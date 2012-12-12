@@ -62,6 +62,17 @@
       HTTP PATCH method where previously it wasn't.</para>
     </section>
 
+    <section xml:id="migration-3.2-compatibility-tiles3">
+      <title>Tiles 3</title>
+
+      <para>Besides the version number change, the set of Tiles
+      dependencies has also changed. You will need to have a subset or all of
+      <filename>tiles-request-api</filename>, <filename>tiles-api</filename>,
+      <filename>tiles-core</filename>, <filename>tiles-servlet</filename>,
+      <filename>tiles-jsp</filename>, <filename>tiles-el</filename>.
+      </para>
+    </section>
+
     <section xml:id="migration-3.2-compatibility-spring-mvc-test">
       <title>Spring MVC Test Standalone Project</title>
 
