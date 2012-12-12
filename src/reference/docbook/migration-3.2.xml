@@ -25,6 +25,63 @@
   <section xml:id="migration-3.2-compatibility">
     <title>Application Migration and Compatibility Concerns</title>
     <para>TODO</para>
+
+    <section xml:id="migration-3.2-compatibility-mvc-config">
+      <title>MVC Java Config and MVC Namespace</title>
+
+      <para>As explained in <xref linkend="mvc-config-content-negotiation"/>, both
+      the MVC Java config and the MVC namespace register extensions such as
+      <filename>.json</filename> and <filename>.xml</filename> if the
+      corresponding classpath dependencies are present. That means controller
+      methods may now return JSON or XML formatted content if those
+      extensions are present in the request URI,
+      even if the 'Accept' header doesn't request those media types.</para>
+
+      <para>The newly added support for matrix variables is explained in
+      <xref linkend="mvc-ann-matrix-variables"/>. To preserve backward
+      compatibility, by default, semicolon content is removed from incoming
+      request URIs and therefore <interfacename>@MatrixVariable</interfacename>
+      cannot be used without additional configuration. However, when using
+      the MVC Java config and the MVC namespace, semicolon content is left
+      in the URI so that matrix variables are automatically supported.
+      The removal of semicolon content is controlled through the
+      <classname>UrlPathHelper</classname> property of
+      <classname>RequestMappingHandlerMapping</classname>.</para>
+    </section>
+
+    <section xml:id="migration-3.2-compatibility-uri-variable-values">
+      <title>Decoding of URI Variable Values</title>
+      <para>URI variable values now get decoded when
+      <code>UrlPathHelper.setUrlDecode</code> is set to <code>false</code>.
+      See <link xl:href="https://jira.springsource.org/browse/SPR-9098">SPR-9098</link>.</para>
+    </section>
+
+    <section xml:id="migration-3.2-compatibility-http-patch">
+      <title>HTTP PATCH method</title>
+      <para>The <classname>DispatcherServlet</classname> now allows the
+      HTTP PATCH method where previously it wasn't.</para>
+    </section>
+
+    <section xml:id="migration-3.2-compatibility-spring-mvc-test">
+      <title>Spring MVC Test Standalone Project</title>
+
+      <para>If migrating from the
+      <link xl:href="https://github.com/SpringSource/spring-test-mvc">spring-test-mvc</link>
+      standalone project to the <filename>spring-test</filename> module in
+      Spring Framework 3.2, you will need to adjust the root package
+      to be <classname>org.springframework.test.web.servlet</classname>.</para>
+
+      <para>You will no longer be able to use the
+      <classname>MockMvcBuilders</classname> <code>annotationConfigSetup</code>
+      and <code>xmlConfigSetup</code> options. Instead you'll need to switch
+      to using the <interfacename>@WebApplicationContext</interfacename> support
+      of <filename>spring-test</filename> for loading Spring configuration,
+      then inject a <interfacename>WebApplicationContext</interfacename> into
+      the test and use it to create a <classname>MockMvc</classname>.
+      <xref linkend="spring-mvc-test-framework" /> for details.</para>
+
+    </section>
+
   </section>
 
   <section xml:id="migration-3.2-changes">
