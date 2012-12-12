@@ -9,6 +9,9 @@
          xmlns:ns="http://docbook.org/ns/docbook">
   <title>New Features and Enhancements in Spring Framework 3.2</title>
 
+  <para>This section covers what's new in Spring Framework 3.2. See also
+  <xref linkend="migration-3.2"/></para>
+
   <section xml:id="new-in-3.2-webmvc-async">
     <title>Support for Servlet 3 based asynchronous request processing</title>
 
