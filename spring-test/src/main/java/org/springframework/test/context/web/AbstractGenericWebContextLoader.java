@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,12 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 *
 	 * <ul>
 	 * <li>Creates a {@link GenericWebApplicationContext} instance.</li>
+	 * <li>If the supplied {@code MergedContextConfiguration} references a
+	 * {@linkplain MergedContextConfiguration#getParent() parent configuration},
+	 * the corresponding {@link MergedContextConfiguration#getParentApplicationContext()
+	 * ApplicationContext} will be retrieved and
+	 * {@linkplain GenericWebApplicationContext#setParent(ApplicationContext) set as the parent}
+	 * for the context created by this method.</li>
 	 * <li>Delegates to {@link #configureWebResources} to create the
 	 * {@link MockServletContext} and set it in the {@code WebApplicationContext}.</li>
 	 * <li>Calls {@link #prepareContext} to allow for customizing the context
@@ -107,6 +113,11 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 		}
 
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
+
+		ApplicationContext parent = mergedConfig.getParentApplicationContext();
+		if (parent != null) {
+			context.setParent(parent);
+		}
 		configureWebResources(context, webMergedConfig);
 		prepareContext(context, webMergedConfig);
 		customizeBeanFactory(context.getDefaultListableBeanFactory(), webMergedConfig);

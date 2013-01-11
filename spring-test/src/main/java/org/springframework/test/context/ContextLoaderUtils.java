@@ -16,20 +16,24 @@
 
 package org.springframework.test.context;
 
-import static org.springframework.beans.BeanUtils.*;
-import static org.springframework.core.annotation.AnnotationUtils.*;
+import static org.springframework.beans.BeanUtils.instantiateClass;
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClass;
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotationDeclaringClassForTypes;
+import static org.springframework.core.annotation.AnnotationUtils.isAnnotationDeclaredLocally;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -52,9 +56,12 @@ import org.springframework.util.StringUtils;
  * @see ContextConfigurationAttributes
  * @see ActiveProfiles
  * @see ApplicationContextInitializer
+ * @see ContextHierarchy
  * @see MergedContextConfiguration
  */
 abstract class ContextLoaderUtils {
+
+	static final String GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX = "ContextHierarchyLevel#";
 
 	private static final Log logger = LogFactory.getLog(ContextLoaderUtils.class);
 
@@ -70,30 +77,29 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Resolve the {@link ContextLoader} {@linkplain Class class} to use for the
-	 * supplied list of {@link ContextConfigurationAttributes} and then
-	 * instantiate and return that {@code ContextLoader}.
+	 * Resolve the {@link ContextLoader} {@linkplain Class class} to use for the supplied
+	 * list of {@link ContextConfigurationAttributes} and then instantiate and return that
+	 * {@code ContextLoader}.
 	 *
-	 * <p>If the supplied {@code defaultContextLoaderClassName} is
-	 * {@code null} or <em>empty</em>, depending on the absence or presence
-	 * of {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
-	 * either {@value #DEFAULT_CONTEXT_LOADER_CLASS_NAME}
-	 * or {@value #DEFAULT_WEB_CONTEXT_LOADER_CLASS_NAME} will be used as the
-	 * default context loader class name. For details on the class resolution
-	 * process, see {@link #resolveContextLoaderClass}.
+	 * <p>If the supplied {@code defaultContextLoaderClassName} is {@code null} or
+	 * <em>empty</em>, depending on the absence or presence of
+	 * {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration} either
+	 * {@code "org.springframework.test.context.support.DelegatingSmartContextLoader"} or
+	 * {@code "org.springframework.test.context.web.WebDelegatingSmartContextLoader"} will
+	 * be used as the default context loader class name. For details on the class
+	 * resolution process, see {@link #resolveContextLoaderClass}.
 	 *
-	 * @param testClass the test class for which the {@code ContextLoader}
-	 * should be resolved; must not be {@code null}
-	 * @param configAttributesList the list of configuration attributes to process;
-	 * must not be {@code null} or <em>empty</em>; must be ordered <em>bottom-up</em>
+	 * @param testClass the test class for which the {@code ContextLoader} should be
+	 * resolved; must not be {@code null}
+	 * @param configAttributesList the list of configuration attributes to process; must
+	 * not be {@code null} or <em>empty</em>; must be ordered <em>bottom-up</em>
 	 * (i.e., as if we were traversing up the class hierarchy)
-	 * @param defaultContextLoaderClassName the name of the default
-	 * {@code ContextLoader} class to use; may be {@code null} or <em>empty</em>
-	 * @return the resolved {@code ContextLoader} for the supplied
-	 * {@code testClass} (never {@code null})
+	 * @param defaultContextLoaderClassName the name of the default {@code ContextLoader}
+	 * class to use; may be {@code null} or <em>empty</em>
+	 * @return the resolved {@code ContextLoader} for the supplied {@code testClass}
+	 * (never {@code null})
 	 * @see #resolveContextLoaderClass
 	 */
-	@SuppressWarnings("javadoc")
 	static ContextLoader resolveContextLoader(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributesList, String defaultContextLoaderClassName) {
 		Assert.notNull(testClass, "Class must not be null");
@@ -113,36 +119,35 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Resolve the {@link ContextLoader} {@linkplain Class class} to use for the
-	 * supplied list of {@link ContextConfigurationAttributes}.
+	 * Resolve the {@link ContextLoader} {@linkplain Class class} to use for the supplied
+	 * list of {@link ContextConfigurationAttributes}.
 	 *
-	 * <p>Beginning with the first level in the context configuration attributes
-	 * hierarchy:
+	 * <p>Beginning with the first level in the context configuration attributes hierarchy:
 	 *
 	 * <ol>
 	 * <li>If the {@link ContextConfigurationAttributes#getContextLoaderClass()
 	 * contextLoaderClass} property of {@link ContextConfigurationAttributes} is
 	 * configured with an explicit class, that class will be returned.</li>
-	 * <li>If an explicit {@code ContextLoader} class is not specified at the
-	 * current level in the hierarchy, traverse to the next level in the hierarchy
-	 * and return to step #1.</li>
-	 * <li>If no explicit {@code ContextLoader} class is found after traversing
-	 * the hierarchy, an attempt will be made to load and return the class
-	 * with the supplied {@code defaultContextLoaderClassName}.</li>
+	 * <li>If an explicit {@code ContextLoader} class is not specified at the current
+	 * level in the hierarchy, traverse to the next level in the hierarchy and return to
+	 * step #1.</li>
+	 * <li>If no explicit {@code ContextLoader} class is found after traversing the
+	 * hierarchy, an attempt will be made to load and return the class with the supplied
+	 * {@code defaultContextLoaderClassName}.</li>
 	 * </ol>
 	 *
-	 * @param testClass the class for which to resolve the {@code ContextLoader}
-	 * class; must not be {@code null}; only used for logging purposes
-	 * @param configAttributesList the list of configuration attributes to process;
-	 * must not be {@code null} or <em>empty</em>; must be ordered <em>bottom-up</em>
+	 * @param testClass the class for which to resolve the {@code ContextLoader} class;
+	 * must not be {@code null}; only used for logging purposes
+	 * @param configAttributesList the list of configuration attributes to process; must
+	 * not be {@code null} or <em>empty</em>; must be ordered <em>bottom-up</em>
 	 * (i.e., as if we were traversing up the class hierarchy)
-	 * @param defaultContextLoaderClassName the name of the default
-	 * {@code ContextLoader} class to use; must not be {@code null} or empty
+	 * @param defaultContextLoaderClassName the name of the default {@code ContextLoader}
+	 * class to use; must not be {@code null} or empty
 	 * @return the {@code ContextLoader} class to use for the supplied test class
 	 * @throws IllegalArgumentException if {@code @ContextConfiguration} is not
 	 * <em>present</em> on the supplied test class
-	 * @throws IllegalStateException if the default {@code ContextLoader} class
-	 * could not be loaded
+	 * @throws IllegalStateException if the default {@code ContextLoader} class could not
+	 * be loaded
 	 */
 	@SuppressWarnings("unchecked")
 	static Class<? extends ContextLoader> resolveContextLoaderClass(Class<?> testClass,
@@ -184,22 +189,137 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Resolve the list of {@link ContextConfigurationAttributes configuration
-	 * attributes} for the supplied {@link Class class} and its superclasses.
+	 * Convenience method for creating a {@link ContextConfigurationAttributes} instance
+	 * from the supplied {@link ContextConfiguration} and declaring class and then adding
+	 * the attributes to the supplied list.
+	 */
+	private static void convertContextConfigToConfigAttributesAndAddToList(ContextConfiguration contextConfiguration,
+			Class<?> declaringClass, final List<ContextConfigurationAttributes> attributesList) {
+		if (logger.isTraceEnabled()) {
+			logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
+				contextConfiguration, declaringClass.getName()));
+		}
+
+		ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
+			contextConfiguration);
+		if (logger.isTraceEnabled()) {
+			logger.trace("Resolved context configuration attributes: " + attributes);
+		}
+		attributesList.add(attributes);
+	}
+
+	/**
+	 * TODO Document resolveContextHierarchyAttributes().
 	 *
-	 * <p>Note that the {@link ContextConfiguration#inheritLocations
-	 * inheritLocations} and {@link ContextConfiguration#inheritInitializers()
-	 * inheritInitializers} flags of {@link ContextConfiguration
-	 * &#064;ContextConfiguration} will <strong>not</strong> be taken into
-	 * consideration. If these flags need to be honored, that must be handled
-	 * manually when traversing the list returned by this method.
+	 * @since 3.2.2
+	 */
+	static List<List<ContextConfigurationAttributes>> resolveContextHierarchyAttributes(Class<?> testClass) {
+		Assert.notNull(testClass, "Class must not be null");
+
+		final Class<ContextConfiguration> contextConfigType = ContextConfiguration.class;
+		final Class<ContextHierarchy> contextHierarchyType = ContextHierarchy.class;
+		final List<Class<? extends Annotation>> annotationTypes = Arrays.asList(contextConfigType, contextHierarchyType);
+
+		final List<List<ContextConfigurationAttributes>> hierarchyAttributes = new ArrayList<List<ContextConfigurationAttributes>>();
+
+		Class<?> declaringClass = findAnnotationDeclaringClassForTypes(annotationTypes, testClass);
+		Assert.notNull(declaringClass, String.format(
+			"Could not find an 'annotation declaring class' for annotation types [%s] or [%s] and test class [%s]",
+			contextConfigType.getName(), contextHierarchyType.getName(), testClass.getName()));
+
+		while (declaringClass != null) {
+
+			boolean contextConfigDeclaredLocally = isAnnotationDeclaredLocally(contextConfigType, declaringClass);
+			boolean contextHierarchyDeclaredLocally = isAnnotationDeclaredLocally(contextHierarchyType, declaringClass);
+
+			if (contextConfigDeclaredLocally && contextHierarchyDeclaredLocally) {
+				String msg = String.format("Test class [%s] has been configured with both @ContextConfiguration "
+						+ "and @ContextHierarchy as class-level annotations. Only one of these annotations may "
+						+ "be declared as a top-level annotation per test class.", declaringClass.getName());
+				logger.error(msg);
+				throw new IllegalStateException(msg);
+			}
+
+			final List<ContextConfigurationAttributes> configAttributesList = new ArrayList<ContextConfigurationAttributes>();
+
+			if (contextConfigDeclaredLocally) {
+				ContextConfiguration contextConfiguration = declaringClass.getAnnotation(contextConfigType);
+				convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
+					configAttributesList);
+			}
+			else if (contextHierarchyDeclaredLocally) {
+				ContextHierarchy contextHierarchy = declaringClass.getAnnotation(contextHierarchyType);
+				for (ContextConfiguration contextConfiguration : contextHierarchy.value()) {
+					convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass,
+						configAttributesList);
+				}
+			}
+			else {
+				// This should actually never happen...
+				String msg = String.format("Test class [%s] has been configured with neither @ContextConfiguration "
+						+ "nor @ContextHierarchy as a class-level annotation.", declaringClass.getName());
+				logger.error(msg);
+				throw new IllegalStateException(msg);
+			}
+
+			hierarchyAttributes.add(0, configAttributesList);
+
+			declaringClass = findAnnotationDeclaringClassForTypes(annotationTypes, declaringClass.getSuperclass());
+		}
+
+		return hierarchyAttributes;
+	}
+
+	/**
+	 * TODO Document buildContextHierarchyMap().
+	 *
+	 * @since 3.2.2
+	 * @see #resolveContextHierarchyAttributes(Class)
+	 */
+	static Map<String, List<ContextConfigurationAttributes>> buildContextHierarchyMap(Class<?> testClass) {
+		final Map<String, List<ContextConfigurationAttributes>> map = new LinkedHashMap<String, List<ContextConfigurationAttributes>>();
+		int hierarchyLevel = 1;
+
+		for (List<ContextConfigurationAttributes> configAttributesList : resolveContextHierarchyAttributes(testClass)) {
+			for (ContextConfigurationAttributes configAttributes : configAttributesList) {
+				String name = configAttributes.getName();
+
+				// Assign a generated name?
+				if (!StringUtils.hasText(name)) {
+					name = GENERATED_CONTEXT_HIERARCHY_LEVEL_PREFIX + hierarchyLevel;
+				}
+
+				// Encountered a new context hierarchy level?
+				if (!map.containsKey(name)) {
+					hierarchyLevel++;
+					map.put(name, new ArrayList<ContextConfigurationAttributes>());
+				}
+
+				map.get(name).add(configAttributes);
+			}
+		}
+
+		return map;
+	}
+
+	/**
+	 * Resolve the list of {@linkplain ContextConfigurationAttributes context
+	 * configuration attributes} for the supplied {@linkplain Class test class} and its
+	 * superclasses.
+	 *
+	 * <p>Note that the {@link ContextConfiguration#inheritLocations inheritLocations} and
+	 * {@link ContextConfiguration#inheritInitializers() inheritInitializers} flags of
+	 * {@link ContextConfiguration &#064;ContextConfiguration} will <strong>not</strong>
+	 * be taken into consideration. If these flags need to be honored, that must be
+	 * handled manually when traversing the list returned by this method.
 	 *
 	 * @param testClass the class for which to resolve the configuration attributes (must
 	 * not be {@code null})
-	 * @return the list of configuration attributes for the specified class, ordered <em>bottom-up</em>
-	 * (i.e., as if we were traversing up the class hierarchy); never {@code null}
-	 * @throws IllegalArgumentException if the supplied class is {@code null} or
-	 * if {@code @ContextConfiguration} is not <em>present</em> on the supplied class
+	 * @return the list of configuration attributes for the specified class, ordered
+	 * <em>bottom-up</em> (i.e., as if we were traversing up the class hierarchy);
+	 * never {@code null}
+	 * @throws IllegalArgumentException if the supplied class is {@code null} or if
+	 * {@code @ContextConfiguration} is not <em>present</em> on the supplied class
 	 */
 	static List<ContextConfigurationAttributes> resolveContextConfigurationAttributes(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
@@ -214,19 +334,7 @@ abstract class ContextLoaderUtils {
 
 		while (declaringClass != null) {
 			ContextConfiguration contextConfiguration = declaringClass.getAnnotation(annotationType);
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ContextConfiguration [%s] for declaring class [%s].",
-					contextConfiguration, declaringClass.getName()));
-			}
-
-			ContextConfigurationAttributes attributes = new ContextConfigurationAttributes(declaringClass,
-				contextConfiguration);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Resolved context configuration attributes: " + attributes);
-			}
-
-			attributesList.add(attributes);
-
+			convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, declaringClass, attributesList);
 			declaringClass = findAnnotationDeclaringClass(annotationType, declaringClass.getSuperclass());
 		}
 
@@ -234,22 +342,21 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Resolve the list of merged {@code ApplicationContextInitializer} classes
-	 * for the supplied list of {@code ContextConfigurationAttributes}.
+	 * Resolve the list of merged {@code ApplicationContextInitializer} classes for the
+	 * supplied list of {@code ContextConfigurationAttributes}.
 	 *
 	 * <p>Note that the {@link ContextConfiguration#inheritInitializers inheritInitializers}
 	 * flag of {@link ContextConfiguration @ContextConfiguration} will be taken into
-	 * consideration. Specifically, if the {@code inheritInitializers} flag is
-	 * set to {@code true} for a given level in the class hierarchy represented by
-	 * the provided configuration attributes, context initializer classes defined
-	 * at the given level will be merged with those defined in higher levels
-	 * of the class hierarchy.
+	 * consideration. Specifically, if the {@code inheritInitializers} flag is set to
+	 * {@code true} for a given level in the class hierarchy represented by the provided
+	 * configuration attributes, context initializer classes defined at the given level
+	 * will be merged with those defined in higher levels of the class hierarchy.
 	 *
-	 * @param configAttributesList the list of configuration attributes to process;
-	 * must not be {@code null} or <em>empty</em>; must be ordered <em>bottom-up</em>
+	 * @param configAttributesList the list of configuration attributes to process; must
+	 * not be {@code null} or <em>empty</em>; must be ordered <em>bottom-up</em>
 	 * (i.e., as if we were traversing up the class hierarchy)
-	 * @return the set of merged context initializer classes, including those
-	 * from superclasses if appropriate (never {@code null})
+	 * @return the set of merged context initializer classes, including those from
+	 * superclasses if appropriate (never {@code null})
 	 * @since 3.2
 	 */
 	static Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> resolveInitializerClasses(
@@ -278,16 +385,15 @@ abstract class ContextLoaderUtils {
 	/**
 	 * Resolve <em>active bean definition profiles</em> for the supplied {@link Class}.
 	 *
-	 * <p>Note that the {@link ActiveProfiles#inheritProfiles inheritProfiles}
-	 * flag of {@link ActiveProfiles &#064;ActiveProfiles} will be taken into
-	 * consideration. Specifically, if the {@code inheritProfiles} flag is
-	 * set to {@code true}, profiles defined in the test class will be
-	 * merged with those defined in superclasses.
+	 * <p>Note that the {@link ActiveProfiles#inheritProfiles inheritProfiles} flag of
+	 * {@link ActiveProfiles &#064;ActiveProfiles} will be taken into consideration.
+	 * Specifically, if the {@code inheritProfiles} flag is set to {@code true}, profiles
+	 * defined in the test class will be merged with those defined in superclasses.
 	 *
-	 * @param testClass the class for which to resolve the active profiles (must
-	 * not be {@code null})
-	 * @return the set of active profiles for the specified class, including
-	 * active profiles from superclasses if appropriate (never {@code null})
+	 * @param testClass the class for which to resolve the active profiles (must not be
+	 * {@code null})
+	 * @return the set of active profiles for the specified class, including active
+	 * profiles from superclasses if appropriate (never {@code null})
 	 * @see ActiveProfiles
 	 * @see org.springframework.context.annotation.Profile
 	 */
@@ -342,14 +448,62 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Build the {@link MergedContextConfiguration merged context configuration}
-	 * for the supplied {@link Class testClass} and
-	 * {@code defaultContextLoaderClassName}.
+	 * Build the {@link MergedContextConfiguration merged context configuration} for the
+	 * supplied {@link Class testClass} and {@code defaultContextLoaderClassName}.
 	 *
 	 * @param testClass the test class for which the {@code MergedContextConfiguration}
 	 * should be built (must not be {@code null})
-	 * @param defaultContextLoaderClassName the name of the default
-	 * {@code ContextLoader} class to use (may be {@code null})
+	 * @param defaultContextLoaderClassName the name of the default {@code ContextLoader}
+	 * class to use (may be {@code null})
+	 * @param cacheAwareContextLoaderDelegate the cache-aware context loader delegate to
+	 * be passed to the {@code MergedContextConfiguration} constructor
+	 * @return the merged context configuration
+	 * @see #buildContextHierarchyMap(Class)
+	 * @see #buildMergedContextConfiguration(Class, List, String, MergedContextConfiguration, CacheAwareContextLoaderDelegate)
+	 */
+	@SuppressWarnings("javadoc")
+	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
+			String defaultContextLoaderClassName, CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+
+		if (testClass.isAnnotationPresent(ContextHierarchy.class)) {
+			Map<String, List<ContextConfigurationAttributes>> hierarchyMap = buildContextHierarchyMap(testClass);
+
+			MergedContextConfiguration parentConfig = null;
+			MergedContextConfiguration mergedConfig = null;
+
+			for (List<ContextConfigurationAttributes> list : hierarchyMap.values()) {
+				List<ContextConfigurationAttributes> reversedList = new ArrayList<ContextConfigurationAttributes>(list);
+				Collections.reverse(reversedList);
+				mergedConfig = buildMergedContextConfiguration(testClass, reversedList, defaultContextLoaderClassName,
+					parentConfig, cacheAwareContextLoaderDelegate);
+				parentConfig = mergedConfig;
+			}
+
+			// Return the last level in the context hierarchy
+			return mergedConfig;
+		}
+		else {
+			return buildMergedContextConfiguration(testClass, resolveContextConfigurationAttributes(testClass),
+				defaultContextLoaderClassName, null, cacheAwareContextLoaderDelegate);
+		}
+	}
+
+	/**
+	 * Build the {@link MergedContextConfiguration merged context configuration} for the
+	 * supplied {@link Class testClass}, context configuration attributes,
+	 * {@code defaultContextLoaderClassName}, and parent context configuration.
+	 *
+	 * @param testClass the test class for which the {@code MergedContextConfiguration}
+	 * should be built (must not be {@code null})
+	 * @param configAttributesList the list of context configuration attributes for the
+	 * specified test class, ordered <em>bottom-up</em> (i.e., as if we were
+	 * traversing up the class hierarchy); never {@code null} or empty
+	 * @param defaultContextLoaderClassName the name of the default {@code ContextLoader}
+	 * class to use (may be {@code null})
+	 * @param parentConfig the merged context configuration for the parent application
+	 * context in a context hierarchy, or {@code null} if there is no parent
+	 * @param cacheAwareContextLoaderDelegate the cache-aware context loader delegate to
+	 * be passed to the {@code MergedContextConfiguration} constructor
 	 * @return the merged context configuration
 	 * @see #resolveContextLoader
 	 * @see #resolveContextConfigurationAttributes
@@ -358,10 +512,11 @@ abstract class ContextLoaderUtils {
 	 * @see #resolveActiveProfiles
 	 * @see MergedContextConfiguration
 	 */
-	static MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
-			String defaultContextLoaderClassName) {
+	private static MergedContextConfiguration buildMergedContextConfiguration(final Class<?> testClass,
+			final List<ContextConfigurationAttributes> configAttributesList,
+			final String defaultContextLoaderClassName, MergedContextConfiguration parentConfig,
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
 
-		final List<ContextConfigurationAttributes> configAttributesList = resolveContextConfigurationAttributes(testClass);
 		final ContextLoader contextLoader = resolveContextLoader(testClass, configAttributesList,
 			defaultContextLoaderClassName);
 		final List<String> locationsList = new ArrayList<String>();
@@ -397,22 +552,21 @@ abstract class ContextLoaderUtils {
 		String[] activeProfiles = resolveActiveProfiles(testClass);
 
 		MergedContextConfiguration mergedConfig = buildWebMergedContextConfiguration(testClass, locations, classes,
-			initializerClasses, activeProfiles, contextLoader);
+			initializerClasses, activeProfiles, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
 
 		if (mergedConfig == null) {
 			mergedConfig = new MergedContextConfiguration(testClass, locations, classes, initializerClasses,
-				activeProfiles, contextLoader);
+				activeProfiles, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
 		}
 
 		return mergedConfig;
 	}
 
 	/**
-	 * Load the {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}
+	 * Load the {@link org.springframework.test.context.web.WebAppConfiguration}
 	 * class, using reflection in order to avoid package cycles.
 	 *
-	 * @return the {@code @WebAppConfiguration} class or {@code null} if it
-	 * cannot be loaded
+	 * @return the {@code @WebAppConfiguration} class or {@code null} if it cannot be loaded
 	 * @since 3.2
 	 */
 	@SuppressWarnings("unchecked")
@@ -431,12 +585,10 @@ abstract class ContextLoaderUtils {
 	}
 
 	/**
-	 * Attempt to build a {@link org.springframework.test.context.web.WebMergedContextConfiguration
-	 * WebMergedContextConfiguration} from the supplied arguments, using reflection
-	 * in order to avoid package cycles.
+	 * Attempt to build a {@link org.springframework.test.context.web.WebMergedContextConfiguration}
+	 * from the supplied arguments, using reflection in order to avoid package cycles.
 	 *
-	 * @return the {@code WebMergedContextConfiguration} or {@code null} if
-	 * it could not be built
+	 * @return the {@code WebMergedContextConfiguration} or {@code null} if it could not be built
 	 * @since 3.2
 	 */
 	@SuppressWarnings("unchecked")
@@ -445,7 +597,8 @@ abstract class ContextLoaderUtils {
 			String[] locations,
 			Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses,
-			String[] activeProfiles, ContextLoader contextLoader) {
+			String[] activeProfiles, ContextLoader contextLoader,
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parentConfig) {
 
 		Class<? extends Annotation> webAppConfigClass = loadWebAppConfigurationClass();
 
@@ -459,11 +612,12 @@ abstract class ContextLoaderUtils {
 
 				Constructor<? extends MergedContextConfiguration> constructor = ClassUtils.getConstructorIfAvailable(
 					webMergedConfigClass, Class.class, String[].class, Class[].class, Set.class, String[].class,
-					String.class, ContextLoader.class);
+					String.class, ContextLoader.class, CacheAwareContextLoaderDelegate.class,
+					MergedContextConfiguration.class);
 
 				if (constructor != null) {
 					return instantiateClass(constructor, testClass, locations, classes, initializerClasses,
-						activeProfiles, resourceBasePath, contextLoader);
+						activeProfiles, resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
 				}
 			}
 			catch (Throwable t) {
