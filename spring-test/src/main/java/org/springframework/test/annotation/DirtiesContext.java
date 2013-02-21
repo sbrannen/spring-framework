@@ -90,4 +90,11 @@ public @interface DirtiesContext {
 	 */
 	ClassMode classMode() default ClassMode.AFTER_CLASS;
 
+	/**
+	 * {@link org.springframework.test.context.ContextConfiguration} name to mark dirty.
+	 *
+	 * @since 3.2.2
+	 */
+	String value() default "";
+
 }

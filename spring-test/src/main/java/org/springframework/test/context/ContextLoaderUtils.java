@@ -550,13 +550,14 @@ abstract class ContextLoaderUtils {
 		Class<?>[] classes = ClassUtils.toClassArray(classesList);
 		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = resolveInitializerClasses(configAttributesList);
 		String[] activeProfiles = resolveActiveProfiles(testClass);
+		String name = configAttributesList.get(0).getName();
 
 		MergedContextConfiguration mergedConfig = buildWebMergedContextConfiguration(testClass, locations, classes,
-			initializerClasses, activeProfiles, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+			initializerClasses, activeProfiles, contextLoader, cacheAwareContextLoaderDelegate, parentConfig, name);
 
 		if (mergedConfig == null) {
 			mergedConfig = new MergedContextConfiguration(testClass, locations, classes, initializerClasses,
-				activeProfiles, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+				activeProfiles, contextLoader, cacheAwareContextLoaderDelegate, parentConfig, name);
 		}
 
 		return mergedConfig;
@@ -598,7 +599,8 @@ abstract class ContextLoaderUtils {
 			Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses,
 			String[] activeProfiles, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parentConfig) {
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parentConfig,
+			String name) {
 
 		Class<? extends Annotation> webAppConfigClass = loadWebAppConfigurationClass();
 
@@ -613,11 +615,12 @@ abstract class ContextLoaderUtils {
 				Constructor<? extends MergedContextConfiguration> constructor = ClassUtils.getConstructorIfAvailable(
 					webMergedConfigClass, Class.class, String[].class, Class[].class, Set.class, String[].class,
 					String.class, ContextLoader.class, CacheAwareContextLoaderDelegate.class,
-					MergedContextConfiguration.class);
+					MergedContextConfiguration.class, String.class);
 
 				if (constructor != null) {
 					return instantiateClass(constructor, testClass, locations, classes, initializerClasses,
-						activeProfiles, resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+						activeProfiles, resourceBasePath, contextLoader, cacheAwareContextLoaderDelegate, parentConfig,
+						name);
 				}
 			}
 			catch (Throwable t) {
