@@ -78,9 +78,9 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @param activeProfiles the merged active bean definition profiles
 	 * @param resourceBasePath the resource path to the root directory of the web application
 	 * @param contextLoader the resolved {@code ContextLoader}
-	 * @see #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)
+	 * @see #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration, String)
 	 * @deprecated as of Spring 3.2.2, use
-	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)} instead.
+	 * {@link #WebMergedContextConfiguration(Class, String[], Class[], Set, String[], String, ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration, String)} instead.
 	 */
 	@Deprecated
 	public WebMergedContextConfiguration(
@@ -91,7 +91,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 			String[] activeProfiles, String resourceBasePath, ContextLoader contextLoader) {
 
 		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, resourceBasePath, contextLoader,
-			null, null);
+			null, null, null);
 	}
 
 	/**
@@ -117,6 +117,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 * @param cacheAwareContextLoaderDelegate a cache-aware context loader
 	 * delegate with which to retrieve the parent context
 	 * @param parent the parent configuration or {@code null} if there is no parent
+	 * @param name the {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration} name or {@code null}
 	 * @since 3.2.2
 	 */
 	public WebMergedContextConfiguration(
@@ -125,10 +126,11 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 			Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, String resourceBasePath, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent,
+			String name) {
 
 		super(testClass, locations, classes, contextInitializerClasses, activeProfiles, contextLoader,
-			cacheAwareContextLoaderDelegate, parent);
+			cacheAwareContextLoaderDelegate, parent, name);
 
 		this.resourceBasePath = !StringUtils.hasText(resourceBasePath) ? "" : resourceBasePath;
 	}

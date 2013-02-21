@@ -50,7 +50,14 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to {@code true}.
 	 */
 	protected void dirtyContext(TestContext testContext) {
-		testContext.markApplicationContextDirty();
+		dirtyContext(testContext, "");
+	}
+
+	/**
+	 * @since 3.2.2
+	 */
+	protected void dirtyContext(TestContext testContext, String parentContextName) {
+		testContext.markApplicationContextDirty(parentContextName);
 		testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
 	}
 
@@ -88,7 +95,9 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		}
 
 		if (methodDirtiesContext || (classDirtiesContext && classMode == ClassMode.AFTER_EACH_TEST_METHOD)) {
-			dirtyContext(testContext);
+			String parentContextName = methodDirtiesContext ?
+					testMethod.getAnnotation(annotationType).value() : classDirtiesContextAnnotation.value();
+			dirtyContext(testContext, parentContextName);
 		}
 	}
 
@@ -112,7 +121,8 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 			logger.debug("After test class: context [" + testContext + "], dirtiesContext [" + dirtiesContext + "].");
 		}
 		if (dirtiesContext) {
-			dirtyContext(testContext);
+			String parentContextName = testClass.getAnnotation(DirtiesContext.class).value();
+			dirtyContext(testContext, parentContextName);
 		}
 	}
 

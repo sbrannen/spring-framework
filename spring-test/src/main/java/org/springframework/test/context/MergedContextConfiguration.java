@@ -76,6 +76,7 @@ public class MergedContextConfiguration implements Serializable {
 	private final ContextLoader contextLoader;
 	private final CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate;
 	private final MergedContextConfiguration parent;
+	private final String name;
 
 
 	private static String[] processLocations(String[] locations) {
@@ -111,6 +112,10 @@ public class MergedContextConfiguration implements Serializable {
 	 */
 	protected static String nullSafeToString(ContextLoader contextLoader) {
 		return contextLoader == null ? "null" : contextLoader.getClass().getName();
+	}
+
+	protected static String nullSafeToString(String str) {
+		return str == null ? "null" : str;
 	}
 
 	/**
@@ -153,7 +158,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param contextInitializerClasses the merged context initializer classes
 	 * @param activeProfiles the merged active bean definition profiles
 	 * @param contextLoader the resolved {@code ContextLoader}
-	 * @see #MergedContextConfiguration(Class, String[], Class[], Set, String[], ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration)
+	 * @see #MergedContextConfiguration(Class, String[], Class[], Set, String[], ContextLoader, CacheAwareContextLoaderDelegate, MergedContextConfiguration, String)
 	 */
 	public MergedContextConfiguration(
 			Class<?> testClass,
@@ -161,7 +166,7 @@ public class MergedContextConfiguration implements Serializable {
 			Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, ContextLoader contextLoader) {
-		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, contextLoader, null, null);
+		this(testClass, locations, classes, contextInitializerClasses, activeProfiles, contextLoader, null, null, null);
 	}
 
 	/**
@@ -186,6 +191,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param cacheAwareContextLoaderDelegate a cache-aware context loader
 	 * delegate with which to retrieve the parent context
 	 * @param parent the parent configuration or {@code null} if there is no parent
+	 * @param name the {@link ContextConfiguration @ContextConfiguration} name or {@code null}
 	 * @since 3.2.2
 	 */
 	public MergedContextConfiguration(
@@ -194,7 +200,7 @@ public class MergedContextConfiguration implements Serializable {
 			Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
 			String[] activeProfiles, ContextLoader contextLoader,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent) {
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, MergedContextConfiguration parent, String name) {
 		this.testClass = testClass;
 		this.locations = processLocations(locations);
 		this.classes = processClasses(classes);
@@ -203,6 +209,7 @@ public class MergedContextConfiguration implements Serializable {
 		this.contextLoader = contextLoader;
 		this.cacheAwareContextLoaderDelegate = cacheAwareContextLoaderDelegate;
 		this.parent = parent;
+        this.name = name;
 	}
 
 	/**
@@ -282,6 +289,15 @@ public class MergedContextConfiguration implements Serializable {
 	}
 
 	/**
+	 *
+	 * @return the name of {@link MergedContextConfiguration}
+	 * @since 3.2.2
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
 	 * Generate a unique hash code for all properties of this
 	 * {@code MergedContextConfiguration} excluding the
 	 * {@linkplain #getTestClass() test class}.
@@ -349,6 +365,10 @@ public class MergedContextConfiguration implements Serializable {
 			return false;
 		}
 
+		if (!nullSafeToString(this.name).equals(nullSafeToString(that.name))) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -370,6 +390,7 @@ public class MergedContextConfiguration implements Serializable {
 		.append("activeProfiles", ObjectUtils.nullSafeToString(activeProfiles))//
 		.append("contextLoader", nullSafeToString(contextLoader))//
 		.append("parent", parent)//
+		.append("name", name)//
 		.toString();
 	}
 

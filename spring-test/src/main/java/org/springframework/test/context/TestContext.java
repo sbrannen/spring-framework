@@ -25,6 +25,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.AttributeAccessorSupport;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code TestContext} encapsulates the context in which a test is executed,
@@ -168,7 +169,29 @@ public class TestContext extends AttributeAccessorSupport {
 	 * bean definition).
 	 */
 	public void markApplicationContextDirty() {
-		contextCache.remove(mergedContextConfiguration);
+		markApplicationContextDirty("");
+	}
+
+	/**
+	 *
+	 * @param parentContextName parent context name to flag dirty
+	 * @since 3.2.2
+	 */
+	public void markApplicationContextDirty(String parentContextName) {
+		MergedContextConfiguration configuration = this.mergedContextConfiguration;
+		if (StringUtils.hasText(parentContextName)) {
+			while (true) {
+				if (parentContextName.equals(configuration.getName())) {
+					break;
+				}
+				configuration = configuration.getParent();
+				if (configuration == null) {
+					throw new RuntimeException(
+							String.format("Context [%s] doesn't exist in the context hierarchy.", parentContextName));
+				}
+			}
+		}
+		contextCache.remove(configuration); // this also removes all child contexts
 	}
 
 	/**
