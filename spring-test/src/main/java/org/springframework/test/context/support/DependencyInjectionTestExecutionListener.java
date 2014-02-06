@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.springframework.test.context.support;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.core.Conventions;
+import org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor;
 import org.springframework.test.context.TestContext;
 
 /**
@@ -49,7 +51,7 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	 * <p>Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.
 	 */
 	public static final String REINJECT_DEPENDENCIES_ATTRIBUTE = Conventions.getQualifiedAttributeName(
-			DependencyInjectionTestExecutionListener.class, "reinjectDependencies");
+		DependencyInjectionTestExecutionListener.class, "reinjectDependencies");
 
 	private static final Log logger = LogFactory.getLog(DependencyInjectionTestExecutionListener.class);
 
@@ -107,8 +109,29 @@ public class DependencyInjectionTestExecutionListener extends AbstractTestExecut
 	protected void injectDependencies(final TestContext testContext) throws Exception {
 		Object bean = testContext.getTestInstance();
 		AutowireCapableBeanFactory beanFactory = testContext.getApplicationContext().getAutowireCapableBeanFactory();
-		beanFactory.autowireBeanProperties(bean, AutowireCapableBeanFactory.AUTOWIRE_NO, false);
+
+		// TODO BeanPostProcessors should be retrieved from the ApplicationContext if they
+		// exist, instead of instantiating new ones that are potentially improperly
+		// configured.
+
+		AutowiredAnnotationBeanPostProcessor aabpp = new AutowiredAnnotationBeanPostProcessor();
+		aabpp.setBeanFactory(beanFactory);
+		aabpp.processInjection(bean);
+
+		CommonAnnotationBeanPostProcessor cabpp = new CommonAnnotationBeanPostProcessor();
+		cabpp.setBeanFactory(beanFactory);
+		cabpp.processInjection(bean);
+
+		// TODO Add check for presence of JPA. See AnnotationConfigUtils (i.e.,
+		// registerAnnotationConfigProcessors()).
+		PersistenceAnnotationBeanPostProcessor pabpp = new PersistenceAnnotationBeanPostProcessor();
+		pabpp.setBeanFactory(beanFactory);
+		pabpp.processInjection(bean);
+
+		// beanFactory.autowireBeanProperties(bean,
+		// AutowireCapableBeanFactory.AUTOWIRE_NO, false);
 		beanFactory.initializeBean(bean, testContext.getTestClass().getName());
+
 		testContext.removeAttribute(REINJECT_DEPENDENCIES_ATTRIBUTE);
 	}
 

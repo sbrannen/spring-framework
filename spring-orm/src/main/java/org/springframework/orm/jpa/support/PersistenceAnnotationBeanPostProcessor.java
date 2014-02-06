@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -356,6 +357,24 @@ public class PersistenceAnnotationBeanPostProcessor
 			throw new BeanCreationException(beanName, "Injection of persistence dependencies failed", ex);
 		}
 		return pvs;
+	}
+
+	/**
+	 * 'Native' processing method for direct calls with an arbitrary target instance,
+	 * resolving all of its fields and methods which are annotated with
+	 * {@code @PersistenceContext} or {@code @PersistenceUnit}.
+	 * @param bean the target instance to process
+	 * @throws BeansException if autowiring failed
+	 */
+	public void processInjection(Object bean) throws BeansException {
+		Class<?> clazz = bean.getClass();
+		InjectionMetadata metadata = findPersistenceMetadata(clazz.getName(), clazz);
+		try {
+			metadata.inject(bean, null, null);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException("Injection of persistence dependencies failed for class [" + clazz + "]", ex);
+		}
 	}
 
 	@Override

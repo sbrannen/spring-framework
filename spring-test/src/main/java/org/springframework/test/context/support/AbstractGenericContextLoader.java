@@ -167,7 +167,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 		prepareContext(context);
 		customizeBeanFactory(context.getDefaultListableBeanFactory());
 		createBeanDefinitionReader(context).loadBeanDefinitions(locations);
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		// AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
 		customizeContext(context);
 		context.refresh();
 		context.registerShutdownHook();

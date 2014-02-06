@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
@@ -307,6 +308,23 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			throw new BeanCreationException(beanName, "Injection of resource dependencies failed", ex);
 		}
 		return pvs;
+	}
+
+	/**
+	 * 'Native' processing method for direct calls with an arbitrary target instance,
+	 * resolving all of its fields and methods which are annotated with {@code @Resource}.
+	 * @param bean the target instance to process
+	 * @throws BeansException if autowiring failed
+	 */
+	public void processInjection(Object bean) throws BeansException {
+		Class<?> clazz = bean.getClass();
+		InjectionMetadata metadata = findResourceMetadata(clazz.getName(), clazz);
+		try {
+			metadata.inject(bean, null, null);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException("Injection of resource dependencies failed for class [" + clazz + "]", ex);
+		}
 	}
 
 
