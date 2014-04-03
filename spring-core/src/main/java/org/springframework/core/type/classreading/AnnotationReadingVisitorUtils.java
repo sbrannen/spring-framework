@@ -16,6 +16,7 @@
 
 package org.springframework.core.type.classreading;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import java.util.Set;
 
 import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.LinkedMultiValueMap;
 
 import static org.springframework.core.annotation.AnnotationUtils.VALUE;
@@ -103,6 +105,7 @@ abstract class AnnotationReadingVisitorUtils {
 	 * <p>Annotation attribute values appearing <em>lower</em> in the annotation
 	 * hierarchy (i.e., closer to the declaring class) will override those
 	 * defined <em>higher</em> in the annotation hierarchy.
+	 * @param classLoader the {@code ClassLoader} to use to retrieve further metadata
 	 * @param attributesMap the map of annotation attribute lists, keyed by
 	 * annotation type name
 	 * @param annotationType the name of the annotation type to look for
@@ -110,8 +113,10 @@ abstract class AnnotationReadingVisitorUtils {
 	 * annotation is present in the {@code attributesMap}
 	 * @since 4.0.3
 	 */
-	public static AnnotationAttributes getMergedAnnotationAttributes(
+	public static AnnotationAttributes getMergedAnnotationAttributes(ClassLoader classLoader,
 			LinkedMultiValueMap<String, AnnotationAttributes> attributesMap, String annotationType) {
+
+		SimpleMetadataReaderFactory factory = new SimpleMetadataReaderFactory(classLoader);
 
 		// Get the unmerged list of attributes for the target annotation.
 		List<AnnotationAttributes> attributesList = attributesMap.get(annotationType);
@@ -119,9 +124,9 @@ abstract class AnnotationReadingVisitorUtils {
 			return null;
 		}
 
-		// To start with, we populate the results with all attribute values from the
-		// target annotation.
-		AnnotationAttributes results = attributesList.get(0);
+		// To start with, we populate the results with a copy of all attribute
+		// values from the target annotation.
+		AnnotationAttributes results = new AnnotationAttributes(attributesList.get(0));
 
 		Set<String> overridableAttributeNames = new HashSet<String>(results.keySet());
 		overridableAttributeNames.remove(VALUE);
@@ -132,23 +137,54 @@ abstract class AnnotationReadingVisitorUtils {
 		List<String> annotationTypes = new ArrayList<String>(attributesMap.keySet());
 		Collections.reverse(annotationTypes);
 
+		// No need to revisit the target annotation type:
+		annotationTypes.remove(annotationType);
+
 		for (String currentAnnotationType : annotationTypes) {
-			List<AnnotationAttributes> currentAttributesList = attributesMap.get(currentAnnotationType);
-			if (currentAttributesList != null && !currentAttributesList.isEmpty()) {
-				AnnotationAttributes currentAttributes = currentAttributesList.get(0);
-				for (String overridableAttributeName : overridableAttributeNames) {
-					Object value = currentAttributes.get(overridableAttributeName);
-					if (value != null) {
-						// Store the value, potentially overriding a value from an
-						// attribute of the same name found higher in the annotation
-						// hierarchy.
-						results.put(overridableAttributeName, value);
+			// Ensure that the currentAnnotationType is meta-annotated with the target
+			// annotationType (i.e., that its attributes are allowed to override those of
+			// the target).
+			if (isMetaAnnotated(currentAnnotationType, annotationType, factory)) {
+				List<AnnotationAttributes> currentAttributesList = attributesMap.get(currentAnnotationType);
+				if (currentAttributesList != null && !currentAttributesList.isEmpty()) {
+					AnnotationAttributes currentAttributes = currentAttributesList.get(0);
+					for (String overridableAttributeName : overridableAttributeNames) {
+						Object value = currentAttributes.get(overridableAttributeName);
+						if (value != null) {
+							// Store the value, potentially overriding a value from an
+							// attribute of the same name found higher in the annotation
+							// hierarchy.
+							results.put(overridableAttributeName, value);
+						}
 					}
 				}
 			}
 		}
 
 		return results;
+	}
+
+	/**
+	 * Determine whether an annotation of the given target type is <em>present</em>
+	 * on the candidate (i.e., whether the candidate is meta-annotated with the
+	 * target).
+	 * @param candidate the candidate annotation type
+	 * @param target the annotation type to look for
+	 * @param factory the {@code SimpleMetadataReaderFactory} to use to obtain
+	 * {@link AnnotationMetadata} for the candidate
+	 * @return whether a matching annotation is present
+	 * @since 4.0.4
+	 */
+	private static boolean isMetaAnnotated(String candidate, String target, SimpleMetadataReaderFactory factory) {
+		try {
+			MetadataReader metadataReader = factory.getMetadataReader(candidate);
+			AnnotationMetadata annotationMetadata = metadataReader.getAnnotationMetadata();
+			return annotationMetadata.hasAnnotation(target);
+		}
+		catch (IOException e) {
+			/* ignore */
+		}
+		return false;
 	}
 
 }

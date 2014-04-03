@@ -123,6 +123,64 @@ public class AnnotationMetadataTests {
 		assertThat("length of basePackageClasses[]", basePackageClasses.length, is(0));
 	}
 
+	/**
+	 * https://jira.spring.io/browse/SPR-11649
+	 */
+	@Test
+	public void multipleAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
+		AnnotationMetadata metadata = new StandardAnnotationMetadata(NamedAnnotationsClass.class);
+		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
+	}
+
+	/**
+	 * https://jira.spring.io/browse/SPR-11649
+	 */
+	@Test
+	public void multipleAnnotationsWithIdenticalAttributeNamesUsingAnnotationMetadataReadingVisitor() throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(NamedAnnotationsClass.class.getName());
+		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
+	}
+
+	/**
+	 * https://jira.spring.io/browse/SPR-11649
+	 */
+	@Test
+	public void composedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingStandardAnnotationMetadata() {
+		AnnotationMetadata metadata = new StandardAnnotationMetadata(NamedComposedAnnotationClass.class);
+		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
+	}
+
+	/**
+	 * https://jira.spring.io/browse/SPR-11649
+	 */
+	@Test
+	public void composedAnnotationWithMetaAnnotationsWithIdenticalAttributeNamesUsingAnnotationMetadataReadingVisitor()
+			throws Exception {
+		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
+		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(NamedComposedAnnotationClass.class.getName());
+		AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
+		assertMultipleAnnotationsWithIdenticalAttributeNames(metadata);
+	}
+
+	private void assertMultipleAnnotationsWithIdenticalAttributeNames(AnnotationMetadata metadata) {
+		AnnotationAttributes attributes1 = (AnnotationAttributes) metadata.getAnnotationAttributes(
+			NamedAnnotation1.class.getName(), false);
+		String name1 = attributes1.getString("name");
+		assertThat("name of NamedAnnotation1", name1, is("name 1"));
+
+		AnnotationAttributes attributes2 = (AnnotationAttributes) metadata.getAnnotationAttributes(
+			NamedAnnotation2.class.getName(), false);
+		String name2 = attributes2.getString("name");
+		assertThat("name of NamedAnnotation2", name2, is("name 2"));
+
+		AnnotationAttributes attributes3 = (AnnotationAttributes) metadata.getAnnotationAttributes(
+			NamedAnnotation3.class.getName(), false);
+		String name3 = attributes3.getString("name");
+		assertThat("name of NamedAnnotation3", name3, is("name 3"));
+	}
+
 	private void doTestAnnotationInfo(AnnotationMetadata metadata) {
 		assertThat(metadata.getClassName(), is(AnnotatedComponent.class.getName()));
 		assertThat(metadata.isInterface(), is(false));
@@ -318,8 +376,10 @@ public class AnnotationMetadataTests {
 	// SPR-10914
 	public static enum SubclassEnum {
 		FOO {
+		/* Do not delete! This subclassing is intentional. */
 		},
 		BAR {
+		/* Do not delete! This subclassing is intentional. */
 		};
 	}
 
@@ -380,6 +440,42 @@ public class AnnotationMetadataTests {
 
 	@ComposedConfigurationWithAttributeOverrides(basePackages = "org.example.componentscan")
 	public static class ComposedConfigurationWithAttributeOverridesClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface NamedAnnotation1 {
+		String name() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface NamedAnnotation2 {
+		String name() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface NamedAnnotation3 {
+		String name() default "";
+	}
+
+	@NamedAnnotation1(name = "name 1")
+	@NamedAnnotation2(name = "name 2")
+	@NamedAnnotation3(name = "name 3")
+	public static class NamedAnnotationsClass {
+	}
+
+	@NamedAnnotation1(name = "name 1")
+	@NamedAnnotation2(name = "name 2")
+	@NamedAnnotation3(name = "name 3")
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public static @interface NamedComposedAnnotation {
+	}
+
+	@NamedComposedAnnotation
+	public static class NamedComposedAnnotationClass {
 	}
 
 }
