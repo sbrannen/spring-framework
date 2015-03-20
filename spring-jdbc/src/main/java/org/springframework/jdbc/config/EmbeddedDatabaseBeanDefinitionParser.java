@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.jdbc.config;
 
 import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -28,30 +27,47 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses an {@code embedded-database}
- * element and creates a {@link BeanDefinition} for {@link EmbeddedDatabaseFactoryBean}. Picks up nested
- * {@code script} elements and configures a {@link ResourceDatabasePopulator} for them.
+ * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that
+ * parses an {@code embedded-database} element and creates a {@link BeanDefinition}
+ * for {@link EmbeddedDatabaseFactoryBean}. Picks up nested {@code script} elements
+ * and configures a {@link ResourceDatabasePopulator} for them.
  *
  * @author Oliver Gierke
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
+ * @see DatabasePopulatorConfigUtils
  */
 class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser {
+
+	/**
+	 * Constant for the "database-name" attribute.
+	 */
+	static final String DB_NAME_ATTRIBUTE = "database-name";
+
 
 	@Override
 	protected AbstractBeanDefinition parseInternal(Element element, ParserContext parserContext) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(EmbeddedDatabaseFactoryBean.class);
+		setDatabaseName(element, builder);
 		setDatabaseType(element, builder);
 		DatabasePopulatorConfigUtils.setDatabasePopulator(element, builder);
-		useIdAsDatabaseNameIfGiven(element, builder);
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
 		return builder.getBeanDefinition();
 	}
 
-	private void useIdAsDatabaseNameIfGiven(Element element, BeanDefinitionBuilder builder) {
-		String id = element.getAttribute(ID_ATTRIBUTE);
-		if (StringUtils.hasText(id)) {
-			builder.addPropertyValue("databaseName", id);
+	@Override
+	protected boolean shouldGenerateIdAsFallback() {
+		return true;
+	}
+
+	private void setDatabaseName(Element element, BeanDefinitionBuilder builder) {
+		String name = element.getAttribute(DB_NAME_ATTRIBUTE);
+		if (!StringUtils.hasText(name)) {
+			name = element.getAttribute(ID_ATTRIBUTE);
+		}
+		if (StringUtils.hasText(name)) {
+			builder.addPropertyValue("databaseName", name);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import javax.sql.DataSource;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -31,6 +30,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.AbstractDriverBasedDataSource;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.tests.Assume;
@@ -62,6 +63,22 @@ public class JdbcNamespaceIntegrationTests {
 		// If Derby isn't cleaned up properly this will fail...
 		Assume.group(TestGroup.LONG_RUNNING);
 		assertCorrectSetup("jdbc-config.xml", "derbyDataSource");
+	}
+
+	@Test
+	public void createWithDefaultDatabaseName() throws Exception {
+		assertCorrectSetupAndCloseContextForSingleDataSource("jdbc-config-db-name-default.xml",
+			EmbeddedDatabaseFactory.DEFAULT_DATABASE_NAME, 1);
+	}
+
+	@Test
+	public void createWithImplicitDatabaseName() throws Exception {
+		assertCorrectSetupAndCloseContextForSingleDataSource("jdbc-config-db-name-implicit.xml", "dataSource", 1);
+	}
+
+	@Test
+	public void createWithExplicitDatabaseName() throws Exception {
+		assertCorrectSetupAndCloseContext("jdbc-config-db-name-explicit.xml", "customDbName", 1, "dataSource");
 	}
 
 	@Test
@@ -156,13 +173,35 @@ public class JdbcNamespaceIntegrationTests {
 	}
 
 	private void assertCorrectSetupAndCloseContext(String file, int count, String... dataSources) {
+		assertCorrectSetupAndCloseContext(file, null, count, dataSources);
+	}
+
+	private void assertCorrectSetupAndCloseContext(String file, String dbName, int count, String... dataSources) {
 		ConfigurableApplicationContext context = context(file);
 		try {
 			for (String dataSourceName : dataSources) {
 				DataSource dataSource = context.getBean(dataSourceName, DataSource.class);
 				JdbcTemplate template = new JdbcTemplate(dataSource);
 				assertNumRowsInTestTable(template, count);
+				assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
+				AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
+				assertThat(adbDataSource.getUrl(), containsString(dbName != null ? dbName : dataSourceName));
 			}
+		}
+		finally {
+			context.close();
+		}
+	}
+
+	private void assertCorrectSetupAndCloseContextForSingleDataSource(String file, String dbName, int count) {
+		ConfigurableApplicationContext context = context(file);
+		try {
+			DataSource dataSource = context.getBean(DataSource.class);
+			JdbcTemplate template = new JdbcTemplate(dataSource);
+			assertNumRowsInTestTable(template, count);
+			assertTrue(dataSource instanceof AbstractDriverBasedDataSource);
+			AbstractDriverBasedDataSource adbDataSource = (AbstractDriverBasedDataSource) dataSource;
+			assertThat(adbDataSource.getUrl(), containsString(dbName));
 		}
 		finally {
 			context.close();
