@@ -16,8 +16,10 @@
 
 package org.springframework.core.annotation;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -145,6 +147,50 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
+	public void getAliasedString() {
+		attributes.clear();
+		attributes.put("name", "metaverse");
+		assertEquals("metaverse", getAliasedString("name"));
+		assertEquals("metaverse", getAliasedString("value"));
+
+		attributes.clear();
+		attributes.put("value", "metaverse");
+		assertEquals("metaverse", getAliasedString("name"));
+		assertEquals("metaverse", getAliasedString("value"));
+
+		attributes.clear();
+		attributes.put("name", "metaverse");
+		attributes.put("value", "metaverse");
+		assertEquals("metaverse", getAliasedString("name"));
+		assertEquals("metaverse", getAliasedString("value"));
+	}
+
+	@Test
+	public void getAliasedStringWithMissingAliasedAttributes() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(equalTo("Neither attribute 'name' nor its alias 'value' was found in attributes for annotation [unknown]"));
+		getAliasedString("name");
+	}
+
+	@Test
+	public void getAliasedStringWithDifferentAliasedValues() {
+		attributes.put("name", "request");
+		attributes.put("value", "session");
+
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("In annotation [" + Scope.class.getName() + "]"));
+		exception.expectMessage(containsString("attribute [name] and its alias [value]"));
+		exception.expectMessage(containsString("[request] and [session]"));
+		exception.expectMessage(containsString("but only one is permitted"));
+
+		getAliasedString("name");
+	}
+
+	private String getAliasedString(String attributeName) {
+		return attributes.getAliasedString(attributeName, Scope.class, null);
+	}
+
+	@Test
 	public void getAliasedStringArray() {
 		final String[] INPUT = new String[] { "test.xml" };
 		final String[] EMPTY = new String[0];
@@ -197,7 +243,7 @@ public class AnnotationAttributesTests {
 		attributes.put("value", new String[] { "2.xml" });
 
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("In annotation [unknown]"));
+		exception.expectMessage(containsString("In annotation [" + ContextConfig.class.getName() + "]"));
 		exception.expectMessage(containsString("attribute [locations] and its alias [value]"));
 		exception.expectMessage(containsString("[{1.xml}] and [{2.xml}]"));
 		exception.expectMessage(containsString("but only one is permitted"));
@@ -262,7 +308,7 @@ public class AnnotationAttributesTests {
 		attributes.put("value", new Class[] { Number.class });
 
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("In annotation [unknown]"));
+		exception.expectMessage(containsString("In annotation [" + Filter.class.getName() + "]"));
 		exception.expectMessage(containsString("attribute [classes] and its alias [value]"));
 		exception.expectMessage(containsString("[{class java.lang.String}] and [{class java.lang.Number}]"));
 		exception.expectMessage(containsString("but only one is permitted"));
@@ -306,6 +352,20 @@ public class AnnotationAttributesTests {
 
 		@AliasFor(attribute = "value")
 		String locations() default "";
+	}
+
+	/**
+	 * Mock of {@code org.springframework.context.annotation.Scope}.
+	 */
+	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface Scope {
+
+		@AliasFor(attribute = "name")
+		String value() default "singleton";
+
+		@AliasFor(attribute = "value")
+		String name() default "singleton";
 	}
 
 }
