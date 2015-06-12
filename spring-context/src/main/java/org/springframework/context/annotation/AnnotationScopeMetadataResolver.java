@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Fisher
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.context.annotation.Scope
  */
@@ -79,7 +80,12 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 			AnnotatedBeanDefinition annDef = (AnnotatedBeanDefinition) definition;
 			AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(annDef.getMetadata(), this.scopeAnnotationType);
 			if (attributes != null) {
-				metadata.setScopeName(attributes.getString("value"));
+				if (this.scopeAnnotationType == Scope.class) {
+					metadata.setScopeName(attributes.getAliasedString("name", Scope.class, definition.getSource()));
+				}
+				else {
+					metadata.setScopeName(attributes.getString("value"));
+				}
 				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode");
 				if (proxyMode == null || proxyMode == ScopedProxyMode.DEFAULT) {
 					proxyMode = this.defaultProxyMode;

@@ -138,7 +138,7 @@ public final class AnnotationScopeMetadataResolverTests {
 	private static final class AnnotatedWithPrototypeScope {
 	}
 
-	@Scope(value="request", proxyMode = ScopedProxyMode.TARGET_CLASS)
+	@Scope(name = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 	private static final class AnnotatedWithScopedProxy {
 	}
 
