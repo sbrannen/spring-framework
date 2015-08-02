@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -698,16 +699,36 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getAliasedAttributeNameFromWrongTargetAnnotation() throws Exception {
-		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
-		assertNull("xmlConfigFile is not an alias for @Component.",
-				getAliasedAttributeName(attribute, Component.class));
-	}
-
-	@Test
 	public void getAliasedAttributeNameFromAliasedComposedAnnotation() throws Exception {
 		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
 		assertEquals("location", getAliasedAttributeName(attribute, ContextConfig.class));
+	}
+
+	@Test
+	public void getAliasedAttributeNameFromWrongTargetAnnotation() throws Exception {
+		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
+		assertNull("xmlConfigFile is not an alias for @Component.", getAliasedAttributeName(attribute, Component.class));
+	}
+
+	@Test
+	@Ignore
+	public void getAliasedAttributeNameFromComposedAnnotationWithMultipleAliases() throws Exception {
+
+		// --- Explicit Aliases ------------------------------------------
+		Method attribute = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("xmlFile");
+		// assertEquals("location", getAliasedAttributeName(attribute,
+		// ContextConfig.class));
+
+		attribute = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("groovyScript");
+		// assertEquals("location", getAliasedAttributeName(attribute,
+		// ContextConfig.class));
+
+		attribute = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("value");
+		// assertEquals("location", getAliasedAttributeName(attribute,
+		// ContextConfig.class));
+
+		// --- Implicit Aliases ------------------------------------------
+		assertEquals("location", getAliasedAttributeName(attribute));
 	}
 
 	@Test
@@ -1595,6 +1616,8 @@ public class AnnotationUtilsTests {
 
 		@AliasFor("value")
 		String location() default "";
+
+		Class<?> klass() default Object.class;
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
@@ -1768,6 +1791,25 @@ public class AnnotationUtilsTests {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "location")
 		String xmlConfigFile();
+	}
+
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MultipleAliasesComposedContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
+		String xmlFile() default "";
+
+		@AliasFor(annotation = ContextConfig.class, value = "location")
+		String groovyScript() default "";
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
+		String value() default "";
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "klass")
+		Class<?> configClass() default Object.class;
+
+		String nonAliasedAttribute() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

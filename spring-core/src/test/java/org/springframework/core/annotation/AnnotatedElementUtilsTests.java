@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -323,16 +324,28 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	public void getMergeAndSynthesizeAnnotationWithAliasedValueComposedAnnotation() {
-		Class<?> element = AliasedValueComposedContextConfigClass.class;
+	public void getMergedAnnotationWithAliasedValueComposedAnnotation() {
+		assertGetMergedAnnotation(AliasedValueComposedContextConfigClass.class, "test.xml");
+	}
+
+	@Test
+	@Ignore
+	public void getMergedAnnotationWithMultipleAliasesForSameAttributeInComposedAnnotation() {
+		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass1.class, "foo.xml");
+		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass2.class, "bar.xml");
+		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass3.class, "baz.xml");
+	}
+
+	private void assertGetMergedAnnotation(Class<?> element, String expected) {
+		String name = ContextConfig.class.getName();
 		ContextConfig contextConfig = getMergedAnnotation(element, ContextConfig.class);
 
 		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), contextConfig);
-		assertArrayEquals("locations", new String[] { "test.xml" }, contextConfig.locations());
-		assertArrayEquals("value", new String[] { "test.xml" }, contextConfig.value());
+		assertArrayEquals("locations", new String[] { expected }, contextConfig.locations());
+		assertArrayEquals("value", new String[] { expected }, contextConfig.value());
 
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, ContextConfig.class.getName()));
+		assertTrue(isAnnotated(element, name));
 	}
 
 	@Test
@@ -716,6 +729,20 @@ public class AnnotatedElementUtilsTests {
 		String[] locations();
 	}
 
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface MultipleAliasesComposedContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] xmlFiles() default {};
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] locations() default {};
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] value() default {};
+	}
+
 	/**
 	 * Invalid because the configuration declares a value for 'value' and
 	 * requires a value for the aliased 'locations'. So we likely end up with
@@ -926,6 +953,18 @@ public class AnnotatedElementUtilsTests {
 
 	@AliasedValueComposedContextConfig(locations = "test.xml")
 	static class AliasedValueComposedContextConfigClass {
+	}
+
+	@MultipleAliasesComposedContextConfig("foo.xml")
+	static class MultipleAliasesComposedContextConfigClass1 {
+	}
+
+	@MultipleAliasesComposedContextConfig(locations = "bar.xml")
+	static class MultipleAliasesComposedContextConfigClass2 {
+	}
+
+	@MultipleAliasesComposedContextConfig(xmlFiles = "baz.xml")
+	static class MultipleAliasesComposedContextConfigClass3 {
 	}
 
 	@InvalidAliasedComposedContextConfig(xmlConfigFiles = "test.xml")
