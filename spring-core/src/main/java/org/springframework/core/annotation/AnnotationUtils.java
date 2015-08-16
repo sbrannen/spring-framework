@@ -25,7 +25,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -39,6 +38,8 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -126,8 +127,8 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Boolean>(256);
 
-	private static final Map<Class<? extends Annotation>, Map<String, String>> attributeAliasesCache =
-			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Map<String, String>>(256);
+	private static final Map<Class<? extends Annotation>, MultiValueMap<String, String>> attributeAliasesCache =
+			new ConcurrentReferenceHashMap<Class<? extends Annotation>, MultiValueMap<String, String>>(256);
 
 	private static final Map<Class<? extends Annotation>, List<Method>> attributeMethodsCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, List<Method>>(256);
@@ -1374,22 +1375,27 @@ public abstract class AnnotationUtils {
 	 * @return a map containing attribute alias pairs; never {@code null}
 	 * @since 4.2
 	 */
-	static Map<String, String> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
+	static MultiValueMap<String, String> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
 		if (annotationType == null) {
-			return Collections.emptyMap();
+			return new LinkedMultiValueMap<String, String>();
 		}
 
-		Map<String, String> map = attributeAliasesCache.get(annotationType);
+		MultiValueMap<String, String> map = attributeAliasesCache.get(annotationType);
 		if (map != null) {
 			return map;
 		}
 
-		map = new HashMap<String, String>();
+		map = new LinkedMultiValueMap<String, String>();
 		for (Method attribute : getAttributeMethods(annotationType)) {
 			String attributeName = attribute.getName();
-			String aliasedAttributeName = getAliasedAttributeName(attribute);
-			if (aliasedAttributeName != null) {
-				map.put(attributeName, aliasedAttributeName);
+
+			List<String> aliases = getAliasedAttributeNames(attribute);
+			if (aliases != null) {
+				for (String alias : aliases) {
+					if (alias != null) {
+						map.add(attributeName, alias);
+					}
+				}
 			}
 		}
 
@@ -1420,7 +1426,7 @@ public abstract class AnnotationUtils {
 
 		synthesizable = Boolean.FALSE;
 		for (Method attribute : getAttributeMethods(annotationType)) {
-			if (getAliasedAttributeName(attribute) != null) {
+			if (getAliasedAttributeNames(attribute) != null) {
 				synthesizable = Boolean.TRUE;
 				break;
 			}
@@ -1460,10 +1466,10 @@ public abstract class AnnotationUtils {
 	 * @throws AnnotationConfigurationException if invalid configuration of
 	 * {@code @AliasFor} is detected
 	 * @since 4.2
-	 * @see #getAliasedAttributeName(Method, Class)
+	 * @see #getAliasedAttributeNames(Method, Class)
 	 */
-	static String getAliasedAttributeName(Method attribute) {
-		return getAliasedAttributeName(attribute, (Class<? extends Annotation>) null);
+	static List<String> getAliasedAttributeNames(Method attribute) {
+		return getAliasedAttributeNames(attribute, (Class<? extends Annotation>) null);
 	}
 
 	/**
@@ -1475,26 +1481,41 @@ public abstract class AnnotationUtils {
 	 * <em>within the same annotation</em>
 	 * @return the name of the aliased attribute, or {@code null} if not found
 	 * @throws IllegalArgumentException if the supplied attribute method is
-	 * not from an annotation, or if the supplied target type is {@link Annotation}
+	 * {@code null} or not from an annotation, or if the supplied target type
+	 * is {@link Annotation}
 	 * @throws AnnotationConfigurationException if invalid configuration of
 	 * {@code @AliasFor} is detected
 	 * @since 4.2
 	 */
-	static String getAliasedAttributeName(Method attribute, Class<? extends Annotation> targetAnnotationType) {
+	static List<String> getAliasedAttributeNames(Method attribute, Class<? extends Annotation> targetAnnotationType) {
 		Assert.notNull(attribute, "attribute method must not be null");
 		Assert.isTrue(!Annotation.class.equals(targetAnnotationType),
 			"targetAnnotationType must not be java.lang.annotation.Annotation");
 
-		// Nothing to check
-		if (!attribute.isAnnotationPresent(AliasFor.class)) {
+		AliasDescriptor descriptor = AliasDescriptor.from(attribute);
+
+		// No alias declared via @AliasFor?
+		if (descriptor == null) {
 			return null;
 		}
 
-		AliasDescriptor descriptor = new AliasDescriptor(attribute);
+		boolean searchInLocalAnnotation = (targetAnnotationType == null);
+		boolean searchInMetaAnnotation = !searchInLocalAnnotation;
 
 		// Explicit alias for a different target meta-annotation?
-		if ((targetAnnotationType != null) && !targetAnnotationType.equals(descriptor.aliasedAnnotationType())) {
+		if (searchInMetaAnnotation && !targetAnnotationType.equals(descriptor.aliasedAnnotationType())) {
 			return null;
+		}
+
+		if (searchInMetaAnnotation) {
+			return Collections.singletonList(descriptor.aliasedAttributeName());
+		}
+
+		List<String> aliases = new ArrayList<String>();
+
+		// Explicit alias pair?
+		if (descriptor.isAliasPair()) {
+			aliases.add(descriptor.aliasedAttributeName());
 		}
 
 		// Implicit alias pairs?
@@ -1504,22 +1525,26 @@ public abstract class AnnotationUtils {
 				continue;
 			}
 
-			AliasDescriptor currentDescriptor = new AliasDescriptor(currentAttribute);
-
-			// If two attributes alias the same attribute in the same target
-			// annotation, they are "implicit" aliases for each other.
-			if (descriptor.equals(currentDescriptor)) {
-				System.err.println("Implicit alias for '" + attribute.getName() + "': " + currentDescriptor);
-				// TODO populate multi-map
+			AliasDescriptor currentDescriptor = AliasDescriptor.from(currentAttribute);
+			if (currentDescriptor != null) {
+				// If two attributes alias the same attribute in the same target
+				// annotation, they are "implicit" aliases for each other.
+				if (descriptor.equals(currentDescriptor)) {
+					aliases.add(currentDescriptor.sourceAttributeName());
+					// System.err.println("Implicit alias for '" + attribute.getName() +
+					// "': " + currentDescriptor);
+				}
 			}
 		}
 
-		// Wrong search scope?
-		if ((targetAnnotationType == null) && !descriptor.isAliasPair()) {
-			return null;
-		}
+		// System.err.println("Aliases for '" + attribute.getName() + "': " + aliases);
 
-		return descriptor.aliasedAttributeName();
+		// Wrong search scope?
+		// if (searchInLocalAnnotation && !descriptor.isAliasPair()) {
+		//     return null;
+		// }
+
+		return aliases;
 	}
 
 	/**
@@ -1537,7 +1562,7 @@ public abstract class AnnotationUtils {
 	 * @throws AnnotationConfigurationException if invalid configuration of
 	 * {@code @AliasFor} is detected
 	 * @since 4.2
-	 * @see #getAliasedAttributeName(Method, Class)
+	 * @see #getAliasedAttributeNames(Method, Class)
 	 */
 	private static String getAliasedAttributeName(AliasFor aliasFor, Method attribute) {
 		String attributeName = aliasFor.attribute();
@@ -1664,7 +1689,8 @@ public abstract class AnnotationUtils {
 		Class<? extends Annotation> annotationType = attributes.annotationType();
 
 		// Validate @AliasFor configuration
-		Map<String, String> aliasMap = getAttributeAliasMap(annotationType);
+		// TODO Switch to MultiValueMap.
+		Map<String, String> aliasMap = getAttributeAliasMap(annotationType).toSingleValueMap();
 		Set<String> validated = new HashSet<String>();
 		for (String attributeName : aliasMap.keySet()) {
 			String aliasedAttributeName = aliasMap.get(attributeName);
@@ -1873,7 +1899,7 @@ public abstract class AnnotationUtils {
 		}
 	}
 
-	static class AliasDescriptor {
+	private static class AliasDescriptor {
 
 		private final Method sourceAttribute;
 
@@ -1889,29 +1915,41 @@ public abstract class AnnotationUtils {
 
 
 		@SuppressWarnings("unchecked")
-		AliasDescriptor(Method sourceAttribute) {
+		static AliasDescriptor from(Method sourceAttribute) {
 			Class<?> declaringClass = sourceAttribute.getDeclaringClass();
 			Assert.isTrue(declaringClass.isAnnotation(), "attribute method must be from an annotation");
 
-			this.sourceAttribute = sourceAttribute;
-			this.sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
-			this.sourceAttributeName = sourceAttribute.getName();
-
 			AliasFor aliasFor = sourceAttribute.getAnnotation(AliasFor.class);
-			if (aliasFor != null) {
-				Class<? extends Annotation> aliasedAnnotationType = aliasFor.annotation();
-				this.aliasedAnnotationType = (Annotation.class.equals(aliasedAnnotationType) ? sourceAnnotationType
-						: aliasedAnnotationType);
-				this.aliasedAttributeName = AnnotationUtils.getAliasedAttributeName(aliasFor, sourceAttribute);
-				this.aliasPair = this.sourceAnnotationType.equals(this.aliasedAnnotationType);
+			if (aliasFor == null) {
+				return null;
+			}
 
-				validate();
-			}
-			else {
-				this.aliasedAnnotationType = null;
-				this.aliasedAttributeName = null;
-				this.aliasPair = false;
-			}
+			Class<? extends Annotation> sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
+			Class<? extends Annotation> aliasedAnnotationType = aliasFor.annotation();
+			String sourceAttributeName = sourceAttribute.getName();
+			String aliasedAttributeName = AnnotationUtils.getAliasedAttributeName(aliasFor, sourceAttribute);
+
+			aliasedAnnotationType = (Annotation.class.equals(aliasedAnnotationType) ? sourceAnnotationType
+					: aliasedAnnotationType);
+
+			AliasDescriptor descriptor = new AliasDescriptor(sourceAttribute, sourceAnnotationType,
+				sourceAttributeName, aliasedAnnotationType, aliasedAttributeName);
+
+			descriptor.validate();
+
+			return descriptor;
+		}
+
+		private AliasDescriptor(Method sourceAttribute, Class<? extends Annotation> sourceAnnotationType,
+				String sourceAttributeName, Class<? extends Annotation> aliasedAnnotationType,
+				String aliasedAttributeName) {
+
+			this.sourceAttribute = sourceAttribute;
+			this.sourceAnnotationType = sourceAnnotationType;
+			this.sourceAttributeName = sourceAttributeName;
+			this.aliasedAnnotationType = aliasedAnnotationType;
+			this.aliasedAttributeName = aliasedAttributeName;
+			this.aliasPair = sourceAnnotationType.equals(aliasedAnnotationType);
 		}
 
 		private void validate() {
@@ -1919,9 +1957,9 @@ public abstract class AnnotationUtils {
 			// Target annotation is not meta-present?
 			if (!isAliasPair() && findAnnotation(this.sourceAnnotationType, this.aliasedAnnotationType) == null) {
 				String msg = String.format("@AliasFor declaration on attribute [%s] in annotation [%s] declares "
-						+ "an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",
-						this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
-						this.aliasedAnnotationType.getName());
+					+ "an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",
+					this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
+					this.aliasedAnnotationType.getName());
 				throw new AnnotationConfigurationException(msg);
 			}
 
@@ -1961,7 +1999,7 @@ public abstract class AnnotationUtils {
 			Class<?> aliasedReturnType = aliasedAttribute.getReturnType();
 			if (!returnType.equals(aliasedReturnType)) {
 				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
-						+ "and attribute [%s] in annotation [%s] must declare the same return type.",
+					+ "and attribute [%s] in annotation [%s] must declare the same return type.",
 					this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
 					this.aliasedAnnotationType.getName());
 				throw new AnnotationConfigurationException(msg);
@@ -1973,7 +2011,7 @@ public abstract class AnnotationUtils {
 
 				if ((defaultValue == null) || (aliasedDefaultValue == null)) {
 					String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
-							+ "and attribute [%s] in annotation [%s] must declare default values.",
+						+ "and attribute [%s] in annotation [%s] must declare default values.",
 						this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
 						this.aliasedAnnotationType.getName());
 					throw new AnnotationConfigurationException(msg);
@@ -1981,7 +2019,7 @@ public abstract class AnnotationUtils {
 
 				if (!ObjectUtils.nullSafeEquals(defaultValue, aliasedDefaultValue)) {
 					String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
-							+ "and attribute [%s] in annotation [%s] must declare the same default value.",
+						+ "and attribute [%s] in annotation [%s] must declare the same default value.",
 						this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
 						this.aliasedAnnotationType.getName());
 					throw new AnnotationConfigurationException(msg);

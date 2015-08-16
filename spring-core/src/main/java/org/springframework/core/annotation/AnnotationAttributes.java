@@ -422,7 +422,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		Assert.notNull(expectedType, "expectedType must not be null");
 
 		T attributeValue = getAttribute(attributeName, expectedType);
-		String aliasName = AnnotationUtils.getAttributeAliasMap(annotationType).get(attributeName);
+		// TODO Switch to MultiValueMap.
+		String aliasName = AnnotationUtils.getAttributeAliasMap(annotationType).toSingleValueMap().get(attributeName);
 		T aliasValue = getAttribute(aliasName, expectedType);
 		boolean attributeDeclared = !ObjectUtils.isEmpty(attributeValue);
 		boolean aliasDeclared = !ObjectUtils.isEmpty(aliasValue);

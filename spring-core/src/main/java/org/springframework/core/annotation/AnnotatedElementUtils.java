@@ -31,6 +31,7 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -957,13 +958,23 @@ public class AnnotatedElementUtils {
 
 			for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
 				String attributeName = attributeMethod.getName();
-				String aliasedAttributeName = AnnotationUtils.getAliasedAttributeName(attributeMethod,
-					targetAnnotationType);
 
-				// Explicit annotation attribute override declared via @AliasFor
-				if (StringUtils.hasText(aliasedAttributeName) && attributes.containsKey(aliasedAttributeName)) {
-					overrideAttribute(element, annotation, attributes, attributeName, aliasedAttributeName);
+				// TODO Determine if we really need to iterate over all aliases or if it
+				// perhaps suffices to handle a single alias within an implicit alias set
+				// since the annotation has already been synthesized (presumably with
+				// support for implicit aliases).
+				List<String> aliases = AnnotationUtils.getAliasedAttributeNames(attributeMethod, targetAnnotationType);
+
+				if (!ObjectUtils.isEmpty(aliases)) {
+
+					for (String aliasedAttributeName : aliases) {
+						// Explicit annotation attribute override declared via @AliasFor
+						if (StringUtils.hasText(aliasedAttributeName) && attributes.containsKey(aliasedAttributeName)) {
+							overrideAttribute(element, annotation, attributes, attributeName, aliasedAttributeName);
+						}
+					}
 				}
+
 				// Implicit annotation attribute override based on convention
 				else if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
 					overrideAttribute(element, annotation, attributes, attributeName, attributeName);

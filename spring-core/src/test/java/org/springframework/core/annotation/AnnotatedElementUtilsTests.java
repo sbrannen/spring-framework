@@ -27,7 +27,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -329,11 +328,12 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	@Ignore
 	public void getMergedAnnotationWithMultipleAliasesForSameAttributeInComposedAnnotation() {
 		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass1.class, "foo.xml");
-		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass2.class, "bar.xml");
-		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass3.class, "baz.xml");
+
+		// TODO Uncomment the following assertions.
+		// assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass2.class, "bar.xml");
+		// assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass3.class, "baz.xml");
 	}
 
 	private void assertGetMergedAnnotation(Class<?> element, String expected) {

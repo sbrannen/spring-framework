@@ -62,7 +62,8 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 		this.annotationType = annotationType;
 		this.annotatedElement = annotatedElement;
 		this.source = source;
-		this.attributeAliasMap = AnnotationUtils.getAttributeAliasMap(annotationType);
+		// TODO Switch to MultiValueMap.
+		this.attributeAliasMap = AnnotationUtils.getAttributeAliasMap(annotationType).toSingleValueMap();
 	}
 
 

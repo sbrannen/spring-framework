@@ -87,7 +87,8 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			Map<String, Object> originalAttributes, Class<? extends Annotation> annotationType) {
 
 		Map<String, Object> attributes = new HashMap<String, Object>(originalAttributes);
-		Map<String, String> attributeAliasMap = getAttributeAliasMap(annotationType);
+		// TODO Switch to MultiValueMap.
+		Map<String, String> attributeAliasMap = getAttributeAliasMap(annotationType).toSingleValueMap();
 
 		for (Method attributeMethod : getAttributeMethods(annotationType)) {
 			String attributeName = attributeMethod.getName();
