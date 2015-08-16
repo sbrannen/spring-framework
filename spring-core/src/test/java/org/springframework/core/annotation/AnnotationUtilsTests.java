@@ -698,32 +698,38 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getAliasedAttributeNamesFromAliasedComposedAnnotation() throws Exception {
-		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
-		assertEquals(asList("location"), getAliasedAttributeNames(attribute, ContextConfig.class));
-	}
-
-	@Test
 	public void getAliasedAttributeNamesFromWrongTargetAnnotation() throws Exception {
 		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
 		assertNull("xmlConfigFile is not an alias for @Component.", getAliasedAttributeNames(attribute, Component.class));
 	}
 
 	@Test
-	public void getAliasedAttributeNamesFromComposedAnnotationWithMultipleAliases() throws Exception {
+	public void getAliasedAttributeNamesForNonAliasedAttribute() throws Exception {
+		Method nonAliasedAttribute = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("nonAliasedAttribute");
+		assertNull(getAliasedAttributeNames(nonAliasedAttribute, ContextConfig.class));
+	}
 
-		// --- Explicit Aliases ------------------------------------------
-		Method attribute = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("xmlFile");
+	@Test
+	public void getAliasedAttributeNamesFromAliasedComposedAnnotation() throws Exception {
+		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
 		assertEquals(asList("location"), getAliasedAttributeNames(attribute, ContextConfig.class));
+	}
 
-		attribute = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("groovyScript");
-		assertEquals(asList("location"), getAliasedAttributeNames(attribute, ContextConfig.class));
+	@Test
+	public void getAliasedAttributeNamesFromComposedAnnotationWithMultipleAliasesForOverriddenAttribute() throws Exception {
+		Method xmlFile = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("xmlFile");
+		Method groovyScript = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("groovyScript");
+		Method value = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("value");
 
-		attribute = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("value");
-		assertEquals(asList("location"), getAliasedAttributeNames(attribute, ContextConfig.class));
+		// Meta-annotation attribute overrides
+		assertEquals(asList("location"), getAliasedAttributeNames(xmlFile, ContextConfig.class));
+		assertEquals(asList("location"), getAliasedAttributeNames(groovyScript, ContextConfig.class));
+		assertEquals(asList("location"), getAliasedAttributeNames(value, ContextConfig.class));
 
-		// --- Implicit Aliases ------------------------------------------
-		assertEquals(asList("xmlFile", "groovyScript"), getAliasedAttributeNames(attribute));
+		// Implicit Aliases
+		assertThat(getAliasedAttributeNames(xmlFile), containsInAnyOrder("value", "groovyScript"));
+		assertThat(getAliasedAttributeNames(groovyScript), containsInAnyOrder("value", "xmlFile"));
+		assertThat(getAliasedAttributeNames(value), containsInAnyOrder("xmlFile", "groovyScript"));
 	}
 
 	@Test
