@@ -330,10 +330,8 @@ public class AnnotatedElementUtilsTests {
 	@Test
 	public void getMergedAnnotationWithMultipleAliasesForSameAttributeInComposedAnnotation() {
 		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass1.class, "foo.xml");
-
-		// TODO Uncomment the following assertions.
-		// assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass2.class, "bar.xml");
-		// assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass3.class, "baz.xml");
+		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass2.class, "bar.xml");
+		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass3.class, "baz.xml");
 	}
 
 	private void assertGetMergedAnnotation(Class<?> element, String expected) {

@@ -644,8 +644,22 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the type of annotation to look for
 	 * @return the first matching annotation, or {@code null} if not found
 	 */
-	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType) {
+		return findAnnotation(clazz, annotationType, true);
+	}
+
+	/**
+	 * Perform the actual work for {@link #findAnnotation(AnnotatedElement, Class)},
+	 * honoring the {@code synthesize} flag.
+	 * @param clazz the class to look for annotations on
+	 * @param annotationType the type of annotation to look for
+	 * @param synthesize {@code true} if the result should be
+	 * {@linkplain #synthesizeAnnotation(Annotation) synthesized}
+	 * @return the first matching annotation, or {@code null} if not found
+	 * @since 4.2.1
+	 */
+	@SuppressWarnings("unchecked")
+	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, boolean synthesize) {
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(clazz, annotationType);
 		A result = (A) findAnnotationCache.get(cacheKey);
 		if (result == null) {
@@ -654,7 +668,7 @@ public abstract class AnnotationUtils {
 				findAnnotationCache.put(cacheKey, result);
 			}
 		}
-		return synthesizeAnnotation(result, clazz);
+		return (synthesize ? synthesizeAnnotation(result, clazz) : result);
 	}
 
 	/**
@@ -1578,6 +1592,7 @@ public abstract class AnnotationUtils {
 	 * Determine if the supplied {@code method} is an annotation attribute method.
 	 * @param method the method to check
 	 * @return {@code true} if the method is an attribute method
+	 * @since 4.2
 	 */
 	static boolean isAttributeMethod(Method method) {
 		return (method != null && method.getParameterTypes().length == 0 && method.getReturnType() != void.class);
@@ -1587,9 +1602,23 @@ public abstract class AnnotationUtils {
 	 * Determine if the supplied method is an "annotationType" method.
 	 * @return {@code true} if the method is an "annotationType" method
 	 * @see Annotation#annotationType()
+	 * @since 4.2
 	 */
 	static boolean isAnnotationTypeMethod(Method method) {
 		return (method != null && method.getName().equals("annotationType") && method.getParameterTypes().length == 0);
+	}
+
+	/**
+	 * Determine if an annotation of type {@code metaAnnotationType} is
+	 * <em>meta-present</em> on the supplied {@code annotationType}.
+	 * @param annotationType the annotation type to search on
+	 * @param metaAnnotationType the type of meta-annotation to search for
+	 * @return {@code true} if such an annotation is meta-present
+	 * @since 4.2.1
+	 */
+	private static boolean isAnnotationMetaPresent(Class<? extends Annotation> annotationType,
+			Class<? extends Annotation> metaAnnotationType) {
+		return findAnnotation(annotationType, metaAnnotationType, false) != null;
 	}
 
 	/**
@@ -1881,7 +1910,7 @@ public abstract class AnnotationUtils {
 		private void validate() {
 
 			// Target annotation is not meta-present?
-			if (!isAliasPair() && findAnnotation(this.sourceAnnotationType, this.aliasedAnnotationType) == null) {
+			if (!isAliasPair() && !isAnnotationMetaPresent(this.sourceAnnotationType, this.aliasedAnnotationType)) {
 				String msg = String.format("@AliasFor declaration on attribute [%s] in annotation [%s] declares "
 					+ "an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",
 					this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,

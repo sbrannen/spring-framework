@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -721,6 +720,7 @@ public class AnnotationUtilsTests {
 		Method xmlFile = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("xmlFile");
 		Method groovyScript = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("groovyScript");
 		Method value = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("value");
+		Method location = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("location");
 
 		// Meta-annotation attribute overrides
 		assertEquals(asList("location"), getAliasedAttributeNames(xmlFile, ContextConfig.class));
@@ -728,9 +728,10 @@ public class AnnotationUtilsTests {
 		assertEquals(asList("location"), getAliasedAttributeNames(value, ContextConfig.class));
 
 		// Implicit Aliases
-		assertThat(getAliasedAttributeNames(xmlFile), containsInAnyOrder("value", "groovyScript"));
-		assertThat(getAliasedAttributeNames(groovyScript), containsInAnyOrder("value", "xmlFile"));
-		assertThat(getAliasedAttributeNames(value), containsInAnyOrder("xmlFile", "groovyScript"));
+		assertThat(getAliasedAttributeNames(xmlFile), containsInAnyOrder("value", "groovyScript", "location"));
+		assertThat(getAliasedAttributeNames(groovyScript), containsInAnyOrder("value", "xmlFile", "location"));
+		assertThat(getAliasedAttributeNames(value), containsInAnyOrder("xmlFile", "groovyScript", "location"));
+		assertThat(getAliasedAttributeNames(location), containsInAnyOrder("xmlFile", "groovyScript", "value"));
 	}
 
 	@Test
@@ -911,12 +912,38 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void synthesizeAnnotationWithMultipleImplicitAttributeAliases() throws Exception {
+		assertAnnotationSynthesisWithMultipleImplicitAttributeAliases(
+			ValueMultipleAliasesComposedContextConfigClass.class, "value");
+		assertAnnotationSynthesisWithMultipleImplicitAttributeAliases(
+			LocationMultipleAliasesComposedContextConfigClass.class, "location");
+		assertAnnotationSynthesisWithMultipleImplicitAttributeAliases(
+			XmlMultipleAliasesComposedContextConfigClass.class, "xmlFile");
+		assertAnnotationSynthesisWithMultipleImplicitAttributeAliases(
+			GroovyMultipleAliasesComposedContextConfigClass.class, "groovyScript");
+	}
+
+	private void assertAnnotationSynthesisWithMultipleImplicitAttributeAliases(Class<?> clazz, String expected)
+			throws Exception {
+
+		MultipleAliasesComposedContextConfig config = clazz.getAnnotation(MultipleAliasesComposedContextConfig.class);
+		assertNotNull(config);
+
+		MultipleAliasesComposedContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
+		assertNotSame(config, synthesizedConfig);
+
+		assertEquals("value: ", expected, synthesizedConfig.value());
+		assertEquals("xmlFile: ", expected, synthesizedConfig.xmlFile());
+		assertEquals("groovyScript: ", expected, synthesizedConfig.groovyScript());
+	}
+
+	@Test
 	public void synthesizeAnnotationFromMapWithoutAttributeAliases() throws Exception {
 		Component component = WebController.class.getAnnotation(Component.class);
 		assertNotNull(component);
 
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(VALUE, "webController");
+		Map<String, Object> map = Collections.singletonMap(VALUE, "webController");
 		Component synthesizedComponent = synthesizeAnnotation(map, Component.class, WebController.class);
 		assertNotNull(synthesizedComponent);
 
@@ -1002,12 +1029,31 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationFromMapWithMinimalAttributesWithAttributeAliases() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("location", "test.xml");
+		Map<String, Object> map = Collections.singletonMap("location", "test.xml");
 		ContextConfig contextConfig = synthesizeAnnotation(map, ContextConfig.class, null);
 		assertNotNull(contextConfig);
 		assertEquals("value: ", "test.xml", contextConfig.value());
 		assertEquals("location: ", "test.xml", contextConfig.location());
+	}
+
+	@Test
+	public void synthesizeAnnotationFromMapWithMultipleImplicitAttributeAliases() throws Exception {
+		assertAnnotationSynthesisFromMapWithMultipleImplicitAttributeAliases("value");
+		assertAnnotationSynthesisFromMapWithMultipleImplicitAttributeAliases("location");
+		assertAnnotationSynthesisFromMapWithMultipleImplicitAttributeAliases("xmlFile");
+		assertAnnotationSynthesisFromMapWithMultipleImplicitAttributeAliases("groovyScript");
+	}
+
+	private void assertAnnotationSynthesisFromMapWithMultipleImplicitAttributeAliases(String attributeNameAndValue)
+			throws Exception {
+
+		Map<String, Object> map = Collections.singletonMap(attributeNameAndValue, attributeNameAndValue);
+		MultipleAliasesComposedContextConfig config = synthesizeAnnotation(map,
+			MultipleAliasesComposedContextConfig.class, null);
+		assertNotNull(config);
+		assertEquals("value: ", attributeNameAndValue, config.value());
+		assertEquals("xmlFile: ", attributeNameAndValue, config.xmlFile());
+		assertEquals("groovyScript: ", attributeNameAndValue, config.groovyScript());
 	}
 
 	@Test
@@ -1017,8 +1063,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationFromMapWithNullAttributeValue() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("text", null);
+		Map<String, Object> map = Collections.singletonMap("text", null);
 		assertTrue(map.containsKey("text"));
 		assertMissingTextAttribute(map);
 	}
@@ -1033,8 +1078,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationFromMapWithAttributeOfIncorrectType() throws Exception {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(VALUE, 42L);
+		Map<String, Object> map = Collections.singletonMap(VALUE, 42L);
 
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(startsWith("Attributes map"));
@@ -1808,10 +1852,33 @@ public class AnnotationUtilsTests {
 		@AliasFor(annotation = ContextConfig.class, attribute = "location")
 		String value() default "";
 
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
+		String location() default "";
+
 		@AliasFor(annotation = ContextConfig.class, attribute = "klass")
 		Class<?> configClass() default Object.class;
 
 		String nonAliasedAttribute() default "";
+	}
+
+	// Attribute value intentionally matches attribute name:
+	@MultipleAliasesComposedContextConfig(groovyScript = "groovyScript")
+	static class GroovyMultipleAliasesComposedContextConfigClass {
+	}
+
+	// Attribute value intentionally matches attribute name:
+	@MultipleAliasesComposedContextConfig(xmlFile = "xmlFile")
+	static class XmlMultipleAliasesComposedContextConfigClass {
+	}
+
+	// Attribute value intentionally matches attribute name:
+	@MultipleAliasesComposedContextConfig("value")
+	static class ValueMultipleAliasesComposedContextConfigClass {
+	}
+
+	// Attribute value intentionally matches attribute name:
+	@MultipleAliasesComposedContextConfig(location = "location")
+	static class LocationMultipleAliasesComposedContextConfigClass {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
