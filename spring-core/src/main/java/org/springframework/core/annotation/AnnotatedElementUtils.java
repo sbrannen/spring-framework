@@ -31,7 +31,6 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -965,8 +964,7 @@ public class AnnotatedElementUtils {
 				// support for implicit aliases).
 				List<String> aliases = AnnotationUtils.getAliasedAttributeNames(attributeMethod, targetAnnotationType);
 
-				if (!ObjectUtils.isEmpty(aliases)) {
-
+				if (!aliases.isEmpty()) {
 					for (String aliasedAttributeName : aliases) {
 						// Explicit annotation attribute override declared via @AliasFor
 						if (StringUtils.hasText(aliasedAttributeName) && attributes.containsKey(aliasedAttributeName)) {

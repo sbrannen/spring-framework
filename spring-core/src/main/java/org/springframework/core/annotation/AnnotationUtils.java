@@ -1389,12 +1389,9 @@ public abstract class AnnotationUtils {
 		for (Method attribute : getAttributeMethods(annotationType)) {
 			String attributeName = attribute.getName();
 
-			List<String> aliases = getAliasedAttributeNames(attribute);
-			if (aliases != null) {
-				for (String alias : aliases) {
-					if (alias != null) {
-						map.add(attributeName, alias);
-					}
+			for (String alias : getAliasedAttributeNames(attribute)) {
+				if (alias != null) {
+					map.add(attributeName, alias);
 				}
 			}
 		}
@@ -1426,7 +1423,7 @@ public abstract class AnnotationUtils {
 
 		synthesizable = Boolean.FALSE;
 		for (Method attribute : getAttributeMethods(annotationType)) {
-			if (getAliasedAttributeNames(attribute) != null) {
+			if (!getAliasedAttributeNames(attribute).isEmpty()) {
 				synthesizable = Boolean.TRUE;
 				break;
 			}
@@ -1456,7 +1453,8 @@ public abstract class AnnotationUtils {
 	 * {@link AliasFor @AliasFor} for the supplied annotation {@code attribute}.
 	 * <p>This method does not resolve meta-annotation attribute overrides.
 	 * @param attribute the attribute to find aliases for; never {@code null}
-	 * @return the names of the aliased attributes, or {@code null} if not found
+	 * @return the names of the aliased attributes; never {@code null}, though
+	 * potentially <em>empty</em>
 	 * @throws IllegalArgumentException if the supplied attribute method is
 	 * {@code null} or not from an annotation
 	 * @throws AnnotationConfigurationException if invalid configuration of
@@ -1475,7 +1473,8 @@ public abstract class AnnotationUtils {
 	 * @param targetAnnotationType the type of annotation in which an
 	 * aliased attribute is allowed to be declared; {@code null} implies
 	 * <em>within the same annotation</em> as the supplied attribute
-	 * @return the names of the aliased attributes, or {@code null} if not found
+	 * @return the names of the aliased attributes; never {@code null}, though
+	 * potentially <em>empty</em>
 	 * @throws IllegalArgumentException if the supplied attribute method is
 	 * {@code null} or not from an annotation, or if the supplied target type
 	 * is {@link Annotation}
@@ -1492,7 +1491,7 @@ public abstract class AnnotationUtils {
 
 		// No alias declared via @AliasFor?
 		if (descriptor == null) {
-			return null;
+			return Collections.emptyList();
 		}
 
 		// Searching for explicit meta-annotation attribute override?
@@ -1501,7 +1500,7 @@ public abstract class AnnotationUtils {
 				return Collections.singletonList(descriptor.aliasedAttributeName());
 			}
 			// Else: explicit attribute override for a different meta-annotation
-			return null;
+			return Collections.emptyList();
 		}
 
 		// Explicit alias pair?
@@ -1525,7 +1524,7 @@ public abstract class AnnotationUtils {
 				aliases.add(otherDescriptor.sourceAttributeName());
 			}
 		}
-		return (aliases.isEmpty() ? null : aliases);
+		return aliases;
 	}
 
 	/**

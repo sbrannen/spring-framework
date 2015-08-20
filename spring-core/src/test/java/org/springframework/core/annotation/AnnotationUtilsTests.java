@@ -700,13 +700,14 @@ public class AnnotationUtilsTests {
 	@Test
 	public void getAliasedAttributeNamesFromWrongTargetAnnotation() throws Exception {
 		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
-		assertNull("xmlConfigFile is not an alias for @Component.", getAliasedAttributeNames(attribute, Component.class));
+		assertThat("xmlConfigFile is not an alias for @Component.",
+			getAliasedAttributeNames(attribute, Component.class), is(empty()));
 	}
 
 	@Test
 	public void getAliasedAttributeNamesForNonAliasedAttribute() throws Exception {
 		Method nonAliasedAttribute = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("nonAliasedAttribute");
-		assertNull(getAliasedAttributeNames(nonAliasedAttribute, ContextConfig.class));
+		assertThat(getAliasedAttributeNames(nonAliasedAttribute, ContextConfig.class), is(empty()));
 	}
 
 	@Test
