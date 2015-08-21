@@ -17,8 +17,20 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link MapAnnotationAttributeExtractor}.
@@ -28,10 +40,88 @@ import java.util.Map;
  */
 public class MapAnnotationAttributeExtractorTests extends AbstractAliasAwareAnnotationAttributeExtractorTestCase {
 
+	@Before
+	public void clearCachesBeforeTests() {
+		AnnotationUtilsTests.clearCaches();
+	}
+
+	@Test
+	@SuppressWarnings("serial")
+	public void enrichAndValidateAttributesWithImplicitAliasesAndMinimalAttributes() {
+		Map<String, Object> attributes = new HashMap<String, Object>();
+		Map<String, Object> expectedAttributes = new HashMap<String, Object>() {{
+			put("groovyScript", "");
+			put("xmlFile", "");
+			put("value", "");
+			put("location1", "");
+			put("location2", "");
+			put("location3", "");
+			put("nonAliasedAttribute", "");
+			put("configClass", Object.class);
+		}};
+
+		assertEnrichAndValidateAttributes(attributes, expectedAttributes);
+	}
+
+	@Test
+	@SuppressWarnings("serial")
+	public void enrichAndValidateAttributesWithImplicitAliases() {
+		Map<String, Object> attributes = new HashMap<String, Object>() {{
+			put("groovyScript", "groovy!");
+		}};
+
+		Map<String, Object> expectedAttributes = new HashMap<String, Object>() {{
+			put("groovyScript", "groovy!");
+			put("xmlFile", "groovy!");
+			put("value", "groovy!");
+			put("location1", "groovy!");
+			put("location2", "groovy!");
+			put("location3", "groovy!");
+			put("nonAliasedAttribute", "");
+			put("configClass", Object.class);
+		}};
+
+		assertEnrichAndValidateAttributes(attributes, expectedAttributes);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void assertEnrichAndValidateAttributes(Map<String, Object> sourceAttributes, Map<String, Object> expected) {
+		Class<? extends Annotation> annotationType = ImplicitAliasesContextConfig.class;
+
+		// Since the ordering of attribute methods returned by the JVM is
+		// non-deterministic, we have to rig the attributeAliasesCache in AnnotationUtils
+		// so that the tests consistently fail in case enrichAndValidateAttributes() is
+		// buggy.
+		//
+		// Otherwise, these tests would intermittently pass even for an invalid
+		// implementation.
+		Map<Class<? extends Annotation>, MultiValueMap<String, String>> attributeAliasesCache =
+				(Map<Class<? extends Annotation>, MultiValueMap<String, String>>) AnnotationUtilsTests.getCache("attributeAliasesCache");
+
+		// Declare aliases in an order that will cause enrichAndValidateAttributes() to
+		// fail unless it considers all aliases in the set of implicit aliases.
+		MultiValueMap<String, String> aliases = new LinkedMultiValueMap<String, String>();
+		aliases.put("xmlFile", Arrays.asList("value", "groovyScript", "location1", "location2", "location3"));
+		aliases.put("groovyScript", Arrays.asList("value", "xmlFile", "location1", "location2", "location3"));
+		aliases.put("value", Arrays.asList("xmlFile", "groovyScript", "location1", "location2", "location3"));
+		aliases.put("location1", Arrays.asList("xmlFile", "groovyScript", "value", "location2", "location3"));
+		aliases.put("location2", Arrays.asList("xmlFile", "groovyScript", "value", "location1", "location3"));
+		aliases.put("location3", Arrays.asList("xmlFile", "groovyScript", "value", "location1", "location2"));
+
+		attributeAliasesCache.put(annotationType, aliases);
+
+		MapAnnotationAttributeExtractor extractor = new MapAnnotationAttributeExtractor(sourceAttributes, annotationType, null);
+		Map<String, Object> enriched = extractor.getSource();
+
+		assertEquals("attribute map size", expected.size(), enriched.size());
+		expected.keySet().stream().forEach( attr ->
+			assertThat("for attribute '" + attr + "'", enriched.get(attr), is(expected.get(attr))));
+	}
+
 	@Override
-	protected AnnotationAttributeExtractor<?> createExtractorFor(Class<? extends Annotation> annotationType) {
+	protected AnnotationAttributeExtractor<?> createExtractorFor(Class<?> clazz, String expected, Class<? extends Annotation> annotationType) {
 		Map<String, Object> attributes = Collections.singletonMap(expected, expected);
-		return new MapAnnotationAttributeExtractor(attributes, annotationType, super.clazz);
+		return new MapAnnotationAttributeExtractor(attributes, annotationType, clazz);
 	}
 
 }

@@ -27,8 +27,8 @@ import java.lang.annotation.Annotation;
 public class DefaultAnnotationAttributeExtractorTests extends AbstractAliasAwareAnnotationAttributeExtractorTestCase {
 
 	@Override
-	protected AnnotationAttributeExtractor<?> createExtractorFor(Class<? extends Annotation> annotationType) {
-		return new DefaultAnnotationAttributeExtractor(super.clazz.getAnnotation(annotationType), super.clazz);
+	protected AnnotationAttributeExtractor<?> createExtractorFor(Class<?> clazz, String expected, Class<? extends Annotation> annotationType) {
+		return new DefaultAnnotationAttributeExtractor(clazz.getAnnotation(annotationType), clazz);
 	}
 
 }

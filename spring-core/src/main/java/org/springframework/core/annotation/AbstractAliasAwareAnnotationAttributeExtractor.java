@@ -20,9 +20,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -45,7 +45,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 
 	private final S source;
 
-	private final MultiValueMap<String, String> attributeAliasMap;
+	private final Map<String, List<String>> attributeAliasMap;
 
 
 	/**

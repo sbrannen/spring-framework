@@ -17,15 +17,17 @@
 package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+
+import org.springframework.core.annotation.AnnotationUtilsTests.GroovyImplicitAliasesContextConfigClass;
+import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
+import org.springframework.core.annotation.AnnotationUtilsTests.Location1ImplicitAliasesContextConfigClass;
+import org.springframework.core.annotation.AnnotationUtilsTests.Location2ImplicitAliasesContextConfigClass;
+import org.springframework.core.annotation.AnnotationUtilsTests.Location3ImplicitAliasesContextConfigClass;
+import org.springframework.core.annotation.AnnotationUtilsTests.ValueImplicitAliasesContextConfigClass;
+import org.springframework.core.annotation.AnnotationUtilsTests.XmlImplicitAliasesContextConfigClass;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -34,85 +36,33 @@ import static org.junit.Assert.*;
  * Abstract base class for tests involving concrete implementations of
  * {@link AbstractAliasAwareAnnotationAttributeExtractor}.
  *
- * @author sbrannen
+ * @author Sam Brannen
  * @since 4.2.1
  */
-@RunWith(Parameterized.class)
 public abstract class AbstractAliasAwareAnnotationAttributeExtractorTestCase {
 
-	@Parameters(name = "{1}")
-	public static Object[][] testData() {
-		return new Object[][] {
-			{ GroovyMultipleAliasesComposedContextConfigClass.class, "groovyScript" },
-			{ XmlMultipleAliasesComposedContextConfigClass.class, "xmlFile" },
-			{ ValueMultipleAliasesComposedContextConfigClass.class, "value" }
-		};
+	@Test
+	public void getAttributeValueForImplicitAliases() throws Exception {
+		assertGetAttributeValueForImplicitAliases(GroovyImplicitAliasesContextConfigClass.class, "groovyScript");
+		assertGetAttributeValueForImplicitAliases(XmlImplicitAliasesContextConfigClass.class, "xmlFile");
+		assertGetAttributeValueForImplicitAliases(ValueImplicitAliasesContextConfigClass.class, "value");
+		assertGetAttributeValueForImplicitAliases(Location1ImplicitAliasesContextConfigClass.class, "location1");
+		assertGetAttributeValueForImplicitAliases(Location2ImplicitAliasesContextConfigClass.class, "location2");
+		assertGetAttributeValueForImplicitAliases(Location3ImplicitAliasesContextConfigClass.class, "location3");
 	}
 
+	private void assertGetAttributeValueForImplicitAliases(Class<?> clazz, String expected) throws Exception {
+		Method xmlFile = ImplicitAliasesContextConfig.class.getDeclaredMethod("xmlFile");
+		Method groovyScript = ImplicitAliasesContextConfig.class.getDeclaredMethod("groovyScript");
+		Method value = ImplicitAliasesContextConfig.class.getDeclaredMethod("value");
 
-	@Parameter(0)
-	public Class<?> clazz;
-
-	@Parameter(1)
-	public String expected;
-
-
-	@Test
-	public void getAttributeValueForMultipleImplicitAliases() throws Exception {
-		Method xmlFile = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("xmlFile");
-		Method groovyScript = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("groovyScript");
-		Method value = MultipleAliasesComposedContextConfig.class.getDeclaredMethod("value");
-
-		AnnotationAttributeExtractor<?> extractor = createExtractorFor(MultipleAliasesComposedContextConfig.class);
+		AnnotationAttributeExtractor<?> extractor = createExtractorFor(clazz, expected, ImplicitAliasesContextConfig.class);
 
 		assertThat(extractor.getAttributeValue(value), is(expected));
 		assertThat(extractor.getAttributeValue(groovyScript), is(expected));
 		assertThat(extractor.getAttributeValue(xmlFile), is(expected));
 	}
 
-	protected abstract AnnotationAttributeExtractor<?> createExtractorFor(Class<? extends Annotation> annotationType);
-
-
-	/**
-	 * Mock of {@code org.springframework.test.context.ContextConfiguration}.
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	protected @interface ContextConfig {
-
-		@AliasFor("location")
-		String value() default "";
-
-		@AliasFor("value")
-		String location() default "";
-	}
-
-	@ContextConfig
-	@Retention(RetentionPolicy.RUNTIME)
-	protected @interface MultipleAliasesComposedContextConfig {
-
-		@AliasFor(annotation = ContextConfig.class, attribute = "location")
-		String xmlFile() default "";
-
-		@AliasFor(annotation = ContextConfig.class, value = "location")
-		String groovyScript() default "";
-
-		@AliasFor(annotation = ContextConfig.class, attribute = "location")
-		String value() default "";
-	}
-
-	// Attribute value intentionally matches attribute name:
-	@MultipleAliasesComposedContextConfig(groovyScript = "groovyScript")
-	protected static class GroovyMultipleAliasesComposedContextConfigClass {
-	}
-
-	// Attribute value intentionally matches attribute name:
-	@MultipleAliasesComposedContextConfig(xmlFile = "xmlFile")
-	protected static class XmlMultipleAliasesComposedContextConfigClass {
-	}
-
-	// Attribute value intentionally matches attribute name:
-	@MultipleAliasesComposedContextConfig("value")
-	protected static class ValueMultipleAliasesComposedContextConfigClass {
-	}
+	protected abstract AnnotationAttributeExtractor<?> createExtractorFor(Class<?> clazz, String expected, Class<? extends Annotation> annotationType);
 
 }
