@@ -31,7 +31,6 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 
 /**
  * General utility methods for finding annotations and meta-annotations on
@@ -957,19 +956,18 @@ public class AnnotatedElementUtils {
 
 			for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
 				String attributeName = attributeMethod.getName();
-
-				// TODO Determine if we really need to iterate over all aliases or if it
-				// perhaps suffices to handle a single alias within an implicit alias set
-				// since the annotation has already been synthesized (presumably with
-				// support for implicit aliases).
 				List<String> aliases = AnnotationUtils.getAliasedAttributeNames(attributeMethod, targetAnnotationType);
 
+				// Explicit annotation attribute override declared via @AliasFor
 				if (!aliases.isEmpty()) {
-					for (String aliasedAttributeName : aliases) {
-						// Explicit annotation attribute override declared via @AliasFor
-						if (StringUtils.hasText(aliasedAttributeName) && attributes.containsKey(aliasedAttributeName)) {
-							overrideAttribute(element, annotation, attributes, attributeName, aliasedAttributeName);
-						}
+					if (aliases.size() != 1) {
+						throw new IllegalStateException(String.format(
+							"Alias list for annotation attribute [%s] must contain at most one element: %s",
+							attributeMethod, aliases));
+					}
+					String aliasedAttributeName = aliases.get(0);
+					if (attributes.containsKey(aliasedAttributeName)) {
+						overrideAttribute(element, annotation, attributes, attributeName, aliasedAttributeName);
 					}
 				}
 

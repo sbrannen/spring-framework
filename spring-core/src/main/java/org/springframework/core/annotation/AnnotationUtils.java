@@ -1483,23 +1483,25 @@ public abstract class AnnotationUtils {
 	/**
 	 * Get the names of the aliased attributes configured via
 	 * {@link AliasFor @AliasFor} for the supplied annotation {@code attribute}.
+	 * <p>If the supplied {@code metaAnnotationType} is non-null, the
+	 * returned list will contain at most one element.
 	 * @param attribute the attribute to find aliases for; never {@code null}
-	 * @param targetAnnotationType the type of annotation in which an
+	 * @param metaAnnotationType the type of meta-annotation in which an
 	 * aliased attribute is allowed to be declared; {@code null} implies
 	 * <em>within the same annotation</em> as the supplied attribute
 	 * @return the names of the aliased attributes; never {@code null}, though
 	 * potentially <em>empty</em>
 	 * @throws IllegalArgumentException if the supplied attribute method is
-	 * {@code null} or not from an annotation, or if the supplied target type
-	 * is {@link Annotation}
+	 * {@code null} or not from an annotation, or if the supplied meta-annotation
+	 * type is {@link Annotation}
 	 * @throws AnnotationConfigurationException if invalid configuration of
 	 * {@code @AliasFor} is detected
 	 * @since 4.2
 	 */
-	static List<String> getAliasedAttributeNames(Method attribute, Class<? extends Annotation> targetAnnotationType) {
+	static List<String> getAliasedAttributeNames(Method attribute, Class<? extends Annotation> metaAnnotationType) {
 		Assert.notNull(attribute, "attribute method must not be null");
-		Assert.isTrue(!Annotation.class.equals(targetAnnotationType),
-			"targetAnnotationType must not be java.lang.annotation.Annotation");
+		Assert.isTrue(!Annotation.class.equals(metaAnnotationType),
+			"metaAnnotationType must not be java.lang.annotation.Annotation");
 
 		AliasDescriptor descriptor = AliasDescriptor.from(attribute);
 
@@ -1509,8 +1511,8 @@ public abstract class AnnotationUtils {
 		}
 
 		// Searching for explicit meta-annotation attribute override?
-		if (targetAnnotationType != null) {
-			if (descriptor.isAliasFor(targetAnnotationType)) {
+		if (metaAnnotationType != null) {
+			if (descriptor.isAliasFor(metaAnnotationType)) {
 				return Collections.singletonList(descriptor.aliasedAttributeName());
 			}
 			// Else: explicit attribute override for a different meta-annotation
@@ -1653,41 +1655,62 @@ public abstract class AnnotationUtils {
 
 		Class<? extends Annotation> annotationType = attributes.annotationType();
 
+		// Track which attribute values have already been replaced so that we can short
+		// circuit the search algorithms.
+		Set<String> valuesAlreadyReplaced = new HashSet<String>();
+
 		// Validate @AliasFor configuration
-		// TODO Switch to MultiValueMap.
-		Map<String, String> aliasMap = getAttributeAliasMap(annotationType).toSingleValueMap();
-		Set<String> validated = new HashSet<String>();
+		Map<String, List<String>> aliasMap = getAttributeAliasMap(annotationType);
 		for (String attributeName : aliasMap.keySet()) {
-			String aliasedAttributeName = aliasMap.get(attributeName);
+			if (valuesAlreadyReplaced.contains(attributeName)) {
+				continue;
+			}
+			Object value = attributes.get(attributeName);
+			boolean valuePresent = (value != null && value != DEFAULT_VALUE_PLACEHOLDER);
 
-			if (validated.add(attributeName) && validated.add(aliasedAttributeName)) {
-				Object value = attributes.get(attributeName);
+			for (String aliasedAttributeName : aliasMap.get(attributeName)) {
+				if (valuesAlreadyReplaced.contains(aliasedAttributeName)) {
+					continue;
+				}
+
 				Object aliasedValue = attributes.get(aliasedAttributeName);
+				boolean aliasPresent = (aliasedValue != null && aliasedValue != DEFAULT_VALUE_PLACEHOLDER);
 
-				if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && (value != DEFAULT_VALUE_PLACEHOLDER)
-						&& (aliasedValue != DEFAULT_VALUE_PLACEHOLDER)) {
-					String elementAsString = (element == null ? "unknown element" : element.toString());
-					String msg = String.format(
-						"In AnnotationAttributes for annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
-								+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
-						annotationType.getName(), elementAsString, attributeName, aliasedAttributeName,
-						ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
-					throw new AnnotationConfigurationException(msg);
-				}
-
-				// Replace default values with aliased values...
-				if (value == DEFAULT_VALUE_PLACEHOLDER) {
-					attributes.put(attributeName,
-						adaptValue(element, aliasedValue, classValuesAsString, nestedAnnotationsAsMap));
-				}
-				if (aliasedValue == DEFAULT_VALUE_PLACEHOLDER) {
-					attributes.put(aliasedAttributeName,
-						adaptValue(element, value, classValuesAsString, nestedAnnotationsAsMap));
+				// Something to validate or replace with an alias?
+				if (valuePresent || aliasPresent) {
+					if (valuePresent && aliasPresent) {
+						// Since annotation attributes can be arrays, we must use ObjectUtils.nullSafeEquals().
+						if (!ObjectUtils.nullSafeEquals(value, aliasedValue)) {
+							String elementAsString = (element == null ? "unknown element" : element.toString());
+							String msg = String.format("In AnnotationAttributes for annotation [%s] declared on [%s], "
+									+ "attribute [%s] and its alias [%s] are declared with values of [%s] and [%s], "
+									+ "but only one declaration is permitted.", annotationType.getName(),
+									elementAsString, attributeName, aliasedAttributeName,
+									ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
+							throw new AnnotationConfigurationException(msg);
+						}
+					}
+					else if (aliasPresent) {
+						// Replace value with aliasedValue
+						attributes.put(attributeName,
+							adaptValue(element, aliasedValue, classValuesAsString, nestedAnnotationsAsMap));
+						valuesAlreadyReplaced.add(attributeName);
+					}
+					else {
+						// Replace aliasedValue with value
+						attributes.put(aliasedAttributeName,
+							adaptValue(element, value, classValuesAsString, nestedAnnotationsAsMap));
+						valuesAlreadyReplaced.add(aliasedAttributeName);
+					}
 				}
 			}
 		}
 
+		// Replace any remaining placeholders with actual default values
 		for (String attributeName : attributes.keySet()) {
+			if (valuesAlreadyReplaced.contains(attributeName)) {
+				continue;
+			}
 			Object value = attributes.get(attributeName);
 			if (value == DEFAULT_VALUE_PLACEHOLDER) {
 				attributes.put(attributeName,

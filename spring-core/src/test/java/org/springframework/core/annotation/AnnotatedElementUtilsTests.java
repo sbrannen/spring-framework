@@ -323,15 +323,32 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void getMergedAnnotationAttributesWithImplicitAliasesInMetaAnnotationOnComposedAnnotation() {
+		Class<?> element = ComposedImplicitAliasesContextConfigClass.class;
+		String name = ImplicitAliasesContextConfig.class.getName();
+		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
+		String[] expected = new String[] { "A.xml", "B.xml" };
+
+		assertNotNull("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName(), attributes);
+		assertArrayEquals("groovyScripts", expected, attributes.getStringArray("groovyScripts"));
+		assertArrayEquals("xmlFiles", expected, attributes.getStringArray("xmlFiles"));
+		assertArrayEquals("locations", expected, attributes.getStringArray("locations"));
+		assertArrayEquals("value", expected, attributes.getStringArray("value"));
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
 	public void getMergedAnnotationWithAliasedValueComposedAnnotation() {
 		assertGetMergedAnnotation(AliasedValueComposedContextConfigClass.class, "test.xml");
 	}
 
 	@Test
-	public void getMergedAnnotationWithMultipleAliasesForSameAttributeInComposedAnnotation() {
-		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass1.class, "foo.xml");
-		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass2.class, "bar.xml");
-		assertGetMergedAnnotation(MultipleAliasesComposedContextConfigClass3.class, "baz.xml");
+	public void getMergedAnnotationWithImplicitAliasesForSameAttributeInComposedAnnotation() {
+		assertGetMergedAnnotation(ImplicitAliasesContextConfigClass1.class, "foo.xml");
+		assertGetMergedAnnotation(ImplicitAliasesContextConfigClass2.class, "bar.xml");
+		assertGetMergedAnnotation(ImplicitAliasesContextConfigClass3.class, "baz.xml");
 	}
 
 	private void assertGetMergedAnnotation(Class<?> element, String expected) {
@@ -341,6 +358,24 @@ public class AnnotatedElementUtilsTests {
 		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), contextConfig);
 		assertArrayEquals("locations", new String[] { expected }, contextConfig.locations());
 		assertArrayEquals("value", new String[] { expected }, contextConfig.value());
+		assertArrayEquals("classes", new Class<?>[0], contextConfig.classes());
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
+	public void getMergedAnnotationWithImplicitAliasesInMetaAnnotationOnComposedAnnotation() {
+		Class<?> element = ComposedImplicitAliasesContextConfigClass.class;
+		String name = ImplicitAliasesContextConfig.class.getName();
+		ImplicitAliasesContextConfig config = getMergedAnnotation(element, ImplicitAliasesContextConfig.class);
+		String[] expected = new String[] { "A.xml", "B.xml" };
+
+		assertNotNull("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName(), config);
+		assertArrayEquals("groovyScripts", expected, config.groovyScripts());
+		assertArrayEquals("xmlFiles", expected, config.xmlFiles());
+		assertArrayEquals("locations", expected, config.locations());
+		assertArrayEquals("value", expected, config.value());
 
 		// Verify contracts between utility methods:
 		assertTrue(isAnnotated(element, name));
@@ -729,7 +764,10 @@ public class AnnotatedElementUtilsTests {
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface MultipleAliasesComposedContextConfig {
+	@interface ImplicitAliasesContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] groovyScripts() default {};
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] xmlFiles() default {};
@@ -739,6 +777,11 @@ public class AnnotatedElementUtilsTests {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] value() default {};
+	}
+
+	@ImplicitAliasesContextConfig(xmlFiles = { "A.xml", "B.xml" })
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComposedImplicitAliasesContextConfig {
 	}
 
 	/**
@@ -953,16 +996,20 @@ public class AnnotatedElementUtilsTests {
 	static class AliasedValueComposedContextConfigClass {
 	}
 
-	@MultipleAliasesComposedContextConfig("foo.xml")
-	static class MultipleAliasesComposedContextConfigClass1 {
+	@ImplicitAliasesContextConfig("foo.xml")
+	static class ImplicitAliasesContextConfigClass1 {
 	}
 
-	@MultipleAliasesComposedContextConfig(locations = "bar.xml")
-	static class MultipleAliasesComposedContextConfigClass2 {
+	@ImplicitAliasesContextConfig(locations = "bar.xml")
+	static class ImplicitAliasesContextConfigClass2 {
 	}
 
-	@MultipleAliasesComposedContextConfig(xmlFiles = "baz.xml")
-	static class MultipleAliasesComposedContextConfigClass3 {
+	@ImplicitAliasesContextConfig(xmlFiles = "baz.xml")
+	static class ImplicitAliasesContextConfigClass3 {
+	}
+
+	@ComposedImplicitAliasesContextConfig
+	static class ComposedImplicitAliasesContextConfigClass {
 	}
 
 	@InvalidAliasedComposedContextConfig(xmlConfigFiles = "test.xml")
