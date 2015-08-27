@@ -563,17 +563,33 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void findMergedAnnotationAttributesOnClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
+		String[] expected = new String[] { "com.example.app.test" };
 		Class<?> element = TestComponentScanClass.class;
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
 		assertNotNull("Should find @ComponentScan on " + element, attributes);
-		assertArrayEquals("basePackages for " + element, new String[] { "com.example.app.test" },
-			attributes.getStringArray("basePackages"));
+		assertArrayEquals("basePackages for " + element, expected, attributes.getStringArray("basePackages"));
 
 		Filter[] excludeFilters = attributes.getAnnotationArray("excludeFilters", Filter.class);
 		assertNotNull(excludeFilters);
 
 		List<String> patterns = stream(excludeFilters).map(Filter::pattern).collect(toList());
 		assertEquals(asList("*Test", "*Tests"), patterns);
+	}
+
+	/**
+	 * This test ensures that {@link AnnotationUtils#postProcessAnnotationAttributes}
+	 * uses {@code ObjectUtils.nullSafeEquals()} to check for equality between annotation
+	 * attributes since attributes may be arrays.
+	 */
+	@Test
+	public void findMergedAnnotationAttributesOnClassWithBothAttributesOfAnAliasPairDeclared() {
+		String[] expected = new String[] { "com.example.app.test" };
+		Class<?> element = ComponentScanWithBasePackagesAndValueAliasClass.class;
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
+
+		assertNotNull("Should find @ComponentScan on " + element, attributes);
+		assertArrayEquals("value: ", expected, attributes.getStringArray("value"));
+		assertArrayEquals("basePackages: ", expected, attributes.getStringArray("basePackages"));
 	}
 
 	@Test
@@ -830,6 +846,10 @@ public class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComponentScan {
 
+		@AliasFor("basePackages")
+		String[] value() default {};
+
+		@AliasFor("value")
 		String[] basePackages() default {};
 
 		Filter[] excludeFilters() default {};
@@ -1018,6 +1038,10 @@ public class AnnotatedElementUtilsTests {
 
 	@AliasedComposedContextConfigAndTestPropSource(xmlConfigFiles = "test.xml")
 	static class AliasedComposedContextConfigAndTestPropSourceClass {
+	}
+
+	@ComponentScan(value = "com.example.app.test", basePackages = "com.example.app.test")
+	static class ComponentScanWithBasePackagesAndValueAliasClass {
 	}
 
 	@TestComponentScan(packages = "com.example.app.test")
