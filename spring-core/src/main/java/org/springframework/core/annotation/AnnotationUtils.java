@@ -1378,15 +1378,22 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Get a map of all attribute alias pairs, declared via {@code @AliasFor}
+	 * Get a map of all attribute aliases declared via {@code @AliasFor}
 	 * in the supplied annotation type.
 	 * <p>The map is keyed by attribute name with each value representing
-	 * the name of the aliased attribute. For each entry {@code [x, y]} in
-	 * the map there will be a corresponding {@code [y, x]} entry in the map.
+	 * a list of names of aliased attributes.
+	 * <p>For <em>explicit</em> alias pairs such as x and y (i.e., where x
+	 * is an {@code @AliasFor("y")} and y is an {@code @AliasFor("x")}, there
+	 * will be two entries in the map: {@code x -> (y)} and {@code y -> (x)}.
+	 * <p>For <em>implicit</em> aliases (i.e., attributes that are declared
+	 * as attribute overrides for the same attribute in the same meta-annotation),
+	 * there will be n entries in the map. For example, if x, y, and z are
+	 * implicit aliases, the map will contain the following entries:
+	 * {@code x -> (y, z)}, {@code y -> (x, z)}, {@code z -> (x, y)}.
 	 * <p>An empty return value implies that the annotation does not declare
 	 * any attribute aliases.
 	 * @param annotationType the annotation type to find attribute aliases in
-	 * @return a map containing attribute alias pairs; never {@code null}
+	 * @return a map containing attribute aliases; never {@code null}
 	 * @since 4.2
 	 */
 	static MultiValueMap<String, String> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
