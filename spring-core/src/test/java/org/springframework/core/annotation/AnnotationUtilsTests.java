@@ -970,12 +970,12 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithImplicitAliasesWithDuplicateValues() throws Exception {
-		Class<?> clazz = ImplicitAliasesWithDuplicateValuesValuesContextConfigClass.class;
-		Class<ImplicitAliasesWithDuplicateValuesValuesContextConfig> annotationClass = ImplicitAliasesWithDuplicateValuesValuesContextConfig.class;
-		ImplicitAliasesWithDuplicateValuesValuesContextConfig config = clazz.getAnnotation(annotationClass);
+		Class<?> clazz = ImplicitAliasesWithDuplicateValuesContextConfigClass.class;
+		Class<ImplicitAliasesWithDuplicateValuesContextConfig> annotationClass = ImplicitAliasesWithDuplicateValuesContextConfig.class;
+		ImplicitAliasesWithDuplicateValuesContextConfig config = clazz.getAnnotation(annotationClass);
 		assertNotNull(config);
 
-		ImplicitAliasesWithDuplicateValuesValuesContextConfig synthesizedConfig = synthesizeAnnotation(config, clazz);
+		ImplicitAliasesWithDuplicateValuesContextConfig synthesizedConfig = synthesizeAnnotation(config, clazz);
 		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
 
 		exception.expect(AnnotationConfigurationException.class);
@@ -1971,7 +1971,7 @@ public class AnnotationUtilsTests {
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface ImplicitAliasesWithDuplicateValuesValuesContextConfig {
+	@interface ImplicitAliasesWithDuplicateValuesContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "location")
 		String location1();
@@ -1980,8 +1980,8 @@ public class AnnotationUtilsTests {
 		String location2();
 	}
 
-	@ImplicitAliasesWithDuplicateValuesValuesContextConfig(location1 = "1", location2 = "2")
-	static class ImplicitAliasesWithDuplicateValuesValuesContextConfigClass {
+	@ImplicitAliasesWithDuplicateValuesContextConfig(location1 = "1", location2 = "2")
+	static class ImplicitAliasesWithDuplicateValuesContextConfigClass {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

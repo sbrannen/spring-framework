@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -38,8 +39,6 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -127,8 +126,8 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Boolean>(256);
 
-	private static final Map<Class<? extends Annotation>, MultiValueMap<String, String>> attributeAliasesCache =
-			new ConcurrentReferenceHashMap<Class<? extends Annotation>, MultiValueMap<String, String>>(256);
+	private static final Map<Class<? extends Annotation>, Map<String, List<String>>> attributeAliasesCache =
+			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Map<String, List<String>>>(256);
 
 	private static final Map<Class<? extends Annotation>, List<Method>> attributeMethodsCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, List<Method>>(256);
@@ -1396,24 +1395,21 @@ public abstract class AnnotationUtils {
 	 * @return a map containing attribute aliases; never {@code null}
 	 * @since 4.2
 	 */
-	static MultiValueMap<String, String> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
+	static Map<String, List<String>> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
 		if (annotationType == null) {
-			return new LinkedMultiValueMap<String, String>();
+			return Collections.emptyMap();
 		}
 
-		MultiValueMap<String, String> map = attributeAliasesCache.get(annotationType);
+		Map<String, List<String>> map = attributeAliasesCache.get(annotationType);
 		if (map != null) {
 			return map;
 		}
 
-		map = new LinkedMultiValueMap<String, String>();
+		map = new HashMap<String, List<String>>();
 		for (Method attribute : getAttributeMethods(annotationType)) {
-			String attributeName = attribute.getName();
-
-			for (String alias : getAliasedAttributeNames(attribute)) {
-				if (alias != null) {
-					map.add(attributeName, alias);
-				}
+			List<String> aliasNames = getAliasedAttributeNames(attribute);
+			if (!aliasNames.isEmpty()) {
+				map.put(attribute.getName(), aliasNames);
 			}
 		}
 
