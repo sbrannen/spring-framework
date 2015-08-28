@@ -67,7 +67,9 @@ import org.springframework.util.StringUtils;
  *
  * <p>An annotation is <em>meta-present</em> on an element if the annotation
  * is declared as a meta-annotation on some other annotation which is
- * <em>present</em> on the element.
+ * <em>present</em> on the element. Annotation {@code A} is <em>meta-present</em>
+ * on another annotation if {@code A} is either <em>directly present</em> or
+ * <em>meta-present</em> on the other annotation.
  *
  * <h3>Meta-annotation Support</h3>
  * <p>Most {@code find*()} methods and some {@code get*()} methods in this
