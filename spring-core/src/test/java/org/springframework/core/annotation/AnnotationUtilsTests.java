@@ -483,7 +483,7 @@ public class AnnotationUtilsTests {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("attribute 'value' and its alias 'path'"));
 		exception.expectMessage(containsString("values of [/enigma] and [/test]"));
-		exception.expectMessage(containsString("but only one is permitted"));
+		exception.expectMessage(endsWith("but only one is permitted."));
 		getAnnotationAttributes(webMapping);
 	}
 
@@ -552,9 +552,9 @@ public class AnnotationUtilsTests {
 	@Test
 	public void getRepeatableAnnotationsDeclaredOnClassWithMissingAttributeAliasDeclaration() throws Exception {
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("Attribute [value] in"));
+		exception.expectMessage(startsWith("Attribute [value] in"));
 		exception.expectMessage(containsString(BrokenContextConfig.class.getName()));
-		exception.expectMessage(containsString("must be declared as an @AliasFor [location]"));
+		exception.expectMessage(endsWith("must be declared as an @AliasFor [location]."));
 		getRepeatableAnnotations(BrokenConfigHierarchyTestCase.class, BrokenContextConfig.class, BrokenHierarchy.class);
 	}
 
@@ -797,9 +797,9 @@ public class AnnotationUtilsTests {
 	public void synthesizeAnnotationWhereAliasForIsMissingAttributeDeclaration() throws Exception {
 		AliasForWithMissingAttributeDeclaration annotation = AliasForWithMissingAttributeDeclarationClass.class.getAnnotation(AliasForWithMissingAttributeDeclaration.class);
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("@AliasFor declaration on attribute [foo] in annotation"));
+		exception.expectMessage(startsWith("@AliasFor declaration on attribute [foo] in annotation"));
 		exception.expectMessage(containsString(AliasForWithMissingAttributeDeclaration.class.getName()));
-		exception.expectMessage(containsString("is missing required 'attribute' value"));
+		exception.expectMessage(endsWith("is missing required 'attribute' value."));
 		synthesizeAnnotation(annotation);
 	}
 
@@ -807,10 +807,10 @@ public class AnnotationUtilsTests {
 	public void synthesizeAnnotationWhereAliasForHasDuplicateAttributeDeclaration() throws Exception {
 		AliasForWithDuplicateAttributeDeclaration annotation = AliasForWithDuplicateAttributeDeclarationClass.class.getAnnotation(AliasForWithDuplicateAttributeDeclaration.class);
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("In @AliasFor declared on attribute [foo] in annotation"));
+		exception.expectMessage(startsWith("In @AliasFor declared on attribute [foo] in annotation"));
 		exception.expectMessage(containsString(AliasForWithDuplicateAttributeDeclaration.class.getName()));
 		exception.expectMessage(containsString("attribute 'attribute' and its alias 'value' are present with values of [baz] and [bar]"));
-		exception.expectMessage(containsString("but only one is permitted"));
+		exception.expectMessage(endsWith("but only one is permitted."));
 		synthesizeAnnotation(annotation);
 	}
 
@@ -818,7 +818,7 @@ public class AnnotationUtilsTests {
 	public void synthesizeAnnotationWithAttributeAliasForNonexistentAttribute() throws Exception {
 		AliasForNonexistentAttribute annotation = AliasForNonexistentAttributeClass.class.getAnnotation(AliasForNonexistentAttribute.class);
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("Attribute [foo] in"));
+		exception.expectMessage(startsWith("Attribute [foo] in"));
 		exception.expectMessage(containsString(AliasForNonexistentAttribute.class.getName()));
 		exception.expectMessage(containsString("is declared as an @AliasFor nonexistent attribute [bar]"));
 		synthesizeAnnotation(annotation);
@@ -829,9 +829,9 @@ public class AnnotationUtilsTests {
 		AliasForWithoutMirroredAliasFor annotation =
 				AliasForWithoutMirroredAliasForClass.class.getAnnotation(AliasForWithoutMirroredAliasFor.class);
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("Attribute [bar] in"));
+		exception.expectMessage(startsWith("Attribute [bar] in"));
 		exception.expectMessage(containsString(AliasForWithoutMirroredAliasFor.class.getName()));
-		exception.expectMessage(containsString("must be declared as an @AliasFor [foo]"));
+		exception.expectMessage(endsWith("must be declared as an @AliasFor [foo]."));
 		synthesizeAnnotation(annotation);
 	}
 
@@ -840,12 +840,8 @@ public class AnnotationUtilsTests {
 		AliasForWithMirroredAliasForWrongAttribute annotation =
 				AliasForWithMirroredAliasForWrongAttributeClass.class.getAnnotation(AliasForWithMirroredAliasForWrongAttribute.class);
 
-		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
-		// reflection, we cannot make the test dependent on any specific ordering.
-		// In other words, we can't be certain which type of exception message we'll get,
-		// so we allow for both possibilities.
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("Attribute [bar] in"));
+		exception.expectMessage(startsWith("Attribute [bar] in"));
 		exception.expectMessage(containsString(AliasForWithMirroredAliasForWrongAttribute.class.getName()));
 		exception.expectMessage(either(containsString("must be declared as an @AliasFor [foo], not [quux]")).
 			or(containsString("is declared as an @AliasFor nonexistent attribute [quux]")));
@@ -859,13 +855,9 @@ public class AnnotationUtilsTests {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Misconfigured aliases"));
 		exception.expectMessage(containsString(AliasForAttributeOfDifferentType.class.getName()));
-
-		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
-		// reflection, we cannot make the test dependent on any specific ordering.
-		// In other words, we don't know if "foo" or "bar" will come first.
 		exception.expectMessage(containsString("attribute [foo]"));
 		exception.expectMessage(containsString("attribute [bar]"));
-		exception.expectMessage(containsString("must declare the same return type"));
+		exception.expectMessage(endsWith("must declare the same return type."));
 		synthesizeAnnotation(annotation);
 	}
 
@@ -876,13 +868,9 @@ public class AnnotationUtilsTests {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Misconfigured aliases"));
 		exception.expectMessage(containsString(AliasForWithMissingDefaultValues.class.getName()));
-
-		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
-		// reflection, we cannot make the test dependent on any specific ordering.
-		// In other words, we don't know if "foo" or "bar" will come first.
-		exception.expectMessage(containsString("attribute [foo]"));
-		exception.expectMessage(containsString("attribute [bar]"));
-		exception.expectMessage(containsString("must declare default values"));
+		exception.expectMessage(containsString("attribute [foo] in annotation"));
+		exception.expectMessage(containsString("attribute [bar] in annotation"));
+		exception.expectMessage(endsWith("must declare default values."));
 		synthesizeAnnotation(annotation);
 	}
 
@@ -893,13 +881,9 @@ public class AnnotationUtilsTests {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Misconfigured aliases"));
 		exception.expectMessage(containsString(AliasForAttributeWithDifferentDefaultValue.class.getName()));
-
-		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
-		// reflection, we cannot make the test dependent on any specific ordering.
-		// In other words, we don't know if "foo" or "bar" will come first.
-		exception.expectMessage(containsString("attribute [foo]"));
-		exception.expectMessage(containsString("attribute [bar]"));
-		exception.expectMessage(containsString("must declare the same default value"));
+		exception.expectMessage(containsString("attribute [foo] in annotation"));
+		exception.expectMessage(containsString("attribute [bar] in annotation"));
+		exception.expectMessage(endsWith("must declare the same default value."));
 		synthesizeAnnotation(annotation);
 	}
 
@@ -962,25 +946,49 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithImplicitAliasesWithMissingDefaultValues() throws Exception {
-		// TODO Add test for missing default values in implicit aliases
+		Class<?> clazz = ImplicitAliasesWithMissingDefaultValuesContextConfigClass.class;
+		Class<ImplicitAliasesWithMissingDefaultValuesContextConfig> annotationType = ImplicitAliasesWithMissingDefaultValuesContextConfig.class;
+		ImplicitAliasesWithMissingDefaultValuesContextConfig config = clazz.getAnnotation(annotationType);
+		assertNotNull(config);
 
-		// @ImplicitAliasesWithMissingDefaultValuesContextConfig
-		// ImplicitAliasesWithMissingDefaultValuesContextConfigClass
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(startsWith("Misconfigured aliases:"));
+		exception.expectMessage(containsString("attribute [location1] in annotation [" + annotationType.getName() + "]"));
+		exception.expectMessage(containsString("attribute [location2] in annotation [" + annotationType.getName() + "]"));
+		exception.expectMessage(endsWith("must declare default values."));
+
+		synthesizeAnnotation(config, clazz);
+	}
+
+	@Test
+	public void synthesizeAnnotationWithImplicitAliasesWithDifferentDefaultValues() throws Exception {
+		Class<?> clazz = ImplicitAliasesWithDifferentDefaultValuesContextConfigClass.class;
+		Class<ImplicitAliasesWithDifferentDefaultValuesContextConfig> annotationType = ImplicitAliasesWithDifferentDefaultValuesContextConfig.class;
+		ImplicitAliasesWithDifferentDefaultValuesContextConfig config = clazz.getAnnotation(annotationType);
+		assertNotNull(config);
+
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(startsWith("Misconfigured aliases:"));
+		exception.expectMessage(containsString("attribute [location1] in annotation [" + annotationType.getName() + "]"));
+		exception.expectMessage(containsString("attribute [location2] in annotation [" + annotationType.getName() + "]"));
+		exception.expectMessage(endsWith("must declare the same default value."));
+
+		synthesizeAnnotation(config, clazz);
 	}
 
 	@Test
 	public void synthesizeAnnotationWithImplicitAliasesWithDuplicateValues() throws Exception {
 		Class<?> clazz = ImplicitAliasesWithDuplicateValuesContextConfigClass.class;
-		Class<ImplicitAliasesWithDuplicateValuesContextConfig> annotationClass = ImplicitAliasesWithDuplicateValuesContextConfig.class;
-		ImplicitAliasesWithDuplicateValuesContextConfig config = clazz.getAnnotation(annotationClass);
+		Class<ImplicitAliasesWithDuplicateValuesContextConfig> annotationType = ImplicitAliasesWithDuplicateValuesContextConfig.class;
+		ImplicitAliasesWithDuplicateValuesContextConfig config = clazz.getAnnotation(annotationType);
 		assertNotNull(config);
 
 		ImplicitAliasesWithDuplicateValuesContextConfig synthesizedConfig = synthesizeAnnotation(config, clazz);
-		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
+		assertNotNull(synthesizedConfig);
 
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("In annotation"));
-		exception.expectMessage(containsString(annotationClass.getName()));
+		exception.expectMessage(containsString(annotationType.getName()));
 		exception.expectMessage(containsString("declared on class"));
 		exception.expectMessage(containsString(clazz.getName()));
 		exception.expectMessage(containsString("and synthesized from"));
@@ -1971,13 +1979,28 @@ public class AnnotationUtilsTests {
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
+	@interface ImplicitAliasesWithDifferentDefaultValuesContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
+		String location1() default "foo";
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
+		String location2() default "bar";
+	}
+
+	@ImplicitAliasesWithDifferentDefaultValuesContextConfig(location1 = "1", location2 = "2")
+	static class ImplicitAliasesWithDifferentDefaultValuesContextConfigClass {
+	}
+
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
 	@interface ImplicitAliasesWithDuplicateValuesContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "location")
-		String location1();
+		String location1() default "";
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "location")
-		String location2();
+		String location2() default "";
 	}
 
 	@ImplicitAliasesWithDuplicateValuesContextConfig(location1 = "1", location2 = "2")

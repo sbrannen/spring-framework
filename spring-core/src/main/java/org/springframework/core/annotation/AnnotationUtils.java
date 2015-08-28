@@ -1540,6 +1540,7 @@ public abstract class AnnotationUtils {
 			// they are "implicit" aliases for each other.
 			AliasDescriptor otherDescriptor = AliasDescriptor.from(currentAttribute);
 			if (descriptor.equals(otherDescriptor)) {
+				descriptor.validateAgainst(otherDescriptor);
 				aliases.add(otherDescriptor.sourceAttributeName());
 			}
 		}
@@ -1987,24 +1988,33 @@ public abstract class AnnotationUtils {
 			}
 
 			if (isAliasPair()) {
-				Object defaultValue = this.sourceAttribute.getDefaultValue();
-				Object aliasedDefaultValue = aliasedAttribute.getDefaultValue();
+				validateDefaultValueConfiguration(aliasedAttribute);
+			}
+		}
 
-				if ((defaultValue == null) || (aliasedDefaultValue == null)) {
-					String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
-						+ "and attribute [%s] in annotation [%s] must declare default values.",
-						this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
-						this.aliasedAnnotationType.getName());
-					throw new AnnotationConfigurationException(msg);
-				}
+		void validateAgainst(AliasDescriptor otherDescriptor) {
+			validateDefaultValueConfiguration(otherDescriptor.sourceAttribute);
+		}
 
-				if (!ObjectUtils.nullSafeEquals(defaultValue, aliasedDefaultValue)) {
-					String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
-						+ "and attribute [%s] in annotation [%s] must declare the same default value.",
-						this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
-						this.aliasedAnnotationType.getName());
-					throw new AnnotationConfigurationException(msg);
-				}
+		private void validateDefaultValueConfiguration(Method aliasedAttribute) {
+			Assert.notNull(aliasedAttribute, "aliasedAttribute must not be null");
+			Object defaultValue = this.sourceAttribute.getDefaultValue();
+			Object aliasedDefaultValue = aliasedAttribute.getDefaultValue();
+
+			if ((defaultValue == null) || (aliasedDefaultValue == null)) {
+				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
+					+ "and attribute [%s] in annotation [%s] must declare default values.",
+					this.sourceAttributeName, this.sourceAnnotationType.getName(), aliasedAttribute.getName(),
+					aliasedAttribute.getDeclaringClass().getName());
+				throw new AnnotationConfigurationException(msg);
+			}
+
+			if (!ObjectUtils.nullSafeEquals(defaultValue, aliasedDefaultValue)) {
+				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
+					+ "and attribute [%s] in annotation [%s] must declare the same default value.",
+					this.sourceAttributeName, this.sourceAnnotationType.getName(), aliasedAttribute.getName(),
+					aliasedAttribute.getDeclaringClass().getName());
+				throw new AnnotationConfigurationException(msg);
 			}
 		}
 
