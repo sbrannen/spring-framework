@@ -1516,20 +1516,20 @@ public abstract class AnnotationUtils {
 		// Searching for explicit meta-annotation attribute override?
 		if (metaAnnotationType != null) {
 			if (descriptor.isAliasFor(metaAnnotationType)) {
-				return Collections.singletonList(descriptor.aliasedAttributeName());
+				return Collections.singletonList(descriptor.aliasedAttributeName);
 			}
 			// Else: explicit attribute override for a different meta-annotation
 			return Collections.emptyList();
 		}
 
 		// Explicit alias pair?
-		if (descriptor.isAliasPair()) {
-			return Collections.singletonList(descriptor.aliasedAttributeName());
+		if (descriptor.isAliasPair) {
+			return Collections.singletonList(descriptor.aliasedAttributeName);
 		}
 
 		// Else: search for implicit alias pairs
 		List<String> aliases = new ArrayList<String>();
-		for (Method currentAttribute : getAttributeMethods(descriptor.sourceAnnotationType())) {
+		for (Method currentAttribute : getAttributeMethods(descriptor.sourceAnnotationType)) {
 
 			// An attribute cannot alias itself
 			if (attribute.equals(currentAttribute)) {
@@ -1541,7 +1541,7 @@ public abstract class AnnotationUtils {
 			AliasDescriptor otherDescriptor = AliasDescriptor.from(currentAttribute);
 			if (descriptor.equals(otherDescriptor)) {
 				descriptor.validateAgainst(otherDescriptor);
-				aliases.add(otherDescriptor.sourceAttributeName());
+				aliases.add(otherDescriptor.sourceAttributeName);
 			}
 		}
 		return aliases;
@@ -1892,6 +1892,9 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
+	 * {@code AliasDescriptor} encapsulates the declaration of {@code @AliasFor}
+	 * on a given annotation attribute and includes support for validating
+	 * the configuration of aliases (both explicit and implicit).
 	 * @since 4.2.1
 	 */
 	private static class AliasDescriptor {
@@ -1906,16 +1909,26 @@ public abstract class AnnotationUtils {
 
 		private final String aliasedAttributeName;
 
-		private final boolean aliasPair;
+		private final boolean isAliasPair;
 
 
-		static AliasDescriptor from(Method sourceAttribute) {
-			AliasFor aliasFor = sourceAttribute.getAnnotation(AliasFor.class);
+		/**
+		 * Create a new {@code AliasDescriptor} <em>from</em> the declaration
+		 * of {@code @AliasFor} on the supplied annotation attribute and
+		 * validate the configuration of {@code @AliasFor}.
+		 * @param attribute the annotation attribute that is annotated with
+		 * {@code @AliasFor}
+		 * @return a new alias descriptor, or {@code null} if the attribute
+		 * is not annotated with {@code @AliasFor}
+		 * @see #validateAgainst(AliasDescriptor)
+		 */
+		public static AliasDescriptor from(Method attribute) {
+			AliasFor aliasFor = attribute.getAnnotation(AliasFor.class);
 			if (aliasFor == null) {
 				return null;
 			}
 
-			AliasDescriptor descriptor = new AliasDescriptor(sourceAttribute, aliasFor);
+			AliasDescriptor descriptor = new AliasDescriptor(attribute, aliasFor);
 			descriptor.validate();
 			return descriptor;
 		}
@@ -1931,13 +1944,13 @@ public abstract class AnnotationUtils {
 			this.aliasedAnnotationType = (Annotation.class.equals(aliasFor.annotation()) ? this.sourceAnnotationType
 					: aliasFor.annotation());
 			this.aliasedAttributeName = getAliasedAttributeName(aliasFor, this.sourceAttribute);
-			this.aliasPair = this.sourceAnnotationType.equals(this.aliasedAnnotationType);
+			this.isAliasPair = this.sourceAnnotationType.equals(this.aliasedAnnotationType);
 		}
 
 		private void validate() {
 
 			// Target annotation is not meta-present?
-			if (!isAliasPair() && !isAnnotationMetaPresent(this.sourceAnnotationType, this.aliasedAnnotationType)) {
+			if (!this.isAliasPair && !isAnnotationMetaPresent(this.sourceAnnotationType, this.aliasedAnnotationType)) {
 				String msg = String.format("@AliasFor declaration on attribute [%s] in annotation [%s] declares "
 					+ "an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",
 					this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
@@ -1957,7 +1970,7 @@ public abstract class AnnotationUtils {
 				throw new AnnotationConfigurationException(msg, ex);
 			}
 
-			if (isAliasPair()) {
+			if (this.isAliasPair) {
 				AliasFor mirrorAliasFor = aliasedAttribute.getAnnotation(AliasFor.class);
 				if (mirrorAliasFor == null) {
 					String msg = String.format(
@@ -1987,13 +2000,9 @@ public abstract class AnnotationUtils {
 				throw new AnnotationConfigurationException(msg);
 			}
 
-			if (isAliasPair()) {
+			if (this.isAliasPair) {
 				validateDefaultValueConfiguration(aliasedAttribute);
 			}
-		}
-
-		void validateAgainst(AliasDescriptor otherDescriptor) {
-			validateDefaultValueConfiguration(otherDescriptor.sourceAttribute);
 		}
 
 		private void validateDefaultValueConfiguration(Method aliasedAttribute) {
@@ -2016,6 +2025,69 @@ public abstract class AnnotationUtils {
 					aliasedAttribute.getDeclaringClass().getName());
 				throw new AnnotationConfigurationException(msg);
 			}
+		}
+
+		/**
+		 * Validate this descriptor against the supplied descriptor.
+		 * <p>This method only validates the configuration of default values
+		 * for the two descriptors, since other aspects of the descriptors
+		 * were validated when the descriptors were created.
+		 */
+		public void validateAgainst(AliasDescriptor otherDescriptor) {
+			validateDefaultValueConfiguration(otherDescriptor.sourceAttribute);
+		}
+
+		/**
+		 * Does this descriptor represent an alias for an attribute in the
+		 * supplied {@code targetAnnotationType}?
+		 */
+		public boolean isAliasFor(Class<? extends Annotation> targetAnnotationType) {
+			return targetAnnotationType.equals(this.aliasedAnnotationType);
+		}
+
+		/**
+		 * Determine if this descriptor is logically equal to the supplied
+		 * object.
+		 * <p>Two descriptors are considered equal if the aliases they
+		 * represent are from attributes in one annotation that alias the
+		 * same attribute in a given target annotation.
+		 */
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof AliasDescriptor)) {
+				return false;
+			}
+
+			AliasDescriptor that = (AliasDescriptor) other;
+
+			if (!this.sourceAnnotationType.equals(that.sourceAnnotationType)) {
+				return false;
+			}
+			if (!this.aliasedAnnotationType.equals(that.aliasedAnnotationType)) {
+				return false;
+			}
+			if (!this.aliasedAttributeName.equals(that.aliasedAttributeName)) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = this.sourceAnnotationType.hashCode();
+			result = 31 * result + this.aliasedAnnotationType.hashCode();
+			result = 31 * result + this.aliasedAttributeName.hashCode();
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("%s: '%s' in @%s is an alias for '%s' in @%s", getClass().getSimpleName(),
+				this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
+				(this.aliasedAnnotationType != null ? this.aliasedAnnotationType.getName() : null));
 		}
 
 		/**
@@ -2060,69 +2132,6 @@ public abstract class AnnotationUtils {
 			}
 
 			return attributeName.trim();
-		}
-
-		public Class<? extends Annotation> sourceAnnotationType() {
-			return this.sourceAnnotationType;
-		}
-
-		public String sourceAttributeName() {
-			return this.sourceAttributeName;
-		}
-
-		@SuppressWarnings("unused")
-		public Class<? extends Annotation> aliasedAnnotationType() {
-			return this.aliasedAnnotationType;
-		}
-
-		public String aliasedAttributeName() {
-			return this.aliasedAttributeName;
-		}
-
-		public boolean isAliasPair() {
-			return this.aliasPair;
-		}
-
-		public boolean isAliasFor(Class<? extends Annotation> targetAnnotationType) {
-			return targetAnnotationType.equals(this.aliasedAnnotationType);
-		}
-
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (!(other instanceof AliasDescriptor)) {
-				return false;
-			}
-
-			AliasDescriptor that = (AliasDescriptor) other;
-
-			if (!this.sourceAnnotationType.equals(that.sourceAnnotationType)) {
-				return false;
-			}
-			if (!this.aliasedAnnotationType.equals(that.aliasedAnnotationType)) {
-				return false;
-			}
-			if (!this.aliasedAttributeName.equals(that.aliasedAttributeName)) {
-				return false;
-			}
-
-			return true;
-		}
-
-		@Override
-		public int hashCode() {
-			int result = this.sourceAnnotationType.hashCode();
-			result = 31 * result + this.aliasedAnnotationType.hashCode();
-			result = 31 * result + this.aliasedAttributeName.hashCode();
-			return result;
-		}
-
-		@Override
-		public String toString() {
-			return String.format("%s: '%s' in @%s is an alias for '%s' in @%s", getClass().getSimpleName(),
-				this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
-				(this.aliasedAnnotationType != null ? this.aliasedAnnotationType.getName() : null));
 		}
 	}
 
