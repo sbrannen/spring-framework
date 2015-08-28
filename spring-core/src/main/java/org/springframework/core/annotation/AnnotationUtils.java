@@ -123,6 +123,9 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<?>, Boolean> annotatedInterfaceCache =
 			new ConcurrentReferenceHashMap<Class<?>, Boolean>(256);
 
+	private static final Map<AnnotationCacheKey, Boolean> metaPresentCache =
+			new ConcurrentReferenceHashMap<AnnotationCacheKey, Boolean>(256);
+
 	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Boolean>(256);
 
@@ -650,7 +653,7 @@ public abstract class AnnotationUtils {
 	/**
 	 * Perform the actual work for {@link #findAnnotation(AnnotatedElement, Class)},
 	 * honoring the {@code synthesize} flag.
-	 * @param clazz the class to look for annotations on
+	 * @param clazz the class to look for annotations on; never {@code null}
 	 * @param annotationType the type of annotation to look for
 	 * @param synthesize {@code true} if the result should be
 	 * {@linkplain #synthesizeAnnotation(Annotation) synthesized}
@@ -845,6 +848,30 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isAnnotationPresent(annotationType) && !isAnnotationDeclaredLocally(annotationType, clazz));
+	}
+
+	/**
+	 * Determine if an annotation of type {@code metaAnnotationType} is
+	 * <em>meta-present</em> on the supplied {@code annotationType}.
+	 * @param annotationType the annotation type to search on; never {@code null}
+	 * @param metaAnnotationType the type of meta-annotation to search for
+	 * @return {@code true} if such an annotation is meta-present
+	 * @since 4.2.1
+	 */
+	public static boolean isAnnotationMetaPresent(Class<? extends Annotation> annotationType,
+			Class<? extends Annotation> metaAnnotationType) {
+
+		AnnotationCacheKey cacheKey = new AnnotationCacheKey(annotationType, metaAnnotationType);
+		Boolean metaPresent = metaPresentCache.get(cacheKey);
+		if (metaPresent != null) {
+			return metaPresent.booleanValue();
+		}
+		metaPresent = Boolean.FALSE;
+		if (findAnnotation(annotationType, metaAnnotationType, false) != null) {
+			metaPresent = Boolean.TRUE;
+		}
+		metaPresentCache.put(cacheKey, metaPresent);
+		return metaPresent.booleanValue();
 	}
 
 	/**
@@ -1527,7 +1554,7 @@ public abstract class AnnotationUtils {
 			return Collections.singletonList(descriptor.aliasedAttributeName);
 		}
 
-		// Else: search for implicit alias pairs
+		// Else: search for implicit aliases
 		List<String> aliases = new ArrayList<String>();
 		for (Method currentAttribute : getAttributeMethods(descriptor.sourceAnnotationType)) {
 
@@ -1614,18 +1641,7 @@ public abstract class AnnotationUtils {
 		return (method != null && method.getName().equals("annotationType") && method.getParameterTypes().length == 0);
 	}
 
-	/**
-	 * Determine if an annotation of type {@code metaAnnotationType} is
-	 * <em>meta-present</em> on the supplied {@code annotationType}.
-	 * @param annotationType the annotation type to search on
-	 * @param metaAnnotationType the type of meta-annotation to search for
-	 * @return {@code true} if such an annotation is meta-present
-	 * @since 4.2.1
-	 */
-	private static boolean isAnnotationMetaPresent(Class<? extends Annotation> annotationType,
-			Class<? extends Annotation> metaAnnotationType) {
-		return findAnnotation(annotationType, metaAnnotationType, false) != null;
-	}
+	static int count = 0;
 
 	/**
 	 * Post-process the supplied {@link AnnotationAttributes}.

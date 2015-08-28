@@ -58,8 +58,8 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
 public class AnnotationUtilsTests {
 
 	static void clearCaches() {
-		clearCache("findAnnotationCache", "annotatedInterfaceCache", "synthesizableCache", "attributeAliasesCache",
-			"attributeMethodsCache");
+		clearCache("findAnnotationCache", "annotatedInterfaceCache", "metaPresentCache", "synthesizableCache",
+			"attributeAliasesCache", "attributeMethodsCache");
 	}
 
 	static void clearCache(String... cacheNames) {
@@ -739,7 +739,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getAliasedAttributeNamesFromComposedAnnotationWithMultipleAliasesForOverriddenAttribute() throws Exception {
+	public void getAliasedAttributeNamesFromComposedAnnotationWithImplicitAliases() throws Exception {
 		Method xmlFile = ImplicitAliasesContextConfig.class.getDeclaredMethod("xmlFile");
 		Method groovyScript = ImplicitAliasesContextConfig.class.getDeclaredMethod("groovyScript");
 		Method value = ImplicitAliasesContextConfig.class.getDeclaredMethod("value");
@@ -923,7 +923,7 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void synthesizeAnnotationWithImplicitAttributeAliases() throws Exception {
+	public void synthesizeAnnotationWithImplicitAliases() throws Exception {
 		assertAnnotationSynthesisWithImplicitAliases(ValueImplicitAliasesContextConfigClass.class, "value");
 		assertAnnotationSynthesisWithImplicitAliases(Location1ImplicitAliasesContextConfigClass.class, "location1");
 		assertAnnotationSynthesisWithImplicitAliases(XmlImplicitAliasesContextConfigClass.class, "xmlFile");
