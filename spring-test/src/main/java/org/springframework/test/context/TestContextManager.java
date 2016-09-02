@@ -92,6 +92,14 @@ public class TestContextManager {
 
 	private final TestContext testContext;
 
+	private final ThreadLocal<TestContext> testContextHolder = new ThreadLocal<TestContext>() {
+
+		@Override
+		protected TestContext initialValue() {
+			return TestContextManager.this.testContext.clone();
+		}
+	};
+
 	private final List<TestExecutionListener> testExecutionListeners = new ArrayList<>();
 
 
@@ -128,10 +136,11 @@ public class TestContextManager {
 	}
 
 	/**
-	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
+	 * Get the {@link TestContext} managed by this {@code TestContextManager}
+	 * for the current thread.
 	 */
 	public final TestContext getTestContext() {
-		return this.testContext;
+		return this.testContextHolder.get();
 	}
 
 	/**
@@ -482,6 +491,9 @@ public class TestContextManager {
 				}
 			}
 		}
+
+		this.testContextHolder.remove();
+
 		if (afterTestClassException != null) {
 			ReflectionUtils.rethrowException(afterTestClassException);
 		}

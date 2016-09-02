@@ -45,11 +45,11 @@ public class DefaultTestContext extends AttributeAccessorSupport implements Test
 
 	private final Class<?> testClass;
 
-	private Object testInstance;
+	private volatile Object testInstance;
 
-	private Method testMethod;
+	private volatile Method testMethod;
 
-	private Throwable testException;
+	private volatile Throwable testException;
 
 
 	/**
@@ -124,6 +124,15 @@ public class DefaultTestContext extends AttributeAccessorSupport implements Test
 		this.testException = testException;
 	}
 
+	@Override
+	public TestContext clone() {
+		try {
+			return (TestContext) super.clone();
+		}
+		catch (CloneNotSupportedException ex) {
+			throw new IllegalStateException("TestContext could not be cloned", ex);
+		}
+	}
 
 	/**
 	 * Provide a String representation of this test context's state.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
  * @author Sam Brannen
  * @since 2.5
  */
-public interface TestContext extends AttributeAccessor, Serializable {
+public interface TestContext extends AttributeAccessor, Serializable, Cloneable {
 
 	/**
 	 * Get the {@linkplain ApplicationContext application context} for this
@@ -99,5 +99,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * {@code null} if no exception was thrown
 	 */
 	void updateState(Object testInstance, Method testMethod, Throwable testException);
+
+	TestContext clone();
 
 }
