@@ -14,28 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.concurrency.model;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+package org.springframework.test.context.concurrency;
 
 /**
- * @author Kristian Rosenvold
+ * @author Sam Brannen
  * @since 5.0
  */
-@Component
-public abstract class BaseBean<T> {
+interface ClientTester {
 
-	private T service;
-
-
-	public T getService() {
-		return service;
-	}
-
-	@Autowired
-	public void setService(T service) {
-		this.service = service;
-	}
+	void testClient();
 
 }

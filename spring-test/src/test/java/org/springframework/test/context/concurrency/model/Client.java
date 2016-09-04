@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,45 @@
 
 package org.springframework.test.context.concurrency.model;
 
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.annotation.Resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
- * @author <a href="mailto:kristian@zenior*dot*no">Kristian Rosenvold</a>
+ * @author Kristian Rosenvold
+ * @since 5.0
  */
 @Service
 public class Client {
 
-    @Resource(name="default")
+	@Resource(name = "default")
 	private SessionStorage sessionStorage;
 
-    @Resource(name="default")
+	@Resource(name = "default")
 	private SessionStorage sessionStorageAlias;
 
-    @Resource(name="lazyStorage1")
-    private SessionStorage sessionStorageLazy;
-    
-    @Autowired
+	@Resource(name = "lazyStorage1")
+	private SessionStorage sessionStorageLazy;
+
+	@Autowired
 	private RequestStorage service2;
 
-    public SessionStorage getSessionStorage() {
-        return sessionStorage;
-    }
 
-    public SessionStorage getSessionStorageLazy() {
-        return sessionStorageLazy;
-    }
+	public SessionStorage getSessionStorage() {
+		return sessionStorage;
+	}
 
-    public SessionStorage getSessionStorageAlias() {
-        return sessionStorageAlias;
-    }
+	public SessionStorage getSessionStorageLazy() {
+		return sessionStorageLazy;
+	}
 
-    public RequestStorage getRequestStorage() {
-        return service2;
-    }
+	public SessionStorage getSessionStorageAlias() {
+		return sessionStorageAlias;
+	}
+
+	public RequestStorage getRequestStorage() {
+		return service2;
+	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ package org.springframework.test.context.concurrency.model;
 import org.springframework.stereotype.Component;
 
 /**
- * @author <a href="mailto:kristian@zenior*dot*no">Kristian Rosenvold</a>
+ * @author Kristian Rosenvold
+ * @since 5.0
  */
 @Component
 public class SubBean extends BaseBean<RequestStorage> {
