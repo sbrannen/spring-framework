@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.context.support.AbstractContextConfigurationUtilsTests.array;
 import static org.springframework.test.context.support.TestPropertySourceUtils.*;
 
 /**
@@ -75,7 +76,7 @@ public class TestPropertySourceUtilsTests {
 
 	@Test
 	public void value() {
-		assertMergedTestPropertySources(ValuePropertySources.class, asArray("classpath:/value.xml"),
+		assertMergedTestPropertySources(ValuePropertySources.class, array("classpath:/value.xml"),
 				EMPTY_STRING_ARRAY);
 	}
 
@@ -88,38 +89,38 @@ public class TestPropertySourceUtilsTests {
 	@Test
 	public void locationsAndProperties() {
 		assertMergedTestPropertySources(LocationsAndPropertiesPropertySources.class,
-				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+				array("classpath:/foo1.xml", "classpath:/foo2.xml"), array("k1a=v1a", "k1b: v1b"));
 	}
 
 	@Test
 	public void inheritedLocationsAndProperties() {
 		assertMergedTestPropertySources(InheritedPropertySources.class,
-				asArray("classpath:/foo1.xml", "classpath:/foo2.xml"), asArray("k1a=v1a", "k1b: v1b"));
+				array("classpath:/foo1.xml", "classpath:/foo2.xml"), array("k1a=v1a", "k1b: v1b"));
 	}
 
 	@Test
 	public void extendedLocationsAndProperties() {
 		assertMergedTestPropertySources(ExtendedPropertySources.class,
-				asArray("classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/bar1.xml", "classpath:/bar2.xml"),
-				asArray("k1a=v1a", "k1b: v1b", "k2a v2a", "k2b: v2b"));
+				array("classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/bar1.xml", "classpath:/bar2.xml"),
+				array("k1a=v1a", "k1b: v1b", "k2a v2a", "k2b: v2b"));
 	}
 
 	@Test
 	public void overriddenLocations() {
 		assertMergedTestPropertySources(OverriddenLocationsPropertySources.class,
-				asArray("classpath:/baz.properties"), asArray("k1a=v1a", "k1b: v1b", "key = value"));
+				array("classpath:/baz.properties"), array("k1a=v1a", "k1b: v1b", "key = value"));
 	}
 
 	@Test
 	public void overriddenProperties() {
 		assertMergedTestPropertySources(OverriddenPropertiesPropertySources.class,
-				asArray("classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/baz.properties"), KEY_VALUE_PAIR);
+				array("classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/baz.properties"), KEY_VALUE_PAIR);
 	}
 
 	@Test
 	public void overriddenLocationsAndProperties() {
 		assertMergedTestPropertySources(OverriddenLocationsAndPropertiesPropertySources.class,
-				asArray("classpath:/baz.properties"), KEY_VALUE_PAIR);
+				array("classpath:/baz.properties"), KEY_VALUE_PAIR);
 	}
 
 
@@ -201,14 +202,14 @@ public class TestPropertySourceUtilsTests {
 	public void addInlinedPropertiesToEnvironmentWithMalformedUnicodeInValue() {
 		expectedException.expect(IllegalStateException.class);
 		expectedException.expectMessage("Failed to load test environment property");
-		addInlinedPropertiesToEnvironment(new MockEnvironment(), asArray("key = \\uZZZZ"));
+		addInlinedPropertiesToEnvironment(new MockEnvironment(), array("key = \\uZZZZ"));
 	}
 
 	@Test
 	public void addInlinedPropertiesToEnvironmentWithMultipleKeyValuePairsInSingleInlinedProperty() {
 		expectedException.expect(IllegalStateException.class);
 		expectedException.expectMessage("Failed to load exactly one test environment property");
-		addInlinedPropertiesToEnvironment(new MockEnvironment(), asArray("a=b\nx=y"));
+		addInlinedPropertiesToEnvironment(new MockEnvironment(), array("a=b\nx=y"));
 	}
 
 	@Test
@@ -218,7 +219,7 @@ public class TestPropertySourceUtilsTests {
 		MutablePropertySources propertySources = environment.getPropertySources();
 		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
 		assertEquals(0, propertySources.size());
-		addInlinedPropertiesToEnvironment(environment, asArray("  "));
+		addInlinedPropertiesToEnvironment(environment, array("  "));
 		assertEquals(1, propertySources.size());
 		assertEquals(0, ((Map) propertySources.iterator().next().getSource()).size());
 	}
@@ -238,12 +239,6 @@ public class TestPropertySourceUtilsTests {
 		assertNotNull(mergedPropertySources);
 		assertArrayEquals(expectedLocations, mergedPropertySources.getLocations());
 		assertArrayEquals(expectedProperties, mergedPropertySources.getProperties());
-	}
-
-
-	@SafeVarargs
-	private static <T> T[] asArray(T... arr) {
-		return arr;
 	}
 
 

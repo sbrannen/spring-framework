@@ -217,4 +217,23 @@ abstract class AbstractContextConfigurationUtilsTests {
 	static class PropertiesClassesFoo {
 	}
 
+	@ContextConfiguration(classes = FooConfig.class, loader = AnnotationConfigContextLoader.class)
+	@ActiveProfiles("foo")
+	static class OuterTestCase {
+
+		class NestedTestCaseWithInheritedConfig {
+		}
+
+		@ContextConfiguration(classes = BarConfig.class)
+		@ActiveProfiles("bar")
+		class NestedTestCaseWithMergedInheritedConfig {
+		}
+
+		@ContextConfiguration(classes = BarConfig.class, inheritLocations = false)
+		@ActiveProfiles(profiles = "bar", inheritProfiles = false)
+		class NestedTestCaseWithOverriddenConfig {
+		}
+
+	}
+
 }

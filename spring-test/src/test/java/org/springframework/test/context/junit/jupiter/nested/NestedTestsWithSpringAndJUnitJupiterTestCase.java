@@ -27,7 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.junit.jupiter.nested.NestedTestsWithSpringAndJUnitJupiterTestCase.TopLevelConfig;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests that verify support for {@code @Nested} test classes
@@ -43,19 +43,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringJUnitConfig(TopLevelConfig.class)
 class NestedTestsWithSpringAndJUnitJupiterTestCase {
 
+	private static final String FOO = "foo";
+	private static final String BAR = "bar";
+
+
 	@Autowired
 	String foo;
 
 
 	@Test
 	void topLevelTest() {
-		assertEquals("foo", foo);
+		assertEquals(FOO, foo);
 	}
 
 
 	@Nested
 	@SpringJUnitConfig(NestedConfig.class)
-	class NestedTestCase {
+	class NestedTestCaseWithLocalConfig {
 
 		@Autowired
 		String bar;
@@ -66,8 +70,26 @@ class NestedTestsWithSpringAndJUnitJupiterTestCase {
 			// In contrast to nested test classes running in JUnit 4, the foo
 			// field in the outer instance should have been injected from the
 			// test ApplicationContext for the outer instance.
-			assertEquals("foo", foo);
-			assertEquals("bar", bar);
+			assertEquals(FOO, foo);
+			assertEquals(BAR, bar);
+		}
+	}
+
+	@Nested
+	// @SpringJUnitConfig(NestedConfig.class)
+	class NestedTestCaseWithInheritedConfig {
+
+		@Autowired
+		String bar;
+
+
+		@Test
+		void nestedTest() throws Exception {
+			// Since the configuration is inherited, the foo field in the outer instance
+			// and the bar field in the inner instance should both have been injected
+			// from the test ApplicationContext for the outer instance.
+			assertEquals(FOO, foo);
+			assertEquals(FOO, bar);
 		}
 	}
 
@@ -78,7 +100,7 @@ class NestedTestsWithSpringAndJUnitJupiterTestCase {
 
 		@Bean
 		String foo() {
-			return "foo";
+			return FOO;
 		}
 	}
 
@@ -87,7 +109,7 @@ class NestedTestsWithSpringAndJUnitJupiterTestCase {
 
 		@Bean
 		String bar() {
-			return "bar";
+			return BAR;
 		}
 	}
 

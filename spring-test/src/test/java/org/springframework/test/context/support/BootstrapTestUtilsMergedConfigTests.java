@@ -32,9 +32,8 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.web.WebDelegatingSmartContextLoader;
 import org.springframework.test.context.web.WebMergedContextConfiguration;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link BootstrapTestUtils} involving {@link MergedContextConfiguration}.
@@ -200,6 +199,45 @@ public class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigur
 
 		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
 			AnnotationConfigContextLoader.class);
+	}
+
+	/**
+	 * @since 5.0
+	 */
+	@Test
+	public void buildMergedConfigForNestedTestClassWithInheritedConfig() {
+		Class<?> testClass = OuterTestCase.NestedTestCaseWithInheritedConfig.class;
+		Class<?>[] expectedClasses = array(FooConfig.class);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+
+		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
+			AnnotationConfigContextLoader.class);
+	}
+
+	/**
+	 * @since 5.0
+	 */
+	@Test
+	public void buildMergedConfigForNestedTestClassWithMergedInheritedConfig() {
+		Class<?> testClass = OuterTestCase.NestedTestCaseWithMergedInheritedConfig.class;
+		Class<?>[] expectedClasses = array(FooConfig.class, BarConfig.class);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+
+		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
+			AnnotationConfigContextLoader.class);
+	}
+
+	/**
+	 * @since 5.0
+	 */
+	@Test
+	public void buildMergedConfigForNestedTestClassWithOverriddenConfig() {
+		Class<?> testClass = OuterTestCase.NestedTestCaseWithOverriddenConfig.class;
+		Class<?>[] expectedClasses = array(BarConfig.class);
+		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
+
+		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, expectedClasses,
+			DelegatingSmartContextLoader.class);
 	}
 
 
