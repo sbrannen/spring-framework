@@ -16,6 +16,7 @@
 
 package org.springframework.test.web.servlet;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.AsyncContext;
@@ -25,6 +26,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+
+import org.assertj.core.api.UriAssert;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.lang.Nullable;
@@ -203,6 +206,20 @@ public final class MockMvc {
 			@Override
 			public MvcResult andReturn() {
 				return mvcResult;
+			}
+			@Override
+			public MvcFluent fluent() {
+				return new MvcFluent() {
+					@Override
+					public UriAssert assertThat(URI actual) {
+						return new UriAssert(actual);
+					}
+
+					@Override
+					public MvcResult andReturn() {
+						return mvcResult;
+					}
+				};
 			}
 		};
 	}

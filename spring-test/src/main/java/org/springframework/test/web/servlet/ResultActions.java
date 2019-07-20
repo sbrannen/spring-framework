@@ -78,4 +78,6 @@ public interface ResultActions {
 	 */
 	MvcResult andReturn();
 
+	MvcFluent fluent();
+
 }
