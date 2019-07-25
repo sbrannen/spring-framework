@@ -20,10 +20,13 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
@@ -32,6 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
@@ -69,25 +73,13 @@ public abstract class TestPropertySourceUtils {
 	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
 
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
-
-		if (!isPresentTestPropertySourceAnnotation(testClass)) {
-			return new MergedTestPropertySources();
-		}
-		else {
-			return mergeTestPropertySources(testClass);
-		}
+		MergedAnnotations mergedAnnotations = MergedAnnotations.from(testClass, SearchStrategy.EXHAUSTIVE);
+		return (mergedAnnotations.isPresent(TestPropertySource.class) ? mergeTestPropertySources(mergedAnnotations) :
+				new MergedTestPropertySources());
 	}
 
-	private static boolean isPresentTestPropertySourceAnnotation(Class<?> testClass) {
-		return MergedAnnotations
-				.from(testClass, MergedAnnotations.SearchStrategy.EXHAUSTIVE)
-				.get(TestPropertySource.class).isPresent();
-	}
-
-	private static MergedTestPropertySources mergeTestPropertySources(Class<?> testClass) {
-
-		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(
-				testClass);
+	private static MergedTestPropertySources mergeTestPropertySources(MergedAnnotations mergedAnnotations) {
+		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(mergedAnnotations);
 
 		String[] locations = mergeLocations(attributesList);
 		String[] properties = mergeProperties(attributesList);
@@ -95,20 +87,41 @@ public abstract class TestPropertySourceUtils {
 		return new MergedTestPropertySources(locations, properties);
 	}
 
-	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(Class<?> testClass) {
-		Assert.notNull(testClass, "Class must not be null");
-		return MergedAnnotations
-				.from(testClass, MergedAnnotations.SearchStrategy.EXHAUSTIVE)
+	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(
+			MergedAnnotations mergedAnnotations) {
+
+		// 1) Group by aggregate index to ensure proper separation of inherited
+		// and local annotations.
+		Map<Integer, List<MergedAnnotation<TestPropertySource>>> aggregateIndexMap = mergedAnnotations
 				.stream(TestPropertySource.class)
-				.map(TestPropertySourceUtils::makeTestPropertySourceAttribute)
-				.collect(Collectors.toList());
+				.collect(Collectors.groupingBy(MergedAnnotation::getAggregateIndex, TreeMap::new,
+					Collectors.mapping(x -> x, Collectors.toList())));
+
+		// 2) Replace each original list per aggregate index with a list that is
+		// reversed and then sorted according to the meta-distance of the annotation
+		// from the declaring class. Reversal ensures that multiple directly present
+		// annotations are properly ordered. Sorting according to meta-distance
+		// ensures that directly present annotations take precedence over
+		// meta-present annotations (within the current aggregate index).
+		aggregateIndexMap.entrySet().forEach(entry -> {
+			List<MergedAnnotation<TestPropertySource>> list = entry.getValue();
+			Collections.reverse(list);
+			list.sort(Comparator.comparingInt(MergedAnnotation::getDistance));
+			aggregateIndexMap.put(entry.getKey(), list);
+		});
+
+		// 3) Finally, create the TestPropertySourceAttribute list from the
+		// nested lists in the sorted map.
+		return aggregateIndexMap.values().stream().flatMap(List::stream)
+			.map(TestPropertySourceUtils::createTestPropertySourceAttribute)
+			.collect(Collectors.toList());
 	}
 
-	private static TestPropertySourceAttributes makeTestPropertySourceAttribute(
-			MergedAnnotation<TestPropertySource> annotation) {
+	private static TestPropertySourceAttributes createTestPropertySourceAttribute(
+			MergedAnnotation<TestPropertySource> mergedAnnotation) {
 
-		TestPropertySource testPropertySource = annotation.synthesize();
-		Class<?> rootDeclaringClass = (Class<?>) annotation.getSource();
+		TestPropertySource testPropertySource = mergedAnnotation.synthesize();
+		Class<?> rootDeclaringClass = (Class<?>) mergedAnnotation.getSource();
 		if (logger.isTraceEnabled()) {
 			logger.trace(String.format(
 					"Retrieved @TestPropertySource [%s] for declaring class [%s].",
