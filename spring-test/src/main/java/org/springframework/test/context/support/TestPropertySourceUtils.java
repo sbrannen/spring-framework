@@ -41,13 +41,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.util.TestContextResourceUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -72,6 +75,20 @@ public abstract class TestPropertySourceUtils {
 
 	private static final Log logger = LogFactory.getLog(TestPropertySourceUtils.class);
 
+	/**
+	 * Compares {@link MergedAnnotation} instances (presumably within a given
+	 * aggregate index) by their meta-distance, in reverse order.
+	 * <p>Using this {@link Comparator} to sort according to reverse meta-distance
+	 * ensures that directly present annotations take precedence over meta-present
+	 * annotations (within a given aggregate index). In other words, this follows
+	 * the last-one-wins principle of overriding properties.
+	 * @see MergedAnnotation#getAggregateIndex()
+	 * @see MergedAnnotation#getDistance()
+	 */
+	private static final Comparator<? super MergedAnnotation<?>> reversedMetaDistanceComparator = //
+		(mergedAnno1, mergedAnno2) -> Integer.compare(mergedAnno2.getDistance(), mergedAnno1.getDistance());
+
+
 	static MergedTestPropertySources buildMergedTestPropertySources(Class<?> testClass) {
 		MergedAnnotations mergedAnnotations = MergedAnnotations.from(testClass, SearchStrategy.EXHAUSTIVE);
 		return (mergedAnnotations.isPresent(TestPropertySource.class) ? mergeTestPropertySources(mergedAnnotations) :
@@ -80,60 +97,130 @@ public abstract class TestPropertySourceUtils {
 
 	private static MergedTestPropertySources mergeTestPropertySources(MergedAnnotations mergedAnnotations) {
 		List<TestPropertySourceAttributes> attributesList = resolveTestPropertySourceAttributes(mergedAnnotations);
-
-		String[] locations = mergeLocations(attributesList);
-		String[] properties = mergeProperties(attributesList);
-
-		return new MergedTestPropertySources(locations, properties);
+		return new MergedTestPropertySources(mergeLocations(attributesList), mergeProperties(attributesList));
 	}
 
 	private static List<TestPropertySourceAttributes> resolveTestPropertySourceAttributes(
 			MergedAnnotations mergedAnnotations) {
 
-		// 1) Group by aggregate index to ensure proper separation of inherited
-		// and local annotations.
+		// Group by aggregate index to ensure proper separation of inherited and local annotations.
 		Map<Integer, List<MergedAnnotation<TestPropertySource>>> aggregateIndexMap = mergedAnnotations
 				.stream(TestPropertySource.class)
 				.collect(Collectors.groupingBy(MergedAnnotation::getAggregateIndex, TreeMap::new,
 					Collectors.mapping(x -> x, Collectors.toList())));
 
-		// 2) Replace each original list per aggregate index with a list that is
-		// reversed and then sorted according to the meta-distance of the annotation
-		// from the declaring class. Reversal ensures that multiple directly present
-		// annotations are properly ordered. Sorting according to meta-distance
-		// ensures that directly present annotations take precedence over
-		// meta-present annotations (within the current aggregate index).
-		aggregateIndexMap.entrySet().forEach(entry -> {
-			List<MergedAnnotation<TestPropertySource>> list = entry.getValue();
-			Collections.reverse(list);
-			list.sort(Comparator.comparingInt(MergedAnnotation::getDistance));
-			aggregateIndexMap.put(entry.getKey(), list);
-		});
-
-		// 3) Finally, create the TestPropertySourceAttribute list from the
-		// nested lists in the sorted map.
-		return aggregateIndexMap.values().stream().flatMap(List::stream)
-			.map(TestPropertySourceUtils::createTestPropertySourceAttribute)
-			.collect(Collectors.toList());
+		// Stream the lists of annotations per aggregate index, merge each list into a
+		// single TestPropertySourceAttributes instance, and collect the results.
+		return aggregateIndexMap.values().stream()
+				.map(TestPropertySourceUtils::createTestPropertySourceAttributes)
+				.collect(Collectors.toList());
 	}
 
-	private static TestPropertySourceAttributes createTestPropertySourceAttribute(
-			MergedAnnotation<TestPropertySource> mergedAnnotation) {
+	/**
+	 * Create a merged {@link TestPropertySourceAttributes} instance from all
+	 * annotations in the supplied list for a given aggregate index as if there
+	 * were only one such annotation.
+	 * <p>Within the supplied list, sort according to reversed meta-distance of
+	 * the annotations from the declaring class. This ensures that directly present
+	 * annotations take precedence over meta-present annotations within the current
+	 * aggregate index.
+	 * <p>If a given {@link TestPropertySource @TestPropertySource} does not
+	 * declare properties or locations, an attempt will be made to detect a default
+	 * properties file.
+	 */
+	private static TestPropertySourceAttributes createTestPropertySourceAttributes(
+			List<MergedAnnotation<TestPropertySource>> list) {
 
-		TestPropertySource testPropertySource = mergedAnnotation.synthesize();
-		Class<?> rootDeclaringClass = (Class<?>) mergedAnnotation.getSource();
-		if (logger.isTraceEnabled()) {
-			logger.trace(String.format(
-					"Retrieved @TestPropertySource [%s] for declaring class [%s].",
-					testPropertySource, rootDeclaringClass.getName()));
+		list.sort(reversedMetaDistanceComparator);
+
+		List<String> locations = new ArrayList<>();
+		List<String> properties = new ArrayList<>();
+		Class<?> declaringClass = null;
+		Boolean inheritLocations = null;
+		Boolean inheritProperties = null;
+
+		// Merge all @TestPropertySource annotations within the current
+		// aggregate index into a single TestPropertySourceAttributes instance,
+		// simultaneously ensuring that all such annotations have the same
+		// declaringClass, inheritLocations, and inheritProperties values.
+		for (MergedAnnotation<TestPropertySource> mergedAnnotation : list) {
+			Class<?> currentDeclaringClass = (Class<?>) mergedAnnotation.getSource();
+			if (declaringClass != null && !declaringClass.equals(currentDeclaringClass)) {
+				throw new IllegalStateException("Detected @TestPropertySource declarations within an aggregate index " +
+						"with different declaring classes: " + declaringClass.getName() + " and " +
+						currentDeclaringClass.getName());
+			}
+			declaringClass = currentDeclaringClass;
+
+			TestPropertySource testPropertySource = mergedAnnotation.synthesize();
+			if (logger.isTraceEnabled()) {
+				logger.trace(String.format("Retrieved %s for declaring class [%s].", testPropertySource,
+					declaringClass.getName()));
+			}
+
+			Boolean currentInheritLocations = testPropertySource.inheritLocations();
+			assertConsistentValues(testPropertySource, declaringClass, "inheritLocations", inheritLocations,
+				currentInheritLocations);
+			inheritLocations = currentInheritLocations;
+
+			Boolean currentInheritProperties = testPropertySource.inheritProperties();
+			assertConsistentValues(testPropertySource, declaringClass, "inheritProperties", inheritProperties,
+				currentInheritProperties);
+			inheritProperties = currentInheritProperties;
+
+			String[] currentLocations = testPropertySource.locations();
+			String[] currentProperties = testPropertySource.properties();
+			if (ObjectUtils.isEmpty(currentLocations) && ObjectUtils.isEmpty(currentProperties)) {
+				locations.add(detectDefaultPropertiesFile(declaringClass));
+			}
+			else {
+				Collections.addAll(locations, currentLocations);
+				Collections.addAll(properties, currentProperties);
+			}
 		}
 
-		TestPropertySourceAttributes attributes = new TestPropertySourceAttributes(
-				rootDeclaringClass, testPropertySource);
+		TestPropertySourceAttributes attributes = new TestPropertySourceAttributes(declaringClass, locations,
+			inheritLocations, properties, inheritProperties);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved TestPropertySource attributes: " + attributes);
+			logger.trace(String.format("Resolved @TestPropertySource attributes %s for declaring class [%s].",
+				attributes, declaringClass.getName()));
 		}
 		return attributes;
+	}
+
+	private static void assertConsistentValues(TestPropertySource testPropertySource, Class<?> declaringClass,
+			String attributeName, Object trackedValue, Object currentValue) {
+
+		Assert.isTrue((trackedValue == null || trackedValue.equals(currentValue)),
+			() -> String.format("%s on class [%s] must declare the same value for '%s' " +
+					"as other directly present or meta-present @TestPropertySource annotations on [%2$s].",
+					testPropertySource, declaringClass.getName(), attributeName));
+	}
+
+	/**
+	 * Detect a default properties file for the supplied class, as specified
+	 * in the class-level Javadoc for {@link TestPropertySource}.
+	 */
+	private static String detectDefaultPropertiesFile(Class<?> testClass) {
+		String resourcePath = ClassUtils.convertClassNameToResourcePath(testClass.getName()) + ".properties";
+		ClassPathResource classPathResource = new ClassPathResource(resourcePath);
+
+		if (classPathResource.exists()) {
+			String prefixedResourcePath = ResourceUtils.CLASSPATH_URL_PREFIX + resourcePath;
+			if (logger.isInfoEnabled()) {
+				logger.info(String.format("Detected default properties file \"%s\" for test class [%s]",
+					prefixedResourcePath, testClass.getName()));
+			}
+			return prefixedResourcePath;
+		}
+		else {
+			String msg = String.format("Could not detect default properties file for test class [%s]: " +
+					"%s does not exist. Either declare the 'locations' or 'properties' attributes " +
+					"of @TestPropertySource or make the default properties file available.", testClass.getName(),
+					classPathResource);
+			logger.error(msg);
+			throw new IllegalStateException(msg);
+		}
 	}
 
 	private static String[] mergeLocations(List<TestPropertySourceAttributes> attributesList) {
