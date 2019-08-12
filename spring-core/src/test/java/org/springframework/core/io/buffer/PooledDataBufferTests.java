@@ -54,10 +54,8 @@ public class PooledDataBufferTests {
 		buffer.write((byte) 'a');
 
 		buffer.retain();
-		boolean result = buffer.release();
-		assertThat(result).isFalse();
-		result = buffer.release();
-		assertThat(result).isTrue();
+		assertThat(buffer.release()).isFalse();
+		assertThat(buffer.release()).isTrue();
 	}
 
 	@Test
@@ -66,9 +64,7 @@ public class PooledDataBufferTests {
 		buffer.write((byte) 'a');
 
 		buffer.release();
-		assertThatIllegalStateException().isThrownBy(
-				buffer::release);
+		assertThatIllegalStateException().isThrownBy(buffer::release);
 	}
-
 
 }
