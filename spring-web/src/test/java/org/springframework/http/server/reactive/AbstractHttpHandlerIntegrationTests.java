@@ -17,14 +17,18 @@
 package org.springframework.http.server.reactive;
 
 import java.io.File;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.time.Duration;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 
 import org.springframework.http.server.reactive.bootstrap.HttpServer;
@@ -33,31 +37,17 @@ import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
 
-@RunWith(Parameterized.class)
 public abstract class AbstractHttpHandlerIntegrationTests {
 
-	protected Log logger = LogFactory.getLog(getClass());
+	protected final Log logger = LogFactory.getLog(getClass());
+
+	protected HttpServer server;
 
 	protected int port;
 
-	@Parameterized.Parameter(0)
-	public HttpServer server;
 
-
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		File base = new File(System.getProperty("java.io.tmpdir"));
-		return new Object[][] {
-				{new JettyHttpServer()},
-				{new ReactorHttpServer()},
-				{new TomcatHttpServer(base.getAbsolutePath())},
-				{new UndertowHttpServer()}
-		};
-	}
-
-
-	@Before
-	public void setup() throws Exception {
+	protected void startServer(HttpServer httpServer) throws Exception {
+		this.server = httpServer;
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();
@@ -66,8 +56,8 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 		this.port = this.server.getPort();
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void stopServer() {
 		this.server.stop();
 		this.port = 0;
 	}
@@ -90,6 +80,24 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 	 */
 	public static Flux<Long> testInterval(Duration period, int count) {
 		return Flux.interval(period).take(count).onBackpressureBuffer(count);
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@ParameterizedTest
+	@MethodSource("org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests#httpServers()")
+	protected @interface ParameterizedHttpServerTest {
+	}
+
+	static Stream<HttpServer> httpServers() {
+		File base = new File(System.getProperty("java.io.tmpdir"));
+		return Stream.of(
+				new JettyHttpServer(),
+				new ReactorHttpServer(),
+				new TomcatHttpServer(base.getAbsolutePath()),
+				new UndertowHttpServer()
+		);
 	}
 
 }
