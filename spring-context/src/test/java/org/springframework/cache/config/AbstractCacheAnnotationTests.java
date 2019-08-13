@@ -19,9 +19,9 @@ package org.springframework.cache.config;
 import java.util.Collection;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
