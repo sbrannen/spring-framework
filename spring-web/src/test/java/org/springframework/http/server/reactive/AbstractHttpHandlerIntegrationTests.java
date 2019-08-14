@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
@@ -36,8 +38,39 @@ import org.springframework.http.server.reactive.bootstrap.JettyHttpServer;
 import org.springframework.http.server.reactive.bootstrap.ReactorHttpServer;
 import org.springframework.http.server.reactive.bootstrap.TomcatHttpServer;
 import org.springframework.http.server.reactive.bootstrap.UndertowHttpServer;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpServerErrorException;
 
 public abstract class AbstractHttpHandlerIntegrationTests {
+
+	/**
+	 * Custom JUnit Jupiter extension that handles exceptions thrown by test methods.
+	 *
+	 * <p>If the test method throws an {@link HttpServerErrorException}, this
+	 * extension will throw an {@link AssertionError} that wraps the
+	 * {@code HttpServerErrorException} using the
+	 * {@link HttpServerErrorException#getResponseBodyAsString() response body}
+	 * as the failure message.
+	 *
+	 * <p>This mechanism provides an actually meaningful failure message if the
+	 * test fails due to an {@code AssertionError} on the server.
+	 */
+	@RegisterExtension
+	TestExecutionExceptionHandler serverErrorToAssertionErrorConverter = (context, throwable) -> {
+		if (throwable instanceof HttpServerErrorException) {
+			HttpServerErrorException ex = (HttpServerErrorException) throwable;
+			String responseBody = ex.getResponseBodyAsString();
+			if (StringUtils.hasText(responseBody)) {
+				String prefix = AssertionError.class.getName() + ": ";
+				if (responseBody.startsWith(prefix)) {
+					responseBody = responseBody.substring(prefix.length());
+				}
+				throw new AssertionError(responseBody, ex);
+			}
+		}
+		// Else throw as-is in order to comply with the contract of TestExecutionExceptionHandler.
+		throw throwable;
+	};
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -85,9 +118,10 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest
+	@ParameterizedTest(name = "{0}")
 	@MethodSource("org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests#httpServers()")
-	protected @interface ParameterizedHttpServerTest {
+	// public for Kotlin
+	public @interface ParameterizedHttpServerTest {
 	}
 
 	static Stream<HttpServer> httpServers() {
