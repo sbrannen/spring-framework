@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,26 +17,30 @@
 package org.springframework.util;
 
 import java.io.Serializable;
+import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.Function;
 
 import org.springframework.lang.Nullable;
 
 /**
  * {@link LinkedHashMap} variant that stores String keys in a case-insensitive
- * manner, for example for key-based access in a results table.
+ * manner &mdash; for example, for key-based access in a results table.
  *
  * <p>Preserves the original order as well as the original casing of keys,
- * while allowing for contains, get and remove calls with any case of key.
+ * while allowing for contains, get, and remove calls with any case of key.
  *
  * <p>Does <i>not</i> support {@code null} keys.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @param <V> the value type
  */
@@ -94,6 +98,7 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 			public boolean containsKey(Object key) {
 				return LinkedCaseInsensitiveMap.this.containsKey(key);
 			}
+
 			@Override
 			protected boolean removeEldestEntry(Map.Entry<String, V> eldest) {
 				boolean doRemove = LinkedCaseInsensitiveMap.this.removeEldestEntry(eldest);
@@ -101,6 +106,48 @@ public class LinkedCaseInsensitiveMap<V> implements Map<String, V>, Serializable
 					caseInsensitiveKeys.remove(convertKey(eldest.getKey()));
 				}
 				return doRemove;
+			}
+
+			@Override
+			public Set<String> keySet() {
+				Set<String> keySet = super.keySet();
+
+				return new AbstractSet<String>() {
+					@Override
+					public boolean remove(Object key) {
+						boolean removed = keySet.remove(key);
+						if (removed) {
+							LinkedCaseInsensitiveMap.this.remove(key);
+						}
+						return removed;
+					}
+
+					@Override
+					public void clear() {
+						keySet.clear();
+						LinkedCaseInsensitiveMap.this.clear();
+					}
+
+					@Override
+					public boolean contains(Object key) {
+						return keySet.contains(key);
+					}
+
+					@Override
+					public Iterator<String> iterator() {
+						return keySet.iterator();
+					}
+
+					@Override
+					public Spliterator<String> spliterator() {
+						return keySet.spliterator();
+					}
+
+					@Override
+					public int size() {
+						return keySet.size();
+					}
+				};
 			}
 		};
 		this.caseInsensitiveKeys = new HashMap<>(initialCapacity);
