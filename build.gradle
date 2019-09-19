@@ -335,6 +335,16 @@ configure([rootProject] + javaProjects) { project ->
 		}
 	}
 
+	if (System.getenv('SPRING_JAVA_HOME')) {
+		compileJava {
+			options.fork = true
+			options.forkOptions.executable = System.getenv('SPRING_JAVA_HOME') + "/bin/javac"
+		}
+		test {
+			executable = System.getenv('SPRING_JAVA_HOME') + "/bin/java"
+		}
+	}
+
 	test {
 		useJUnitPlatform()
 		include(["**/*Tests.class", "**/*Test.class"])
