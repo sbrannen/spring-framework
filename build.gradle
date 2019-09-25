@@ -336,12 +336,19 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	if (System.getenv('SPRING_JAVA_HOME')) {
+		def javacExecutable = System.getenv('SPRING_JAVA_HOME') + "/bin/javac"
+		def javaExecutable = System.getenv('SPRING_JAVA_HOME') + "/bin/java"
+
+		logger.error("Java compiler for " + project.name + ": " + javacExecutable)
+
 		compileJava {
 			options.fork = true
-			options.forkOptions.executable = System.getenv('SPRING_JAVA_HOME') + "/bin/javac"
+			options.forkOptions.executable = javacExecutable
 		}
-		test {
-			executable = System.getenv('SPRING_JAVA_HOME') + "/bin/java"
+
+		tasks.withType(Test) {
+			logger.error("Java executable for " + it.name + " task in " + project.name + ": " + javaExecutable)
+			executable = javaExecutable
 		}
 	}
 
