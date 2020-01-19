@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.lang.UsesSunMisc;
-import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -45,6 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * Tests for {@link AnnotationTypeMappings} and {@link AnnotationTypeMapping}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 class AnnotationTypeMappingsTests {
 
@@ -416,19 +416,19 @@ class AnnotationTypeMappingsTests {
 	@Test
 	void isEquivalentToDefaultValueWhenValueAndDefaultAreNullReturnsTrue() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(ClassValue.class).get(0);
-		assertThat(mapping.isEquivalentToDefaultValue(0, null, ReflectionUtils::invokeMethod)).isTrue();
+		assertThat(mapping.isEquivalentToDefaultValue(0, null, TypeMappedAnnotation.standardValueExtractor)).isTrue();
 	}
 
 	@Test
 	void isEquivalentToDefaultValueWhenValueAndDefaultMatchReturnsTrue() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(ClassValueWithDefault.class).get(0);
-		assertThat(mapping.isEquivalentToDefaultValue(0, InputStream.class, ReflectionUtils::invokeMethod)).isTrue();
+		assertThat(mapping.isEquivalentToDefaultValue(0, InputStream.class, TypeMappedAnnotation.standardValueExtractor)).isTrue();
 	}
 
 	@Test
 	void isEquivalentToDefaultValueWhenClassAndStringNamesMatchReturnsTrue() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(ClassValueWithDefault.class).get(0);
-		assertThat(mapping.isEquivalentToDefaultValue(0, "java.io.InputStream", ReflectionUtils::invokeMethod)).isTrue();
+		assertThat(mapping.isEquivalentToDefaultValue(0, "java.io.InputStream", TypeMappedAnnotation.standardValueExtractor)).isTrue();
 	}
 
 	@Test
@@ -436,26 +436,34 @@ class AnnotationTypeMappingsTests {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(ClassArrayValueWithDefault.class).get(0);
 		assertThat(mapping.isEquivalentToDefaultValue(0,
 				new String[] { "java.io.InputStream", "java.io.OutputStream" },
-				ReflectionUtils::invokeMethod)).isTrue();
+				TypeMappedAnnotation.standardValueExtractor)).isTrue();
 	}
 
 	@Test
-	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrue() {
+	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrueAndValueSuppliedAsMap() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(NestedValue.class).get(0);
 		Map<String, Object> value = Collections.singletonMap("value", "java.io.InputStream");
-		assertThat(mapping.isEquivalentToDefaultValue(0, value, this::extractFromMap)).isTrue();
+		assertThat(mapping.isEquivalentToDefaultValue(0, value, TypeMappedAnnotation.standardValueExtractor)).isTrue();
+	}
+
+	@Test // gh-24375
+	void isEquivalentToDefaultValueWhenNestedAnnotationAndExtractedValuesMatchReturnsTrueAndValueSuppliedAsTypeMappedAnnotation() {
+		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(NestedValue.class).get(0);
+		Map<String, String> attributes = Collections.singletonMap("value", "java.io.InputStream");
+		MergedAnnotation<ClassValue> value = TypeMappedAnnotation.of(getClass().getClassLoader(), null, ClassValue.class, attributes);
+		assertThat(mapping.isEquivalentToDefaultValue(0, value, TypeMappedAnnotation.standardValueExtractor)).isTrue();
 	}
 
 	@Test
 	void isEquivalentToDefaultValueWhenNotMatchingReturnsFalse() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(ClassValueWithDefault.class).get(0);
-		assertThat(mapping.isEquivalentToDefaultValue(0, OutputStream.class, ReflectionUtils::invokeMethod)).isFalse();
+		assertThat(mapping.isEquivalentToDefaultValue(0, OutputStream.class, TypeMappedAnnotation.standardValueExtractor)).isFalse();
 	}
 
 	private Method[] resolveMirrorSets(AnnotationTypeMapping mapping, Class<?> element,
 			Class<? extends Annotation> annotationClass) {
 		Annotation annotation = element.getAnnotation(annotationClass);
-		int[] resolved = mapping.getMirrorSets().resolve(element.getName(), annotation, ReflectionUtils::invokeMethod);
+		int[] resolved = mapping.getMirrorSets().resolve(element.getName(), annotation, TypeMappedAnnotation.standardValueExtractor);
 		Method[] result = new Method[resolved.length];
 		for (int i = 0; i < resolved.length; i++) {
 			result[i] = resolved[i] != -1 ? mapping.getAttributes().get(resolved[i]) : null;
@@ -502,11 +510,6 @@ class AnnotationTypeMappingsTests {
 			names.add(mirrorSet.get(i).getName());
 		}
 		return names;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object extractFromMap(Method attribute, Object map) {
-		return map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null;
 	}
 
 

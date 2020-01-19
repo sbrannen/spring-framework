@@ -64,11 +64,33 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.2
  * @param <A> the annotation type
  * @see TypeMappedAnnotations
  */
 final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnnotation<A> {
+
+	/**
+	 * Standard value extractor that supports extracting values from objects of
+	 * type {@link Annotation}, {@link Map}, or {@link TypeMappedAnnotation}.
+	 * <p>Returns {@code null} for any other type of object.
+	 * @since 5.2.4
+	 */
+	@SuppressWarnings("unchecked")
+	static final BiFunction<Method, Object, Object> standardValueExtractor = (attribute, object) -> {
+		if (object instanceof Annotation) {
+			return ReflectionUtils.invokeMethod(attribute, object);
+		}
+		if (object instanceof Map) {
+			return ((Map<String, ?>) object).get(attribute.getName());
+		}
+		if (object instanceof TypeMappedAnnotation) {
+			return ((TypeMappedAnnotation<?>) object).getValue(attribute.getName()).orElse(null);
+		}
+		return null;
+	};
+
 
 	private static final Map<Class<?>, Object> EMPTY_ARRAYS;
 	static {
@@ -563,11 +585,8 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 	private BiFunction<Method, Object, Object> getValueExtractor(Object value) {
-		if (value instanceof Annotation) {
-			return ReflectionUtils::invokeMethod;
-		}
-		if (value instanceof Map) {
-			return TypeMappedAnnotation::extractFromMap;
+		if (value instanceof Annotation || value instanceof Map || value instanceof TypeMappedAnnotation) {
+			return standardValueExtractor;
 		}
 		return this.valueExtractor;
 	}
@@ -635,7 +654,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(annotationType);
 		return new TypeMappedAnnotation<>(
-				mappings.get(0), classLoader, source, attributes, TypeMappedAnnotation::extractFromMap, 0);
+				mappings.get(0), classLoader, source, attributes, standardValueExtractor, 0);
 	}
 
 	@Nullable
@@ -681,12 +700,6 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			}
 			return null;
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Nullable
-	private static Object extractFromMap(Method attribute, @Nullable Object map) {
-		return (map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null);
 	}
 
 }
