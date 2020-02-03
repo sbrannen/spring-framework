@@ -99,3 +99,11 @@ test {
 	// When test fixtures are involved, the JAR is used by default
 	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
 }
+
+task printClasspath {
+  doLast {
+    configurations.runtime.each { println it }
+    configurations.testRuntime.each { println it }
+    configurations.optional.each { println it }
+  }
+}

@@ -1,0 +1,2442 @@
+[
+{
+  "name":"io.netty.buffer.AbstractByteBufAllocator",
+  "allDeclaredMethods":true
+},
+{
+  "name":"io.netty.buffer.AbstractReferenceCountedByteBuf",
+  "fields":[{"name":"refCnt", "allowUnsafeAccess":true}]
+},
+{
+  "name":"io.netty.util.internal.shaded.org.jctools.queues.MpscArrayQueueConsumerIndexField",
+  "fields":[{"name":"consumerIndex", "allowUnsafeAccess":true}]
+},
+{
+  "name":"io.netty.util.internal.shaded.org.jctools.queues.MpscArrayQueueProducerIndexField",
+  "fields":[{"name":"producerIndex", "allowUnsafeAccess":true}]
+},
+{
+  "name":"io.netty.util.internal.shaded.org.jctools.queues.MpscArrayQueueProducerLimitField",
+  "fields":[{"name":"producerLimit", "allowUnsafeAccess":true}]
+},
+{
+  "name":"java.beans.Transient",
+  "allDeclaredMethods":true
+},
+{
+  "name":"java.io.InputStream"
+},
+{
+  "name":"java.io.ObjectInputStream",
+  "allPublicMethods":true
+},
+{
+  "name":"java.io.OutputStream"
+},
+{
+  "name":"java.io.Serializable",
+  "allPublicMethods":true
+},
+{
+  "name":"java.io.Serializable[]"
+},
+{
+  "name":"java.lang.CharSequence[]"
+},
+{
+  "name":"java.lang.Class[]"
+},
+{
+  "name":"java.lang.Comparable",
+  "allPublicMethods":true
+},
+{
+  "name":"java.lang.Comparable[]"
+},
+{
+  "name":"java.lang.Deprecated",
+  "allPublicMethods":true
+},
+{
+  "name":"java.lang.Integer[]"
+},
+{
+  "name":"java.lang.Iterable[]"
+},
+{
+  "name":"java.lang.Long[]"
+},
+{
+  "name":"java.lang.Number[]"
+},
+{
+  "name":"java.lang.Object",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true
+},
+{
+  "name":"java.lang.Object[]"
+},
+{
+  "name":"java.lang.String",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"toString","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.String[]"
+},
+{
+  "name":"java.nio.Bits",
+  "methods":[{"name":"unaligned","parameterTypes":[] }]
+},
+{
+  "name":"java.nio.Buffer",
+  "fields":[{"name":"address", "allowUnsafeAccess":true}]
+},
+{
+  "name":"java.nio.DirectByteBuffer",
+  "fields":[{"name":"cleaner", "allowUnsafeAccess":true}],
+  "methods":[{"name":"<init>","parameterTypes":["long","int"] }]
+},
+{
+  "name":"java.nio.file.Path"
+},
+{
+  "name":"java.nio.file.Paths",
+  "methods":[{"name":"get","parameterTypes":["java.lang.String","java.lang.String[]"] }]
+},
+{
+  "name":"java.sql.Connection"
+},
+{
+  "name":"java.sql.Driver"
+},
+{
+  "name":"java.sql.DriverManager",
+  "methods":[
+    {"name":"getConnection","parameterTypes":["java.lang.String"] }, 
+    {"name":"getDriver","parameterTypes":["java.lang.String"] }
+  ]
+},
+{
+  "name":"java.sql.Time"
+},
+{
+  "name":"java.sql.Timestamp",
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.time.Duration",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.Instant",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.LocalDate",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.LocalDateTime",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.LocalTime",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.MonthDay",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.OffsetDateTime",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.OffsetTime",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.Period",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.Year",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.YearMonth",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.ZoneId",
+  "methods":[{"name":"of","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.time.ZoneOffset",
+  "methods":[{"name":"of","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.time.ZonedDateTime",
+  "methods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.util.AbstractCollection",
+  "allDeclaredMethods":true
+},
+{
+  "name":"java.util.AbstractQueue",
+  "allDeclaredMethods":true
+},
+{
+  "name":"java.util.ArrayList",
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"get","parameterTypes":["int"] }
+  ]
+},
+{
+  "name":"java.util.Collection",
+  "allPublicMethods":true
+},
+{
+  "name":"java.util.Collection[]"
+},
+{
+  "name":"java.util.Collections$EmptyList"
+},
+{
+  "name":"java.util.HashMap",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.util.HashSet",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.util.LinkedHashMap",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.util.LinkedList",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"java.util.List",
+  "allPublicMethods":true,
+  "methods":[{"name":"remove","parameterTypes":["int"] }]
+},
+{
+  "name":"java.util.Queue",
+  "allPublicMethods":true
+},
+{
+  "name":"java.util.concurrent.BlockingQueue",
+  "allPublicMethods":true
+},
+{
+  "name":"java.util.concurrent.DelayQueue",
+  "allDeclaredMethods":true,
+  "methods":[
+    {"name":"add","parameterTypes":["java.lang.Object"] }, 
+    {"name":"add","parameterTypes":["java.util.concurrent.Delayed"] }
+  ]
+},
+{
+  "name":"java.util.function.Consumer",
+  "allPublicMethods":true
+},
+{
+  "name":"javax.annotation.Priority",
+  "allDeclaredMethods":true
+},
+{
+  "name":"javax.script.ScriptEngine"
+},
+{
+  "name":"kotlin.Metadata"
+},
+{
+  "name":"kotlin.reflect.full.KClasses"
+},
+{
+  "name":"org.apache.logging.log4j.core.Appender[]"
+},
+{
+  "name":"org.apache.logging.log4j.core.appender.AbstractAppender$Builder",
+  "allDeclaredFields":true
+},
+{
+  "name":"org.apache.logging.log4j.core.appender.AbstractOutputStreamAppender$Builder",
+  "allDeclaredFields":true
+},
+{
+  "name":"org.apache.logging.log4j.core.appender.ConsoleAppender",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.appender.ConsoleAppender$Builder",
+  "allDeclaredFields":true
+},
+{
+  "name":"org.apache.logging.log4j.core.appender.FileAppender",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.appender.FileAppender$Builder",
+  "allDeclaredFields":true
+},
+{
+  "name":"org.apache.logging.log4j.core.config.AppenderRef",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.config.AppenderRef[]"
+},
+{
+  "name":"org.apache.logging.log4j.core.config.AppendersPlugin",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.config.LoggerConfig",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.config.LoggerConfig$RootLogger",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.config.LoggerConfig[]"
+},
+{
+  "name":"org.apache.logging.log4j.core.config.LoggersPlugin",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.config.Property[]"
+},
+{
+  "name":"org.apache.logging.log4j.core.config.json.JsonConfigurationFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$BigDecimalConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$BigIntegerConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$BooleanConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$ByteArrayConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$ByteConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$CharArrayConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$CharacterConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$CharsetConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$ClassConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$CronExpressionConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$DoubleConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$DurationConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$FileConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$FloatConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$InetAddressConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$IntegerConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$LevelConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$LongConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$PathConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$PatternConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$SecurityProviderConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$ShortConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$StringConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$UriConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$UrlConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.convert.TypeConverters$UuidConverter",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.validation.validators.RequiredValidator",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.visitors.PluginAttributeVisitor",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.visitors.PluginBuilderAttributeVisitor",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.visitors.PluginConfigurationVisitor",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.plugins.visitors.PluginElementVisitor",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.properties.PropertiesConfigurationFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.xml.XmlConfigurationFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.config.yaml.YamlConfigurationFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.filter.AbstractFilterable$Builder",
+  "allDeclaredFields":true
+},
+{
+  "name":"org.apache.logging.log4j.core.impl.Log4jContextFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.layout.PatternLayout",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.layout.PatternLayout$Builder",
+  "allDeclaredFields":true
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.ContextMapLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.DateLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.EnvironmentLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.JavaLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.JmxRuntimeInputArgumentsLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.JndiLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.Log4jLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.MainMapLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.MapLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.MarkerLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.ResourceBundleLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.StructuredDataLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.lookup.SystemPropertiesLookup",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.core.pattern.DatePatternConverter",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.pattern.LevelPatternConverter",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.pattern.LineSeparatorPatternConverter",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.pattern.LoggerPatternConverter",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.pattern.MessagePatternConverter",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.core.pattern.ThreadNamePatternConverter",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.apache.logging.log4j.message.DefaultFlowMessageFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.message.ParameterizedMessageFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.logging.log4j.spi.ExtendedLogger"
+},
+{
+  "name":"org.apiguardian.api.API",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.api.Disabled",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.api.Nested",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.api.Test",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.api.TestTemplate",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.api.extension.ExtendWith",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.engine.extension.ScriptExecutionEvaluator",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.junit.jupiter.params.ParameterizedTest",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.params.ParameterizedTestExtension",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.junit.jupiter.params.provider.ArgumentsProvider",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.params.provider.ArgumentsSource",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.params.provider.ValueArgumentsProvider",
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.junit.jupiter.params.provider.ValueSource",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.jupiter.params.support.AnnotationConsumer",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.platform.commons.annotation.Testable",
+  "allPublicMethods":true
+},
+{
+  "name":"org.junit.platform.console.options.AvailableOptions",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.AttributeAccessorSupportTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$AbstractBounded",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$AbstractDao",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$AbstractDaoImpl",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"loadFromParent","parameterTypes":[] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$AbstractDateAdder",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$AbstractDomainObject",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$AbstractImplementsInterface",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Adder",
+  "allPublicMethods":true,
+  "methods":[{"name":"add","parameterTypes":["java.lang.Object"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Bar",
+  "methods":[{"name":"someMethod","parameterTypes":["java.lang.Object","java.lang.Object"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$BaseClass",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$BaseInterface",
+  "allDeclaredMethods":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Boo",
+  "allPublicMethods":true,
+  "methods":[
+    {"name":"foo","parameterTypes":["java.io.Serializable"] }, 
+    {"name":"foo","parameterTypes":["java.lang.Object"] }
+  ]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Bounded",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Broadcaster",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$BusinessDao",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$BusinessGenericDao",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$ConcreteSettingsDao",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$ConvenienceGenericDao",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Dao",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$DaoInterface",
+  "allPublicMethods":true,
+  "methods":[{"name":"get","parameterTypes":["java.lang.Object"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$DateAdder",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"add","parameterTypes":["java.lang.Object"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$DomainObject",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$EmailMessageProvider",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$EntityClass",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$EntityInterface",
+  "allDeclaredMethods":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$EventBroadcaster",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$ExtendsAbstractImplementsInterface",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$ExternalMessageProvider",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Foo",
+  "allPublicMethods":true,
+  "methods":[{"name":"someMethod","parameterTypes":["java.io.Serializable","java.lang.Object"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$FooClass",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"test","parameterTypes":["org.springframework.core.BridgeMethodResolverTests$FooEntity"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$FooInterface",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"test","parameterTypes":["org.springframework.core.BridgeMethodResolverTests$FooEntity"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$GenericBroadcasterImpl",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$GenericDao",
+  "methods":[{"name":"saveOrUpdate","parameterTypes":["java.lang.Object"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$GenericEventBroadcasterImpl",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$GenericParameter",
+  "allPublicMethods":true,
+  "methods":[{"name":"getFor","parameterTypes":["java.lang.Class"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$GenericSqlMapDao",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$GenericSqlMapIntegerDao",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Homer",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$IExternalMessageProvider",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$IGenericInterface",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$MegaMessageProducer",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$MegaMessageProducerImpl",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$MegaReceiver",
+  "methods":[{"name":"receive","parameterTypes":["org.springframework.core.BridgeMethodResolverTests$MegaEvent"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$MessageBroadcaster",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$MessageBroadcasterImpl",
+  "allDeclaredMethods":true,
+  "methods":[
+    {"name":"receive","parameterTypes":["org.springframework.core.BridgeMethodResolverTests$Event"] }, 
+    {"name":"receive","parameterTypes":["org.springframework.core.BridgeMethodResolverTests$MessageEvent"] }, 
+    {"name":"receive","parameterTypes":["org.springframework.core.BridgeMethodResolverTests$NewMessageEvent"] }
+  ]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$MyBar",
+  "methods":[
+    {"name":"someMethod","parameterTypes":["java.lang.Integer","java.lang.Object"] }, 
+    {"name":"someMethod","parameterTypes":["java.lang.Object","java.lang.Object"] }, 
+    {"name":"someMethod","parameterTypes":["java.lang.String","java.lang.Object"] }
+  ]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$MyBoo",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$MyFoo",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$MyHomer",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Other",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$Receiver",
+  "methods":[{"name":"receive","parameterTypes":["org.springframework.core.BridgeMethodResolverTests$Event"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$SearchProvider",
+  "methods":[{"name":"findBy","parameterTypes":["java.lang.Object"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$SerializableBounded",
+  "allDeclaredMethods":true,
+  "methods":[
+    {"name":"boundedOperation","parameterTypes":["java.lang.Object"] }, 
+    {"name":"boundedOperation","parameterTypes":["java.util.HashMap"] }
+  ]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$SettingsDaoImpl",
+  "allDeclaredMethods":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$StringGenericParameter",
+  "allDeclaredMethods":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$StringList",
+  "allDeclaredMethods":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$TestEmailProvider",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$UserDao",
+  "allPublicMethods":true,
+  "methods":[{"name":"save","parameterTypes":["org.springframework.core.BridgeMethodResolverTests$User"] }]
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$UserDaoImpl",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.BridgeMethodResolverTests$YourHomer",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.CollectionFactoryTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.ConstantsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.ConstantsTests$A",
+  "allPublicFields":true
+},
+{
+  "name":"org.springframework.core.ConstantsTests$NoConstants",
+  "allPublicFields":true
+},
+{
+  "name":"org.springframework.core.ExceptionDepthComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.GenericTypeResolverTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.GenericTypeResolverTests$MyInterfaceType[]"
+},
+{
+  "name":"org.springframework.core.GenericTypeResolverTests$MySimpleTypeWithMethods",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.GenericTypeResolverTests$MyTypeWithMethods",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.GenericTypeResolverTests$WithArrayBase",
+  "methods":[{"name":"array","parameterTypes":["java.lang.Object[]"] }]
+},
+{
+  "name":"org.springframework.core.LocalVariableTableParameterNameDiscovererTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.LocalVariableTableParameterNameDiscovererTests$GenerifiedClass",
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.Object"] }, 
+    {"name":"<init>","parameterTypes":["java.lang.Object","java.lang.Object"] }, 
+    {"name":"generifiedMethod","parameterTypes":["java.lang.Object","long","java.lang.Object","java.lang.Object"] }, 
+    {"name":"generifiedStaticMethod","parameterTypes":["java.lang.Object"] }, 
+    {"name":"getDate","parameterTypes":[] }, 
+    {"name":"nonVoidStaticMethod","parameterTypes":["java.lang.Object","long","int"] }, 
+    {"name":"voidStaticMethod","parameterTypes":["java.lang.Object","long","int"] }
+  ]
+},
+{
+  "name":"org.springframework.core.LocalVariableTableParameterNameDiscovererTests$InnerClass",
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","long","java.lang.Object"] }, 
+    {"name":"instanceMethod","parameterTypes":["java.lang.String"] }, 
+    {"name":"instanceMethod","parameterTypes":["java.lang.String","java.lang.String"] }, 
+    {"name":"staticMethod","parameterTypes":["long"] }, 
+    {"name":"staticMethod","parameterTypes":["long","long"] }
+  ]
+},
+{
+  "name":"org.springframework.core.MethodParameterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.MethodParameterTests$InnerClass",
+  "methods":[{"name":"<init>","parameterTypes":["org.springframework.core.MethodParameterTests","java.lang.String","java.util.concurrent.Callable"] }]
+},
+{
+  "name":"org.springframework.core.MethodParameterTests$NestedClass",
+  "methods":[{"name":"<init>","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"org.springframework.core.NestedExceptionTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.OrderComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.ParameterizedTypeReferenceTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.PrioritizedParameterNameDiscovererTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.SimpleAliasRegistryTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.AliasFor",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationAttributesTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationAttributesTests$Filter[]"
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationAttributes[]"
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationAwareOrderComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationBackCompatibiltyTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationBackCompatibiltyTests$DefaultValueAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationBackCompatibiltyTests$MetaMetaTestAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationBackCompatibiltyTests$MetaTestAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationBackCompatibiltyTests$TestAndMetaTestAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationBackCompatibiltyTests$TestAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationFilterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$A",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AA",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AB",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ABC",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForNonMetaAnnotated",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForNonMetaAnnotatedTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForSelfWithDifferentDefaults",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForSelfWithMissingDefault",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForToOtherNonExistingAttribute",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForToOtherNonExistingAttributeTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForToSelf",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForToSelfAnnotatedToOtherAttribute",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForToSelfNonExistingAttribute",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForWithArrayCompatibleReturnTypes",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForWithArrayCompatibleReturnTypesTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForWithBothValueAndAttribute",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForWithIncompatibleReturnTypes",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForWithIncompatibleReturnTypesTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForWithMixedImplicitAndExplicitAliasesV1",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasForWithMixedImplicitAndExplicitAliasesV2",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasPair",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasWithExplicitMirrorAndDifferentDefaults",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$AliasWithExplicitMirrorAndDifferentDefaultsTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$B",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ClassArrayValueWithDefault",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ClassValue",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ClassValueWithDefault",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ConventionToExplicitAliases",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ConventionToExplicitAliasesTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$DefinedAttributes",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$DefinedAttributesTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ImplicitMirrors",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ImplicitMirrorsTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$LoopA",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$LoopB",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$Mapped",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$MappedTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$MetaAnnotated",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$MulipleRoutesToAliasA",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$MulipleRoutesToAliasB",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$MulipleRoutesToAliasC",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$NestedValue",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$Repeating",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$Repeatings",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$SelfAnnotated",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$SimpleAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ThreeDeepA",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ThreeDeepB",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$ThreeDeepC",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$WithRepeatedMetaAnnotations",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationTypeMappingsTests$WithSpringLangAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationUtilsTests$ContextConfig",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.AnnotationUtilsTests$ImplicitAliasesContextConfig",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$ComposedContainer",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$ComposedNoninherited",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$ContainerMissingValueAttribute",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$ContainerWithArrayValueAttributeButWrongComponentType",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$ContainerWithNonArrayValueAttribute",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$ForPetesSake",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$ForTheLoveOfFoo",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$Noninherited",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$Noninheriteds",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$PeteRepeat",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$PeteRepeats",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationPredicatesTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationPredicatesTests$TestAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationPredicatesTests$TestAnnotations",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$ComposedContainer",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$ComposedNoninherited",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$ContainerMissingValueAttribute",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$ContainerWithArrayValueAttributeButWrongComponentType",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$ContainerWithNonArrayValueAttribute",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$ForPetesSake",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$ForTheLoveOfFoo",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$Noninherited",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$Noninheriteds",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$PeteRepeat",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$PeteRepeats",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MissingMergedAnnotationTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.MissingMergedAnnotationTests$TestEnum[]"
+},
+{
+  "name":"org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests$BarCache",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests$Cacheable",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests$FooCache",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests$GenericParameter",
+  "allPublicMethods":true,
+  "methods":[{"name":"getFor","parameterTypes":["java.lang.Class"] }]
+},
+{
+  "name":"org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests$NoninheritedCache1",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests$NoninheritedCache2",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests$StringGenericParameter",
+  "allDeclaredMethods":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.Order",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.OrderSourceProviderTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.OrderUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.PackagesAnnotationFilterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.RepeatableContainersTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.RepeatableContainersTests$ExplicitContainer",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.RepeatableContainersTests$ExplicitRepeatable",
+  "methods":[{"name":"value","parameterTypes":[] }]
+},
+{
+  "name":"org.springframework.core.annotation.RepeatableContainersTests$InvalidNoValue",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.RepeatableContainersTests$InvalidNotArray",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.RepeatableContainersTests$InvalidWrongArrayType",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.RepeatableContainersTests$NonRepeatable",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.RepeatableContainersTests$StandardContainer",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.RepeatableContainersTests$StandardRepeatable",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"value","parameterTypes":[] }]
+},
+{
+  "name":"org.springframework.core.annotation.SynthesizedAnnotation"
+},
+{
+  "name":"org.springframework.core.annotation.SynthesizingMethodParameterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$ArrayTypes",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$ClassAttributes",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$ConventionAliasMetaAnnotationTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$ConventionAliasToMetaAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$ExampleEnum[]"
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$ExplicitAliasMetaAnnotationTarget",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$ExplicitAliasToMetaAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$ExplicitMirror",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$Nested",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotationTests$NestedContainer",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.annotation.TypeMappedAnnotation[]"
+},
+{
+  "name":"org.springframework.core.convert.converter.ConvertingComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.convert.support.ByteBufferConverterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.convert.support.CollectionToCollectionConverterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true,
+  "fields":[
+    {"name":"emptyListDifferentTarget"}, 
+    {"name":"emptyListTarget"}, 
+    {"name":"enumSet"}, 
+    {"name":"list"}, 
+    {"name":"objectToCollection"}, 
+    {"name":"resources"}, 
+    {"name":"scalarListTarget"}, 
+    {"name":"strings"}, 
+    {"name":"wildcardCollection"}
+  ]
+},
+{
+  "name":"org.springframework.core.convert.support.GenericConversionServiceTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true,
+  "fields":[
+    {"name":"activeColor"}, 
+    {"name":"annotatedString"}, 
+    {"name":"genericCollection"}, 
+    {"name":"inactiveColor"}, 
+    {"name":"integerCollection"}, 
+    {"name":"list"}, 
+    {"name":"map"}, 
+    {"name":"rawCollection"}, 
+    {"name":"stringCollection"}, 
+    {"name":"wildcardMap"}
+  ]
+},
+{
+  "name":"org.springframework.core.convert.support.GenericConversionServiceTests$ExampleAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.convert.support.GenericConversionServiceTests$MyBaseInterface[]"
+},
+{
+  "name":"org.springframework.core.convert.support.GenericConversionServiceTests$MyInterface[]"
+},
+{
+  "name":"org.springframework.core.convert.support.MapToMapConverterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true,
+  "fields":[
+    {"name":"collectionMapTarget"}, 
+    {"name":"emptyMapDifferentTarget"}, 
+    {"name":"emptyMapTarget"}, 
+    {"name":"enumMap"}, 
+    {"name":"multiValueMapTarget"}, 
+    {"name":"notGenericMapSource"}, 
+    {"name":"scalarMapTarget"}, 
+    {"name":"sourceCollectionMapTarget"}
+  ]
+},
+{
+  "name":"org.springframework.core.convert.support.StreamConverterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.convert.support.StreamConverterTests$Types",
+  "fields":[
+    {"name":"arrayOfLongs"}, 
+    {"name":"listOfStrings"}, 
+    {"name":"rawList"}, 
+    {"name":"rawStream"}, 
+    {"name":"streamOfBooleans"}, 
+    {"name":"streamOfIntegers"}
+  ]
+},
+{
+  "name":"org.springframework.core.env.CompositePropertySourceTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.env.CustomEnvironmentTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.env.JOptCommandLinePropertySourceTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.env.JOptCommandLinePropertySourceTests$OptionEnum",
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"org.springframework.core.env.MutablePropertySourcesTests",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.env.ProfilesTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.env.PropertySourceTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.env.PropertySourcesPropertyResolverTests",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.env.SimpleCommandLinePropertySourceTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.env.SystemEnvironmentPropertySourceTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.io.InputStreamSource[]"
+},
+{
+  "name":"org.springframework.core.io.ResourceEditorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.io.buffer.PooledDataBufferTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.io.buffer.PooledDataBufferTests$PooledByteBufAllocatorWithPreferDirectFalseTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.io.buffer.PooledDataBufferTests$PooledByteBufAllocatorWithPreferDirectTrueTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.io.buffer.PooledDataBufferTests$PooledDataBufferTestingTrait",
+  "allPublicFields":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocatorWithPreferDirectFalseTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocatorWithPreferDirectTrueTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.io.support.DummyPackagePrivateFactory",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.springframework.core.io.support.EncodedResourceTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.io.support.MyDummyFactory1",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.springframework.core.io.support.MyDummyFactory2",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.springframework.core.io.support.ResourcePropertySourceTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.io.support.SpringFactoriesLoaderTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.log.LogSupportTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.style.DefaultValueStylerTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.style.ToStringCreatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.task.SimpleAsyncTaskExecutorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.type.AbstractClassMetadataMemberClassTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$AnnotationAttributes",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$DirectAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$MetaAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$MetaAnnotationAttributes1",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$MetaAnnotationAttributes2",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$Tag",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$WithAbstractMethod",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$WithAnnotationAttributes",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$WithDirectAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$WithFinalMethod",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$WithMetaAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$WithMetaAnnotationAttributes",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$WithMethod",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$WithPrivateMethod",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.AbstractMethodMetadataTests$WithStaticMethod",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.CachingMetadataReaderLeakTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.type.StandardMethodMetadataTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.type.classreading.ClassMetadataReadingVisitorMemberClassTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests$AnnotationAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests$ClassAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests$EnumAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests$ExampleEnum"
+},
+{
+  "name":"org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests$ExampleEnum[]"
+},
+{
+  "name":"org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests$NestedAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests$SimpleArrayTypesAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests$SimpleTypesAnnotation",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.core.type.classreading.SimpleMethodMetadataTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.tests.sample.objects.ITestInterface",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.tests.sample.objects.ITestObject",
+  "allPublicMethods":true
+},
+{
+  "name":"org.springframework.tests.sample.objects.TestObject",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"<init>","parameterTypes":["java.lang.String","int"] }, 
+    {"name":"getAge","parameterTypes":[] }, 
+    {"name":"getName","parameterTypes":[] }, 
+    {"name":"setName","parameterTypes":["java.lang.String"] }
+  ]
+},
+{
+  "name":"org.springframework.util.AntPathMatcherTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.AssertTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.Base64UtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.CollectionUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.CompositeIteratorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.ConcurrentReferenceHashMap$Segment[]"
+},
+{
+  "name":"org.springframework.util.ConcurrentReferenceHashMapTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.DigestUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.ExceptionTypeFilterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.ExponentialBackOffTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.FastByteArrayOutputStreamTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.FileCopyUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.FileSystemUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.FixedBackOffTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.InstanceFilterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.LinkedCaseInsensitiveMapTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.LinkedMultiValueMapTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.MethodInvokerTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.MethodInvokerTests$Greeter",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.util.MethodInvokerTests$TestClass1",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"method1","parameterTypes":[] }]
+},
+{
+  "name":"org.springframework.util.MimeType",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"org.springframework.util.MimeTypeTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.NumberUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.ObjectUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.PatternMatchUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.PropertiesPersisterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.PropertyPlaceholderHelperTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$1C",
+  "methods":[
+    {"name":"CGLIB$$0","parameterTypes":[] }, 
+    {"name":"CGLIB$m1","parameterTypes":[] }, 
+    {"name":"CGLIB$m1$","parameterTypes":[] }, 
+    {"name":"CGLIB$m1$0","parameterTypes":[] }, 
+    {"name":"CGLIB$m1$123","parameterTypes":[] }, 
+    {"name":"m1","parameterTypes":[] }, 
+    {"name":"m1$","parameterTypes":[] }, 
+    {"name":"m1$1","parameterTypes":[] }
+  ]
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$1Foo",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$1Leaf",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"m1","parameterTypes":[] }]
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$1Parent",
+  "allDeclaredMethods":true,
+  "methods":[{"name":"m1","parameterTypes":[] }]
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$2C",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$2Foo",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$A",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$B",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$TestObjectSubclass",
+  "allDeclaredMethods":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$TestObjectSubclassWithFinalField",
+  "allDeclaredFields":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$TestObjectSubclassWithNewField",
+  "allDeclaredFields":true
+},
+{
+  "name":"org.springframework.util.ReflectionUtilsTests$TestObjectSubclassWithPublicField",
+  "allDeclaredFields":true
+},
+{
+  "name":"org.springframework.util.ResizableByteArrayOutputStreamTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.SocketUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.StopWatchTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.StringUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.SystemPropertyUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.TypeUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true,
+  "fields":[
+    {"name":"array"}, 
+    {"name":"number"}, 
+    {"name":"object"}, 
+    {"name":"objects"}, 
+    {"name":"openArray"}, 
+    {"name":"openNumbers"}, 
+    {"name":"openObjects"}, 
+    {"name":"storableObjectList"}, 
+    {"name":"string"}, 
+    {"name":"strings"}
+  ]
+},
+{
+  "name":"org.springframework.util.comparator.BooleanComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.comparator.ComparableComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.comparator.CompoundComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.comparator.InstanceComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.comparator.InvertibleComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.comparator.NullSafeComparatorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.concurrent.MonoToListenableFutureAdapterTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.unit.DataSizeTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.xml.SimpleNamespaceContextTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.xml.StaxUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.xml.TransformerUtilsTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"org.springframework.util.xml.XmlValidationModeDetectorTests",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allPublicMethods":true,
+  "allDeclaredConstructors":true
+},
+{
+  "name":"sun.misc.Cleaner",
+  "methods":[{"name":"clean","parameterTypes":[] }]
+},
+{
+  "name":"sun.misc.Unsafe",
+  "fields":[{"name":"theUnsafe"}],
+  "methods":[
+    {"name":"copyMemory","parameterTypes":["java.lang.Object","long","java.lang.Object","long","long"] }, 
+    {"name":"getAndSetObject","parameterTypes":["java.lang.Object","long","java.lang.Object"] }
+  ]
+},
+{
+  "name":"sun.misc.VM",
+  "methods":[{"name":"maxDirectMemory","parameterTypes":[] }]
+},
+{
+  "name":"sun.reflect.Reflection",
+  "methods":[{"name":"getCallerClass","parameterTypes":["int"] }]
+}
+]
