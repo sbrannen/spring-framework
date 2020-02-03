@@ -1,0 +1,14 @@
+[
+  ["java.lang.reflect.GenericArrayType","org.springframework.core.SerializableTypeWrapper$SerializableTypeProxy","java.io.Serializable"],
+  ["java.lang.reflect.ParameterizedType","org.springframework.core.SerializableTypeWrapper$SerializableTypeProxy","java.io.Serializable"],
+  ["java.lang.reflect.TypeVariable","org.springframework.core.SerializableTypeWrapper$SerializableTypeProxy","java.io.Serializable"],
+  ["java.lang.reflect.WildcardType","org.springframework.core.SerializableTypeWrapper$SerializableTypeProxy","java.io.Serializable"],
+  ["org.springframework.core.annotation.AnnotationBackCompatibiltyTests$DefaultValueAnnotation","org.springframework.core.annotation.SynthesizedAnnotation"],
+  ["org.springframework.core.annotation.AnnotationBackCompatibiltyTests$TestAnnotation","org.springframework.core.annotation.SynthesizedAnnotation"],
+  ["org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$Noninherited","org.springframework.core.annotation.SynthesizedAnnotation"],
+  ["org.springframework.core.annotation.ComposedRepeatableAnnotationsTests$PeteRepeat","org.springframework.core.annotation.SynthesizedAnnotation"],
+  ["org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$Noninherited","org.springframework.core.annotation.SynthesizedAnnotation"],
+  ["org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests$PeteRepeat","org.springframework.core.annotation.SynthesizedAnnotation"],
+  ["org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests$Cacheable","org.springframework.core.annotation.SynthesizedAnnotation"],
+  ["org.springframework.core.convert.support.GenericConversionServiceTests$ExampleAnnotation","org.springframework.core.annotation.SynthesizedAnnotation"]
+]
