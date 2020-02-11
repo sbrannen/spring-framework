@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
 import org.springframework.lang.Nullable;
@@ -467,7 +466,7 @@ final class AnnotationTypeMapping {
 	 * @return {@code true} if the value is equivalent to the default value
 	 */
 	boolean isEquivalentToDefaultValue(int attributeIndex, Object value,
-			BiFunction<Method, Object, Object> valueExtractor) {
+			ValueExtractor valueExtractor) {
 
 		Method attribute = this.attributes.get(attributeIndex);
 		return isEquivalentToDefaultValue(attribute, value, valueExtractor);
@@ -489,13 +488,13 @@ final class AnnotationTypeMapping {
 	}
 
 	private static boolean isEquivalentToDefaultValue(Method attribute, Object value,
-			BiFunction<Method, Object, Object> valueExtractor) {
+			ValueExtractor valueExtractor) {
 
 		return areEquivalent(attribute.getDefaultValue(), value, valueExtractor);
 	}
 
 	private static boolean areEquivalent(@Nullable Object value, @Nullable Object extractedValue,
-			BiFunction<Method, Object, Object> valueExtractor) {
+			ValueExtractor valueExtractor) {
 
 		if (ObjectUtils.nullSafeEquals(value, extractedValue)) {
 			return true;
@@ -529,13 +528,13 @@ final class AnnotationTypeMapping {
 	}
 
 	private static boolean areEquivalent(Annotation annotation, @Nullable Object extractedValue,
-			BiFunction<Method, Object, Object> valueExtractor) {
+			ValueExtractor valueExtractor) {
 
 		AttributeMethods attributes = AttributeMethods.forAnnotationType(annotation.annotationType());
 		for (int i = 0; i < attributes.size(); i++) {
 			Method attribute = attributes.get(i);
 			if (!areEquivalent(ReflectionUtils.invokeMethod(attribute, annotation),
-					valueExtractor.apply(attribute, extractedValue), valueExtractor)) {
+					valueExtractor.extract(attribute, extractedValue), valueExtractor)) {
 				return false;
 			}
 		}
@@ -597,8 +596,7 @@ final class AnnotationTypeMapping {
 			return this.assigned[attributeIndex];
 		}
 
-		int[] resolve(@Nullable Object source, @Nullable Object annotation,
-				BiFunction<Method, Object, Object> valueExtractor) {
+		int[] resolve(@Nullable Object source, @Nullable Object annotation, ValueExtractor valueExtractor) {
 
 			int[] result = new int[attributes.size()];
 			for (int i = 0; i < result.length; i++) {
@@ -636,13 +634,13 @@ final class AnnotationTypeMapping {
 			}
 
 			<A> int resolve(@Nullable Object source, @Nullable A annotation,
-					BiFunction<Method, Object, Object> valueExtractor) {
+					ValueExtractor valueExtractor) {
 
 				int result = -1;
 				Object lastValue = null;
 				for (int i = 0; i < this.size; i++) {
 					Method attribute = attributes.get(this.indexes[i]);
-					Object value = valueExtractor.apply(attribute, annotation);
+					Object value = valueExtractor.extract(attribute, annotation);
 					boolean isDefaultValue = (value == null ||
 							isEquivalentToDefaultValue(attribute, value, valueExtractor));
 					if (isDefaultValue || ObjectUtils.nullSafeEquals(lastValue, value)) {

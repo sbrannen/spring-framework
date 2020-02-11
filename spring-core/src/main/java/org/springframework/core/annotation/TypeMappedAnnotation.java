@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -78,7 +77,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	 * @since 5.2.4
 	 */
 	@SuppressWarnings("unchecked")
-	static final BiFunction<Method, Object, Object> standardValueExtractor = (attribute, object) -> {
+	static final ValueExtractor standardValueExtractor = (attribute, object) -> {
 		if (object instanceof Annotation) {
 			return ReflectionUtils.invokeMethod(attribute, object);
 		}
@@ -118,7 +117,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@Nullable
 	private final Object rootAttributes;
 
-	private final BiFunction<Method, Object, Object> valueExtractor;
+	private final ValueExtractor valueExtractor;
 
 	private final int aggregateIndex;
 
@@ -137,14 +136,14 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable ClassLoader classLoader,
 			@Nullable Object source, @Nullable Object rootAttributes,
-			BiFunction<Method, Object, Object> valueExtractor, int aggregateIndex) {
+			ValueExtractor valueExtractor, int aggregateIndex) {
 
 		this(mapping, classLoader, source, rootAttributes, valueExtractor, aggregateIndex, null);
 	}
 
 	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable ClassLoader classLoader,
 			@Nullable Object source, @Nullable Object rootAttributes,
-			BiFunction<Method, Object, Object> valueExtractor, int aggregateIndex,
+			ValueExtractor valueExtractor, int aggregateIndex,
 			@Nullable int[] resolvedRootMirrors) {
 
 		this.mapping = mapping;
@@ -163,7 +162,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	private TypeMappedAnnotation(AnnotationTypeMapping mapping, @Nullable ClassLoader classLoader,
 			@Nullable Object source, @Nullable Object rootAnnotation,
-			BiFunction<Method, Object, Object> valueExtractor, int aggregateIndex,
+			ValueExtractor valueExtractor, int aggregateIndex,
 			boolean useMergedValues, @Nullable Predicate<String> attributeFilter,
 			int[] resolvedRootMirrors, int[] resolvedMirrors) {
 
@@ -448,7 +447,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		}
 		if (mapping.getDistance() == 0) {
 			Method attribute = mapping.getAttributes().get(attributeIndex);
-			Object result = this.valueExtractor.apply(attribute, this.rootAttributes);
+			Object result = this.valueExtractor.extract(attribute, this.rootAttributes);
 			return (result != null) ? result : attribute.getDefaultValue();
 		}
 		return getValueFromMetaAnnotation(attributeIndex, forMirrorResolution);
@@ -584,7 +583,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 				mapping, null, this.source, value, getValueExtractor(value), this.aggregateIndex);
 	}
 
-	private BiFunction<Method, Object, Object> getValueExtractor(Object value) {
+	private ValueExtractor getValueExtractor(Object value) {
 		if (value instanceof Annotation || value instanceof Map || value instanceof TypeMappedAnnotation) {
 			return standardValueExtractor;
 		}
@@ -683,8 +682,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@Nullable
 	private static <A extends Annotation> TypeMappedAnnotation<A> createIfPossible(
 			AnnotationTypeMapping mapping, @Nullable Object source, @Nullable Object rootAttribute,
-			BiFunction<Method, Object, Object> valueExtractor,
-			int aggregateIndex, IntrospectionFailureLogger logger) {
+			ValueExtractor valueExtractor, int aggregateIndex, IntrospectionFailureLogger logger) {
 
 		try {
 			return new TypeMappedAnnotation<>(mapping, null, source, rootAttribute,
