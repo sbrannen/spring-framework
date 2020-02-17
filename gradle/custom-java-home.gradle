@@ -31,11 +31,15 @@
 import org.gradle.internal.os.OperatingSystem
 // import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 
-def customJavaHome = System.getProperty("customJavaHome")
+// def customJavaHome = System.getProperty("customJavaHome")
 
 if (customJavaHome) {
-	def customJavaHomeDir = new File(customJavaHome)
 	def customJavaSourceVersion = System.getProperty("customJavaSourceVersion")
+	def customJavaHomeDir = new File(customJavaHome)
+	def javaExecutable = customJavaHome + "/bin/java"
+	if (OperatingSystem.current().isWindows()) {
+		javaExecutable += ".exe"
+	}
 
 	tasks.withType(JavaCompile) {
 		logger.info("Java home for " + it.name + " task in " + project.name + ": " + customJavaHomeDir)
@@ -66,10 +70,6 @@ if (customJavaHome) {
 	*/
 
 	tasks.withType(Test) {
-		def javaExecutable = customJavaHome + "/bin/java"
-		if (OperatingSystem.current().isWindows()) {
-			javaExecutable += ".exe"
-		}
 		logger.info("Java executable for " + it.name + " task in " + project.name + ": " + javaExecutable)
 		executable = javaExecutable
 		inputs.property("customJavaHome", customJavaHome)

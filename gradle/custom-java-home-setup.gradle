@@ -1,0 +1,37 @@
+import org.gradle.internal.os.OperatingSystem
+
+def customJavaSourceVersion = System.getProperty("customJavaSourceVersion")
+def customJavaHome = System.getProperty("customJavaHome")
+def customJavaHomeDir
+def customJavaExecutable
+def customRuntimeName
+def customRuntimeVersion
+
+if (customJavaHome) {
+	customJavaHomeDir = new File(customJavaHome)
+	customJavaExecutable = customJavaHome + "/bin/java"
+	if (OperatingSystem.current().isWindows()) {
+		customJavaExecutable += ".exe"
+	}
+
+	execAndGetStderr(customJavaExecutable, "-XshowSettings:properties", "-version").eachLine {
+		if (it =~ /\sjava\.runtime\.name\s?=\s?.+/) {
+			customRuntimeName = it.split('=')[1].trim()
+		}
+		if (it =~ /\sjava\.runtime\.version\s?=\s?.+/) {
+			customRuntimeVersion = it.split('=')[1].trim()
+		}
+	}
+	System.err.println("#### Custom JRE: $customRuntimeName $customRuntimeVersion")
+
+	ext['customJavaHome'] = customJavaHome
+}
+
+String execAndGetStderr(String... args) {
+	def stderr = new ByteArrayOutputStream()
+	exec {
+		commandLine(args)
+		errorOutput = stderr
+	}
+	return stderr.toString().trim()
+}
