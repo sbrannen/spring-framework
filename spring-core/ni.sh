@@ -2,7 +2,7 @@ native-image \
   --no-server \
   -Dverbose=true \
   -H:+TraceClassInitialization \
-  -H:Name=springcore \
+  -H:Name=build/spring-core-tests.bin \
   -H:+ReportExceptionStackTraces \
   --no-fallback \
 -Dlog4j2.disable.jmx=true \
