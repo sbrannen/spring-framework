@@ -16,6 +16,7 @@ spring-test/test-output/
 argfile*
 pom.xml
 activemq-data/
+spring-*/cp.txt
 
 classes/
 /build
