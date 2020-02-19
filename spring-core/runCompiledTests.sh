@@ -1,2 +1,2 @@
 TESTS=`./getActiveTests.sh`
-./springcore $TESTS
+./build/spring-core-tests.bin $TESTS
