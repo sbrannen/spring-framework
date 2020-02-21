@@ -24,6 +24,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.annotation.UsesMockito;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -360,6 +362,7 @@ class SettableListenableFutureTests {
 
 	@Test
 	@SuppressWarnings({"rawtypes", "unchecked"})
+	@UsesMockito
 	public void cancelDoesNotNotifyCallbacksOnSet() {
 		ListenableFutureCallback callback = mock(ListenableFutureCallback.class);
 		settableListenableFuture.addCallback(callback);
@@ -377,6 +380,7 @@ class SettableListenableFutureTests {
 
 	@Test
 	@SuppressWarnings({"rawtypes", "unchecked"})
+	@UsesMockito
 	public void cancelDoesNotNotifyCallbacksOnSetException() {
 		ListenableFutureCallback callback = mock(ListenableFutureCallback.class);
 		settableListenableFuture.addCallback(callback);

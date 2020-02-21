@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+
+import org.springframework.core.testfixture.annotation.UsesMockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.inOrder;
@@ -107,6 +109,7 @@ class StreamUtilsTests {
 	}
 
 	@Test
+	@UsesMockito
 	void nonClosingInputStream() throws Exception {
 		InputStream source = mock(InputStream.class);
 		InputStream nonClosing = StreamUtils.nonClosing(source);
@@ -122,6 +125,7 @@ class StreamUtilsTests {
 	}
 
 	@Test
+	@UsesMockito
 	void nonClosingOutputStream() throws Exception {
 		OutputStream source = mock(OutputStream.class);
 		OutputStream nonClosing = StreamUtils.nonClosing(source);
@@ -135,4 +139,5 @@ class StreamUtilsTests {
 		ordered.verify(source).write(bytes, 1, 2);
 		ordered.verify(source, never()).close();
 	}
+
 }

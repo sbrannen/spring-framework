@@ -26,6 +26,8 @@ import java.util.Spliterator;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.annotation.UsesMockito;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.BDDMockito.given;
@@ -52,6 +54,7 @@ class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
+	@UsesMockito
 	void createWhenAnnotationIsNotDirectlyPresentThrowsException() {
 		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
 		given(annotation.isDirectlyPresent()).willReturn(false);
@@ -61,6 +64,7 @@ class MergedAnnotationsCollectionTests {
 	}
 
 	@Test
+	@UsesMockito
 	void createWhenAnnotationAggregateIndexIsNotZeroThrowsException() {
 		MergedAnnotation<?> annotation = mock(MergedAnnotation.class);
 		given(annotation.isDirectlyPresent()).willReturn(true);

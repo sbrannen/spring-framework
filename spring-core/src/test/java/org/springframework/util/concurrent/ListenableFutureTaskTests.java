@@ -22,6 +22,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.annotation.UsesMockito;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -108,6 +110,7 @@ class ListenableFutureTaskTests {
 	}
 
 	@Test
+	@UsesMockito
 	void failureWithLambdas() throws Exception {
 		final String s = "Hello World";
 		IOException ex = new IOException(s);

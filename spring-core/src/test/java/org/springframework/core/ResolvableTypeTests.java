@@ -50,6 +50,7 @@ import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.core.ResolvableType.VariableResolver;
+import org.springframework.core.testfixture.annotation.UsesMockito;
 import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,6 +70,7 @@ import static org.mockito.Mockito.verify;
  */
 @SuppressWarnings("rawtypes")
 @ExtendWith(MockitoExtension.class)
+@UsesMockito
 class ResolvableTypeTests {
 
 	@Captor
