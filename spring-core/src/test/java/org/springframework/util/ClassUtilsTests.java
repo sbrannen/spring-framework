@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.tests.sample.objects.DerivedTestObject;
 import org.springframework.tests.sample.objects.ITestInterface;
 import org.springframework.tests.sample.objects.ITestObject;
@@ -136,24 +137,29 @@ class ClassUtilsTests {
 				return childLoader1.loadClass(name);
 			}
 		};
-		Class<?> composite = ClassUtils.createCompositeInterface(
-				new Class<?>[] {Serializable.class, Externalizable.class}, childLoader1);
 
 		assertThat(ClassUtils.isCacheSafe(String.class, null)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(String.class, classLoader)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(String.class, childLoader1)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(String.class, childLoader2)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(String.class, childLoader3)).isTrue();
+
 		assertThat(ClassUtils.isCacheSafe(InnerClass.class, null)).isFalse();
 		assertThat(ClassUtils.isCacheSafe(InnerClass.class, classLoader)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(InnerClass.class, childLoader1)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(InnerClass.class, childLoader2)).isTrue();
 		assertThat(ClassUtils.isCacheSafe(InnerClass.class, childLoader3)).isTrue();
-		assertThat(ClassUtils.isCacheSafe(composite, null)).isFalse();
-		assertThat(ClassUtils.isCacheSafe(composite, classLoader)).isFalse();
-		assertThat(ClassUtils.isCacheSafe(composite, childLoader1)).isTrue();
-		assertThat(ClassUtils.isCacheSafe(composite, childLoader2)).isFalse();
-		assertThat(ClassUtils.isCacheSafe(composite, childLoader3)).isTrue();
+
+		if (!GraalVmDetector.inImageCode()) {
+			Class<?> composite = ClassUtils.createCompositeInterface(
+					new Class<?>[] {Serializable.class, Externalizable.class}, childLoader1);
+
+			assertThat(ClassUtils.isCacheSafe(composite, null)).isFalse();
+			assertThat(ClassUtils.isCacheSafe(composite, classLoader)).isFalse();
+			assertThat(ClassUtils.isCacheSafe(composite, childLoader1)).isTrue();
+			assertThat(ClassUtils.isCacheSafe(composite, childLoader2)).isFalse();
+			assertThat(ClassUtils.isCacheSafe(composite, childLoader3)).isTrue();
+		}
 	}
 
 	@ParameterizedTest
