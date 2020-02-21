@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+
+import org.springframework.core.testfixture.annotation.UsesMockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -126,6 +128,7 @@ class AttributeMethodsTests {
 	}
 
 	@Test
+	@UsesMockito
 	void isValidWhenHasTypeNotPresentExceptionReturnsFalse() {
 		ClassValue annotation = mockAnnotation(ClassValue.class);
 		given(annotation.value()).willThrow(TypeNotPresentException.class);
@@ -135,6 +138,7 @@ class AttributeMethodsTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@UsesMockito
 	void isValidWhenDoesNotHaveTypeNotPresentExceptionReturnsTrue() {
 		ClassValue annotation = mock(ClassValue.class);
 		given(annotation.value()).willReturn((Class) InputStream.class);
@@ -143,6 +147,7 @@ class AttributeMethodsTests {
 	}
 
 	@Test
+	@UsesMockito
 	void validateWhenHasTypeNotPresentExceptionThrowsException() {
 		ClassValue annotation = mockAnnotation(ClassValue.class);
 		given(annotation.value()).willThrow(TypeNotPresentException.class);
@@ -152,6 +157,7 @@ class AttributeMethodsTests {
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@UsesMockito
 	void validateWhenDoesNotHaveTypeNotPresentExceptionThrowsNothing() {
 		ClassValue annotation = mockAnnotation(ClassValue.class);
 		given(annotation.value()).willReturn((Class) InputStream.class);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.annotation.UsesMockito;
 import org.springframework.tests.MockitoUtils;
 import org.springframework.tests.MockitoUtils.InvocationArgumentsAdapter;
 
@@ -54,6 +55,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Arjen Poutsma
  */
+@UsesMockito
 abstract class AbstractStaxXMLReaderTests {
 
 	protected static XMLInputFactory inputFactory;
