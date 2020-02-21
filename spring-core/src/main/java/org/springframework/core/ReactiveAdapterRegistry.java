@@ -53,6 +53,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 5.0
  */
 public class ReactiveAdapterRegistry {
@@ -104,7 +105,8 @@ public class ReactiveAdapterRegistry {
 		// We can fall back on "reactive-streams-flow-bridge" (once released)
 
 		// Coroutines
-		if (this.reactorPresent && ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader)) {
+		if (this.reactorPresent && !GraalVmDetector.inImageCode() &&
+				ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", classLoader)) {
 			new CoroutinesRegistrar().registerAdapters(this);
 		}
 	}
