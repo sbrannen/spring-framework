@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.core.OverridingClassLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Tests that trigger annotation introspection failures and ensure that they are
@@ -43,6 +45,9 @@ class AnnotationIntrospectionFailureTests {
 
 	@Test
 	void filteredTypeThrowsTypeNotPresentException() throws Exception {
+		assumeFalse(GraalVmDetector.inImageCode(),
+				"Aborted since a GraalVM native image uses the system ClassLoader to load classes by name.");
+
 		FilteringClassLoader classLoader = new FilteringClassLoader(
 				getClass().getClassLoader());
 		Class<?> withExampleAnnotation = ClassUtils.forName(
@@ -58,6 +63,9 @@ class AnnotationIntrospectionFailureTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void filteredTypeInMetaAnnotationWhenUsingAnnotatedElementUtilsHandlesException() throws Exception {
+		assumeFalse(GraalVmDetector.inImageCode(),
+				"Aborted since a GraalVM native image uses the system ClassLoader to load classes by name.");
+
 		FilteringClassLoader classLoader = new FilteringClassLoader(
 				getClass().getClassLoader());
 		Class<?> withExampleMetaAnnotation = ClassUtils.forName(
@@ -79,6 +87,9 @@ class AnnotationIntrospectionFailureTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	void filteredTypeInMetaAnnotationWhenUsingMergedAnnotationsHandlesException() throws Exception {
+		assumeFalse(GraalVmDetector.inImageCode(),
+				"Aborted since a GraalVM native image uses the system ClassLoader to load classes by name.");
+
 		FilteringClassLoader classLoader = new FilteringClassLoader(
 				getClass().getClassLoader());
 		Class<?> withExampleMetaAnnotation = ClassUtils.forName(

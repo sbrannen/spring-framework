@@ -23,15 +23,18 @@ import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.core.OverridingClassLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Tests for {@link MergedAnnotation} to ensure the correct class loader is
  * used.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2
  */
 class MergedAnnotationClassLoaderTests {
@@ -44,8 +47,12 @@ class MergedAnnotationClassLoaderTests {
 
 	private static final String TEST_REFERENCE = TestReference.class.getName();
 
+
 	@Test
 	void synthesizedUsesCorrectClassLoader() throws Exception {
+		assumeFalse(GraalVmDetector.inImageCode(),
+			"Aborted since a GraalVM native image uses the system ClassLoader to load classes by name.");
+
 		ClassLoader parent = getClass().getClassLoader();
 		TestClassLoader child = new TestClassLoader(parent);
 		Class<?> source = child.loadClass(WITH_TEST_ANNOTATION);
