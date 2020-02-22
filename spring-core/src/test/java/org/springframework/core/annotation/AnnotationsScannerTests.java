@@ -29,12 +29,14 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Tests for {@link AnnotationsScanner}.
@@ -120,6 +122,9 @@ class AnnotationsScannerTests {
 
 	@Test
 	void inheritedAnnotationsStrategyOnClassWhenHasAnnotationOnBothClassesIncudesOnlyOne() {
+		assumeFalse(GraalVmDetector.inImageCode(),
+			"It appears that GraalVM native images don't track a locally declared @Inherited annotation if it's also declared on a superclass.");
+
 		Class<?> source = WithSingleSuperclassAndDoubleInherited.class;
 		assertThat(Arrays.stream(source.getAnnotations()).map(
 				Annotation::annotationType).map(Class::getName)).containsExactly(
