@@ -46,6 +46,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
@@ -856,7 +857,9 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void convertStringToTimezone() {
-		assertThat(conversionService.convert("GMT+2", TimeZone.class).getID()).isEqualTo("GMT+02:00");
+		if (!GraalVmDetector.inImageCode()) {
+			assertThat(conversionService.convert("GMT+2", TimeZone.class).getID()).isEqualTo("GMT+02:00");
+		}
 	}
 
 	@Test
