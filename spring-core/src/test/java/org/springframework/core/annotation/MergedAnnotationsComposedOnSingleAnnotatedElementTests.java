@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.util.ReflectionUtils;
 
@@ -183,7 +184,9 @@ class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 		Method bridgeMethod = methods.get(0).getReturnType().equals(Object.class)
 				? methods.get(0)
 				: methods.get(1);
-		assertThat(bridgeMethod.isBridge()).isTrue();
+		if (!GraalVmDetector.inImageCode()) {
+			assertThat(bridgeMethod.isBridge()).isTrue();
+		}
 		return bridgeMethod;
 	}
 

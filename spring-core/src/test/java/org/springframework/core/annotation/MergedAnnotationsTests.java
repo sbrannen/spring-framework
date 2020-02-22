@@ -39,6 +39,7 @@ import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
@@ -544,8 +545,10 @@ class MergedAnnotationsTests {
 				methods.get(0) : methods.get(1);
 		Method bridgedMethod = methods.get(0).getReturnType().equals(Object.class) ?
 				methods.get(1) : methods.get(0);
-		assertThat(bridgeMethod.isBridge()).isTrue();
-		assertThat(bridgedMethod.isBridge()).isFalse();
+		if (!GraalVmDetector.inImageCode()) {
+			assertThat(bridgeMethod.isBridge()).isTrue();
+			assertThat(bridgedMethod.isBridge()).isFalse();
+		}
 		MergedAnnotation<?> annotation = MergedAnnotations.from(bridgeMethod,
 				SearchStrategy.TYPE_HIERARCHY).get(Order.class);
 		assertThat(annotation.isPresent()).isTrue();
