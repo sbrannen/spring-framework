@@ -1,200 +1,188 @@
-org.springframework.tests.AssumeTests
-org.springframework.core.codec.DataBufferDecoderTests
-org.springframework.core.codec.ByteBufferDecoderTests
-org.springframework.core.codec.StringDecoderTests
-org.springframework.core.codec.ByteArrayDecoderTests
-org.springframework.core.codec.ResourceDecoderTests
-org.springframework.core.codec.ByteArrayEncoderTests
-org.springframework.core.codec.AbstractEncoderTests
-org.springframework.core.codec.ByteBufferEncoderTests
-org.springframework.core.codec.AbstractDecoderTests
-org.springframework.core.codec.ResourceEncoderTests
-org.springframework.core.codec.DataBufferEncoderTests
-org.springframework.core.io.buffer.DataBufferTests
-org.springframework.core.ExceptionDepthComparatorTests
-org.springframework.core.io.support.EncodedResourceTests
-org.springframework.core.annotation.PackagesAnnotationFilterTests
-org.springframework.core.annotation.MissingMergedAnnotationTests
-org.springframework.core.annotation.OrderUtilsTests
-org.springframework.core.annotation.OrderSourceProviderTests
-org.springframework.core.annotation.ComposedRepeatableAnnotationsTests
+# @UsesMockito org.springframework.core.annotation.AttributeMethodsTests
+# @UsesMockito org.springframework.core.annotation.MergedAnnotationsCollectionTests
+# @UsesMockito org.springframework.core.io.buffer.DataBufferUtilsTests
+# @UsesMockito org.springframework.core.io.ClassPathResourceTests
+# @UsesMockito org.springframework.core.io.PathResourceTests
+# @UsesMockito org.springframework.core.io.support.ResourceRegionTests
+# @UsesMockito org.springframework.core.ResolvableTypeTests
+# @UsesMockito org.springframework.util.concurrent.FutureAdapterTests
+# @UsesMockito org.springframework.util.concurrent.ListenableFutureTaskTests
+# @UsesMockito org.springframework.util.concurrent.SettableListenableFutureTests
+# @UsesMockito org.springframework.util.StreamUtilsTests
+# @UsesMockito org.springframework.util.xml.StaxEventXMLReaderTests
+# @UsesMockito org.springframework.util.xml.StaxStreamXMLReaderTests
+# abstract org.springframework.core.type.AbstractAnnotationMetadataTests
+# abstract org.springframework.core.type.AbstractClassMetadataMemberClassTests
+# abstract org.springframework.core.type.AbstractMethodMetadataTests
+# abstract org.springframework.util.xml.AbstractStaxHandlerTests
+# abstract org.springframework.util.xml.AbstractStaxXMLReaderTests
+# Agent misses types org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
+# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.io.support.ResourcePropertySourceTests
+# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.SimpleAliasRegistryTests
+# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.task.SimpleAsyncTaskExecutorTests
+# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.type.AnnotationTypeFilterTests
+# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.type.AssignableTypeFilterTests
+# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.type.classreading.AnnotationMetadataReadingVisitorTests
+# Could not initialize PropertyPlaceholderHelper org.springframework.util.PropertyPlaceholderHelperTests
+# Could not initialize PropertyPlaceholderHelper org.springframework.util.SystemPropertyUtilsTests
+# Uses ASM: class path resource [java/lang/Object.class] not found org.springframework.core.type.classreading.SimpleAnnotationMetadataTests
+# Uses Class Path Resource as File org.springframework.core.io.ResourceTests
+# Uses Class Path Scanning org.springframework.core.io.support.PathMatchingResourcePatternResolverTests
+# Uses Class Path Scanning org.springframework.core.io.support.ResourceArrayPropertyEditorTests
+# Uses Custom SecurityManager org.springframework.core.env.StandardEnvironmentTests
+# Uses DefaultParameterNameDiscoverer org.springframework.core.KotlinDefaultParameterNameDiscovererTests
+# Uses jar URL protocol org.springframework.util.ResourceUtilsTests
+# Uses Kotlin Coroutines org.springframework.core.KotlinGenericTypeResolverTests
+# Uses Kotlin Coroutines org.springframework.core.KotlinMethodParameterTests
+# Uses Kotlin Coroutines org.springframework.core.KotlinReactiveAdapterRegistryTests
+# Uses Kotlin Coroutines org.springframework.core.ReactiveAdapterRegistryTests
+# Uses Kotlin Reflection org.springframework.core.KotlinReflectionParameterNameDiscovererTests
+# Uses Mockk org.springframework.core.env.PropertyResolverExtensionsTests
+# Uses reflection for nested types org.springframework.core.type.StandardAnnotationMetadataTests
+# Uses reflection for nested types org.springframework.core.type.StandardClassMetadataMemberClassTests
+# Uses Serialization org.springframework.core.convert.TypeDescriptorTests
+# Uses Serialization org.springframework.core.SerializableTypeWrapperTests
+# Uses Serialization org.springframework.core.serializer.SerializationConverterTests
+# Uses Serialization org.springframework.util.AutoPopulatingListTests
+# Uses Serialization org.springframework.util.SerializationUtilsTests
+# Uses StAX org.springframework.util.xml.DomContentHandlerTests
+# Uses StAX org.springframework.util.xml.ListBasedXMLEventReaderTests
+# Uses StAX org.springframework.util.xml.StaxEventHandlerTests
+# Uses StAX org.springframework.util.xml.StaxResultTests
+# Uses StAX org.springframework.util.xml.StaxSourceTests
+# Uses StAX org.springframework.util.xml.StaxStreamHandlerTests
+# Uses StAX org.springframework.util.xml.XMLEventStreamReaderTests
+# Uses StAX org.springframework.util.xml.XMLEventStreamWriterTests
+# Uses Unsupported Feature: Target_java_lang_ClassLoader.findLoadedClass0(String) org.springframework.core.type.AspectJTypeFilterTests
+# Uses Xerces: javax.xml.parsers.FactoryConfigurationError: Provider com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl not found org.springframework.core.SortedPropertiesTests
+org.springframework.core.annotation.AnnotatedElementUtilsTests
+org.springframework.core.annotation.AnnotationAttributesTests
 org.springframework.core.annotation.AnnotationAwareOrderComparatorTests
 org.springframework.core.annotation.AnnotationBackCompatibiltyTests
-org.springframework.core.annotation.RepeatableContainersTests
-org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests
-org.springframework.core.annotation.SynthesizingMethodParameterTests
-org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests
 org.springframework.core.annotation.AnnotationFilterTests
-org.springframework.core.annotation.MergedAnnotationPredicatesTests
+org.springframework.core.annotation.AnnotationIntrospectionFailureTests
+org.springframework.core.annotation.AnnotationsScannerTests
 org.springframework.core.annotation.AnnotationTypeMappingsTests
-org.springframework.core.annotation.AnnotationAttributesTests
-org.springframework.util.FileCopyUtilsTests
-org.springframework.util.FastByteArrayOutputStreamTests
-org.springframework.util.ConcurrentReferenceHashMapTests
-org.springframework.util.comparator.InstanceComparatorTests
-org.springframework.util.comparator.BooleanComparatorTests
-org.springframework.util.comparator.InvertibleComparatorTests
-org.springframework.util.comparator.ComparableComparatorTests
-org.springframework.util.comparator.NullSafeComparatorTests
-org.springframework.util.comparator.CompoundComparatorTests
-org.springframework.core.NestedExceptionTests
-org.springframework.core.codec.ResourceRegionEncoderTests
-org.springframework.core.io.buffer.PooledDataBufferTests
-org.springframework.core.type.classreading.SimpleMethodMetadataTests
-org.springframework.core.type.classreading.ClassMetadataReadingVisitorMemberClassTests
-org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests
-org.springframework.core.type.AbstractClassMetadataMemberClassTests
-org.springframework.core.type.AbstractMethodMetadataTests
+org.springframework.core.annotation.AnnotationUtilsTests
+org.springframework.core.annotation.ComposedRepeatableAnnotationsTests
+org.springframework.core.annotation.MergedAnnotationClassLoaderTests
+org.springframework.core.annotation.MergedAnnotationCollectorsTests
+org.springframework.core.annotation.MergedAnnotationPredicatesTests
+org.springframework.core.annotation.MergedAnnotationsComposedOnSingleAnnotatedElementTests
+org.springframework.core.annotation.MergedAnnotationsRepeatableAnnotationTests
+org.springframework.core.annotation.MergedAnnotationsTests
+org.springframework.core.annotation.MissingMergedAnnotationTests
+org.springframework.core.annotation.MultipleComposedAnnotationsOnSingleAnnotatedElementTests
+org.springframework.core.annotation.OrderSourceProviderTests
+org.springframework.core.annotation.OrderUtilsTests
+org.springframework.core.annotation.PackagesAnnotationFilterTests
+org.springframework.core.annotation.RepeatableContainersTests
+org.springframework.core.annotation.SynthesizingMethodParameterTests
 org.springframework.core.annotation.TypeMappedAnnotationTests
-org.springframework.util.TypeUtilsTests
-org.springframework.util.ObjectUtilsTests
-org.springframework.util.FileSystemUtilsTests
-org.springframework.util.CompositeIteratorTests
-org.springframework.util.StringUtilsTests
-org.springframework.util.ExceptionTypeFilterTests
-org.springframework.util.InstanceFilterTests
-org.springframework.util.Base64UtilsTests
-org.springframework.util.MethodInvokerTests
-org.springframework.util.DigestUtilsTests
-org.springframework.util.unit.DataSizeTests
-org.springframework.util.LinkedCaseInsensitiveMapTests
-org.springframework.util.ReflectionUtilsTests
-org.springframework.util.ResizableByteArrayOutputStreamTests
-org.springframework.util.StopWatchTests
-org.springframework.util.concurrent.MonoToListenableFutureAdapterTests
-org.springframework.util.PropertiesPersisterTests
-org.springframework.util.ExponentialBackOffTests
-org.springframework.util.AssertTests
-org.springframework.core.env.ProfilesTests
-org.springframework.core.env.MutablePropertySourcesTests
-org.springframework.core.env.PropertySourcesPropertyResolverTests
-org.springframework.core.BridgeMethodResolverTests
-org.springframework.core.type.AbstractAnnotationMetadataTests
-org.springframework.core.type.StandardMethodMetadataTests
-org.springframework.core.log.LogSupportTests
 org.springframework.core.AttributeAccessorSupportTests
-org.springframework.core.ConstantsTests
-org.springframework.core.ParameterizedTypeReferenceTests
-org.springframework.core.convert.converter.ConvertingComparatorTests
+org.springframework.core.BridgeMethodResolverTests
+org.springframework.core.codec.ByteArrayDecoderTests
+org.springframework.core.codec.ByteArrayEncoderTests
+org.springframework.core.codec.ByteBufferDecoderTests
+org.springframework.core.codec.ByteBufferEncoderTests
+org.springframework.core.codec.CharSequenceEncoderTests
+org.springframework.core.codec.DataBufferDecoderTests
+org.springframework.core.codec.DataBufferEncoderTests
+org.springframework.core.codec.ResourceDecoderTests
+org.springframework.core.codec.ResourceEncoderTests
+org.springframework.core.codec.ResourceRegionEncoderTests
+org.springframework.core.codec.StringDecoderTests
 org.springframework.core.CollectionFactoryTests
-org.springframework.core.env.SimpleCommandLineParserTests
+org.springframework.core.ConstantsTests
+org.springframework.core.ConventionsTests
+org.springframework.core.convert.converter.ConvertingComparatorTests
+org.springframework.core.convert.converter.DefaultConversionServiceTests
+org.springframework.core.convert.support.ByteBufferConverterTests
+org.springframework.core.convert.support.CollectionToCollectionConverterTests
 org.springframework.core.convert.support.GenericConversionServiceTests
 org.springframework.core.convert.support.MapToMapConverterTests
-org.springframework.core.convert.support.ByteBufferConverterTests
 org.springframework.core.convert.support.StreamConverterTests
-org.springframework.core.convert.support.CollectionToCollectionConverterTests
-org.springframework.util.LinkedMultiValueMapTests
-org.springframework.util.AntPathMatcherTests
-org.springframework.util.NumberUtilsTests
-org.springframework.util.FixedBackOffTests
-org.springframework.util.SocketUtilsTests
-org.springframework.util.xml.TransformerUtilsTests
-org.springframework.util.xml.StaxUtilsTests
-org.springframework.util.xml.AbstractStaxHandlerTests
-org.springframework.core.io.buffer.support.DataBufferTestUtilsTests
-org.springframework.core.io.buffer.AbstractDataBufferAllocatingTests
-org.springframework.core.io.buffer.AbstractLeakCheckingTests
+org.springframework.core.env.CompositePropertySourceTests
+org.springframework.core.env.CustomEnvironmentTests
+org.springframework.core.env.JOptCommandLinePropertySourceTests
+org.springframework.core.env.MutablePropertySourcesTests
+org.springframework.core.env.ProfilesTests
+org.springframework.core.env.PropertySourcesPropertyResolverTests
+org.springframework.core.env.PropertySourceTests
+org.springframework.core.env.SimpleCommandLineArgsParserTests
+org.springframework.core.env.SimpleCommandLinePropertySourceTests
+org.springframework.core.env.SystemEnvironmentPropertySourceTests
+org.springframework.core.ExceptionDepthComparatorTests
+org.springframework.core.GenericTypeResolverTests
+org.springframework.core.io.buffer.DataBufferTests
+org.springframework.core.io.buffer.LeakAwareDataBufferFactoryTests
+org.springframework.core.io.buffer.LimitedDataBufferListTests
+org.springframework.core.io.buffer.PooledDataBufferTests
+org.springframework.core.io.buffer.PooledDataBufferTests$PooledByteBufAllocatorWithPreferDirectFalseTests
+org.springframework.core.io.buffer.PooledDataBufferTests$PooledByteBufAllocatorWithPreferDirectTrueTests
 org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocatorWithPreferDirectFalseTests
+org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocatorWithPreferDirectTrueTests
+org.springframework.core.io.buffer.support.DataBufferTestUtilsTests
+org.springframework.core.io.ResourceEditorTests
+org.springframework.core.io.support.EncodedResourceTests
+org.springframework.core.io.support.SpringFactoriesLoaderTests
+org.springframework.core.LocalVariableTableParameterNameDiscovererTests
+org.springframework.core.log.LogSupportTests
+org.springframework.core.MethodParameterTests
+org.springframework.core.NestedExceptionTests
 org.springframework.core.OrderComparatorTests
+org.springframework.core.ParameterizedTypeReferenceTests
 org.springframework.core.PrioritizedParameterNameDiscovererTests
+org.springframework.core.StandardReflectionParameterNameDiscoverTests
 org.springframework.core.style.DefaultValueStylerTests
 org.springframework.core.style.ToStringCreatorTests
-org.springframework.util.xml.SimpleNamespaceContextTests
-org.springframework.util.xml.XmlValidationModeDetectorTests
-org.springframework.util.xml.AbstractStaxXMLReaderTests
-org.springframework.core.io.buffer.PooledDataBufferTests$PooledByteBufAllocatorWithPreferDirectTrueTests
-org.springframework.core.io.buffer.PooledDataBufferTests$PooledByteBufAllocatorWithPreferDirectFalseTests
-org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocatorWithPreferDirectTrueTests
+org.springframework.core.testfixture.TestGroupParsingTests
+org.springframework.core.testfixture.TestGroupTests
+org.springframework.core.type.AnnotationMetadataTests
+org.springframework.core.type.CachingMetadataReaderLeakTests
+org.springframework.core.type.classreading.ClassMetadataReadingVisitorMemberClassTests
+org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests
+org.springframework.core.type.classreading.SimpleMethodMetadataTests
+org.springframework.core.type.InheritedAnnotationsAnnotationMetadataTests
+org.springframework.core.type.StandardMethodMetadataTests
+org.springframework.util.AntPathMatcherTests
+org.springframework.util.AssertTests
+org.springframework.util.Base64UtilsTests
+org.springframework.util.ClassUtilsTests
 org.springframework.util.CollectionUtilsTests
+org.springframework.util.comparator.BooleanComparatorTests
+org.springframework.util.comparator.ComparableComparatorTests
+org.springframework.util.comparator.CompoundComparatorTests
+org.springframework.util.comparator.InstanceComparatorTests
+org.springframework.util.comparator.InvertibleComparatorTests
+org.springframework.util.comparator.NullSafeComparatorTests
+org.springframework.util.CompositeIteratorTests
+org.springframework.util.concurrent.MonoToListenableFutureAdapterTests
+org.springframework.util.ConcurrentReferenceHashMapTests
+org.springframework.util.DigestUtilsTests
+org.springframework.util.ExceptionTypeFilterTests
+org.springframework.util.ExponentialBackOffTests
+org.springframework.util.FastByteArrayOutputStreamTests
+org.springframework.util.FileCopyUtilsTests
+org.springframework.util.FileSystemUtilsTests
+org.springframework.util.FixedBackOffTests
+org.springframework.util.InstanceFilterTests
+org.springframework.util.LinkedCaseInsensitiveMapTests
+org.springframework.util.LinkedMultiValueMapTests
+org.springframework.util.MethodInvokerTests
 org.springframework.util.MimeTypeTests
+org.springframework.util.NumberUtilsTests
+org.springframework.util.ObjectUtilsTests
 org.springframework.util.PatternMatchUtilsTests
-org.springframework.tests.TestGroupTests
-#
-# These are removed as I move from running it with agent to running as compiled image. They
-# were previously working though in an older spring commit (f8b875d2d8a6 - but that was
-# old 24Oct2019). It might be that I'm not including aspect discovered types (i.e. the
-# ones the agent is missing)
-#org.springframework.core.io.support.SpringFactoriesLoaderTests
-#org.springframework.core.env.CompositePropertySourceTests
-#org.springframework.core.env.SimpleCommandLinePropertySourceTests
-#org.springframework.core.env.JOptCommandLinePropertySourceTests
-#org.springframework.core.env.CustomEnvironmentTests
-#org.springframework.core.MethodParameterTests
-#org.springframework.core.LocalVariableTableParameterNameDiscovererTests
-#org.springframework.core.GenericTypeResolverTests
-#org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
-#org.springframework.core.io.support.ResourcePropertySourceTests
-#org.springframework.util.SystemPropertyUtilsTests
-#org.springframework.core.env.PropertySourceTests
-#org.springframework.core.io.ResourceEditorTests
-#org.springframework.core.SimpleAliasRegistryTests
-#org.springframework.core.env.SystemEnvironmentPropertySourceTests
-#org.springframework.util.PropertyPlaceholderHelperTests
-#org.springframework.core.task.SimpleAsyncTaskExecutorTests
-#org.springframework.core.type.CachingMetadataReaderLeakTests
-#
-# Why did I have to remove these? They were working before - something changed in spring
-# as I moved to later commit?
-#org.springframework.core.type.AnnotationMetadataTests
-#org.springframework.core.annotation.AnnotationUtilsTests
-#org.springframework.core.io.buffer.LeakAwareDataBufferFactoryTests
-#
-#
-# These failed...
-# Some fail when run with the agent (ignoring native-image for now) (./runModuleTests.sh).
-# Whilst some run ok but fail when built into the native image and then 
-# run (./runCompiledTests.sh after ./ni.sh).
-#org.springframework.core.codec.CharSequenceEncoderTests
-#org.springframework.core.ConventionsTests
-#org.springframework.core.io.buffer.DataBufferUtilsTests
-#org.springframework.core.ReactiveAdapterRegistryTests
-#org.springframework.core.io.support.ResourceRegionTests
-#org.springframework.core.io.support.PathMatchingResourcePatternResolverTests
-#org.springframework.core.io.support.ResourceArrayPropertyEditorTests
-#org.springframework.core.annotation.AttributeMethodsTests
-#org.springframework.core.annotation.AnnotationIntrospectionFailureTests
-#org.springframework.core.annotation.MergedAnnotationClassLoaderTests
-#org.springframework.core.annotation.MergedAnnotationCollectorsTests
-#org.springframework.core.annotation.MergedAnnotationsCollectionTests
-#org.springframework.core.annotation.MergedAnnotationsTests
-#org.springframework.core.io.PathResourceTests
-#org.springframework.core.io.ResourceTests
-#org.springframework.core.io.ClassPathResourceTests
-#org.springframework.core.serializer.SerializationConverterTests
-#org.springframework.core.annotation.AnnotationsScannerTests
-#org.springframework.core.annotation.MergedAnnotationsComposedOnSingleAnnotatedElementTests
-#org.springframework.core.annotation.AnnotatedElementUtilsTests
-#org.springframework.core.type.AnnotationTypeFilterTests
-#org.springframework.core.StandardReflectionParameterNameDiscoverTests
-#org.springframework.core.type.StandardClassMetadataMemberClassTests
-#org.springframework.core.type.classreading.SimpleAnnotationMetadataTests
-#org.springframework.core.type.classreading.AnnotationMetadataReadingVisitorTests
-#org.springframework.util.StreamUtilsTests
-#org.springframework.util.ResourceUtilsTests
-#org.springframework.util.ClassUtilsTests
-#org.springframework.util.AutoPopulatingListTests
-#org.springframework.util.concurrent.FutureAdapterTests
-#org.springframework.util.concurrent.ListenableFutureTaskTests
-#org.springframework.util.concurrent.SettableListenableFutureTests
-#org.springframework.core.ResolvableTypeTests
-#org.springframework.core.convert.converter.DefaultConversionServiceTests
-#org.springframework.core.SortedPropertiesTests
-#org.springframework.core.SerializableTypeWrapperTests
-#org.springframework.core.type.AssignableTypeFilterTests
-#org.springframework.core.type.AspectJTypeFilterTests
-#org.springframework.core.type.StandardAnnotationMetadataTests
-#org.springframework.util.xml.DomContentHandlerTests
-#org.springframework.core.convert.TypeDescriptorTests
-# This one registers security managers, no no, causes the native-image to hard crash with
-# fatal error
-#org.springframework.core.env.StandardEnvironmentTests
-#org.springframework.util.xml.StaxEventXMLReaderTests
-#org.springframework.util.xml.XMLEventStreamWriterTests
-#org.springframework.util.xml.StaxEventHandlerTests
-#org.springframework.util.xml.StaxStreamHandlerTests
-#org.springframework.util.xml.StaxResultTests
-#org.springframework.util.xml.XMLEventStreamReaderTests
-#org.springframework.util.xml.ListBasedXMLEventReaderTests
-#org.springframework.util.xml.StaxSourceTests
-#org.springframework.util.xml.StaxStreamXMLReaderTests
-#org.springframework.util.SerializationUtilsTests
+org.springframework.util.PropertiesPersisterTests
+org.springframework.util.ReflectionUtilsTests
+org.springframework.util.ResizableByteArrayOutputStreamTests
+org.springframework.util.SocketUtilsTests
+org.springframework.util.StopWatchTests
+org.springframework.util.StringUtilsTests
+org.springframework.util.TypeUtilsTests
+org.springframework.util.unit.DataSizeTests
+org.springframework.util.xml.SimpleNamespaceContextTests
+org.springframework.util.xml.StaxUtilsTests
+org.springframework.util.xml.TransformerUtilsTests
+org.springframework.util.xml.XmlValidationModeDetectorTests
