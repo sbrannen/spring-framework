@@ -1,1 +1,1 @@
-cat tests.txt | grep -v "^#" | sed 's/^/-c=/' | tr '\n' ' ' 
+cat tests.txt | grep -v "^#" | grep -v "^$" | sed 's/^/-c=/' | tr '\n' ' ' 
