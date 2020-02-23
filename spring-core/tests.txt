@@ -27,9 +27,7 @@
 # Uses Class Path Resource as File org.springframework.core.io.ResourceTests
 # Uses Class Path Scanning org.springframework.core.io.support.PathMatchingResourcePatternResolverTests
 # Uses Class Path Scanning org.springframework.core.io.support.ResourceArrayPropertyEditorTests
-# Uses Custom SecurityManager org.springframework.core.env.StandardEnvironmentTests
 # Uses DefaultParameterNameDiscoverer org.springframework.core.KotlinDefaultParameterNameDiscovererTests
-# Uses jar URL protocol org.springframework.util.ResourceUtilsTests
 # Uses Kotlin Coroutines org.springframework.core.KotlinGenericTypeResolverTests
 # Uses Kotlin Coroutines org.springframework.core.KotlinMethodParameterTests
 # Uses Kotlin Coroutines org.springframework.core.KotlinReactiveAdapterRegistryTests
@@ -41,7 +39,9 @@
 # Uses Serialization org.springframework.core.serializer.SerializationConverterTests
 # Uses Serialization org.springframework.util.AutoPopulatingListTests
 # Uses Serialization org.springframework.util.SerializationUtilsTests
-# Uses Unsupported Feature: Target_java_lang_ClassLoader.findLoadedClass0(String) org.springframework.core.type.AspectJTypeFilterTests
+# Uses Unsupported Feature: custom SecurityManager org.springframework.core.env.StandardEnvironmentTests
+# Uses Unsupported Feature: jar URL protocol org.springframework.util.ResourceUtilsTests
+# Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AspectJTypeFilterTests
 # Uses XML StAX org.springframework.util.xml.DomContentHandlerTests
 # Uses XML StAX org.springframework.util.xml.ListBasedXMLEventReaderTests
 # Uses XML StAX org.springframework.util.xml.StaxEventHandlerTests
