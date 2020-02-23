@@ -36,8 +36,6 @@
 # Uses Kotlin Coroutines org.springframework.core.ReactiveAdapterRegistryTests
 # Uses Kotlin Reflection org.springframework.core.KotlinReflectionParameterNameDiscovererTests
 # Uses Mockk org.springframework.core.env.PropertyResolverExtensionsTests
-# Uses reflection for nested types org.springframework.core.type.StandardAnnotationMetadataTests
-# Uses reflection for nested types org.springframework.core.type.StandardClassMetadataMemberClassTests
 # Uses Serialization org.springframework.core.convert.TypeDescriptorTests
 # Uses Serialization org.springframework.core.SerializableTypeWrapperTests
 # Uses Serialization org.springframework.core.serializer.SerializationConverterTests
@@ -142,6 +140,8 @@ org.springframework.core.type.classreading.ClassMetadataReadingVisitorMemberClas
 org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests
 org.springframework.core.type.classreading.SimpleMethodMetadataTests
 org.springframework.core.type.InheritedAnnotationsAnnotationMetadataTests
+org.springframework.core.type.StandardAnnotationMetadataTests
+org.springframework.core.type.StandardClassMetadataMemberClassTests
 org.springframework.core.type.StandardMethodMetadataTests
 org.springframework.util.AntPathMatcherTests
 org.springframework.util.AssertTests

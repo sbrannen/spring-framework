@@ -1,6 +1,53 @@
 [
 	{
-		"name": "java.time.ZoneRegion",
-		"allDeclaredMethods": true
+		"name":"java.time.ZoneRegion",
+		"allDeclaredMethods":true
+	},
+	{
+		"name":"org.springframework.core.type.AbstractClassMetadataMemberClassTests",
+		"allDeclaredFields":true,
+		"allDeclaredMethods":true,
+		"allPublicMethods":true,
+		"allDeclaredConstructors":true,
+		"allDeclaredClasses":true,
+		"allPublicClasses":true
+	},
+	{
+		"name":"org.springframework.core.type.AbstractClassMetadataMemberClassTests$L0_b",
+		"allDeclaredClasses":true,
+		"allPublicClasses":true
+	},
+	{
+		"name":"org.springframework.core.type.AbstractClassMetadataMemberClassTests$L0_b$L1"
+	},
+	{
+		"name":"org.springframework.core.type.AbstractClassMetadataMemberClassTests$L0_c",
+		"allDeclaredClasses":true,
+		"allPublicClasses":true
+	},
+	{
+		"name":"org.springframework.core.type.AbstractClassMetadataMemberClassTests$L0_c$L1"
+	},
+	{
+		"name":"org.springframework.core.type.AbstractAnnotationMetadataTests",
+		"allDeclaredFields":true,
+		"allDeclaredMethods":true,
+		"allPublicMethods":true,
+		"allDeclaredConstructors":true,
+		"allDeclaredClasses":true,
+		"allPublicClasses":true
+	},
+	{
+		"name":"org.springframework.core.type.AbstractAnnotationMetadataTests$TestMemberClass",
+		"allDeclaredClasses":true,
+		"allPublicClasses":true,
+		"allDeclaredClasses":true,
+		"allPublicClasses":true
+	},
+	{
+		"name":"org.springframework.core.type.AbstractAnnotationMetadataTests$TestMemberClass$TestMemberClassInnerClass"
+	},
+	{
+		"name":"org.springframework.core.type.AbstractAnnotationMetadataTests$TestMemberClass$TestMemberClassInnerInterface"
 	}
 ]
