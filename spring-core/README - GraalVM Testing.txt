@@ -137,7 +137,24 @@ DefaultConversionServiceTests:
 
 ------------------------------------------------------------------------------------------
 
+Reflection:
 
+- Member classes are not automatically registered for reflective access within a native
+	image by the JVM agent. To enable this support, one must manually set `allPublicClasses`
+	and `allDeclaredClasses` to `true` in `reflect-config.json`.
+	
+	From the GraalVM wiki:
 
+	"However, allPublicClasses and allDeclaredClasses don't automatically register the
+	inner classes for reflective access. They just make them available via Class.getClasses()
+	and Class.getDeclaredClasses() when called on the declaring class."
+
+	https://github.com/oracle/graal/blob/master/substratevm/REFLECTION.md#manual-configuration
+
+    Entries have been manually added to `reflect-config.json` for the following:
+	  - org.springframework.core.type.StandardAnnotationMetadataTests
+      - org.springframework.core.type.StandardClassMetadataMemberClassTests
+
+------------------------------------------------------------------------------------------
 
 
