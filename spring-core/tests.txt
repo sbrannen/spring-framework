@@ -23,8 +23,6 @@
 # Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.type.AnnotationTypeFilterTests
 # Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.type.AssignableTypeFilterTests
 # Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.type.classreading.AnnotationMetadataReadingVisitorTests
-# Could not initialize PropertyPlaceholderHelper org.springframework.util.PropertyPlaceholderHelperTests
-# Could not initialize PropertyPlaceholderHelper org.springframework.util.SystemPropertyUtilsTests
 # Uses ASM: class path resource [java/lang/Object.class] not found org.springframework.core.type.classreading.SimpleAnnotationMetadataTests
 # Uses Class Path Resource as File org.springframework.core.io.ResourceTests
 # Uses Class Path Scanning org.springframework.core.io.support.PathMatchingResourcePatternResolverTests
@@ -175,11 +173,13 @@ org.springframework.util.NumberUtilsTests
 org.springframework.util.ObjectUtilsTests
 org.springframework.util.PatternMatchUtilsTests
 org.springframework.util.PropertiesPersisterTests
+org.springframework.util.PropertyPlaceholderHelperTests
 org.springframework.util.ReflectionUtilsTests
 org.springframework.util.ResizableByteArrayOutputStreamTests
 org.springframework.util.SocketUtilsTests
 org.springframework.util.StopWatchTests
 org.springframework.util.StringUtilsTests
+org.springframework.util.SystemPropertyUtilsTests
 org.springframework.util.TypeUtilsTests
 org.springframework.util.unit.DataSizeTests
 org.springframework.util.xml.SimpleNamespaceContextTests
