@@ -43,16 +43,16 @@
 # Uses Serialization org.springframework.core.serializer.SerializationConverterTests
 # Uses Serialization org.springframework.util.AutoPopulatingListTests
 # Uses Serialization org.springframework.util.SerializationUtilsTests
-# Uses StAX org.springframework.util.xml.DomContentHandlerTests
-# Uses StAX org.springframework.util.xml.ListBasedXMLEventReaderTests
-# Uses StAX org.springframework.util.xml.StaxEventHandlerTests
-# Uses StAX org.springframework.util.xml.StaxResultTests
-# Uses StAX org.springframework.util.xml.StaxSourceTests
-# Uses StAX org.springframework.util.xml.StaxStreamHandlerTests
-# Uses StAX org.springframework.util.xml.XMLEventStreamReaderTests
-# Uses StAX org.springframework.util.xml.XMLEventStreamWriterTests
 # Uses Unsupported Feature: Target_java_lang_ClassLoader.findLoadedClass0(String) org.springframework.core.type.AspectJTypeFilterTests
-# Uses Xerces: javax.xml.parsers.FactoryConfigurationError: Provider com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl not found org.springframework.core.SortedPropertiesTests
+# Uses XML StAX org.springframework.util.xml.DomContentHandlerTests
+# Uses XML StAX org.springframework.util.xml.ListBasedXMLEventReaderTests
+# Uses XML StAX org.springframework.util.xml.StaxEventHandlerTests
+# Uses XML StAX org.springframework.util.xml.StaxResultTests
+# Uses XML StAX org.springframework.util.xml.StaxSourceTests
+# Uses XML StAX org.springframework.util.xml.StaxStreamHandlerTests
+# Uses XML StAX org.springframework.util.xml.XMLEventStreamReaderTests
+# Uses XML StAX org.springframework.util.xml.XMLEventStreamWriterTests
+# Uses XML Xerces: javax.xml.parsers.FactoryConfigurationError: Provider com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl not found org.springframework.core.SortedPropertiesTests
 org.springframework.core.annotation.AnnotatedElementUtilsTests
 org.springframework.core.annotation.AnnotationAttributesTests
 org.springframework.core.annotation.AnnotationAwareOrderComparatorTests
