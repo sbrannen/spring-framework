@@ -11,6 +11,11 @@
 # @UsesMockito org.springframework.util.StreamUtilsTests
 # @UsesMockito org.springframework.util.xml.StaxEventXMLReaderTests
 # @UsesMockito org.springframework.util.xml.StaxStreamXMLReaderTests
+# @UsesSerialization org.springframework.core.convert.TypeDescriptorTests
+# @UsesSerialization org.springframework.core.SerializableTypeWrapperTests
+# @UsesSerialization org.springframework.core.serializer.SerializationConverterTests
+# @UsesSerialization org.springframework.util.AutoPopulatingListTests
+# @UsesSerialization org.springframework.util.SerializationUtilsTests
 # Agent misses types org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
 # Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.io.support.ResourcePropertySourceTests
 # Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.SimpleAliasRegistryTests
@@ -29,11 +34,6 @@
 # Uses Kotlin Coroutines org.springframework.core.ReactiveAdapterRegistryTests
 # Uses Kotlin Reflection org.springframework.core.KotlinReflectionParameterNameDiscovererTests
 # Uses Mockk org.springframework.core.env.KotlinPropertyResolverExtensionsTests
-# Uses Serialization org.springframework.core.convert.TypeDescriptorTests
-# Uses Serialization org.springframework.core.SerializableTypeWrapperTests
-# Uses Serialization org.springframework.core.serializer.SerializationConverterTests
-# Uses Serialization org.springframework.util.AutoPopulatingListTests
-# Uses Serialization org.springframework.util.SerializationUtilsTests
 # Uses Unsupported Feature: custom SecurityManager org.springframework.core.env.StandardEnvironmentTests
 # Uses Unsupported Feature: jar URL protocol org.springframework.util.ResourceUtilsTests
 # Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AspectJTypeFilterTests
