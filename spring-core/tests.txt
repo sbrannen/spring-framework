@@ -28,7 +28,7 @@
 # Uses Kotlin Coroutines org.springframework.core.KotlinReactiveAdapterRegistryTests
 # Uses Kotlin Coroutines org.springframework.core.ReactiveAdapterRegistryTests
 # Uses Kotlin Reflection org.springframework.core.KotlinReflectionParameterNameDiscovererTests
-# Uses Mockk org.springframework.core.env.PropertyResolverExtensionsTests
+# Uses Mockk org.springframework.core.env.KotlinPropertyResolverExtensionsTests
 # Uses Serialization org.springframework.core.convert.TypeDescriptorTests
 # Uses Serialization org.springframework.core.SerializableTypeWrapperTests
 # Uses Serialization org.springframework.core.serializer.SerializationConverterTests
