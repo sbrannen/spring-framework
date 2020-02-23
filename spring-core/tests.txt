@@ -11,11 +11,6 @@
 # @UsesMockito org.springframework.util.StreamUtilsTests
 # @UsesMockito org.springframework.util.xml.StaxEventXMLReaderTests
 # @UsesMockito org.springframework.util.xml.StaxStreamXMLReaderTests
-# abstract org.springframework.core.type.AbstractAnnotationMetadataTests
-# abstract org.springframework.core.type.AbstractClassMetadataMemberClassTests
-# abstract org.springframework.core.type.AbstractMethodMetadataTests
-# abstract org.springframework.util.xml.AbstractStaxHandlerTests
-# abstract org.springframework.util.xml.AbstractStaxXMLReaderTests
 # Agent misses types org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
 # Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.io.support.ResourcePropertySourceTests
 # Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.SimpleAliasRegistryTests
