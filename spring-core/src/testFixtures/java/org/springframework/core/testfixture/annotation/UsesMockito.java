@@ -26,9 +26,14 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.Tag;
 
 /**
- * Indicates that the annotated test class or test method uses an API from Mockito.
+ * Indicates that the annotated test class or test method uses an API from Mockito
+ * (which internally uses ByteBuddy).
  *
- * <p>Primarily used for tagging JUnit Jupiter based test classes and test methods.
+ * <p>When executing tests within a GraalVM native image, consult the documentation for
+ * <a href="https://github.com/oracle/graal/blob/master/substratevm/LIMITATIONS.md">Native
+ * Image Java Limitations</a>.
+ *
+ * <p>Primarily intended for tagging JUnit Jupiter based test classes and test methods.
  *
  * @author Sam Brannen
  * @since 5.2.4
