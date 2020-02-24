@@ -30,7 +30,11 @@ import org.junit.jupiter.api.Tag;
  * &mdash; for example, {@link java.io.Serializable}, {@link java.io.Externalizable},
  * {@link java.io.ObjectInputStream}, {@link java.io.ObjectOutputStream}, etc.
  *
- * <p>Primarily used for tagging JUnit Jupiter based test classes and test methods.
+ * <p>When executing tests within a GraalVM native image, consult the documentation for
+ * <a href="https://github.com/oracle/graal/blob/master/substratevm/LIMITATIONS.md">Native
+ * Image Java Limitations</a>.
+ *
+ * <p>Primarily intended for tagging JUnit Jupiter based test classes and test methods.
  *
  * @author Sam Brannen
  * @since 5.2.4
