@@ -17,7 +17,3 @@ native-image \
 	org.junit.platform.console.ConsoleLauncher
 
 exit
-
-	--verbose \
-	--initialize-at-run-time=net.bytebuddy,net.bytebuddy.description.method,net.bytebuddy.implementation,net.bytebuddy.implementation.bind,net.bytebuddy.implementation.bind.annotation,net.bytebuddy.implementation.bind.annotation.Argument\$BindingMechanic,net.bytebuddy.implementation.bind.annotation.Super,net.bytebuddy.implementation.bind.annotation.Super\$Instantiation \
-	-H:DynamicProxyConfigurationFiles=proxy-config.json \
