@@ -17,13 +17,6 @@
 # @UsesSerialization org.springframework.util.AutoPopulatingListTests
 # @UsesSerialization org.springframework.util.SerializationUtilsTests
 # Agent misses types org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
-# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.io.support.ResourcePropertySourceTests
-# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.SimpleAliasRegistryTests
-# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.task.SimpleAsyncTaskExecutorTests
-# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.type.AnnotationTypeFilterTests
-# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.type.AssignableTypeFilterTests
-# Could not initialize class org.apache.commons.logging.LogAdapter$Log4jLog org.springframework.core.type.classreading.AnnotationMetadataReadingVisitorTests
-# Uses ASM: class path resource [java/lang/Object.class] not found org.springframework.core.type.classreading.SimpleAnnotationMetadataTests
 # Uses Class Path Resource as File org.springframework.core.io.ResourceTests
 # Uses Class Path Scanning org.springframework.core.io.support.PathMatchingResourcePatternResolverTests
 # Uses Class Path Scanning org.springframework.core.io.support.ResourceArrayPropertyEditorTests
@@ -36,7 +29,9 @@
 # Uses Mockk org.springframework.core.env.KotlinPropertyResolverExtensionsTests
 # Uses Unsupported Feature: custom SecurityManager org.springframework.core.env.StandardEnvironmentTests
 # Uses Unsupported Feature: jar URL protocol org.springframework.util.ResourceUtilsTests
+# Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AnnotationTypeFilterTests
 # Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AspectJTypeFilterTests
+# Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AssignableTypeFilterTests
 # Uses XML StAX org.springframework.util.xml.DomContentHandlerTests
 # Uses XML StAX org.springframework.util.xml.ListBasedXMLEventReaderTests
 # Uses XML StAX org.springframework.util.xml.StaxEventHandlerTests
@@ -116,6 +111,7 @@ org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocato
 org.springframework.core.io.buffer.support.DataBufferTestUtilsTests
 org.springframework.core.io.ResourceEditorTests
 org.springframework.core.io.support.EncodedResourceTests
+org.springframework.core.io.support.ResourcePropertySourceTests
 org.springframework.core.io.support.SpringFactoriesLoaderTests
 org.springframework.core.LocalVariableTableParameterNameDiscovererTests
 org.springframework.core.log.LogSupportTests
@@ -124,15 +120,19 @@ org.springframework.core.NestedExceptionTests
 org.springframework.core.OrderComparatorTests
 org.springframework.core.ParameterizedTypeReferenceTests
 org.springframework.core.PrioritizedParameterNameDiscovererTests
+org.springframework.core.SimpleAliasRegistryTests
 org.springframework.core.StandardReflectionParameterNameDiscoverTests
 org.springframework.core.style.DefaultValueStylerTests
 org.springframework.core.style.ToStringCreatorTests
+org.springframework.core.task.SimpleAsyncTaskExecutorTests
 org.springframework.core.testfixture.TestGroupParsingTests
 org.springframework.core.testfixture.TestGroupTests
 org.springframework.core.type.AnnotationMetadataTests
 org.springframework.core.type.CachingMetadataReaderLeakTests
+org.springframework.core.type.classreading.AnnotationMetadataReadingVisitorTests
 org.springframework.core.type.classreading.ClassMetadataReadingVisitorMemberClassTests
 org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests
+org.springframework.core.type.classreading.SimpleAnnotationMetadataTests
 org.springframework.core.type.classreading.SimpleMethodMetadataTests
 org.springframework.core.type.InheritedAnnotationsAnnotationMetadataTests
 org.springframework.core.type.StandardAnnotationMetadataTests
