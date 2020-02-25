@@ -21,6 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AbstractAnnotationMetadataTests.TestMemberClass.TestMemberClassInnerClass;
 import org.springframework.core.type.AbstractAnnotationMetadataTests.TestMemberClass.TestMemberClassInnerInterface;
@@ -103,7 +104,10 @@ public abstract class AbstractAnnotationMetadataTests {
 
 	@Test
 	public void getSuperClassNameWhenHasNoSuperClassReturnsNull() {
-		assertThat(get(Object.class).getSuperClassName()).isNull();
+		// In native image: class path resource [java/lang/Object.class] not found
+		if (!GraalVmDetector.inImageCode()) {
+			assertThat(get(Object.class).getSuperClassName()).isNull();
+		}
 		assertThat(get(TestInterface.class).getSuperClassName()).isNull();
 		assertThat(get(TestSubInterface.class).getSuperClassName()).isNull();
 	}
