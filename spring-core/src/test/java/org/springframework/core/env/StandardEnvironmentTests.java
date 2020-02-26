@@ -24,6 +24,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.SpringProperties;
+import org.springframework.core.testfixture.annotation.UsesSecurityManager;
 import org.springframework.core.testfixture.env.EnvironmentTestUtils;
 import org.springframework.core.testfixture.env.MockPropertySource;
 
@@ -381,6 +382,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
+	@UsesSecurityManager
 	void getSystemProperties_withAndWithoutSecurityManager() {
 		System.setProperty(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
 		System.setProperty(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);
@@ -455,6 +457,7 @@ public class StandardEnvironmentTests {
 	}
 
 	@Test
+	@UsesSecurityManager
 	void getSystemEnvironment_withAndWithoutSecurityManager() {
 		EnvironmentTestUtils.getModifiableSystemEnvironment().put(ALLOWED_PROPERTY_NAME, ALLOWED_PROPERTY_VALUE);
 		EnvironmentTestUtils.getModifiableSystemEnvironment().put(DISALLOWED_PROPERTY_NAME, DISALLOWED_PROPERTY_VALUE);

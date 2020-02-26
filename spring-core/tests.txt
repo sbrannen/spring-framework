@@ -25,7 +25,6 @@
 # Agent misses types org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
 # Uses Class Path Scanning org.springframework.core.io.support.PathMatchingResourcePatternResolverTests
 # Uses Class Path Scanning org.springframework.core.io.support.ResourceArrayPropertyEditorTests
-# Uses Unsupported Feature: custom SecurityManager org.springframework.core.env.StandardEnvironmentTests
 # Uses Unsupported Feature: jar URL protocol org.springframework.util.ResourceUtilsTests
 # Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AnnotationTypeFilterTests
 # Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AspectJTypeFilterTests
@@ -95,6 +94,7 @@ org.springframework.core.env.PropertySourcesPropertyResolverTests
 org.springframework.core.env.PropertySourceTests
 org.springframework.core.env.SimpleCommandLineArgsParserTests
 org.springframework.core.env.SimpleCommandLinePropertySourceTests
+org.springframework.core.env.StandardEnvironmentTests
 org.springframework.core.env.SystemEnvironmentPropertySourceTests
 org.springframework.core.ExceptionDepthComparatorTests
 org.springframework.core.GenericTypeResolverTests
