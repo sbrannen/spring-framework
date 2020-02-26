@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,12 @@ import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.util.FileCopyUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
@@ -118,6 +120,14 @@ class ResourceTests {
 
 	@Test
 	void classPathResourceWithClass() throws IOException {
+		// java.io.FileNotFoundException: class path resource [org/springframework/core/io/../SpringVersion.class]
+		// cannot be resolved to URL because it does not exist
+		//
+		// The above exception occurs because the relative path is not cleaned in this particular use case
+		// (i.e., when the ClassPathResource(String,Class) constructor is used and a new ClassPathResource
+		// is later created via createRelative(...) in doTestResource()).
+		assumeFalse(GraalVmDetector.inImageCode(), "Relative classpath resource lookup fails in GraalVM native image");
+
 		Resource resource = new ClassPathResource("Resource.class", getClass());
 		doTestResource(resource);
 		assertThat(new ClassPathResource("Resource.class", getClass())).isEqualTo(resource);
@@ -125,6 +135,8 @@ class ResourceTests {
 
 	@Test
 	void fileSystemResource() throws IOException {
+		assumeFalse(GraalVmDetector.inImageCode(), "Uses classpath resource as File within native image");
+
 		String file = getClass().getResource("Resource.class").getFile();
 		Resource resource = new FileSystemResource(file);
 		doTestResource(resource);
@@ -133,6 +145,8 @@ class ResourceTests {
 
 	@Test
 	void fileSystemResourceWithFile() throws IOException {
+		assumeFalse(GraalVmDetector.inImageCode(), "Uses classpath resource as File within native image");
+
 		File file = new File(getClass().getResource("Resource.class").getFile());
 		Resource resource = new FileSystemResource(file);
 		doTestResource(resource);
@@ -141,6 +155,8 @@ class ResourceTests {
 
 	@Test
 	void fileSystemResourceWithFilePath() throws Exception {
+		assumeFalse(GraalVmDetector.inImageCode(), "Uses classpath resource as File within native image");
+
 		Path filePath = Paths.get(getClass().getResource("Resource.class").toURI());
 		Resource resource = new FileSystemResource(filePath);
 		doTestResource(resource);
@@ -155,6 +171,8 @@ class ResourceTests {
 
 	@Test
 	void urlResource() throws IOException {
+		assumeFalse(GraalVmDetector.inImageCode(), "Relative resource X.class incorrectly appears to 'exist' within a GraalVM native image.");
+
 		Resource resource = new UrlResource(getClass().getResource("Resource.class"));
 		doTestResource(resource);
 		assertThat(resource).isEqualTo(new UrlResource(getClass().getResource("Resource.class")));
@@ -173,7 +191,10 @@ class ResourceTests {
 		assertThat(resource.exists()).isTrue();
 		assertThat(resource.isReadable()).isTrue();
 		assertThat(resource.contentLength() > 0).isTrue();
-		assertThat(resource.lastModified() > 0).isTrue();
+		// "last modified" seems not to be supported for classpath resources within a native image
+		if (!GraalVmDetector.inImageCode()) {
+			assertThat(resource.lastModified() > 0).isTrue();
+		}
 
 		Resource relative1 = resource.createRelative("ClassPathResource.class");
 		assertThat(relative1.getFilename()).isEqualTo("ClassPathResource.class");
@@ -181,7 +202,10 @@ class ResourceTests {
 		assertThat(relative1.exists()).isTrue();
 		assertThat(relative1.isReadable()).isTrue();
 		assertThat(relative1.contentLength() > 0).isTrue();
-		assertThat(relative1.lastModified() > 0).isTrue();
+		// "last modified" seems not to be supported for classpath resources within a native image
+		if (!GraalVmDetector.inImageCode()) {
+			assertThat(relative1.lastModified() > 0).isTrue();
+		}
 
 		Resource relative2 = resource.createRelative("support/ResourcePatternResolver.class");
 		assertThat(relative2.getFilename()).isEqualTo("ResourcePatternResolver.class");
@@ -189,7 +213,10 @@ class ResourceTests {
 		assertThat(relative2.exists()).isTrue();
 		assertThat(relative2.isReadable()).isTrue();
 		assertThat(relative2.contentLength() > 0).isTrue();
-		assertThat(relative2.lastModified() > 0).isTrue();
+		// "last modified" seems not to be supported for classpath resources within a native image
+		if (!GraalVmDetector.inImageCode()) {
+			assertThat(relative2.lastModified() > 0).isTrue();
+		}
 
 		Resource relative3 = resource.createRelative("../SpringVersion.class");
 		assertThat(relative3.getFilename()).isEqualTo("SpringVersion.class");
@@ -197,15 +224,16 @@ class ResourceTests {
 		assertThat(relative3.exists()).isTrue();
 		assertThat(relative3.isReadable()).isTrue();
 		assertThat(relative3.contentLength() > 0).isTrue();
-		assertThat(relative3.lastModified() > 0).isTrue();
+		// "last modified" seems not to be supported for classpath resources within a native image
+		if (!GraalVmDetector.inImageCode()) {
+			assertThat(relative3.lastModified() > 0).isTrue();
+		}
 
 		Resource relative4 = resource.createRelative("X.class");
 		assertThat(relative4.exists()).isFalse();
 		assertThat(relative4.isReadable()).isFalse();
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
-				relative4::contentLength);
-		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(
-				relative4::lastModified);
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::contentLength);
+		assertThatExceptionOfType(FileNotFoundException.class).isThrownBy(relative4::lastModified);
 	}
 
 	@Test
@@ -297,6 +325,8 @@ class ResourceTests {
 
 	@Test
 	void readableChannel() throws IOException {
+		assumeFalse(GraalVmDetector.inImageCode(), "Uses classpath resource as File within native image");
+
 		Resource resource = new FileSystemResource(getClass().getResource("Resource.class").getFile());
 		ReadableByteChannel channel = null;
 		try {

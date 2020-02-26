@@ -11,6 +11,7 @@ native-image \
 	-H:+TraceClassInitialization \
 	-H:+ReportExceptionStackTraces \
 	-H:+AddAllCharsets \
+	-H:EnableURLProtocols=https \
 	-H:Name=build/spring-core-tests.bin \
 	-Dverbose=true \
 	-Dlog4j2.disable.jmx=true \

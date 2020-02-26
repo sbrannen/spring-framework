@@ -17,7 +17,6 @@
 # @UsesSerialization org.springframework.util.AutoPopulatingListTests
 # @UsesSerialization org.springframework.util.SerializationUtilsTests
 # Agent misses types org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
-# Uses Class Path Resource as File org.springframework.core.io.ResourceTests
 # Uses Class Path Scanning org.springframework.core.io.support.PathMatchingResourcePatternResolverTests
 # Uses Class Path Scanning org.springframework.core.io.support.ResourceArrayPropertyEditorTests
 # Uses DefaultParameterNameDiscoverer org.springframework.core.KotlinDefaultParameterNameDiscovererTests
@@ -110,6 +109,7 @@ org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocato
 org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocatorWithPreferDirectTrueTests
 org.springframework.core.io.buffer.support.DataBufferTestUtilsTests
 org.springframework.core.io.ResourceEditorTests
+org.springframework.core.io.ResourceTests
 org.springframework.core.io.support.EncodedResourceTests
 org.springframework.core.io.support.ResourcePropertySourceTests
 org.springframework.core.io.support.SpringFactoriesLoaderTests
