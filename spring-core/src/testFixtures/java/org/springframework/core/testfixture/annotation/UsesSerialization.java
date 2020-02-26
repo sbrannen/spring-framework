@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Tag;
  * @author Sam Brannen
  * @since 5.2.5
  */
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @Documented
