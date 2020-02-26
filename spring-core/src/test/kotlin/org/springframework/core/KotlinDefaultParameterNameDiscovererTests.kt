@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.springframework.core
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
+import org.springframework.core.testfixture.annotation.UsesKotlinReflection
+
+@UsesKotlinReflection
 class KotlinDefaultParameterNameDiscovererTests {
 
 	private val parameterNameDiscoverer = DefaultParameterNameDiscoverer()
@@ -33,4 +36,5 @@ class KotlinDefaultParameterNameDiscovererTests {
 		val actualParams = parameterNameDiscoverer.getParameterNames(constructor)
 		assertThat(actualParams!!.size).isEqualTo(2)
 	}
+
 }

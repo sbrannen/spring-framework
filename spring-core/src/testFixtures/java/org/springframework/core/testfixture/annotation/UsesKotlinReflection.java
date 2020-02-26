@@ -26,8 +26,8 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.Tag;
 
 /**
- * Indicates that the annotated test class or test method uses an API from Mockito
- * (which internally uses ByteBuddy).
+ * Indicates that the annotated test class or test method uses Kotlin reflection
+ * support.
  *
  * <p>When executing tests within a GraalVM native image, consult the documentation for
  * <a href="https://github.com/oracle/graal/blob/master/substratevm/LIMITATIONS.md">Native
@@ -42,6 +42,6 @@ import org.junit.jupiter.api.Tag;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @Documented
-@Tag("uses-mockito")
-public @interface UsesMockito {
+@Tag("uses-kotlin-reflection")
+public @interface UsesKotlinReflection {
 }
