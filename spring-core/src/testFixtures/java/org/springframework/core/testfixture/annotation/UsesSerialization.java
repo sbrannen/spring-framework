@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Tag;
  * <p>Primarily intended for tagging JUnit Jupiter based test classes and test methods.
  *
  * @author Sam Brannen
- * @since 5.2.4
+ * @since 5.2.5
  */
 @Retention(RetentionPolicy.CLASS)
 @Target({ElementType.TYPE, ElementType.METHOD})

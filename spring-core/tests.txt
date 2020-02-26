@@ -1,3 +1,8 @@
+# @UsesKotlinCoroutines org.springframework.core.KotlinGenericTypeResolverTests
+# @UsesKotlinCoroutines org.springframework.core.KotlinMethodParameterTests
+# @UsesKotlinCoroutines org.springframework.core.KotlinReactiveAdapterRegistryTests
+# @UsesKotlinReflection org.springframework.core.KotlinDefaultParameterNameDiscovererTests
+# @UsesKotlinReflection org.springframework.core.KotlinReflectionParameterNameDiscovererTests
 # @UsesMockito org.springframework.core.annotation.AttributeMethodsTests
 # @UsesMockito org.springframework.core.annotation.MergedAnnotationsCollectionTests
 # @UsesMockito org.springframework.core.io.buffer.DataBufferUtilsTests
@@ -11,6 +16,7 @@
 # @UsesMockito org.springframework.util.StreamUtilsTests
 # @UsesMockito org.springframework.util.xml.StaxEventXMLReaderTests
 # @UsesMockito org.springframework.util.xml.StaxStreamXMLReaderTests
+# @UsesMockk org.springframework.core.env.KotlinPropertyResolverExtensionsTests
 # @UsesSerialization org.springframework.core.convert.TypeDescriptorTests
 # @UsesSerialization org.springframework.core.SerializableTypeWrapperTests
 # @UsesSerialization org.springframework.core.serializer.SerializationConverterTests
@@ -19,13 +25,6 @@
 # Agent misses types org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
 # Uses Class Path Scanning org.springframework.core.io.support.PathMatchingResourcePatternResolverTests
 # Uses Class Path Scanning org.springframework.core.io.support.ResourceArrayPropertyEditorTests
-# Uses DefaultParameterNameDiscoverer org.springframework.core.KotlinDefaultParameterNameDiscovererTests
-# Uses Kotlin Coroutines org.springframework.core.KotlinGenericTypeResolverTests
-# Uses Kotlin Coroutines org.springframework.core.KotlinMethodParameterTests
-# Uses Kotlin Coroutines org.springframework.core.KotlinReactiveAdapterRegistryTests
-# Uses Kotlin Coroutines org.springframework.core.ReactiveAdapterRegistryTests
-# Uses Kotlin Reflection org.springframework.core.KotlinReflectionParameterNameDiscovererTests
-# Uses Mockk org.springframework.core.env.KotlinPropertyResolverExtensionsTests
 # Uses Unsupported Feature: custom SecurityManager org.springframework.core.env.StandardEnvironmentTests
 # Uses Unsupported Feature: jar URL protocol org.springframework.util.ResourceUtilsTests
 # Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AnnotationTypeFilterTests
@@ -120,6 +119,7 @@ org.springframework.core.NestedExceptionTests
 org.springframework.core.OrderComparatorTests
 org.springframework.core.ParameterizedTypeReferenceTests
 org.springframework.core.PrioritizedParameterNameDiscovererTests
+org.springframework.core.ReactiveAdapterRegistryTests
 org.springframework.core.SimpleAliasRegistryTests
 org.springframework.core.StandardReflectionParameterNameDiscoverTests
 org.springframework.core.style.DefaultValueStylerTests

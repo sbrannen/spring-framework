@@ -21,11 +21,14 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
 
+import org.springframework.core.testfixture.annotation.UsesMockk
+
 /**
  * Mock object based tests for PropertyResolver Kotlin extensions.
  *
  * @author Sebastien Deleuze
  */
+@UsesMockk
 class KotlinPropertyResolverExtensionsTests {
 
 	val propertyResolver = mockk<PropertyResolver>()

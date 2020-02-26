@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.springframework.core
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.core.GenericTypeResolver.resolveReturnTypeArgument
 import java.lang.reflect.Method
+
+import org.springframework.core.GenericTypeResolver.resolveReturnTypeArgument
+import org.springframework.core.testfixture.annotation.UsesKotlinCoroutines
 
 /**
  * Tests for Kotlin support in [GenericTypeResolver].
@@ -27,6 +29,7 @@ import java.lang.reflect.Method
  * @author Konrad Kaminski
  * @author Sebastien Deleuze
  */
+@UsesKotlinCoroutines
 class KotlinGenericTypeResolverTests {
 
 	@Test

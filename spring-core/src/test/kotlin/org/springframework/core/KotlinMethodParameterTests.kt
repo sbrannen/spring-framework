@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import kotlin.coroutines.Continuation
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.jvm.javaMethod
 
+import org.springframework.core.testfixture.annotation.UsesKotlinCoroutines
+
 /**
  * Tests for Kotlin support in [MethodParameter].
  *
@@ -32,6 +34,7 @@ import kotlin.reflect.jvm.javaMethod
  * @author Juergen Hoeller
  * @author Konrad Kaminski
  */
+@UsesKotlinCoroutines
 class KotlinMethodParameterTests {
 
 	private val nullableMethod: Method = javaClass.getMethod("nullable", String::class.java)

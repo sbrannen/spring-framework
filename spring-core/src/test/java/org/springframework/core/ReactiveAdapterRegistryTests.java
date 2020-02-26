@@ -29,6 +29,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.testfixture.annotation.UsesKotlinCoroutines;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -340,6 +342,7 @@ class ReactiveAdapterRegistryTests {
 	}
 
 	@Nested
+	@UsesKotlinCoroutines
 	class Kotlin {
 
 		@Test
