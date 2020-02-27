@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.annotation.UsesClassPathScanning;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -98,6 +100,7 @@ class PathMatchingResourcePatternResolverTests {
 	}
 
 	@Test
+	@UsesClassPathScanning
 	void getResourcesOnFileSystemContainingHashtagsInTheirFileNames() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/**/resource#test*.txt");
 		assertThat(resources).extracting(Resource::getFile).extracting(File::getName)
@@ -105,18 +108,21 @@ class PathMatchingResourcePatternResolverTests {
 	}
 
 	@Test
+	@UsesClassPathScanning
 	void classpathWithPatternInJar() throws IOException {
 		Resource[] resources = resolver.getResources("classpath:reactor/util/annotation/*.class");
 		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTOR_UTIL_ANNOTATIONS);
 	}
 
 	@Test
+	@UsesClassPathScanning
 	void classpathStarWithPatternInJar() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:reactor/util/annotation/*.class");
 		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_REACTOR_UTIL_ANNOTATIONS);
 	}
 
 	@Test
+	@UsesClassPathScanning
 	void rootPatternRetrievalInJarFiles() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:*.dtd");
 		boolean found = false;
@@ -153,8 +159,11 @@ class PathMatchingResourcePatternResolverTests {
 
 		assertThat(resources.length).as("Correct number of files found").isEqualTo(filenames.length);
 		for (Resource resource : resources) {
-			String actualProtocol = resource.getURL().getProtocol();
-			assertThat(actualProtocol).isEqualTo(protocol);
+			// The protocol can change within a GraalVM native image.
+			if (!GraalVmDetector.inImageCode()) {
+				String actualProtocol = resource.getURL().getProtocol();
+				assertThat(actualProtocol).isEqualTo(protocol);
+			}
 			assertFilenameIn(resource, filenames);
 		}
 	}
