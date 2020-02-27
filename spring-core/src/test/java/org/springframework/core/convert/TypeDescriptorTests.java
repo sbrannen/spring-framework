@@ -56,7 +56,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
  * @author Nathan Piper
  */
 @SuppressWarnings("rawtypes")
-@UsesSerialization
 class TypeDescriptorTests {
 
 	@Test
@@ -726,6 +725,7 @@ class TypeDescriptorTests {
 	}
 
 	@Test
+	@UsesSerialization
 	void serializable() throws Exception {
 		TypeDescriptor typeDescriptor = TypeDescriptor.forObject("");
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
