@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.annotation.UsesClassPathScanning;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 /**
  * @author Dave Syer
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 class ResourceArrayPropertyEditorTests {
 
@@ -37,11 +39,12 @@ class ResourceArrayPropertyEditorTests {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath:org/springframework/core/io/support/ResourceArrayPropertyEditor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
-		assertThat(resources).isNotNull();
+		assertThat(resources).hasSize(1);
 		assertThat(resources[0].exists()).isTrue();
 	}
 
 	@Test
+	@UsesClassPathScanning
 	void patternResource() {
 		// N.B. this will sometimes fail if you use classpath: instead of classpath*:.
 		// The result depends on the classpath - if test-classes are segregated from classes
@@ -50,36 +53,35 @@ class ResourceArrayPropertyEditorTests {
 		PropertyEditor editor = new ResourceArrayPropertyEditor();
 		editor.setAsText("classpath*:org/springframework/core/io/support/Resource*Editor.class");
 		Resource[] resources = (Resource[]) editor.getValue();
-		assertThat(resources).isNotNull();
+		assertThat(resources).hasSizeGreaterThanOrEqualTo(1);
 		assertThat(resources[0].exists()).isTrue();
 	}
 
 	@Test
 	void systemPropertyReplacement() {
-		PropertyEditor editor = new ResourceArrayPropertyEditor();
-		System.setProperty("test.prop", "foo");
 		try {
+			PropertyEditor editor = new ResourceArrayPropertyEditor();
+			System.setProperty("test.prop", "foo");
 			editor.setAsText("${test.prop}");
 			Resource[] resources = (Resource[]) editor.getValue();
+			assertThat(resources).hasSize(1);
 			assertThat(resources[0].getFilename()).isEqualTo("foo");
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
 	@Test
 	void strictSystemPropertyReplacementWithUnresolvablePlaceholder() {
-		PropertyEditor editor = new ResourceArrayPropertyEditor(
-				new PathMatchingResourcePatternResolver(), new StandardEnvironment(),
-				false);
-		System.setProperty("test.prop", "foo");
 		try {
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					editor.setAsText("${test.prop}-${bar}"));
+			PropertyEditor editor = new ResourceArrayPropertyEditor(
+				new PathMatchingResourcePatternResolver(), new StandardEnvironment(), false);
+			System.setProperty("test.prop", "foo");
+			assertThatIllegalArgumentException().isThrownBy(() -> editor.setAsText("${test.prop}-${bar}"));
 		}
 		finally {
-			System.getProperties().remove("test.prop");
+			System.clearProperty("test.prop");
 		}
 	}
 
