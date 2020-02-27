@@ -17,11 +17,6 @@
 # @UsesMockito org.springframework.util.xml.StaxEventXMLReaderTests
 # @UsesMockito org.springframework.util.xml.StaxStreamXMLReaderTests
 # @UsesMockk org.springframework.core.env.KotlinPropertyResolverExtensionsTests
-# @UsesSerialization org.springframework.core.convert.TypeDescriptorTests
-# @UsesSerialization org.springframework.core.SerializableTypeWrapperTests
-# @UsesSerialization org.springframework.core.serializer.SerializationConverterTests
-# @UsesSerialization org.springframework.util.AutoPopulatingListTests
-# @UsesSerialization org.springframework.util.SerializationUtilsTests
 # Uses Unsupported Feature: jar URL protocol org.springframework.util.ResourceUtilsTests
 # Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AnnotationTypeFilterTests
 # Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AspectJTypeFilterTests
@@ -82,6 +77,7 @@ org.springframework.core.convert.support.CollectionToCollectionConverterTests
 org.springframework.core.convert.support.GenericConversionServiceTests
 org.springframework.core.convert.support.MapToMapConverterTests
 org.springframework.core.convert.support.StreamConverterTests
+org.springframework.core.convert.TypeDescriptorTests
 org.springframework.core.env.CompositePropertySourceTests
 org.springframework.core.env.CustomEnvironmentTests
 org.springframework.core.env.JOptCommandLinePropertySourceTests
@@ -119,6 +115,8 @@ org.springframework.core.OrderComparatorTests
 org.springframework.core.ParameterizedTypeReferenceTests
 org.springframework.core.PrioritizedParameterNameDiscovererTests
 org.springframework.core.ReactiveAdapterRegistryTests
+org.springframework.core.SerializableTypeWrapperTests
+org.springframework.core.serializer.SerializationConverterTests
 org.springframework.core.SimpleAliasRegistryTests
 org.springframework.core.StandardReflectionParameterNameDiscoverTests
 org.springframework.core.style.DefaultValueStylerTests
@@ -140,6 +138,7 @@ org.springframework.core.type.StandardClassMetadataMemberClassTests
 org.springframework.core.type.StandardMethodMetadataTests
 org.springframework.util.AntPathMatcherTests
 org.springframework.util.AssertTests
+org.springframework.util.AutoPopulatingListTests
 org.springframework.util.Base64UtilsTests
 org.springframework.util.ClassUtilsTests
 org.springframework.util.CollectionUtilsTests
@@ -171,6 +170,7 @@ org.springframework.util.PropertiesPersisterTests
 org.springframework.util.PropertyPlaceholderHelperTests
 org.springframework.util.ReflectionUtilsTests
 org.springframework.util.ResizableByteArrayOutputStreamTests
+org.springframework.util.SerializationUtilsTests
 org.springframework.util.SocketUtilsTests
 org.springframework.util.StopWatchTests
 org.springframework.util.StringUtilsTests

@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-@UsesSerialization
 class AutoPopulatingListTests {
 
 	@Test
@@ -91,6 +90,7 @@ class AutoPopulatingListTests {
 	}
 
 	@Test
+	@UsesSerialization
 	void serialization() throws Exception {
 		AutoPopulatingList<?> list = new AutoPopulatingList<Object>(TestObject.class);
 		assertThat(SerializationTestUtils.serializeAndDeserialize(list)).isEqualTo(list);
