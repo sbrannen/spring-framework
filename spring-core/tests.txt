@@ -22,7 +22,6 @@
 # @UsesSerialization org.springframework.core.serializer.SerializationConverterTests
 # @UsesSerialization org.springframework.util.AutoPopulatingListTests
 # @UsesSerialization org.springframework.util.SerializationUtilsTests
-# Agent misses types org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
 # Uses Unsupported Feature: jar URL protocol org.springframework.util.ResourceUtilsTests
 # Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AnnotationTypeFilterTests
 # Uses Unsupported Feature: java.lang.ClassLoader.findLoadedClass0(String) org.springframework.core.type.AspectJTypeFilterTests
@@ -132,6 +131,7 @@ org.springframework.core.type.CachingMetadataReaderLeakTests
 org.springframework.core.type.classreading.AnnotationMetadataReadingVisitorTests
 org.springframework.core.type.classreading.ClassMetadataReadingVisitorMemberClassTests
 org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests
+org.springframework.core.type.classreading.MethodMetadataReadingVisitorTests
 org.springframework.core.type.classreading.SimpleAnnotationMetadataTests
 org.springframework.core.type.classreading.SimpleMethodMetadataTests
 org.springframework.core.type.InheritedAnnotationsAnnotationMetadataTests
