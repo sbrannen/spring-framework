@@ -17,7 +17,6 @@
 # @UsesMockito org.springframework.util.xml.StaxEventXMLReaderTests
 # @UsesMockito org.springframework.util.xml.StaxStreamXMLReaderTests
 # @UsesMockk org.springframework.core.env.KotlinPropertyResolverExtensionsTests
-# Uses Unsupported Feature: jar URL protocol org.springframework.util.ResourceUtilsTests
 # Uses XML StAX org.springframework.util.xml.DomContentHandlerTests
 # Uses XML StAX org.springframework.util.xml.ListBasedXMLEventReaderTests
 # Uses XML StAX org.springframework.util.xml.StaxEventHandlerTests
@@ -170,6 +169,7 @@ org.springframework.util.PropertiesPersisterTests
 org.springframework.util.PropertyPlaceholderHelperTests
 org.springframework.util.ReflectionUtilsTests
 org.springframework.util.ResizableByteArrayOutputStreamTests
+org.springframework.util.ResourceUtilsTests
 org.springframework.util.SerializationUtilsTests
 org.springframework.util.SocketUtilsTests
 org.springframework.util.StopWatchTests
