@@ -8,6 +8,7 @@ native-image \
 	--initialize-at-build-time=org.springframework.core.type.AnnotationMetadataTests\$SubclassEnum\$1,org.springframework.core.type.AnnotationMetadataTests\$SubclassEnum\$2 \
 	--initialize-at-run-time=org.apache.logging.log4j.core.async.AsyncLoggerConfigDisruptor,org.apache.logging.log4j.core.async.AsyncLoggerContext,org.apache.logging.log4j.core.config.yaml.YamlConfiguration,org.apache.logging.log4j.core.pattern.JAnsiTextRenderer \
 	--initialize-at-run-time=org.apache.commons.logging.LogAdapter,org.apache.commons.logging.LogAdapter\$Log4jLog \
+	-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages \
 	-H:+TraceClassInitialization \
 	-H:+ReportExceptionStackTraces \
 	-H:+AddAllCharsets \

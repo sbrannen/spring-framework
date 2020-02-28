@@ -17,14 +17,6 @@
 # @UsesMockito org.springframework.util.xml.StaxEventXMLReaderTests
 # @UsesMockito org.springframework.util.xml.StaxStreamXMLReaderTests
 # @UsesMockk org.springframework.core.env.KotlinPropertyResolverExtensionsTests
-# Uses XML StAX org.springframework.util.xml.DomContentHandlerTests
-# Uses XML StAX org.springframework.util.xml.ListBasedXMLEventReaderTests
-# Uses XML StAX org.springframework.util.xml.StaxEventHandlerTests
-# Uses XML StAX org.springframework.util.xml.StaxResultTests
-# Uses XML StAX org.springframework.util.xml.StaxSourceTests
-# Uses XML StAX org.springframework.util.xml.StaxStreamHandlerTests
-# Uses XML StAX org.springframework.util.xml.XMLEventStreamReaderTests
-# Uses XML StAX org.springframework.util.xml.XMLEventStreamWriterTests
 org.springframework.core.annotation.AnnotatedElementUtilsTests
 org.springframework.core.annotation.AnnotationAttributesTests
 org.springframework.core.annotation.AnnotationAwareOrderComparatorTests
@@ -177,7 +169,15 @@ org.springframework.util.StringUtilsTests
 org.springframework.util.SystemPropertyUtilsTests
 org.springframework.util.TypeUtilsTests
 org.springframework.util.unit.DataSizeTests
+org.springframework.util.xml.DomContentHandlerTests
+org.springframework.util.xml.ListBasedXMLEventReaderTests
 org.springframework.util.xml.SimpleNamespaceContextTests
+org.springframework.util.xml.StaxEventHandlerTests
+org.springframework.util.xml.StaxResultTests
+org.springframework.util.xml.StaxSourceTests
+org.springframework.util.xml.StaxStreamHandlerTests
 org.springframework.util.xml.StaxUtilsTests
 org.springframework.util.xml.TransformerUtilsTests
+org.springframework.util.xml.XMLEventStreamReaderTests
+org.springframework.util.xml.XMLEventStreamWriterTests
 org.springframework.util.xml.XmlValidationModeDetectorTests
