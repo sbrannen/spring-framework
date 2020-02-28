@@ -159,8 +159,9 @@ class PathMatchingResourcePatternResolverTests {
 
 		assertThat(resources.length).as("Correct number of files found").isEqualTo(filenames.length);
 		for (Resource resource : resources) {
-			// The protocol can change within a GraalVM native image.
 			if (!GraalVmDetector.inImageCode()) {
+				// The protocol can change to something unexpected within a GraalVM native image.
+				// For example it appears that the protocol is often "resource" within a native image.
 				String actualProtocol = resource.getURL().getProtocol();
 				assertThat(actualProtocol).isEqualTo(protocol);
 			}

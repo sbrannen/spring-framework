@@ -23,14 +23,13 @@ import java.lang.reflect.Method;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.GraalVmDetector;
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * Tests that trigger annotation introspection failures and ensure that they are
@@ -44,10 +43,8 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 class AnnotationIntrospectionFailureTests {
 
 	@Test
+	@DisabledInGraalVmNativeImage("GraalVM native image uses a single ClassLoader to load all classes")
 	void filteredTypeThrowsTypeNotPresentException() throws Exception {
-		assumeFalse(GraalVmDetector.inImageCode(),
-				"Aborted since a GraalVM native image uses the system ClassLoader to load classes by name.");
-
 		FilteringClassLoader classLoader = new FilteringClassLoader(
 				getClass().getClassLoader());
 		Class<?> withExampleAnnotation = ClassUtils.forName(
@@ -62,10 +59,8 @@ class AnnotationIntrospectionFailureTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
+	@DisabledInGraalVmNativeImage("GraalVM native image uses a single ClassLoader to load all classes")
 	void filteredTypeInMetaAnnotationWhenUsingAnnotatedElementUtilsHandlesException() throws Exception {
-		assumeFalse(GraalVmDetector.inImageCode(),
-				"Aborted since a GraalVM native image uses the system ClassLoader to load classes by name.");
-
 		FilteringClassLoader classLoader = new FilteringClassLoader(
 				getClass().getClassLoader());
 		Class<?> withExampleMetaAnnotation = ClassUtils.forName(
@@ -85,11 +80,9 @@ class AnnotationIntrospectionFailureTests {
 	}
 
 	@Test
+	@DisabledInGraalVmNativeImage("GraalVM native image uses a single ClassLoader to load all classes")
 	@SuppressWarnings("unchecked")
 	void filteredTypeInMetaAnnotationWhenUsingMergedAnnotationsHandlesException() throws Exception {
-		assumeFalse(GraalVmDetector.inImageCode(),
-				"Aborted since a GraalVM native image uses the system ClassLoader to load classes by name.");
-
 		FilteringClassLoader classLoader = new FilteringClassLoader(
 				getClass().getClassLoader());
 		Class<?> withExampleMetaAnnotation = ClassUtils.forName(

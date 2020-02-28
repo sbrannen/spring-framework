@@ -185,6 +185,7 @@ class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 				? methods.get(0)
 				: methods.get(1);
 		if (!GraalVmDetector.inImageCode()) {
+			// GraalVM native image appears not to correctly detect bridge methods.
 			assertThat(bridgeMethod.isBridge()).isTrue();
 		}
 		return bridgeMethod;
