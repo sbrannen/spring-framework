@@ -23,10 +23,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+
 /**
- * Indicates that the annotated test class or test method uses serialization
- * &mdash; for example, {@link java.io.Serializable}, {@link java.io.Externalizable},
- * {@link java.io.ObjectInputStream}, {@link java.io.ObjectOutputStream}, etc.
+ * Indicates that the annotated test class or test method is disabled when
+ * executing within a GraalVM native image (at agent time, build time, or run time).
  *
  * <p>When executing tests within a GraalVM native image, consult the documentation for
  * <a href="https://github.com/oracle/graal/blob/master/substratevm/LIMITATIONS.md">Native
@@ -41,6 +42,12 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @Documented
-@DisabledInGraalVmNativeImage
-public @interface UsesSerialization {
+@DisabledIfSystemProperty(named = "org.graalvm.nativeimage.imagecode", matches = ".+")
+public @interface DisabledInGraalVmNativeImage {
+
+	/**
+	 * Optional reason.
+	 */
+	String value() default "";
+
 }
