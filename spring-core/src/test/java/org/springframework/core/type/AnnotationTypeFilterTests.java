@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import example.type.InheritedAnnotation;
 import example.type.NonInheritedAnnotation;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @see AnnotationTypeFilterTestsTypes
  */
+@DisabledInGraalVmNativeImage("ClassloadingAssertions.assertClassNotLoaded() uses reflection to invoke java.lang.ClassLoader.findLoadedClass(String)")
 class AnnotationTypeFilterTests {
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.core.type;
 import example.type.AspectJTypeFilterTestsTypes;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
@@ -31,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @see AspectJTypeFilterTestsTypes
  */
+@DisabledInGraalVmNativeImage("ClassloadingAssertions.assertClassNotLoaded() uses reflection to invoke java.lang.ClassLoader.findLoadedClass(String)")
 class AspectJTypeFilterTests {
 
 	@Test

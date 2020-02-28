@@ -23,9 +23,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
-
 /**
  * Indicates that the annotated test class or test method uses some form of
  * class-path scanning &mdash; for example, by scanning for multiple resources
@@ -44,7 +41,6 @@ import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @Documented
-@DisabledIfSystemProperty(named = "org.graalvm.nativeimage.imagecode", matches = ".+")
-@Tag("uses-class-path-scanning")
+@DisabledInGraalVmNativeImage
 public @interface UsesClassPathScanning {
 }
