@@ -546,6 +546,7 @@ class MergedAnnotationsTests {
 		Method bridgedMethod = methods.get(0).getReturnType().equals(Object.class) ?
 				methods.get(1) : methods.get(0);
 		if (!GraalVmDetector.inImageCode()) {
+			// GraalVM native image appears not to correctly detect bridge methods.
 			assertThat(bridgeMethod.isBridge()).isTrue();
 			assertThat(bridgedMethod.isBridge()).isFalse();
 		}

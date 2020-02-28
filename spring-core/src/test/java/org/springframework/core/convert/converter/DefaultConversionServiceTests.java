@@ -46,12 +46,12 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.GraalVmDetector;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -856,10 +856,9 @@ class DefaultConversionServiceTests {
 	}
 
 	@Test
+	@DisabledInGraalVmNativeImage("GraalVM native image appears to have a bug regarding timezone parsing")
 	void convertStringToTimezone() {
-		if (!GraalVmDetector.inImageCode()) {
-			assertThat(conversionService.convert("GMT+2", TimeZone.class).getID()).isEqualTo("GMT+02:00");
-		}
+		assertThat(conversionService.convert("GMT+2", TimeZone.class).getID()).isEqualTo("GMT+02:00");
 	}
 
 	@Test
