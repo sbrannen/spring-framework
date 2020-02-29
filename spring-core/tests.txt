@@ -1,3 +1,4 @@
+# @UsesBlockHound org.springframework.core.SpringCoreBlockHoundIntegrationTests
 # @UsesKotlinCoroutines org.springframework.core.KotlinGenericTypeResolverTests
 # @UsesKotlinCoroutines org.springframework.core.KotlinMethodParameterTests
 # @UsesKotlinCoroutines org.springframework.core.KotlinReactiveAdapterRegistryTests
@@ -106,7 +107,6 @@ org.springframework.core.SerializableTypeWrapperTests
 org.springframework.core.serializer.SerializationConverterTests
 org.springframework.core.SimpleAliasRegistryTests
 org.springframework.core.SortedPropertiesTests
-org.springframework.core.SpringCoreBlockHoundIntegrationTests
 org.springframework.core.StandardReflectionParameterNameDiscoverTests
 org.springframework.core.style.DefaultValueStylerTests
 org.springframework.core.style.ToStringCreatorTests

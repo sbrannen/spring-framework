@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.core;
 
 import java.lang.reflect.Method;
@@ -26,6 +27,7 @@ import reactor.blockhound.BlockHound;
 import reactor.core.scheduler.ReactorBlockHoundIntegration;
 import reactor.core.scheduler.Schedulers;
 
+import org.springframework.core.testfixture.annotation.UsesBlockHound;
 import org.springframework.tests.sample.objects.TestObject;
 import org.springframework.util.ConcurrentReferenceHashMap;
 
@@ -40,6 +42,7 @@ import static org.junit.jupiter.api.condition.JRE.JAVA_14;
  * @since 5.2.4
  */
 @DisabledForJreRange(min = JAVA_14)
+@UsesBlockHound
 public class SpringCoreBlockHoundIntegrationTests {
 
 
