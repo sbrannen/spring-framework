@@ -43,6 +43,7 @@ import static org.mockito.Mockito.verify;
  *
  * @author Phillip Webb
  */
+@UsesMockito
 class StreamUtilsTests {
 
 	private byte[] bytes = new byte[StreamUtils.BUFFER_SIZE + 10];

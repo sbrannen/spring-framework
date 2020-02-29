@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Brian Clozel
  */
+@UsesMockito
 class ResourceRegionTests {
 
 	@Test

@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
  * @author Sebastien Deleuze
  */
 @SuppressWarnings("unchecked")
+@UsesMockito
 class ListenableFutureTaskTests {
 
 	@Test

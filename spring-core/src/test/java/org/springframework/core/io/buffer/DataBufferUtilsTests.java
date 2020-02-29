@@ -60,6 +60,7 @@ import static org.mockito.Mockito.mock;
  * @author Arjen Poutsma
  * @author Sam Brannen
  */
+@UsesMockito
 class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 
 	private final Resource resource;

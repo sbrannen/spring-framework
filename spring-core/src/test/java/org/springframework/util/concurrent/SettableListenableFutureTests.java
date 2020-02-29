@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Mattias Severson
  * @author Juergen Hoeller
  */
+@UsesMockito
 class SettableListenableFutureTests {
 
 	private final SettableListenableFuture<String> settableListenableFuture = new SettableListenableFuture<>();
