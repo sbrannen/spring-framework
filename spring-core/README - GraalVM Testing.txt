@@ -53,11 +53,10 @@
    for dependencies of spring-core. This file will be used by shell scripts discussed
    later.
 
-   Currently we must manually remove the following from `cp.txt`:
+   Currently we must manually remove the following from `cp.txt`. See
+   https://github.com/oracle/graal/issues/366 for details.
 
-   - org.jetbrains.kotlinx/kotlinx-coroutines-core
    - org.jetbrains.kotlinx/kotlinx-coroutines-reactive
-   - org.jetbrains.kotlinx/kotlinx-coroutines-reactor
 
 ------------------------------------------------------------------------------------------
 
