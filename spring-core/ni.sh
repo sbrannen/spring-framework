@@ -1,3 +1,4 @@
+CP=`cat ./build/test_classpath.txt`
 native-image \
 	--no-server \
 	--no-fallback \
@@ -18,5 +19,3 @@ native-image \
 	-Dlog4j2.disable.jmx=true \
 	-cp $CP:build/graalvm \
 	org.junit.platform.console.ConsoleLauncher
-
-exit

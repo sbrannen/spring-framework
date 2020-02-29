@@ -1,3 +1,4 @@
+CP=`cat ./build/test_classpath.txt`
 TESTS=`./getActiveTests.sh`
 rm -rf build/graalvm/META-INF
 mkdir -p build/graalvm/META-INF/native-image
