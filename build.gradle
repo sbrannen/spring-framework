@@ -343,6 +343,8 @@ configure([rootProject] + javaProjects) { project ->
 		testCompile("org.assertj:assertj-core")
 		// Pull in the latest JUnit 5 Launcher API to ensure proper support in IDEs.
 		testRuntime("org.junit.platform:junit-platform-launcher")
+		// Pull in the JUnit Platform ConsoleLauncher for GraalVM native image testing.
+		testRuntime("org.junit.platform:junit-platform-console")
 		testRuntime("org.junit.jupiter:junit-jupiter-engine")
 		testRuntime("org.apache.logging.log4j:log4j-core")
 		testRuntime("org.apache.logging.log4j:log4j-slf4j-impl")
