@@ -1,1 +1,1 @@
-cat tests.txt | grep -v "^#" | grep -v "^$" | grep -v ".+\.Abstract.+Tests$" | sed 's/^/-c=/' | tr '\n' ' ' 
+cat ./build/test_classes.txt | grep -v "^#" | grep -v "^$" | sed 's/^/-c=/' | tr '\n' ' '
