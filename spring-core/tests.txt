@@ -116,7 +116,6 @@ org.springframework.core.type.AnnotationMetadataTests
 org.springframework.core.type.AnnotationTypeFilterTests
 org.springframework.core.type.AspectJTypeFilterTests
 org.springframework.core.type.AssignableTypeFilterTests
-org.springframework.core.type.CachingMetadataReaderLeakTests
 org.springframework.core.type.classreading.AnnotationMetadataReadingVisitorTests
 org.springframework.core.type.classreading.ClassMetadataReadingVisitorMemberClassTests
 org.springframework.core.type.classreading.MergedAnnotationMetadataVisitorTests
