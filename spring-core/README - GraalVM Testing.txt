@@ -42,8 +42,8 @@
 
    task printClasspath {
      doLast {
-       configurations.runtime.each { println it }
        configurations.testRuntime.each { println it }
+       configurations.runtime.each { println it }
        configurations.optional.each { println it }
      }
    }
