@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -109,6 +111,7 @@ class ClassPathResourceTests {
 	}
 
 	@Test
+	@DisabledInGraalVmNativeImage("Checks if classpath resource directory exists within native image")
 	void directoryNotReadable() {
 		Resource fileDir = new ClassPathResource("org/springframework/core");
 		assertThat(fileDir.exists()).isTrue();
