@@ -106,6 +106,7 @@ org.springframework.core.SerializableTypeWrapperTests
 org.springframework.core.serializer.SerializationConverterTests
 org.springframework.core.SimpleAliasRegistryTests
 org.springframework.core.SortedPropertiesTests
+org.springframework.core.SpringCoreBlockHoundIntegrationTests
 org.springframework.core.StandardReflectionParameterNameDiscoverTests
 org.springframework.core.style.DefaultValueStylerTests
 org.springframework.core.style.ToStringCreatorTests
