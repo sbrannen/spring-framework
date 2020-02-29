@@ -6,7 +6,6 @@
 # @UsesMockito org.springframework.core.annotation.AttributeMethodsTests
 # @UsesMockito org.springframework.core.annotation.MergedAnnotationsCollectionTests
 # @UsesMockito org.springframework.core.io.buffer.DataBufferUtilsTests
-# @UsesMockito org.springframework.core.io.ClassPathResourceTests
 # @UsesMockito org.springframework.core.io.PathResourceTests
 # @UsesMockito org.springframework.core.io.support.ResourceRegionTests
 # @UsesMockito org.springframework.core.ResolvableTypeTests
@@ -87,6 +86,7 @@ org.springframework.core.io.buffer.PooledDataBufferTests$PooledByteBufAllocatorW
 org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocatorWithPreferDirectFalseTests
 org.springframework.core.io.buffer.PooledDataBufferTests$UnpooledByteBufAllocatorWithPreferDirectTrueTests
 org.springframework.core.io.buffer.support.DataBufferTestUtilsTests
+org.springframework.core.io.ClassPathResourceTests
 org.springframework.core.io.ResourceEditorTests
 org.springframework.core.io.ResourceTests
 org.springframework.core.io.support.EncodedResourceTests
