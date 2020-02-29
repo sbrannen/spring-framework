@@ -101,7 +101,7 @@ public class LeakAwareDataBufferFactory implements DataBufferFactory {
 					.map(LeakAwareDataBuffer::leakError)
 					.collect(Collectors.toList());
 
-			errors.forEach(it -> logger.error("Leaked error: ", it));
+			errors.forEach(it -> logger.warn("Leaked error: ", it));
 			throw new AssertionError(errors.size() + " buffer leaks detected (see logs above)");
 		}
 	}
