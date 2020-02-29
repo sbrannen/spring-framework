@@ -29,26 +29,9 @@
 
 ------------------------------------------------------------------------------------------
 
-3. Determine the runtime classpath necessary to execute all tests.
-
-   As a temporary workaround, we have added the following custom Gradle task to build.gradle.
-
-   task printClasspath {
-     doLast {
-       configurations.testRuntime.each { println it }
-       configurations.runtime.each { println it }
-       configurations.optional.each { println it }
-     }
-   }
-
-   Execute `../gradlew printClasspath > cp.txt` within the spring-core directory to create
-   a file named `cp.txt` that contains classpath entries for dependencies of spring-core.
-   This file will be used by shell scripts discussed later.
-
-   Currently we must manually remove the following from `cp.txt`. See
-   https://github.com/oracle/graal/issues/366 for details.
-
-   - org.jetbrains.kotlinx/kotlinx-coroutines-reactive
+3. Execute `../gradlew createTestClasspathFile` within the spring-core directory to create
+   a file named `test_classpath.txt` in the `build` directory that contains classpath entries
+   for dependencies of spring-core. This file will be used by shell scripts discussed later.
 
 ------------------------------------------------------------------------------------------
 

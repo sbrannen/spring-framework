@@ -100,10 +100,15 @@ test {
 	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
 }
 
-task printClasspath {
+task createTestClasspathFile {
 	doLast {
-		configurations.testRuntime.each { println it }
-		configurations.runtime.each { println it }
-		configurations.optional.each { println it }
+		def testClasspath = []
+		// Currently we must filter out kotlinx-coroutines-reactive.
+		// See https://github.com/oracle/graal/issues/366 for details.
+		configurations.testRuntimeClasspath
+			.findAll { entry -> !(entry.path =~ /.*kotlinx-coroutines-reactive.*/) }
+			.each { testClasspath += it }
+		configurations.optional.each { testClasspath += it }
+		project.file("${buildDir}/test_classpath.txt").write(testClasspath.join(':'))
 	}
 }
