@@ -104,8 +104,28 @@ task createTestClasspathFile {
 	doLast {
 		def testClasspath = []
 		test.classpath
-			.findAll { entry -> !(entry.path =~ /.*kotlinx-coroutines-reactive.*/) }
+			.filter { entry -> !(entry.path =~ /.*kotlinx-coroutines-reactive.*/) }
 			.each { testClasspath += it }
 		project.file("${buildDir}/test_classpath.txt").write(testClasspath.join(':'))
 	}
+}
+
+task testWithGraalVmAgent(type: JavaExec) {
+	dependsOn 'test', 'createTestClasspathFile'
+
+	def nativeImageConfigDir = project.file("${buildDir}/graalvm/META-INF/native-image")
+	nativeImageConfigDir.deleteDir()
+	nativeImageConfigDir.mkdirs()
+
+	classpath = test.classpath.filter { entry -> !(entry.path =~ /.*kotlinx-coroutines-reactive.*/) }
+	jvmArgs = [
+		"-agentlib:native-image-agent=config-output-dir=${nativeImageConfigDir}",
+		'-Dorg.graalvm.nativeimage.imagecode=agent'
+	]
+	main = 'org.junit.platform.console.ConsoleLauncher'
+	args = [
+		'--details=summary',
+		'--exclude-tag="uses-blockhound | uses-kotlin-coroutines | uses-kotlin-reflection | uses-mockito | uses-mockk',
+		'@./build/test_classes.txt'
+	]
 }
