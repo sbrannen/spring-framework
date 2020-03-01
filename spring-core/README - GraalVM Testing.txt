@@ -6,11 +6,7 @@
 
 2. Execute the following commands.
 
-   ../gradlew --offline --no-build-cache -DnativeImageTesting=true clean :spring-core:testWithGraalVmAgent
-
-   time ./ni.sh
-
-   time ./runTestsInNativeImage.sh
+../gradlew --offline --no-build-cache -DnativeImageTesting=true clean :spring-core:testWithGraalVmAgent && time ./ni.sh && time ./runTestsInNativeImage.sh
 
 ==========================================================================================
 === Detailed Instructions
