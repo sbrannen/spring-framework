@@ -1,5 +1,19 @@
 ==========================================================================================
-=== INSTRUCTIONS
+=== Quick Instructions
+==========================================================================================
+
+1. Download and install the Java 8 version of GraalVM CE along with the `native-image` tool.
+
+2. Execute the following commands.
+
+   ../gradlew --offline --no-build-cache -DnativeImageTesting=true clean :spring-core:testWithGraalVmAgent
+
+   time ./ni.sh
+
+   time ./runTestsInNativeImage.sh
+
+==========================================================================================
+=== Detailed Instructions
 ==========================================================================================
 
 1. Download the Java 8 version of GraalVM.
@@ -67,11 +81,6 @@
 
 6. Execute `runTestsInNativeImage.sh` to run the tests in the native image.
 
-------------------------------------------------------------------------------------------
-
-
-
-
 ==========================================================================================
 === NOTES
 ==========================================================================================
@@ -119,5 +128,3 @@ Reflection:
       - org.springframework.core.type.StandardClassMetadataMemberClassTests
 
 ------------------------------------------------------------------------------------------
-
-
