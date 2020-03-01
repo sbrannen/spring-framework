@@ -14,7 +14,7 @@ native-image \
 	-H:+ReportExceptionStackTraces \
 	-H:+AddAllCharsets \
 	-H:EnableURLProtocols=https \
-	-H:Name=build/spring-core-tests.bin \
+	-H:Name=build/native-image-tests.bin \
 	-Dverbose=true \
 	-Dlog4j2.disable.jmx=true \
 	-cp $CP:build/graalvm \
