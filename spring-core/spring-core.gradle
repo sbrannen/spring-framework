@@ -110,16 +110,19 @@ task createTestClasspathFile {
 	}
 }
 
-task testWithGraalVmAgent(type: JavaExec) {
-	dependsOn 'test', 'createTestClasspathFile'
+task createNativeImageConfigDir {
+	mustRunAfter clean
+	doLast {
+		mkdir "${buildDir}/graalvm/META-INF/native-image"
+	}
+}
 
-	def nativeImageConfigDir = project.file("${buildDir}/graalvm/META-INF/native-image")
-	nativeImageConfigDir.deleteDir()
-	nativeImageConfigDir.mkdirs()
+task testWithGraalVmAgent(type: JavaExec) {
+	dependsOn test, createNativeImageConfigDir, createTestClasspathFile
 
 	classpath = test.classpath.filter { entry -> !(entry.path =~ /.*kotlinx-coroutines-reactive.*/) }
 	jvmArgs = [
-		"-agentlib:native-image-agent=config-output-dir=${nativeImageConfigDir}",
+		"-agentlib:native-image-agent=config-output-dir=${buildDir}/graalvm/META-INF/native-image",
 		'-Dorg.graalvm.nativeimage.imagecode=agent'
 	]
 	main = 'org.junit.platform.console.ConsoleLauncher'
