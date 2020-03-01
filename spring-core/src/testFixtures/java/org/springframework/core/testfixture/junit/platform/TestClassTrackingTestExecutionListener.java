@@ -32,8 +32,10 @@ import org.junit.platform.launcher.TestPlan;
 
 /**
  * JUnit Platform {@link TestExecutionListener} that tracks the test classes
- * that were executed and writes their fully qualified class names to a file
- * (currently hard coded to {@code ./build/test_classes.txt"}).
+ * that were executed and generates a file (currently hard coded to
+ * {@code ./build/test_classes.txt"}) that contains command-line arguments that can
+ * be supplied to the JUnit Platform {@link org.junit.platform.console.ConsoleLauncher
+ * ConsoleLauncher} to <em>select</em> exactly those test classes.
  *
  * @author Sam Brannen
  * @since 5.2.5
@@ -64,7 +66,7 @@ public class TestClassTrackingTestExecutionListener implements TestExecutionList
 		}
 
 		try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file)), true)) {
-			this.testClassNames.stream().sorted().forEach(writer::println);
+			this.testClassNames.stream().sorted().map(name -> "-c " + name).forEach(writer::println);
 		}
 		catch (IOException ex) {
 			System.err.println("Failed to write test class names to file " + file);
