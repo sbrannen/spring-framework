@@ -100,13 +100,13 @@ test {
 	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
 }
 
+FileCollection getTestClasspathForNativeImage() {
+	return test.classpath.filter { !it.path.contains('kotlinx-coroutines-reactive') }
+}
+
 task createTestClasspathFile {
 	doLast {
-		def testClasspath = []
-		test.classpath
-			.filter { entry -> !(entry.path =~ /.*kotlinx-coroutines-reactive.*/) }
-			.each { testClasspath += it }
-		project.file("${buildDir}/test_classpath.txt").write(testClasspath.join(':'))
+		project.file("${buildDir}/test_classpath.txt").write(getTestClasspathForNativeImage().join(':'))
 	}
 }
 
@@ -120,7 +120,7 @@ task createNativeImageConfigDir {
 task testWithGraalVmAgent(type: JavaExec) {
 	dependsOn test, createNativeImageConfigDir, createTestClasspathFile
 
-	classpath = test.classpath.filter { entry -> !(entry.path =~ /.*kotlinx-coroutines-reactive.*/) }
+	classpath = getTestClasspathForNativeImage()
 	jvmArgs = [
 		"-agentlib:native-image-agent=config-output-dir=${buildDir}/graalvm/META-INF/native-image",
 		'-Dorg.graalvm.nativeimage.imagecode=agent'
@@ -137,12 +137,7 @@ task buildNativeImageForTests(type: Exec) {
 	dependsOn testWithGraalVmAgent
 
 	def nativeImageExecutable = System.getenv('JAVA_HOME') + '/bin/native-image'
-	def classpathEntries = []
-	test.classpath
-		.filter { entry -> !(entry.path =~ /.*kotlinx-coroutines-reactive.*/) }
-		.collect { it.path }
-		.each { classpathEntries += it }
-	classpathEntries += "${buildDir}/graalvm"
+	def classpathEntries = getTestClasspathForNativeImage().collect { it.path } + "${buildDir}/graalvm"
 	def classpath = classpathEntries.join(':')
 
 	commandLine = [
