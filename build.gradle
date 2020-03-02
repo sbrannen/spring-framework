@@ -318,11 +318,7 @@ configure([rootProject] + javaProjects) { project ->
 	}
 
 	test {
-		useJUnitPlatform {
-			if (System.getProperty("nativeImageTesting")) {
-				excludeTags "uses-blockhound | uses-kotlin-coroutines | uses-kotlin-reflection | uses-mockito | uses-mockk"
-			}
-		}
+		useJUnitPlatform()
 		include(["**/*Tests.class", "**/*Test.class"])
 		systemProperty("java.awt.headless", "true")
 		systemProperty("testGroups", project.properties.get("testGroups"))
