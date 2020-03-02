@@ -116,11 +116,7 @@ task testWithGraalVmAgent(type: JavaExec) {
 		'-Dorg.graalvm.nativeimage.imagecode=agent'
 	]
 	main = 'org.junit.platform.console.ConsoleLauncher'
-	args = [
-		'--details=summary',
-		'--exclude-tag="uses-blockhound | uses-kotlin-coroutines | uses-kotlin-reflection | uses-mockito | uses-mockk',
-		"@${buildDir}/test_classes.txt"
-	]
+	args = getConsoleLauncherArgumentsForNativeImageTests()
 }
 
 task buildNativeImageForTests(type: Exec) {
@@ -158,7 +154,11 @@ task testInNativeImage(type: Exec) {
 	dependsOn buildNativeImageForTests
 
 	executable = "${buildDir}/native-image-tests.bin"
-	args = [
+	args = getConsoleLauncherArgumentsForNativeImageTests()
+}
+
+List<String> getConsoleLauncherArgumentsForNativeImageTests() {
+	return [
 		'--details=summary',
 		'--exclude-tag="uses-blockhound | uses-kotlin-coroutines | uses-kotlin-reflection | uses-mockito | uses-mockk"',
 		"@${buildDir}/test_classes.txt"
