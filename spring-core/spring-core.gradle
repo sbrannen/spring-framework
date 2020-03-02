@@ -100,16 +100,6 @@ test {
 	classpath = sourceSets.main.output.classesDirs + classpath - files(jar.archiveFile)
 }
 
-FileCollection getTestClasspathForNativeImage() {
-	return test.classpath.filter { !it.path.contains('kotlinx-coroutines-reactive') }
-}
-
-task createTestClasspathFile {
-	doLast {
-		project.file("${buildDir}/test_classpath.txt").write(getTestClasspathForNativeImage().join(':'))
-	}
-}
-
 task createNativeImageConfigDir {
 	mustRunAfter clean
 	doLast {
@@ -118,7 +108,7 @@ task createNativeImageConfigDir {
 }
 
 task testWithGraalVmAgent(type: JavaExec) {
-	dependsOn test, createNativeImageConfigDir, createTestClasspathFile
+	dependsOn test, createNativeImageConfigDir
 
 	classpath = getTestClasspathForNativeImage()
 	jvmArgs = [
@@ -129,7 +119,7 @@ task testWithGraalVmAgent(type: JavaExec) {
 	args = [
 		'--details=summary',
 		'--exclude-tag="uses-blockhound | uses-kotlin-coroutines | uses-kotlin-reflection | uses-mockito | uses-mockk',
-		'@./build/test_classes.txt'
+		"@${buildDir}/test_classes.txt"
 	]
 }
 
@@ -162,4 +152,19 @@ task buildNativeImageForTests(type: Exec) {
 		'-cp', classpath,
 		'org.junit.platform.console.ConsoleLauncher'
 	]
+}
+
+task testInNativeImage(type: Exec) {
+	dependsOn buildNativeImageForTests
+
+	executable = "${buildDir}/native-image-tests.bin"
+	args = [
+		'--details=summary',
+		'--exclude-tag="uses-blockhound | uses-kotlin-coroutines | uses-kotlin-reflection | uses-mockito | uses-mockk"',
+		"@${buildDir}/test_classes.txt"
+	]
+}
+
+FileCollection getTestClasspathForNativeImage() {
+	return test.classpath.filter { !it.path.contains('kotlinx-coroutines-reactive') }
 }
