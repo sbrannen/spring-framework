@@ -39,6 +39,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @Documented
-@DisabledInGraalVmNativeImage
+@DisabledInGraalVmNativeImage("uses SecurityManager")
 public @interface UsesSecurityManager {
 }
