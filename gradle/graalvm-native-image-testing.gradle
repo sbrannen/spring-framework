@@ -1,4 +1,4 @@
-ext.nativeImageTestingExcludeTagExpression = "uses-blockhound | uses-kotlin-coroutines | uses-kotlin-reflection | uses-mockito | uses-mockk"
+ext.nativeImageTestingExcludeTagExpression = "uses-blockhound | uses-cglib | uses-kotlin-coroutines | uses-kotlin-reflection | uses-mockito | uses-mockk"
 
 tasks.register("createNativeImageConfigDir") {
 	mustRunAfter clean
