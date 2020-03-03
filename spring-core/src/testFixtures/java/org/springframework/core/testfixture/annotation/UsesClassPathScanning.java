@@ -41,6 +41,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @Documented
-@DisabledInGraalVmNativeImage
+@DisabledInGraalVmNativeImage("uses classpath scanning")
 public @interface UsesClassPathScanning {
 }

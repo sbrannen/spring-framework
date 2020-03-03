@@ -48,6 +48,6 @@ public @interface DisabledInGraalVmNativeImage {
 	/**
 	 * Optional reason.
 	 */
-	String value() default "";
+	String value();
 
 }
