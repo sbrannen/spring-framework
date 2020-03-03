@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.testfixture.annotation.UsesMockito;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -85,6 +86,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Chris Beams
  * @author Stephane Nicoll
  */
+@UsesMockito
 public class AutowiredAnnotationBeanPostProcessorTests {
 
 	private DefaultListableBeanFactory bf;

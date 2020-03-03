@@ -97,6 +97,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.core.testfixture.Assume;
 import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.core.testfixture.TestGroup;
+import org.springframework.core.testfixture.annotation.UsesMockito;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.lang.Nullable;
@@ -126,6 +127,7 @@ import static org.mockito.Mockito.verify;
  * @author Phillip Webb
  * @author Stephane Nicoll
  */
+@UsesMockito
 class DefaultListableBeanFactoryTests {
 
 	private static final Log factoryLog = LogFactory.getLog(DefaultListableBeanFactory.class);

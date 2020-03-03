@@ -54,6 +54,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.testfixture.EnabledForTestGroups;
+import org.springframework.core.testfixture.annotation.UsesMockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -65,6 +66,7 @@ import static org.springframework.core.testfixture.TestGroup.LONG_RUNNING;
  * @author Sam Brannen
  * @since 20.01.2006
  */
+@UsesMockito
 public class BeanFactoryGenericsTests {
 
 	@Test
