@@ -40,8 +40,6 @@
 	{
 		"name":"org.springframework.core.type.AbstractAnnotationMetadataTests$TestMemberClass",
 		"allDeclaredClasses":true,
-		"allPublicClasses":true,
-		"allDeclaredClasses":true,
 		"allPublicClasses":true
 	},
 	{
