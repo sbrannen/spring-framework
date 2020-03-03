@@ -13,16 +13,16 @@ tasks.register("testWithGraalVmAgent", JavaExec) {
 	classpath = getTestClasspathForNativeImage()
 	jvmArgs = [
 		"-agentlib:native-image-agent=config-output-dir=${buildDir}/graalvm/META-INF/native-image",
-		'-Dorg.graalvm.nativeimage.imagecode=agent'
+		"-Dorg.graalvm.nativeimage.imagecode=agent"
 	]
-	main = 'org.junit.platform.console.ConsoleLauncher'
+	main = "org.junit.platform.console.ConsoleLauncher"
 	args = getConsoleLauncherArgumentsForNativeImageTests()
 }
 
 tasks.register("buildNativeImageForTests", Exec) {
 	dependsOn tasks.named("testWithGraalVmAgent")
 
-	executable = System.getenv('JAVA_HOME') + '/bin/native-image'
+	executable = System.getenv("JAVA_HOME") + "/bin/native-image"
 	// args: set in afterEvaluate block due to lazy initialization of the test.classpath
 }
 
@@ -36,28 +36,28 @@ tasks.register("testInNativeImage", Exec) {
 afterEvaluate {
 	tasks.named("buildNativeImageForTests").configure {
 		def classpathEntries = getTestClasspathForNativeImage().collect { it.path } + "${buildDir}/graalvm"
-		def classpath = classpathEntries.join(':')
+		def classpath = classpathEntries.join(":")
 
 		args = [
-			'--no-server',
-			'--no-fallback',
-			'--allow-incomplete-classpath',
-			'--report-unsupported-elements-at-runtime',
-			'--initialize-at-build-time=org.apache.logging.log4j.core.LoggerContext,org.apache.logging.log4j.core.config,org.apache.logging.log4j.core.lookup,org.apache.logging.log4j.status,org.apache.logging.log4j.util,org.apache.logging.log4j.Level,org.apache.logging.log4j.core.util,org.apache.logging.log4j.message,org.apache.logging.log4j,org.apache.logging.log4j.MarkerManager\$Log4jMarker,org.apache.logging.log4j.core.impl,org.apache.logging.log4j.status,org.apache.logging.log4j.status.StatusLogger,org.apache.logging.log4j.spi.DefaultThreadContextMap,org.apache.logging.log4j.spi.ExtendedLogger,org.apache.logging.log4j.message.AbstractMessageFactory,org.apache.logging.log4j.core.selector.ClassLoaderContextSelector,org.apache.logging.log4j.core.config.LoggerConfig,org.apache.logging.log4j.simple.SimpleLogger,org.apache.logging.log4j.MarkerManager,org.apache.logging.log4j.message.ParameterizedNoReferenceMessageFactory',
-			'--initialize-at-build-time=org.junit.platform.commons.util.StringUtils,org.junit.platform.commons.logging.LoggerFactory,org.junit.platform.commons.logging.LoggerFactory\$DelegatingLogger',
-			'--initialize-at-build-time=org.springframework.core.type.AnnotationMetadataTests$SubclassEnum$1,org.springframework.core.type.AnnotationMetadataTests$SubclassEnum$2',
-			'--initialize-at-run-time=org.apache.logging.log4j.core.async.AsyncLoggerConfigDisruptor,org.apache.logging.log4j.core.async.AsyncLoggerContext,org.apache.logging.log4j.core.config.yaml.YamlConfiguration,org.apache.logging.log4j.core.pattern.JAnsiTextRenderer',
-			'--initialize-at-run-time=org.apache.commons.logging.LogAdapter,org.apache.commons.logging.LogAdapter$Log4jLog',
-			'-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages',
-			'-H:+TraceClassInitialization',
-			'-H:+ReportExceptionStackTraces',
-			'-H:+AddAllCharsets',
-			'-H:EnableURLProtocols=https',
+			"--no-server",
+			"--no-fallback",
+			"--allow-incomplete-classpath",
+			"--report-unsupported-elements-at-runtime",
+			"--initialize-at-build-time=org.apache.logging.log4j.core.LoggerContext,org.apache.logging.log4j.core.config,org.apache.logging.log4j.core.lookup,org.apache.logging.log4j.status,org.apache.logging.log4j.util,org.apache.logging.log4j.Level,org.apache.logging.log4j.core.util,org.apache.logging.log4j.message,org.apache.logging.log4j,org.apache.logging.log4j.MarkerManager\$Log4jMarker,org.apache.logging.log4j.core.impl,org.apache.logging.log4j.status,org.apache.logging.log4j.status.StatusLogger,org.apache.logging.log4j.spi.DefaultThreadContextMap,org.apache.logging.log4j.spi.ExtendedLogger,org.apache.logging.log4j.message.AbstractMessageFactory,org.apache.logging.log4j.core.selector.ClassLoaderContextSelector,org.apache.logging.log4j.core.config.LoggerConfig,org.apache.logging.log4j.simple.SimpleLogger,org.apache.logging.log4j.MarkerManager,org.apache.logging.log4j.message.ParameterizedNoReferenceMessageFactory",
+			"--initialize-at-build-time=org.junit.platform.commons.util.StringUtils,org.junit.platform.commons.logging.LoggerFactory,org.junit.platform.commons.logging.LoggerFactory\$DelegatingLogger",
+			"--initialize-at-build-time=org.springframework.core.type.AnnotationMetadataTests\$SubclassEnum\$1,org.springframework.core.type.AnnotationMetadataTests\$SubclassEnum\$2",
+			"--initialize-at-run-time=org.apache.logging.log4j.core.async.AsyncLoggerConfigDisruptor,org.apache.logging.log4j.core.async.AsyncLoggerContext,org.apache.logging.log4j.core.config.yaml.YamlConfiguration,org.apache.logging.log4j.core.pattern.JAnsiTextRenderer",
+			"--initialize-at-run-time=org.apache.commons.logging.LogAdapter,org.apache.commons.logging.LogAdapter\$Log4jLog",
+			"-H:IncludeResourceBundles=com.sun.org.apache.xerces.internal.impl.msg.SAXMessages",
+			"-H:+TraceClassInitialization",
+			"-H:+ReportExceptionStackTraces",
+			"-H:+AddAllCharsets",
+			"-H:EnableURLProtocols=https",
 			"-H:Name=${buildDir}/native-image-tests.bin",
-			'-Dverbose=true',
-			'-Dlog4j2.disable.jmx=true',
-			'-cp', classpath,
-			'org.junit.platform.console.ConsoleLauncher'
+			"-Dverbose=true",
+			"-Dlog4j2.disable.jmx=true",
+			"-cp", classpath,
+			"org.junit.platform.console.ConsoleLauncher"
 		]
 	}
 
@@ -72,12 +72,12 @@ afterEvaluate {
 
 List<String> getConsoleLauncherArgumentsForNativeImageTests() {
 	return [
-		'--details=summary',
+		"--details=summary",
 		"--exclude-tag=\"${nativeImageTestingExcludeTagExpression}\"",
 		"@${buildDir}/test_classes.txt"
 	]
 }
 
 FileCollection getTestClasspathForNativeImage() {
-	return test.classpath.filter { !it.path.contains('kotlinx-coroutines-reactive') }
+	return test.classpath.filter { !it.path.contains("kotlinx-coroutines-reactive") }
 }
