@@ -4,9 +4,10 @@
 
 1. Download and install the Java 8 version of GraalVM CE along with the `native-image` tool.
 
-2. Execute the following command.
+2. Execute the `testInNativeImage` task for a given module. For example, for `spring-core`
+   execute the following command.
 
-../gradlew --offline --no-build-cache -DnativeImageTesting=true clean testInNativeImage
+./gradlew --offline --no-build-cache -DnativeImageTesting=true :spring-core:clean :spring-core:testInNativeImage
 
 ==========================================================================================
 === Detailed Instructions
@@ -46,7 +47,12 @@
 
 ------------------------------------------------------------------------------------------
 
-4. Run the tests with the GraalVM JVM agent via the custom `testWithGraalVmAgent` Gradle
+4. The following steps assume you are executing the example commands within a module's
+   directory -- for example, within the `spring-core` directory.
+
+------------------------------------------------------------------------------------------
+
+5. Run the tests with the GraalVM JVM agent via the custom `testWithGraalVmAgent` Gradle
    task`, specifying `-DnativeImageTesting=true` in order to have test classes that use
    unsupported features filtered from the list of test classes. Note that
    `testWithGraalVmAgent` depends on the standard `test` task. To ensure that things
@@ -65,7 +71,7 @@
 
 ------------------------------------------------------------------------------------------
 
-5. Build a native image for the tests via the custom `buildNativeImageForTests` Gradle
+6. Build a native image for the tests via the custom `buildNativeImageForTests` Gradle
    task, specifying `-DnativeImageTesting=true` in order to have test classes that use
    unsupported features filtered from the list of test classes. This compiles a
    `native-image-tests.bin` executable in the `build` directory using the configuration
@@ -78,7 +84,7 @@
 
 ------------------------------------------------------------------------------------------
 
-6. Execute the following to run the tests in the native image.
+7. Execute the following to run the tests in the native image.
 
    Note that `testInNativeImage` depends on the `buildNativeImageForTests` task.
 
