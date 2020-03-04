@@ -12,7 +12,7 @@ tasks.register("testWithGraalVmAgent", JavaExec) {
 
 	classpath = getTestClasspathForNativeImage()
 	jvmArgs = [
-		"-agentlib:native-image-agent=config-output-dir=${buildDir}/graalvm/META-INF/native-image",
+		"-agentlib:native-image-agent=experimental-class-loader-support,config-output-dir=${buildDir}/graalvm/META-INF/native-image",
 		"-Dorg.graalvm.nativeimage.imagecode=agent"
 	]
 	main = "org.junit.platform.console.ConsoleLauncher"
