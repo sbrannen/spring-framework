@@ -1,0 +1,2 @@
+--initialize-at-build-time=org.springframework.core.type.AnnotationMetadataTests$SubclassEnum$1
+--initialize-at-build-time=org.springframework.core.type.AnnotationMetadataTests$SubclassEnum$2
