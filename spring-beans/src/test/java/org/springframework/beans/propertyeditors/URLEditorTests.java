@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,60 +29,54 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 /**
  * @author Rick Evans
  * @author Chris Beams
+ * @author Sam Brannen
  */
-public class URLEditorTests {
+class URLEditorTests {
 
 	@Test
-	public void testCtorWithNullResourceEditor() throws Exception {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				new URLEditor(null));
+	void testCtorWithNullResourceEditor() {
+		assertThatIllegalArgumentException().isThrownBy(() -> new URLEditor(null));
 	}
 
 	@Test
-	public void testStandardURI() throws Exception {
+	void testStandardURI() {
 		PropertyEditor urlEditor = new URLEditor();
-		urlEditor.setAsText("mailto:juergen.hoeller@interface21.com");
+		urlEditor.setAsText("https://start.spring.io");
 		Object value = urlEditor.getValue();
-		boolean condition = value instanceof URL;
-		assertThat(condition).isTrue();
-		URL url = (URL) value;
-		assertThat(urlEditor.getAsText()).isEqualTo(url.toExternalForm());
+		assertThat(value).isInstanceOf(URL.class);
+		assertThat(urlEditor.getAsText()).isEqualTo(((URL) value).toExternalForm());
 	}
 
 	@Test
-	public void testStandardURL() throws Exception {
+	void testStandardURL() {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("https://www.springframework.org");
 		Object value = urlEditor.getValue();
-		boolean condition = value instanceof URL;
-		assertThat(condition).isTrue();
-		URL url = (URL) value;
-		assertThat(urlEditor.getAsText()).isEqualTo(url.toExternalForm());
+		assertThat(value).isInstanceOf(URL.class);
+		assertThat(urlEditor.getAsText()).isEqualTo(((URL) value).toExternalForm());
 	}
 
 	@Test
-	public void testClasspathURL() throws Exception {
+	void testClasspathURL() {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) +
 				"/" + ClassUtils.getShortName(getClass()) + ".class");
 		Object value = urlEditor.getValue();
-		boolean condition1 = value instanceof URL;
-		assertThat(condition1).isTrue();
+		assertThat(value).isInstanceOf(URL.class);
 		URL url = (URL) value;
 		assertThat(urlEditor.getAsText()).isEqualTo(url.toExternalForm());
-		boolean condition = !url.getProtocol().startsWith("classpath");
-		assertThat(condition).isTrue();
+		assertThat(url.getProtocol()).doesNotStartWith("classpath");
 	}
 
 	@Test
-	public void testWithNonExistentResource() throws Exception {
+	void testWithNonExistentResource() {
 		PropertyEditor urlEditor = new URLEditor();
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				urlEditor.setAsText("gonna:/freak/in/the/morning/freak/in/the.evening"));
 	}
 
 	@Test
-	public void testSetAsTextWithNull() throws Exception {
+	void testSetAsTextWithNull() {
 		PropertyEditor urlEditor = new URLEditor();
 		urlEditor.setAsText(null);
 		assertThat(urlEditor.getValue()).isNull();
@@ -90,7 +84,7 @@ public class URLEditorTests {
 	}
 
 	@Test
-	public void testGetAsTextReturnsEmptyStringIfValueNotSet() throws Exception {
+	void testGetAsTextReturnsEmptyStringIfValueNotSet() {
 		PropertyEditor urlEditor = new URLEditor();
 		assertThat(urlEditor.getAsText()).isEqualTo("");
 	}
