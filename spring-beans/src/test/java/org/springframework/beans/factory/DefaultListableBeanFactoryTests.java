@@ -98,6 +98,7 @@ import org.springframework.core.testfixture.Assume;
 import org.springframework.core.testfixture.EnabledForTestGroups;
 import org.springframework.core.testfixture.TestGroup;
 import org.springframework.core.testfixture.annotation.UsesMockito;
+import org.springframework.core.testfixture.annotation.UsesSerialization;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 import org.springframework.core.testfixture.security.TestPrincipal;
 import org.springframework.lang.Nullable;
@@ -1786,6 +1787,7 @@ class DefaultListableBeanFactoryTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
+	@UsesSerialization
 	void beanProviderSerialization() throws Exception {
 		lbf.setSerializationId("test");
 
