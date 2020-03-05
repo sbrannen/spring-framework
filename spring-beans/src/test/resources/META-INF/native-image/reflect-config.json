@@ -1,2 +1,6 @@
 [
+	{
+		"name":"com.sun.org.apache.xerces.internal.impl.dv.xs.SchemaDVFactoryImpl",
+		"methods":[{"name":"<init>","parameterTypes":[] }]
+	}
 ]
