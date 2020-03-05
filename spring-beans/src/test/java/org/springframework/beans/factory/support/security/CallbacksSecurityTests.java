@@ -55,6 +55,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.annotation.UsesSecurityManager;
 import org.springframework.core.testfixture.security.TestPrincipal;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,6 +71,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Costin Leau
  */
+@UsesSecurityManager
 public class CallbacksSecurityTests {
 
 	private DefaultListableBeanFactory beanFactory;

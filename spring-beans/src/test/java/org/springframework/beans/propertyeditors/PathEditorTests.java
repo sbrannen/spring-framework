@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 public class PathEditorTests {
 
 	@Test
+	@DisabledInGraalVmNativeImage("Uses classpath resource as File within native image")
 	public void testClasspathPathName() throws Exception {
 		PropertyEditor pathEditor = new PathEditor();
 		pathEditor.setAsText("classpath:" + ClassUtils.classPackageAsResourcePath(getClass()) + "/" +
@@ -77,6 +79,7 @@ public class PathEditorTests {
 	}
 
 	@Test
+	@DisabledInGraalVmNativeImage("Uses classpath resource as File within native image")
 	public void testUnqualifiedPathNameFound() throws Exception {
 		PropertyEditor pathEditor = new PathEditor();
 		String fileName = ClassUtils.classPackageAsResourcePath(getClass()) + "/" +

@@ -29,6 +29,7 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.testfixture.annotation.UsesMockito;
+import org.springframework.core.testfixture.annotation.UsesSerialization;
 import org.springframework.core.testfixture.io.SerializationTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,6 +76,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
+	@UsesSerialization
 	public void testFactorySerialization() throws Exception {
 		FactoryTestBean testBean = beanFactory.getBean("factoryTestBean", FactoryTestBean.class);
 		ObjectFactory<?> objectFactory = testBean.getObjectFactory();
@@ -98,6 +100,7 @@ public class ObjectFactoryCreatingFactoryBeanTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
+	@UsesSerialization
 	public void testProviderSerialization() throws Exception {
 		ProviderTestBean testBean = beanFactory.getBean("providerTestBean", ProviderTestBean.class);
 		Provider<?> provider = testBean.getProvider();

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CachedIntrospectionResultsTests {
 
 	@Test
+	@DisabledInGraalVmNativeImage("GraalVM native image uses a single ClassLoader to load all classes")
 	public void acceptAndClearClassLoader() throws Exception {
 		BeanWrapper bw = new BeanWrapperImpl(TestBean.class);
 		assertThat(bw.isWritableProperty("name")).isTrue();
