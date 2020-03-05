@@ -42,6 +42,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.testfixture.beans.IndexedTestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.core.io.Resource;
+import org.springframework.core.testfixture.annotation.UsesPreferences;
 import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,6 +62,7 @@ import static org.springframework.core.testfixture.io.ResourceTestUtils.qualifie
  * @see PropertyPlaceholderConfigurerTests
  */
 @SuppressWarnings("deprecation")
+@UsesPreferences
 public class PropertyResourceConfigurerTests {
 
 	static {
