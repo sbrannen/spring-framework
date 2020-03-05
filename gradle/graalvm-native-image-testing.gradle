@@ -57,7 +57,7 @@ afterEvaluate {
 			"-H:+TraceClassInitialization",
 			"-H:+ReportExceptionStackTraces",
 			"-H:+AddAllCharsets",
-			"-H:EnableURLProtocols=https",
+			"-H:EnableURLProtocols=http,https",
 			"-H:Name=${buildDir}/native-image-tests.bin",
 			"-Dverbose=true",
 			"-Dlog4j2.disable.jmx=true",
