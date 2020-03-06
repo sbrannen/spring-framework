@@ -48,6 +48,7 @@ import org.springframework.beans.testfixture.beans.ITestBean;
 import org.springframework.beans.testfixture.beans.IndexedTestBean;
 import org.springframework.beans.testfixture.beans.NumberTestBean;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.testfixture.annotation.DisabledDueToBugInGraalVmNativeImage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -377,6 +378,7 @@ public class CustomEditorTests {
 	}
 
 	@Test
+	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
 	public void testCustomNumberEditorWithoutAllowEmpty() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
 		NumberTestBean tb = new NumberTestBean();
@@ -458,6 +460,7 @@ public class CustomEditorTests {
 	}
 
 	@Test
+	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
 	public void testCustomNumberEditorWithFrenchBigDecimal() throws Exception {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.FRENCH);
 		NumberTestBean tb = new NumberTestBean();

@@ -34,6 +34,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.testfixture.beans.TestBean;
+import org.springframework.core.testfixture.annotation.DisabledDueToBugInGraalVmNativeImage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,6 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CustomEditorConfigurerTests {
 
 	@Test
+	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
 	public void testCustomEditorConfigurerWithPropertyEditorRegistrar() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
@@ -76,6 +78,7 @@ public class CustomEditorConfigurerTests {
 	}
 
 	@Test
+	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
 	public void testCustomEditorConfigurerWithEditorAsClass() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
