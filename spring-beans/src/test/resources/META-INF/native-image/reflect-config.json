@@ -2,5 +2,348 @@
 	{
 		"name":"com.sun.org.apache.xerces.internal.impl.dv.xs.SchemaDVFactoryImpl",
 		"methods":[{"name":"<init>","parameterTypes":[] }]
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$10C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$11C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$12C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$13C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$14C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$15C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$16C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$17C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$18C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$19C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$1A",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$1B",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$1Bean",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$1C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$1Child",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$1ExtendedTestBean",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$1Parent",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$20C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$21C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$22C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$23C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$24C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$25C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$26C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$27C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$28C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$2A",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$2B",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$2C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$3B",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$3C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$4B",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$4C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$5C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$6C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$7C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$8C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$9C",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$CoolBean",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$Book",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$BookOperations",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$LawBook",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$LawLibrary",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$Library",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$Spr9453",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$TextBook",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$TextBookOperations",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests$WithStaticWriteMethod",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
+	},
+	{
+		"name": "org.springframework.beans.ExtendedBeanInfoTests",
+		"allDeclaredFields": true,
+		"allDeclaredMethods": true,
+		"allPublicMethods": true,
+		"allDeclaredConstructors": true
 	}
 ]
