@@ -27,7 +27,8 @@ import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
 /**
  * Indicates that the annotated test class or test method is disabled when
- * executing within a GraalVM native image (at agent time, build time, or run time).
+ * executing within a GraalVM native image (at agent time, build time, or run time)
+ * due to a known bug in GraalVM.
  *
  * <p>When executing tests within a GraalVM native image, consult the documentation for
  * <a href="https://github.com/oracle/graal/blob/master/substratevm/LIMITATIONS.md">Native
@@ -43,10 +44,10 @@ import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 @Inherited
 @Documented
 @DisabledIfSystemProperty(named = "org.graalvm.nativeimage.imagecode", matches = ".+")
-public @interface DisabledInGraalVmNativeImage {
+public @interface DisabledDueToBugInGraalVmNativeImage {
 
 	/**
-	 * The reason that the class or method is disabled.
+	 * Reference to bug tracking issue.
 	 */
 	String value();
 

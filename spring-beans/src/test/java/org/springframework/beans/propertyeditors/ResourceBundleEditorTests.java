@@ -20,6 +20,8 @@ import java.util.ResourceBundle;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.testfixture.annotation.DisabledDueToBugInGraalVmNativeImage;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -76,6 +78,7 @@ public class ResourceBundleEditorTests {
 	}
 
 	@Test
+	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
 	public void testSetAsTextWithBaseNameLanguageAndCountryCode() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountry" + "_en_GB");
@@ -89,6 +92,7 @@ public class ResourceBundleEditorTests {
 	}
 
 	@Test
+	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
 	public void testSetAsTextWithTheKitchenSink() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountryDialect" + "_en_GB_GLASGOW");
