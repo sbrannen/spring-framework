@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -874,11 +874,11 @@ public class ExtendedBeanInfoTests {
 
 	@Test  // SPR-12434
 	public void shouldDetectValidPropertiesAndIgnoreInvalidProperties() throws IntrospectionException {
-		BeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(java.awt.Window.class));
-		assertThat(hasReadMethodForProperty(bi, "locationByPlatform")).isTrue();
-		assertThat(hasWriteMethodForProperty(bi, "locationByPlatform")).isTrue();
-		assertThat(hasIndexedReadMethodForProperty(bi, "locationByPlatform")).isFalse();
-		assertThat(hasIndexedWriteMethodForProperty(bi, "locationByPlatform")).isFalse();
+		BeanInfo bi = new ExtendedBeanInfo(Introspector.getBeanInfo(CoolBean.class));
+		assertThat(hasReadMethodForProperty(bi, "coolBean")).isTrue();
+		assertThat(hasWriteMethodForProperty(bi, "coolBean")).isTrue();
+		assertThat(hasIndexedReadMethodForProperty(bi, "coolBean")).isFalse();
+		assertThat(hasIndexedWriteMethodForProperty(bi, "coolBean")).isFalse();
 	}
 
 
@@ -930,6 +930,16 @@ public class ExtendedBeanInfoTests {
 		T getProp();
 	}
 
+
+	static class CoolBean {
+
+		public boolean isCoolBean() {
+			return true;
+		}
+
+		public void setCoolBean(boolean flag) {
+		}
+	}
 
 	interface Book {
 	}
