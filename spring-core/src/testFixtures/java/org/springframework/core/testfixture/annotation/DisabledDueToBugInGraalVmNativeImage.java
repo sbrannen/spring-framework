@@ -47,8 +47,13 @@ import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 public @interface DisabledDueToBugInGraalVmNativeImage {
 
 	/**
+	 * Description.
+	 */
+	String description();
+
+	/**
 	 * Reference to bug tracking issue.
 	 */
-	String value();
+	String issue();
 
 }

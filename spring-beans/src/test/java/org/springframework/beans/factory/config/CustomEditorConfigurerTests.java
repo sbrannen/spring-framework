@@ -46,7 +46,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CustomEditorConfigurerTests {
 
 	@Test
-	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
+	@DisabledDueToBugInGraalVmNativeImage(
+			description = "Custom Locale not supported",
+			issue = "https://github.com/oracle/graal/issues/911")
 	public void testCustomEditorConfigurerWithPropertyEditorRegistrar() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();
@@ -78,7 +80,9 @@ public class CustomEditorConfigurerTests {
 	}
 
 	@Test
-	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
+	@DisabledDueToBugInGraalVmNativeImage(
+			description = "Custom Locale not supported",
+			issue = "https://github.com/oracle/graal/issues/911")
 	public void testCustomEditorConfigurerWithEditorAsClass() throws ParseException {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CustomEditorConfigurer cec = new CustomEditorConfigurer();

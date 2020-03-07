@@ -378,7 +378,9 @@ public class CustomEditorTests {
 	}
 
 	@Test
-	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
+	@DisabledDueToBugInGraalVmNativeImage(
+			description = "Custom Locale not supported",
+			issue = "https://github.com/oracle/graal/issues/911")
 	public void testCustomNumberEditorWithoutAllowEmpty() {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.GERMAN);
 		NumberTestBean tb = new NumberTestBean();
@@ -460,7 +462,9 @@ public class CustomEditorTests {
 	}
 
 	@Test
-	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
+	@DisabledDueToBugInGraalVmNativeImage(
+			description = "Custom Locale not supported",
+			issue = "https://github.com/oracle/graal/issues/911")
 	public void testCustomNumberEditorWithFrenchBigDecimal() throws Exception {
 		NumberFormat nf = NumberFormat.getNumberInstance(Locale.FRENCH);
 		NumberTestBean tb = new NumberTestBean();

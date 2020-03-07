@@ -51,7 +51,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
+import org.springframework.core.testfixture.annotation.DisabledDueToBugInGraalVmNativeImage;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -856,7 +856,9 @@ class DefaultConversionServiceTests {
 	}
 
 	@Test
-	@DisabledInGraalVmNativeImage("GraalVM native image appears to have a bug regarding timezone parsing")
+	@DisabledDueToBugInGraalVmNativeImage(
+			description = "TimeZone ID parsing loses offset in native image",
+			issue = "https://github.com/oracle/graal/issues/2234")
 	void convertStringToTimezone() {
 		assertThat(conversionService.convert("GMT+2", TimeZone.class).getID()).isEqualTo("GMT+02:00");
 	}
