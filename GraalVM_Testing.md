@@ -108,17 +108,7 @@ tasks.
 	`allDeclaredMethods` entry to `reflect-config.json` for `java.time.ZoneRegion` so that the
 	`of(String)` method defined in `ZoneId` (`ZoneRegion`'s superclass) is visible via reflection.
 
-- `convertStringToTimezone()`: fails because it uses `java.util.TimeZone.getTimeZone(String)`
-	with a custom Zone ID which doesn't seem to be properly supported in a GraalVM native
-	image (perhaps due to the use of `sun.util.calendar.ZoneInfoFile.getCustomTimeZone()`).
-
-	```
-	Assertion failure: Expecting: <"GMT"> to be equal to: <"GMT+02:00"> but was not.
-	```
-	
-	We have circumvented this by aborting this test method when running in a native image.
-
-### Reflection:
+### Reflection
 
 - Member classes are not automatically registered for reflective access within a native
 	image by the JVM agent. To enable this support, one must manually set `allPublicClasses`

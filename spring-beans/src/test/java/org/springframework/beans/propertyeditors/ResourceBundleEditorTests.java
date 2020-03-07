@@ -78,7 +78,9 @@ public class ResourceBundleEditorTests {
 	}
 
 	@Test
-	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
+	@DisabledDueToBugInGraalVmNativeImage(
+			description = "Custom Locale not supported",
+			issue = "https://github.com/oracle/graal/issues/911")
 	public void testSetAsTextWithBaseNameLanguageAndCountryCode() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountry" + "_en_GB");
@@ -92,7 +94,9 @@ public class ResourceBundleEditorTests {
 	}
 
 	@Test
-	@DisabledDueToBugInGraalVmNativeImage("Custom Locale not supported: https://github.com/oracle/graal/issues/911")
+	@DisabledDueToBugInGraalVmNativeImage(
+			description = "Custom Locale not supported",
+			issue = "https://github.com/oracle/graal/issues/911")
 	public void testSetAsTextWithTheKitchenSink() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(BASE_NAME + "LangCountryDialect" + "_en_GB_GLASGOW");

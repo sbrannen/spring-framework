@@ -57,6 +57,7 @@ afterEvaluate {
 			"-H:+TraceClassInitialization",
 			"-H:+ReportExceptionStackTraces",
 			"-H:+AddAllCharsets",
+			// "-H:+IncludeAllTimeZones",
 			"-H:EnableURLProtocols=http,https",
 			"-H:Name=${buildDir}/native-image-tests.bin",
 			"-Dverbose=true",
