@@ -1,7 +1,6 @@
 [
 	{
-		"name":"java.time.ZoneRegion",
-		"allDeclaredMethods":true
+		"name":"java.time.ZoneRegion"
 	},
 	{
 		"name":"org.springframework.core.type.AbstractClassMetadataMemberClassTests",

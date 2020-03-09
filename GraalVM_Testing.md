@@ -104,8 +104,8 @@ tasks.
 - `convertObjectToStringWithJavaTimeOfMethodPresent()`: fails because the GraalVM agent does
 	not detect that it needs to include superclasses in `reflect-config.json` when
 	`Class#getMethod` is invoked (as in `org.springframework.util.ClassUtils.getStaticMethod()`).
-	This may be a bug in the GraalVM agent. As a workaround, we have added an
-	`allDeclaredMethods` entry to `reflect-config.json` for `java.time.ZoneRegion` so that the
+	See [GraalVM issue #2237](https://github.com/oracle/graal/issues/2237). As a workaround,
+	we have added an entry to `reflect-config.json` for `java.time.ZoneRegion` so that the
 	`of(String)` method defined in `ZoneId` (`ZoneRegion`'s superclass) is visible via reflection.
 
 ### Reflection
