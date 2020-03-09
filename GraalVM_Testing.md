@@ -94,10 +94,27 @@ task will cause everything to be rebuilt for the native image, etc.
 This can be improved by configuring "inputs" and "outputs" for the corresponding Gradle
 tasks.
 
-### AnnotatedElementUtilsTests
+### SynthesizedMergedAnnotationInvocationHandler.createProxy()
 
-- `javaxAnnotationTypeViaFindMergedAnnotation()` requires the following in proxy-config:
-  `["javax.annotation.Resource", "org.springframework.core.annotation.SynthesizedAnnotation"]`
+`AnnotatedElementUtilsTests#javaxAnnotationTypeViaFindMergedAnnotation()` requires the
+following in proxy-config:
+
+`["javax.annotation.Resource", "org.springframework.core.annotation.SynthesizedAnnotation"]`
+
+The reason is that `SynthesizedMergedAnnotationInvocationHandler.createProxy()` generates the
+proxy without `SynthesizedAnnotation` if the annotation type being synthesized was loaded by a
+different class loader, which is the case for `javax.annotation.Resource` in a standard JDK.
+Since the use of the GraalVM agent does not result in a single system-wide class loader like
+in a native image, the code path taken in 
+`SynthesizedMergedAnnotationInvocationHandler.createProxy()` when running with the agent
+causes the agent to think the proxy will be created solely based on `Resource`. The agent then
+generates a correct entry in `proxy-config.json` for that scenario. However, when an attempt
+to create the proxy within the native image occurs, there is no precompiled proxy class for
+`Resource` + `SynthesizedAnnotation`, and the following exception is thrown.
+
+> com.oracle.svm.core.jdk.UnsupportedFeatureError: Proxy class defined by interfaces 
+> [interface javax.annotation.Resource, interface 
+> org.springframework.core.annotation.SynthesizedAnnotation] not found.
 
 ### DefaultConversionServiceTests
 
