@@ -18,7 +18,6 @@ package org.springframework.core.type;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
@@ -45,7 +44,6 @@ class AssignableTypeFilterTests {
 	}
 
 	@Test
-	@DisabledInGraalVmNativeImage("ClassloadingAssertions.assertClassNotLoaded() uses reflection to invoke java.lang.ClassLoader.findLoadedClass(String)")
 	void interfaceMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "example.type.AssignableTypeFilterTestsTypes$TestInterfaceImpl";
@@ -57,7 +55,6 @@ class AssignableTypeFilterTests {
 	}
 
 	@Test
-	@DisabledInGraalVmNativeImage("ClassloadingAssertions.assertClassNotLoaded() uses reflection to invoke java.lang.ClassLoader.findLoadedClass(String)")
 	void superClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "example.type.AssignableTypeFilterTestsTypes$SomeDaoLikeImpl";
@@ -69,7 +66,6 @@ class AssignableTypeFilterTests {
 	}
 
 	@Test
-	@DisabledInGraalVmNativeImage("ClassloadingAssertions.assertClassNotLoaded() uses reflection to invoke java.lang.ClassLoader.findLoadedClass(String)")
 	void interfaceThroughSuperClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "example.type.AssignableTypeFilterTestsTypes$SomeDaoLikeImpl";

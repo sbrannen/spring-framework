@@ -21,7 +21,6 @@ import example.type.InheritedAnnotation;
 import example.type.NonInheritedAnnotation;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 import org.springframework.core.testfixture.stereotype.Component;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -37,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @see AnnotationTypeFilterTestsTypes
  */
-@DisabledInGraalVmNativeImage("ClassloadingAssertions.assertClassNotLoaded() uses reflection to invoke java.lang.ClassLoader.findLoadedClass(String)")
 class AnnotationTypeFilterTests {
 
 	@Test

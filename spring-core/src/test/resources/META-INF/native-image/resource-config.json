@@ -3,6 +3,9 @@
 	"bundles": [
 		{
 			"name": "com.sun.org.apache.xerces.internal.impl.msg.SAXMessages"
+		},
+		{
+			"name": "org.aspectj.weaver.weaver-messages"
 		}
 	]
 }
