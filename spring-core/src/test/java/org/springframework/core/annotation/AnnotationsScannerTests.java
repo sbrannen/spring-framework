@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
+import org.springframework.core.testfixture.annotation.DisabledDueToBugInGraalVmNativeImage;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -120,7 +120,9 @@ class AnnotationsScannerTests {
 	}
 
 	@Test
-	@DisabledInGraalVmNativeImage("It appears that GraalVM native images don't track a locally declared @Inherited annotation if it's also declared on a superclass.")
+	@DisabledDueToBugInGraalVmNativeImage(
+		description = "GraalVM native images don't track a locally declared @Inherited annotation if it's also declared on a superclass.",
+		issue = "https://github.com/oracle/graal/issues/2243")
 	void inheritedAnnotationsStrategyOnClassWhenHasAnnotationOnBothClassesIncudesOnlyOne() {
 		Class<?> source = WithSingleSuperclassAndDoubleInherited.class;
 		assertThat(Arrays.stream(source.getAnnotations()).map(
