@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core.type;
 
 import java.lang.reflect.Method;
 
+import org.springframework.core.GraalVmDetector;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -38,7 +39,10 @@ abstract class ClassloadingAssertions {
 	}
 
 	public static void assertClassNotLoaded(String className) {
-		assertThat(isClassLoaded(className)).as("Class [" + className + "] should not have been loaded").isFalse();
+		// Using reflection to invoke ClassLoader.findLoadedClass(String) is not supported in a GraalVM native image.
+		if (!GraalVmDetector.inImageCode()) {
+			assertThat(isClassLoaded(className)).as("Class [" + className + "] should not have been loaded").isFalse();
+		}
 	}
 
 }

@@ -19,7 +19,6 @@ package org.springframework.core.type;
 import example.type.AspectJTypeFilterTestsTypes;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
@@ -32,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @see AspectJTypeFilterTestsTypes
  */
-@DisabledInGraalVmNativeImage("ClassloadingAssertions.assertClassNotLoaded() uses reflection to invoke java.lang.ClassLoader.findLoadedClass(String)")
 class AspectJTypeFilterTests {
 
 	@Test
