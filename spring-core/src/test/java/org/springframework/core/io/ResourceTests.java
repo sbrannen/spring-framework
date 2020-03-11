@@ -169,15 +169,23 @@ class ResourceTests {
 	}
 
 	@Test
-	@DisabledInGraalVmNativeImage("Relative resource X.class incorrectly appears to 'exist' within a GraalVM native image.")
-	void urlResource() throws IOException {
+	@DisabledDueToBugInGraalVmNativeImage(
+		description = "Relative resource X.class incorrectly appears to 'exist' within a GraalVM native image.",
+		issue = "TODO")
+	void urlResourceFromUrlForClasspathResource() throws IOException {
 		Resource resource = new UrlResource(getClass().getResource("Resource.class"));
 		doTestResource(resource);
 		assertThat(resource).isEqualTo(new UrlResource(getClass().getResource("Resource.class")));
+	}
 
-		Resource resource2 = new UrlResource("file:core/io/Resource.class");
-		assertThat(new UrlResource("file:core/../core/io/./Resource.class")).isEqualTo(resource2);
+	@Test
+	void urlResourceFromFileUrl() throws IOException {
+		Resource resource = new UrlResource("file:core/io/Resource.class");
+		assertThat(new UrlResource("file:core/../core/io/./Resource.class")).isEqualTo(resource);
+	}
 
+	@Test
+	void urlResourceFilenameParsing() throws IOException {
 		assertThat(new UrlResource("file:/dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
 		assertThat(new UrlResource("file:\\dir\\test.txt?argh").getFilename()).isEqualTo("test.txt");
 		assertThat(new UrlResource("file:\\dir/test.txt?argh").getFilename()).isEqualTo("test.txt");
