@@ -33,6 +33,7 @@ import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.GraalVmDetector;
+import org.springframework.core.testfixture.annotation.DisabledDueToBugInGraalVmNativeImage;
 import org.springframework.core.testfixture.annotation.DisabledInGraalVmNativeImage;
 import org.springframework.util.FileCopyUtils;
 
@@ -119,13 +120,15 @@ class ResourceTests {
 	}
 
 	@Test
+	@DisabledDueToBugInGraalVmNativeImage(
+		description = "Relative classpath resource lookup fails in GraalVM native image",
+		issue = "https://github.com/oracle/graal/issues/2250")
 	// java.io.FileNotFoundException: class path resource [org/springframework/core/io/../SpringVersion.class]
 	// cannot be resolved to URL because it does not exist
 	//
 	// The above exception occurs because the relative path is not cleaned in this particular use case
 	// (i.e., when the ClassPathResource(String,Class) constructor is used and a new ClassPathResource
 	// is later created via createRelative(...) in doTestResource()).
-	@DisabledInGraalVmNativeImage("Relative classpath resource lookup fails in GraalVM native image")
 	void classPathResourceWithClass() throws IOException {
 		Resource resource = new ClassPathResource("Resource.class", getClass());
 		doTestResource(resource);
