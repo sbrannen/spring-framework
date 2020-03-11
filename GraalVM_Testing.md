@@ -94,6 +94,15 @@ task will cause everything to be rebuilt for the native image, etc.
 This can be improved by configuring "inputs" and "outputs" for the corresponding Gradle
 tasks.
 
+### Last modified for classpath resources
+
+`org.springframework.core.io.Resource.lastModified()` seems not to be supported for classpath resources within a native image. Note, however, that this may be due to the fact that
+URLs for classpath resources end up having a `resource:` protocol within a native image.
+
+TODO: Search for `if (!GraalVmDetector.inImageCode()) ...` for such scenarios within our
+tests and either fix the support in Spring or raise an issue with the GraalVM team if
+appropriate.
+
 ### SynthesizedMergedAnnotationInvocationHandler.createProxy()
 
 `AnnotatedElementUtilsTests#javaxAnnotationTypeViaFindMergedAnnotation()` requires the
