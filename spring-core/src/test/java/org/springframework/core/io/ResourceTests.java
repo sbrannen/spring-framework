@@ -198,7 +198,8 @@ class ResourceTests {
 		assertThat(resource.isReadable()).isTrue();
 		assertThat(resource.contentLength() > 0).isTrue();
 		if (!GraalVmDetector.inImageCode()) {
-			// "last modified" seems not to be supported for classpath resources within a native image
+			// "last modified" is not supported for classpath resources within a native image
+			// See https://github.com/oracle/graal/issues/2253
 			assertThat(resource.lastModified() > 0).isTrue();
 		}
 
@@ -209,7 +210,8 @@ class ResourceTests {
 		assertThat(relative1.isReadable()).isTrue();
 		assertThat(relative1.contentLength() > 0).isTrue();
 		if (!GraalVmDetector.inImageCode()) {
-			// "last modified" seems not to be supported for classpath resources within a native image
+			// "last modified" is not supported for classpath resources within a native image
+			// See https://github.com/oracle/graal/issues/2253
 			assertThat(relative1.lastModified() > 0).isTrue();
 		}
 
@@ -220,7 +222,8 @@ class ResourceTests {
 		assertThat(relative2.isReadable()).isTrue();
 		assertThat(relative2.contentLength() > 0).isTrue();
 		if (!GraalVmDetector.inImageCode()) {
-			// "last modified" seems not to be supported for classpath resources within a native image
+			// "last modified" is not supported for classpath resources within a native image
+			// See https://github.com/oracle/graal/issues/2253
 			assertThat(relative2.lastModified() > 0).isTrue();
 		}
 
@@ -231,7 +234,8 @@ class ResourceTests {
 		assertThat(relative3.isReadable()).isTrue();
 		assertThat(relative3.contentLength() > 0).isTrue();
 		if (!GraalVmDetector.inImageCode()) {
-			// "last modified" seems not to be supported for classpath resources within a native image
+			// "last modified" is not supported for classpath resources within a native image
+			// See https://github.com/oracle/graal/issues/2253
 			assertThat(relative3.lastModified() > 0).isTrue();
 		}
 
