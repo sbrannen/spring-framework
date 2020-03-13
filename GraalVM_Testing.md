@@ -96,12 +96,13 @@ tasks.
 
 ### Last modified for classpath resources
 
-`org.springframework.core.io.Resource.lastModified()` seems not to be supported for classpath resources within a native image. Note, however, that this may be due to the fact that
-URLs for classpath resources end up having a `resource:` protocol within a native image.
+`org.springframework.core.io.Resource.lastModified()` is not supported for classpath
+resources within a native image.
 
-TODO: Search for `if (!GraalVmDetector.inImageCode()) ...` for such scenarios within our
-tests and either fix the support in Spring or raise an issue with the GraalVM team if
-appropriate.
+See [GraalVM issue #2253](https://github.com/oracle/graal/issues/2253) for details.
+
+TODO: Once GraalVM issue #2253 has been fixed, search for `if (!GraalVmDetector.inImageCode()) ...`
+for such scenarios within our tests and reenable those code blocks.
 
 ### SynthesizedMergedAnnotationInvocationHandler.createProxy()
 
