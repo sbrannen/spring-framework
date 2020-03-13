@@ -131,16 +131,21 @@ to create the proxy within the native image occurs, there is no precompiled prox
 - `convertObjectToStringWithJavaTimeOfMethodPresent()`: fails because the GraalVM agent does
 	not detect that it needs to include superclasses in `reflect-config.json` when
 	`Class#getMethod` is invoked (as in `org.springframework.util.ClassUtils.getStaticMethod()`).
-	See [GraalVM issue #2237](https://github.com/oracle/graal/issues/2237). As a workaround,
-	we have added an entry to `reflect-config.json` for `java.time.ZoneRegion` so that the
-	`of(String)` method defined in `ZoneId` (`ZoneRegion`'s superclass) is visible via reflection.
+	
+	See [GraalVM issue #2237](https://github.com/oracle/graal/issues/2237).
+	
+	As a workaround, we have added an entry to `reflect-config.json` for
+	`java.time.ZoneRegion` so that the `of(String)` method defined in
+	`ZoneId` (`ZoneRegion`'s superclass) is visible via reflection.
 
 ### Reflection
 
 - Member classes are not automatically registered for reflective access within a native
 	image by the JVM agent. To enable this support, one must manually set `allPublicClasses`
 	and `allDeclaredClasses` to `true` in `reflect-config.json`.
-	
+
+	See [GraalVM issue #630](https://github.com/oracle/graal/issues/630).
+
 	From the [GraalVM wiki](https://github.com/oracle/graal/blob/master/substratevm/REFLECTION.md#manual-configuration):
 
 	> However, `allPublicClasses` and `allDeclaredClasses` don't automatically register the
