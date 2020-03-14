@@ -25,7 +25,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -39,7 +38,6 @@ import javax.annotation.Resource;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.GraalVmDetector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
@@ -49,7 +47,6 @@ import org.springframework.core.testfixture.stereotype.Indexed;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -534,26 +531,24 @@ class MergedAnnotationsTests {
 	}
 
 	@Test
-	void getWithTypeHierarchyFromBridgeMethod() {
-		List<Method> methods = new ArrayList<>();
-		ReflectionUtils.doWithLocalMethods(StringGenericParameter.class, method -> {
-			if ("getFor".equals(method.getName())) {
-				methods.add(method);
-			}
-		});
-		Method bridgeMethod = methods.get(0).getReturnType().equals(Object.class) ?
-				methods.get(0) : methods.get(1);
-		Method bridgedMethod = methods.get(0).getReturnType().equals(Object.class) ?
-				methods.get(1) : methods.get(0);
-		if (!GraalVmDetector.inImageCode()) {
-			// GraalVM native image appears not to correctly detect bridge methods.
-			assertThat(bridgeMethod.isBridge()).isTrue();
-			assertThat(bridgedMethod.isBridge()).isFalse();
-		}
-		MergedAnnotation<?> annotation = MergedAnnotations.from(bridgeMethod,
-				SearchStrategy.TYPE_HIERARCHY).get(Order.class);
+	void getWithTypeHierarchyFromBridgeMethod() throws Exception {
+		MergedAnnotation<?> annotation = MergedAnnotations.from(getBridgeMethod(), SearchStrategy.TYPE_HIERARCHY)
+				.get(Order.class);
 		assertThat(annotation.isPresent()).isTrue();
 		assertThat(annotation.getAggregateIndex()).isEqualTo(0);
+	}
+
+	private Method getBridgeMethod() throws NoSuchMethodException {
+		Method bridgeMethod = null;
+		for (Method method : StringGenericParameter.class.getMethods()) {
+			if ("getFor".equals(method.getName()) && method.getReturnType().equals(Object.class)
+					&& !method.getParameterTypes()[0].equals(Integer.class)) {
+				bridgeMethod = method;
+			}
+		}
+		assertThat(bridgeMethod).isNotNull();
+		assertThat(bridgeMethod.isBridge()).isTrue();
+		return bridgeMethod;
 	}
 
 	@Test
