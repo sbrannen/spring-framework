@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.GraalVmDetector;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
-import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -162,8 +158,7 @@ class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 	}
 
 	@Test
-	void typeHierarchyStrategyMultipleComposedAnnotationsOnBridgeMethod()
-			throws Exception {
+	void typeHierarchyStrategyMultipleComposedAnnotationsOnBridgeMethod() throws Exception {
 		assertTypeHierarchyStrategyBehavior(getBridgeMethod());
 	}
 
@@ -174,20 +169,16 @@ class MergedAnnotationsComposedOnSingleAnnotatedElementTests {
 		assertThat(stream(annotations, "value")).containsExactly("fooCache", "barCache");
 	}
 
-	Method getBridgeMethod() throws NoSuchMethodException {
-		List<Method> methods = new ArrayList<>();
-		ReflectionUtils.doWithLocalMethods(StringGenericParameter.class, method -> {
-			if ("getFor".equals(method.getName())) {
-				methods.add(method);
+	private Method getBridgeMethod() throws NoSuchMethodException {
+		Method bridgeMethod = null;
+		for (Method method : StringGenericParameter.class.getMethods()) {
+			if ("getFor".equals(method.getName()) && method.getReturnType().equals(Object.class)
+					&& !method.getParameterTypes()[0].equals(Integer.class)) {
+				bridgeMethod = method;
 			}
-		});
-		Method bridgeMethod = methods.get(0).getReturnType().equals(Object.class)
-				? methods.get(0)
-				: methods.get(1);
-		if (!GraalVmDetector.inImageCode()) {
-			// GraalVM native image appears not to correctly detect bridge methods.
-			assertThat(bridgeMethod.isBridge()).isTrue();
 		}
+		assertThat(bridgeMethod).isNotNull();
+		assertThat(bridgeMethod.isBridge()).isTrue();
 		return bridgeMethod;
 	}
 
