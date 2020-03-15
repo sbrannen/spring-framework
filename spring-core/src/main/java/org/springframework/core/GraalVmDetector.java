@@ -28,6 +28,8 @@ package org.springframework.core;
  */
 public abstract class GraalVmDetector {
 
+	private static final String imageCode = System.getProperty("org.graalvm.nativeimage.imagecode");
+
 	/**
 	 * As of GraalVM 20, GraalVM sets the {@code org.graalvm.nativeimage.imagecode}
 	 * JVM system property to either {@code buildtime} or {@code runtime}; however,
@@ -35,19 +37,29 @@ public abstract class GraalVmDetector {
 	 * with the GraalVM agent.
 	 * <p>The GraalVM team may later modify the agent to set the property itself.
 	 * <p>In any case, checking that the value is non-null meets our needs for
-	 * all three use cases.
+	 * most use cases.
 	 * @see <a href="https://github.com/oracle/graal/blob/master/sdk/src/org.graalvm.nativeimage/src/org/graalvm/nativeimage/ImageInfo.java">ImageInfo</a>
 	 */
-	private static final boolean imageCode = (System.getProperty("org.graalvm.nativeimage.imagecode") != null);
+	private static final boolean inImageCode = (imageCode != null);
+
+	private static final boolean inNativeImageAgent = "agent".equals(imageCode);
 
 
 	/**
 	 * Determine whether the current runtime environment is executing while
-	 * running with the GraalVM agent, while building a native image, or within
-	 * a native image.
+	 * running with the GraalVM native image agent, while building a native image,
+	 * or within a native image.
 	 */
 	public static boolean inImageCode() {
-		return imageCode;
+		return inImageCode;
+	}
+
+	/**
+	 * Determine whether the current runtime environment is executing while
+	 * running with the GraalVM native image agent.
+	 */
+	public static boolean inNativeImageAgent() {
+		return inNativeImageAgent;
 	}
 
 }
