@@ -136,8 +136,14 @@ class PathMatchingResourcePatternResolverTests {
 	}
 
 
-	private void assertProtocolAndFilenames(Resource[] resources, String protocol, String... filenames)
+	private void assertProtocolAndFilenames(Resource[] resources, String expectedProtocol, String... filenames)
 			throws IOException {
+
+		// Within a GraalVM native image, class path resources included in the image have
+		// a custom "resource" protocol.
+		if (GraalVmDetector.inImageCode() && !GraalVmDetector.inNativeImageAgent()) {
+			expectedProtocol = "resource";
+		}
 
 		// Uncomment the following if you encounter problems with matching against the file system
 		// It shows file locations.
@@ -159,12 +165,8 @@ class PathMatchingResourcePatternResolverTests {
 
 		assertThat(resources.length).as("Correct number of files found").isEqualTo(filenames.length);
 		for (Resource resource : resources) {
-			if (!GraalVmDetector.inImageCode()) {
-				// The protocol can change to something unexpected within a GraalVM native image.
-				// For example it appears that the protocol is often "resource" within a native image.
-				String actualProtocol = resource.getURL().getProtocol();
-				assertThat(actualProtocol).isEqualTo(protocol);
-			}
+			String actualProtocol = resource.getURL().getProtocol();
+			assertThat(actualProtocol).isEqualTo(expectedProtocol);
 			assertFilenameIn(resource, filenames);
 		}
 	}

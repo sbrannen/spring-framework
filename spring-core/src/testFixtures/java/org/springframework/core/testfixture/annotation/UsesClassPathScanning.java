@@ -41,6 +41,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @Documented
-@DisabledInGraalVmNativeImage("uses classpath scanning")
+@DisabledDueToBugInGraalVmNativeImage(
+	description = "Directories are not supported as class path resources in native image.",
+	issue = "https://github.com/oracle/graal/issues/1108")
 public @interface UsesClassPathScanning {
 }
