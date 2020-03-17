@@ -170,8 +170,8 @@ class ResourceTests {
 
 	@Test
 	@DisabledDueToBugInGraalVmNativeImage(
-		description = "Relative resource X.class incorrectly appears to 'exist' within a GraalVM native image.",
-		issue = "TODO")
+		description = "Relative, nonexistent resource X.class incorrectly appears to 'exist' within a GraalVM native image.",
+		issue = "https://github.com/oracle/graal/issues/2291")
 	void urlResourceFromUrlForClasspathResource() throws IOException {
 		Resource resource = new UrlResource(getClass().getResource("Resource.class"));
 		doTestResource(resource);
