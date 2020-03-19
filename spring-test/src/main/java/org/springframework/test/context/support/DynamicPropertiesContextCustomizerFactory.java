@@ -29,7 +29,7 @@ import org.springframework.test.context.DynamicPropertySource;
 
 /**
  * {@link ContextCustomizerFactory} to support
- * {@link DynamicPropertySource  @DynamicPropertySource} methods.
+ * {@link DynamicPropertySource @DynamicPropertySource} methods.
  *
  * @author Phillip Webb
  * @since 5.2.5
@@ -41,14 +41,15 @@ class DynamicPropertiesContextCustomizerFactory implements ContextCustomizerFact
 	@Nullable
 	public DynamicPropertiesContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
-		Set<Method> methods = MethodIntrospector.selectMethods(testClass, this::isAnnoated);
+
+		Set<Method> methods = MethodIntrospector.selectMethods(testClass, this::isAnnotated);
 		if (methods.isEmpty()) {
 			return null;
 		}
 		return new DynamicPropertiesContextCustomizer(methods);
 	}
 
-	private boolean isAnnoated(Method method) {
+	private boolean isAnnotated(Method method) {
 		return MergedAnnotations.from(method).isPresent(DynamicPropertySource.class);
 	}
 

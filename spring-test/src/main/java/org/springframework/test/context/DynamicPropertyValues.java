@@ -19,11 +19,12 @@ package org.springframework.test.context;
 import java.util.function.Supplier;
 
 /**
- * Interface used with {@link DynamicPropertySource @DynamicPropertySource}
+ * Functional interface used with {@link DynamicPropertySource @DynamicPropertySource}
  * annotated methods so that they can add properties that have dynamically
  * supplied values.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2.5
  */
 @FunctionalInterface
@@ -32,8 +33,8 @@ public interface DynamicPropertyValues {
 	/**
 	 * Add a new property with a dynamically supplied value.
 	 * @param name the name of the property to add
-	 * @param value a supplier that will provide the value when necessary
+	 * @param valueSupplier a supplier that will provide the value lazily on demand
 	 */
-	void add(String name, Supplier<Object> value);
+	void add(String name, Supplier<Object> valueSupplier);
 
 }

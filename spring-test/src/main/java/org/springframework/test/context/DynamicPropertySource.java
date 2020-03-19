@@ -18,24 +18,31 @@ package org.springframework.test.context;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Supplier;
 
 /**
- * Method-level annotation for integration tests that need to add properties
- * with dynamic values to the {@code Environment}'s set of
- * {@code PropertySources}. Primarily designed to allow properties from
- * <a href="https://www.testcontainers.org/">Testcontainer</a> based tests to be
- * exposed easily to Spring.
- * <p>
- * Methods annotated with {@code @DynamicPropertySource} must be {@code static}
+ * Method-level annotation for integration tests that need to add properties with
+ * dynamic values to the {@code Environment}'s set of {@code PropertySources}.
+ *
+ * <p>This annotation and its supporting infrastructure were originally designed
+ * to allow properties from
+ * <a href="https://www.testcontainers.org/">Testcontainers</a> based tests to be
+ * exposed easily to Spring integration tests. However, this feature may also be
+ * used with any form of external resource whose lifecycle is maintained outside
+ * the test's {@code ApplicationContext}.
+ *
+ * <p>Methods annotated with {@code @DynamicPropertySource} must be {@code static}
  * and must have a single {@link DynamicPropertyValues} argument which is used
- * to add name/value property pairs. Values are dynamic and provided via a
- * {@link Supplier} which is only invoked when the property is resolved.
- * Typically, method referenced are used to supply values, for example:
+ * to add <em>name-value</em> pairs to the {@code Environment}'s set of
+ * {@code PropertySources}. Values are dynamic and provided via a
+ * {@link java.util.function.Supplier Supplier} which is only invoked when the
+ * property is resolved. Typically, method references are used to supply values,
+ * as in the following example.
+ *
+ * <h3>Example</h3>
+ *
  * <pre class="code">
  * &#064;SpringJUnitConfig(...)
  * &#064;Testcontainers
@@ -52,21 +59,18 @@ import java.util.function.Supplier;
  *         values.add("redis.port", redis::getMappedPort);
  *     }
  *
- * }
- * </pre>
- *
- *
+ * }</pre>
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2.5
  * @see DynamicPropertyValues
  * @see ContextConfiguration
+ * @see TestPropertySource
  * @see org.springframework.core.env.PropertySource
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Inherited
 public @interface DynamicPropertySource {
-
 }

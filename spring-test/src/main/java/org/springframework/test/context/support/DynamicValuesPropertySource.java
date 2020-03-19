@@ -33,21 +33,20 @@ import org.springframework.util.StringUtils;
  * values.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2.5
  */
 class DynamicValuesPropertySource extends EnumerablePropertySource<Map<String, Supplier<Object>>>  {
 
-	private static final Supplier<Object> NO_VALUE = () -> null;
-
-
-	DynamicValuesPropertySource(String name, Consumer<DynamicPropertyValues> values) {
-		super(name, asMap(values));
+	DynamicValuesPropertySource(String name, Consumer<DynamicPropertyValues> dynamicPropertyValuesConsumer) {
+		super(name, asMap(dynamicPropertyValuesConsumer));
 	}
 
 
 	@Override
 	public Object getProperty(String name) {
-		return this.source.getOrDefault(name, NO_VALUE).get();
+		Supplier<Object> valueSupplier = this.source.get(name);
+		return (valueSupplier != null ? valueSupplier.get() : null);
 	}
 
 	@Override
@@ -61,15 +60,15 @@ class DynamicValuesPropertySource extends EnumerablePropertySource<Map<String, S
 	}
 
 	@Nullable
-	private static Map<String, Supplier<Object>> asMap(Consumer<DynamicPropertyValues> values) {
-		if (values == null) {
+	private static Map<String, Supplier<Object>> asMap(Consumer<DynamicPropertyValues> dynamicPropertyValuesConsumer) {
+		if (dynamicPropertyValuesConsumer == null) {
 			return null;
 		}
 		Map<String, Supplier<Object>> map = new LinkedHashMap<>();
-		values.accept((name, value) -> {
-			Assert.hasLength(name, "'name' must not be empty");
-			Assert.notNull(name, "'value' must not be null");
-			map.put(name, value);
+		dynamicPropertyValuesConsumer.accept((name, valueSupplier) -> {
+			Assert.hasText(name, "'name' must not be null or blank");
+			Assert.notNull(valueSupplier, "'valueSupplier' must not be null");
+			map.put(name, valueSupplier);
 		});
 		return Collections.unmodifiableMap(map);
 	}

@@ -35,54 +35,50 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DynamicPropertiesContextCustomizerFactoryTests {
 
-	private DynamicPropertiesContextCustomizerFactory factory = new DynamicPropertiesContextCustomizerFactory();
+	private final DynamicPropertiesContextCustomizerFactory factory = new DynamicPropertiesContextCustomizerFactory();
 
-	private List<ContextConfigurationAttributes> configAttributes = Collections.emptyList();
+	private final List<ContextConfigurationAttributes> configAttributes = Collections.emptyList();
 
 	@Test
-	void createContextCustomizerWhenNoAnnoatedMethodsReturnsNull() {
+	void createContextCustomizerWhenNoAnnotatedMethodsReturnsNull() {
 		DynamicPropertiesContextCustomizer customizer = this.factory.createContextCustomizer(
-				NoDynamicProperties.class, this.configAttributes);
+				NoDynamicPropertySource.class, this.configAttributes);
 		assertThat(customizer).isNull();
 	}
 
 	@Test
-	void createContextCustomizerWhenSingleAnnoatedMethodReturnsCustomizer() {
+	void createContextCustomizerWhenSingleAnnotatedMethodReturnsCustomizer() {
 		DynamicPropertiesContextCustomizer customizer = this.factory.createContextCustomizer(
-				SingleDynamicProperty.class, this.configAttributes);
+			SingleDynamicPropertySource.class, this.configAttributes);
 		assertThat(customizer).isNotNull();
-		assertThat(customizer.getMethods()).flatExtracting(Method::getName).containsOnly(
-				"p1");
+		assertThat(customizer.getMethods()).flatExtracting(Method::getName).containsOnly("p1");
 	}
 
 	@Test
-	void createContextCustomizerWhenMultipleAnnoatedMethodsReturnsCustomizer() {
+	void createContextCustomizerWhenMultipleAnnotatedMethodsReturnsCustomizer() {
 		DynamicPropertiesContextCustomizer customizer = this.factory.createContextCustomizer(
-				MultipleDynamicProperty.class, this.configAttributes);
+			MultipleDynamicPropertySources.class, this.configAttributes);
 		assertThat(customizer).isNotNull();
-		assertThat(customizer.getMethods()).flatExtracting(Method::getName).containsOnly(
-				"p1", "p2", "p3");
+		assertThat(customizer.getMethods()).flatExtracting(Method::getName).containsOnly("p1", "p2", "p3");
 	}
 
 	@Test
-	void createContextCustomizerWhenAnnoatedMethodsInBaseClassReturnsCustomizer() {
+	void createContextCustomizerWhenAnnotatedMethodsInBaseClassReturnsCustomizer() {
 		DynamicPropertiesContextCustomizer customizer = this.factory.createContextCustomizer(
-				SubClassDynamicProperty.class, this.configAttributes);
+			SubDynamicPropertySource.class, this.configAttributes);
 		assertThat(customizer).isNotNull();
-		assertThat(customizer.getMethods()).flatExtracting(Method::getName).containsOnly(
-				"p1", "p2");
+		assertThat(customizer.getMethods()).flatExtracting(Method::getName).containsOnly("p1", "p2");
 	}
 
 
-
-	static class NoDynamicProperties {
+	static class NoDynamicPropertySource {
 
 		void empty() {
 		}
 
 	}
 
-	static class SingleDynamicProperty {
+	static class SingleDynamicPropertySource {
 
 		@DynamicPropertySource
 		static void p1(DynamicPropertyValues values) {
@@ -90,7 +86,7 @@ class DynamicPropertiesContextCustomizerFactoryTests {
 
 	}
 
-	static class MultipleDynamicProperty {
+	static class MultipleDynamicPropertySources {
 
 		@DynamicPropertySource
 		static void p1(DynamicPropertyValues values) {
@@ -106,7 +102,7 @@ class DynamicPropertiesContextCustomizerFactoryTests {
 
 	}
 
-	static class BaseDynamicProperty {
+	static class BaseDynamicPropertySource {
 
 		@DynamicPropertySource
 		static void p1(DynamicPropertyValues values) {
@@ -114,7 +110,7 @@ class DynamicPropertiesContextCustomizerFactoryTests {
 
 	}
 
-	static class SubClassDynamicProperty extends BaseDynamicProperty {
+	static class SubDynamicPropertySource extends BaseDynamicPropertySource {
 
 		@DynamicPropertySource
 		static void p2(DynamicPropertyValues values) {

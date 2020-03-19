@@ -31,9 +31,10 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link ContextCustomizer} to support
- * {@link DynamicPropertySource  @DynamicPropertySource} methods.
+ * {@link DynamicPropertySource @DynamicPropertySource} methods.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 5.2.5
  * @see DynamicPropertiesContextCustomizerFactory
  */
@@ -53,25 +54,25 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
 	private void assertValid(Method method) {
 		Assert.state(Modifier.isStatic(method.getModifiers()),
-				"@DynamicPropertySource method '" + method.getName() + "' must be static");
+				() -> "@DynamicPropertySource method '" + method.getName() + "' must be static");
 		Class<?>[] types = method.getParameterTypes();
 		Assert.state(types.length == 1 && types[0] == DynamicPropertyValues.class,
-				"@DynamicPropertySource method '" + method.getName() + "' must accept a single DynamicPropertyValues argument");
+				() -> "@DynamicPropertySource method '" + method.getName() + "' must accept a single DynamicPropertyValues argument");
 	}
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context,
 			MergedContextConfiguration mergedConfig) {
+
 		MutablePropertySources sources = context.getEnvironment().getPropertySources();
 		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, this::invokeMethods));
 	}
 
 	private void invokeMethods(DynamicPropertyValues values) {
-		Object[] args = { values };
-		for (Method method : this.methods) {
+		this.methods.forEach(method -> {
 			ReflectionUtils.makeAccessible(method);
-			ReflectionUtils.invokeMethod(method, null, args);
-		}
+			ReflectionUtils.invokeMethod(method, null, values);
+		});
 	}
 
 	Set<Method> getMethods() {
