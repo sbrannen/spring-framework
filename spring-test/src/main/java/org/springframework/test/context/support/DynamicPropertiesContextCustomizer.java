@@ -18,10 +18,15 @@ package org.springframework.test.context.support;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.DynamicPropertyValues;
@@ -65,14 +70,22 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 			MergedContextConfiguration mergedConfig) {
 
 		MutablePropertySources sources = context.getEnvironment().getPropertySources();
-		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, this::invokeMethods));
+		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicValuesMap()));
 	}
 
-	private void invokeMethods(DynamicPropertyValues values) {
+	@Nullable
+	private Map<String, Supplier<Object>> buildDynamicValuesMap() {
+		Map<String, Supplier<Object>> map = new LinkedHashMap<>();
+		DynamicPropertyValues dynamicPropertyValues = (name, valueSupplier) -> {
+			Assert.hasText(name, "'name' must not be null or blank");
+			Assert.notNull(valueSupplier, "'valueSupplier' must not be null");
+			map.put(name, valueSupplier);
+		};
 		this.methods.forEach(method -> {
 			ReflectionUtils.makeAccessible(method);
-			ReflectionUtils.invokeMethod(method, null, values);
+			ReflectionUtils.invokeMethod(method, null, dynamicPropertyValues);
 		});
+		return Collections.unmodifiableMap(map);
 	}
 
 	Set<Method> getMethods() {

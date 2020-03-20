@@ -16,21 +16,28 @@
 
 package org.springframework.test.context.support;
 
+import java.util.HashMap;
+import java.util.function.Supplier;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link DynamicValuesPropertySource}.
+ * Unit tests for {@link DynamicValuesPropertySource}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 class DynamicValuesPropertySourceTests {
 
-	private DynamicValuesPropertySource source = new DynamicValuesPropertySource("test", values -> {
-		values.add("a", () -> "A");
-		values.add("b", () -> "B");
-	});
+	@SuppressWarnings("serial")
+	private final DynamicValuesPropertySource source = new DynamicValuesPropertySource("test",
+		new HashMap<String, Supplier<Object>>() {{
+			put("a", () -> "A");
+			put("b", () -> "B");
+		}});
+
 
 	@Test
 	void getPropertyReturnsSuppliedProperty() throws Exception {
