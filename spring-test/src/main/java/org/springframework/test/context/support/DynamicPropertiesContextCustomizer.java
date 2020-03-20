@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 import org.springframework.context.ConfigurableApplicationContext;
@@ -74,8 +75,8 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 	}
 
 	@Nullable
-	private Map<String, Supplier<Object>> buildDynamicValuesMap() {
-		Map<String, Supplier<Object>> map = new LinkedHashMap<>();
+	private Map<String, Callable<Object>> buildDynamicValuesMap() {
+		Map<String, Callable<Object>> map = new LinkedHashMap<>();
 		DynamicPropertyValues dynamicPropertyValues = (name, valueSupplier) -> {
 			Assert.hasText(name, "'name' must not be null or blank");
 			Assert.notNull(valueSupplier, "'valueSupplier' must not be null");

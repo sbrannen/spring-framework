@@ -16,7 +16,7 @@
 
 package org.springframework.test.context;
 
-import java.util.function.Supplier;
+import java.util.concurrent.Callable;
 
 /**
  * Functional interface used with {@link DynamicPropertySource @DynamicPropertySource}
@@ -33,8 +33,9 @@ public interface DynamicPropertyValues {
 	/**
 	 * Add a new property with a dynamically supplied value.
 	 * @param name the name of the property to add
-	 * @param valueSupplier a supplier that will provide the value lazily on demand
+	 * @param valueSupplier a {@code Callable} that will supply the value lazily,
+	 * on demand
 	 */
-	void add(String name, Supplier<Object> valueSupplier);
+	void add(String name, Callable<Object> valueSupplier);
 
 }

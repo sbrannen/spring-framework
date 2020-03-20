@@ -17,7 +17,7 @@
 package org.springframework.test.context.support;
 
 import java.util.HashMap;
-import java.util.function.Supplier;
+import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +33,7 @@ class DynamicValuesPropertySourceTests {
 
 	@SuppressWarnings("serial")
 	private final DynamicValuesPropertySource source = new DynamicValuesPropertySource("test",
-		new HashMap<String, Supplier<Object>>() {{
+		new HashMap<String, Callable<Object>>() {{
 			put("a", () -> "A");
 			put("b", () -> "B");
 		}});
