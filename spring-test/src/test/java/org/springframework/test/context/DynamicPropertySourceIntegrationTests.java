@@ -17,15 +17,12 @@
 package org.springframework.test.context;
 
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,55 +31,64 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration test for {@link DynamicPropertySource @DynamicPropertySource}.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 @SpringJUnitConfig
-@Testcontainers
 class DynamicPropertySourceIntegrationTests {
 
-	@Container
-	static GenericContainer<?> redis = new GenericContainer<>(
-			"redis:5.0.3-alpine").withExposedPorts(6379);
+	static DemoContainer container = new DemoContainer();
 
-	@Autowired
-	private RedisService service;
 
 	@DynamicPropertySource
-	static void redisProperties(DynamicPropertyValues values) {
-		values.add("test.redis.ip", redis::getContainerIpAddress);
-		values.add("test.redis.port", redis::getFirstMappedPort);
+	static void containerProperties(DynamicPropertyValues values) {
+		values.add("test.container.ip", container::getIpAddress);
+		values.add("test.container.port", container::getPort);
 	}
+
 
 	@Test
-	void hasInjectedValues() {
-		assertThat(this.service.getIp()).isNotEmpty();
-		assertThat(this.service.getPort()).isGreaterThan(0);
+	void hasInjectedValues(@Autowired Service service) {
+		assertThat(service.getIp()).isEqualTo("127.0.0.1");
+		assertThat(service.getPort()).isEqualTo(4242);
 	}
+
 
 	@Configuration
-	@Import(RedisService.class)
+	@Import(Service.class)
 	static class Config {
-
 	}
 
-	@Service
-	static class RedisService {
+	@Component
+	static class Service {
 
 		private final String ip;
 
 		private final int port;
 
-		RedisService(@Value("${test.redis.ip}") String ip,
-				@Value("${test.redis.port}") int port) {
+
+		Service(@Value("${test.container.ip}") String ip, @Value("${test.container.port}") int port) {
 			this.ip = ip;
 			this.port = port;
 		}
 
 		String getIp() {
-			return ip;
+			return this.ip;
 		}
 
 		int getPort() {
-			return port;
+			return this.port;
+		}
+
+	}
+
+	static class DemoContainer {
+
+		String getIpAddress() {
+			return "127.0.0.1";
+		}
+
+		int getPort() {
+			return 4242;
 		}
 
 	}
