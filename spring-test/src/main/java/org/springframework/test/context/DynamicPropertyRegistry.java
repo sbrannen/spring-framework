@@ -16,26 +16,33 @@
 
 package org.springframework.test.context;
 
-import java.util.concurrent.Callable;
-
 /**
  * Functional interface used with {@link DynamicPropertySource @DynamicPropertySource}
- * annotated methods so that they can add properties that have dynamically
- * supplied values.
+ * annotated methods so that they can register properties in the {@code Environment} that
+ * have dynamically resolved values.
  *
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 5.2.5
+ * @see DynamicPropertySource
  */
 @FunctionalInterface
-public interface DynamicPropertyValues {
+public interface DynamicPropertyRegistry {
 
 	/**
-	 * Add a new property with a dynamically supplied value.
-	 * @param name the name of the property to add
-	 * @param valueSupplier a {@code Callable} that will supply the value lazily,
-	 * on demand
+	 * Register a {@link DynamicPropertyResolver} for the given property name.
+	 * @param name the name of the property for which the resolver should be registered
+	 * @param dynamicPropertyResolver a {@code DynamicPropertyResolver} that will
+	 * resolve the property on demand
 	 */
-	void add(String name, Callable<Object> valueSupplier);
+	void register(String name, DynamicPropertyResolver dynamicPropertyResolver);
+
+
+	@FunctionalInterface
+	interface DynamicPropertyResolver {
+
+		Object resolve() throws Exception;
+
+	}
 
 }

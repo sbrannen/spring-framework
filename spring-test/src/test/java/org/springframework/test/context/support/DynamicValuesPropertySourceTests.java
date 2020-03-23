@@ -17,9 +17,10 @@
 package org.springframework.test.context.support;
 
 import java.util.HashMap;
-import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.Test;
+
+import org.springframework.test.context.DynamicPropertyRegistry.DynamicPropertyResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,7 +34,7 @@ class DynamicValuesPropertySourceTests {
 
 	@SuppressWarnings("serial")
 	private final DynamicValuesPropertySource source = new DynamicValuesPropertySource("test",
-		new HashMap<String, Callable<Object>>() {{
+		new HashMap<String, DynamicPropertyResolver>() {{
 			put("a", () -> "A");
 			put("b", () -> "B");
 		}});

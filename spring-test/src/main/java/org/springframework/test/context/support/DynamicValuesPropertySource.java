@@ -17,9 +17,9 @@
 package org.springframework.test.context.support;
 
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.test.context.DynamicPropertyRegistry.DynamicPropertyResolver;
 import org.springframework.util.StringUtils;
 
 /**
@@ -30,19 +30,19 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 5.2.5
  */
-class DynamicValuesPropertySource extends EnumerablePropertySource<Map<String, Callable<Object>>>  {
+class DynamicValuesPropertySource extends EnumerablePropertySource<Map<String, DynamicPropertyResolver>>  {
 
-	DynamicValuesPropertySource(String name, Map<String, Callable<Object>> dynamicValuesMap) {
-		super(name, dynamicValuesMap);
+	DynamicValuesPropertySource(String name, Map<String, DynamicPropertyResolver> dynamicPropertyResolversMap) {
+		super(name, dynamicPropertyResolversMap);
 	}
 
 
 	@Override
 	public Object getProperty(String name) {
-		Callable<Object> valueSupplier = this.source.get(name);
-		if (valueSupplier != null) {
+		DynamicPropertyResolver dynamicPropertyResolver = this.source.get(name);
+		if (dynamicPropertyResolver != null) {
 			try {
-				return valueSupplier.call();
+				return dynamicPropertyResolver.resolve();
 			}
 			catch (Exception ex) {
 				maskAsUncheckedException(ex);

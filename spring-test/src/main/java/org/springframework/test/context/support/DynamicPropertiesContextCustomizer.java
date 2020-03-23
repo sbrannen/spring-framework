@@ -22,15 +22,14 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.function.Supplier;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertyRegistry.DynamicPropertyResolver;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.DynamicPropertyValues;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
@@ -62,8 +61,8 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 		Assert.state(Modifier.isStatic(method.getModifiers()),
 				() -> "@DynamicPropertySource method '" + method.getName() + "' must be static");
 		Class<?>[] types = method.getParameterTypes();
-		Assert.state(types.length == 1 && types[0] == DynamicPropertyValues.class,
-				() -> "@DynamicPropertySource method '" + method.getName() + "' must accept a single DynamicPropertyValues argument");
+		Assert.state(types.length == 1 && types[0] == DynamicPropertyRegistry.class,
+				() -> "@DynamicPropertySource method '" + method.getName() + "' must accept a single DynamicPropertyRegistry argument");
 	}
 
 	@Override
@@ -71,20 +70,20 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 			MergedContextConfiguration mergedConfig) {
 
 		MutablePropertySources sources = context.getEnvironment().getPropertySources();
-		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicValuesMap()));
+		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicPropertyResolversMap()));
 	}
 
 	@Nullable
-	private Map<String, Callable<Object>> buildDynamicValuesMap() {
-		Map<String, Callable<Object>> map = new LinkedHashMap<>();
-		DynamicPropertyValues dynamicPropertyValues = (name, valueSupplier) -> {
+	private Map<String, DynamicPropertyResolver> buildDynamicPropertyResolversMap() {
+		Map<String, DynamicPropertyResolver> map = new LinkedHashMap<>();
+		DynamicPropertyRegistry dynamicPropertyRegistry = (name, valueSupplier) -> {
 			Assert.hasText(name, "'name' must not be null or blank");
 			Assert.notNull(valueSupplier, "'valueSupplier' must not be null");
 			map.put(name, valueSupplier);
 		};
 		this.methods.forEach(method -> {
 			ReflectionUtils.makeAccessible(method);
-			ReflectionUtils.invokeMethod(method, null, dynamicPropertyValues);
+			ReflectionUtils.invokeMethod(method, null, dynamicPropertyRegistry);
 		});
 		return Collections.unmodifiableMap(map);
 	}

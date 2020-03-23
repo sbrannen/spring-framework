@@ -23,8 +23,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.DynamicPropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -81,7 +81,7 @@ class DynamicPropertiesContextCustomizerFactoryTests {
 	static class SingleDynamicPropertySource {
 
 		@DynamicPropertySource
-		static void p1(DynamicPropertyValues values) {
+		static void p1(DynamicPropertyRegistry registry) {
 		}
 
 	}
@@ -89,15 +89,15 @@ class DynamicPropertiesContextCustomizerFactoryTests {
 	static class MultipleDynamicPropertySources {
 
 		@DynamicPropertySource
-		static void p1(DynamicPropertyValues values) {
+		static void p1(DynamicPropertyRegistry registry) {
 		}
 
 		@DynamicPropertySource
-		static void p2(DynamicPropertyValues values) {
+		static void p2(DynamicPropertyRegistry registry) {
 		}
 
 		@DynamicPropertySource
-		static void p3(DynamicPropertyValues values) {
+		static void p3(DynamicPropertyRegistry registry) {
 		}
 
 	}
@@ -105,7 +105,7 @@ class DynamicPropertiesContextCustomizerFactoryTests {
 	static class BaseDynamicPropertySource {
 
 		@DynamicPropertySource
-		static void p1(DynamicPropertyValues values) {
+		static void p1(DynamicPropertyRegistry registry) {
 		}
 
 	}
@@ -113,7 +113,7 @@ class DynamicPropertiesContextCustomizerFactoryTests {
 	static class SubDynamicPropertySource extends BaseDynamicPropertySource {
 
 		@DynamicPropertySource
-		static void p2(DynamicPropertyValues values) {
+		static void p2(DynamicPropertyRegistry registry) {
 		}
 
 	}

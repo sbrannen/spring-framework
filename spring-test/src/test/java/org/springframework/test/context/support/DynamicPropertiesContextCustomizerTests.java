@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.test.context.DynamicPropertyValues;
+import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -55,7 +55,7 @@ class DynamicPropertiesContextCustomizerTests {
 	void createWhenBadDynamicPropertiesSignatureThrowsException() {
 		assertThatIllegalStateException()
 			.isThrownBy(() -> customizerFor("badArgs"))
-			.withMessage("@DynamicPropertySource method 'badArgs' must accept a single DynamicPropertyValues argument");
+			.withMessage("@DynamicPropertySource method 'badArgs' must accept a single DynamicPropertyRegistry argument");
 	}
 
 	@Test
@@ -120,32 +120,32 @@ class DynamicPropertiesContextCustomizerTests {
 
 	static class DynamicPropertySourceTestCase {
 
-		void nonStatic(DynamicPropertyValues values) {
+		void nonStatic(DynamicPropertyRegistry registry) {
 		}
 
 		static void badArgs(String bad) {
 		}
 
-		static void nullName(DynamicPropertyValues values) {
-			values.add(null, () -> "A");
+		static void nullName(DynamicPropertyRegistry registry) {
+			registry.register(null, () -> "A");
 		}
 
-		static void emptyName(DynamicPropertyValues values) {
-			values.add("   ", () -> "A");
+		static void emptyName(DynamicPropertyRegistry registry) {
+			registry.register("   ", () -> "A");
 		}
 
-		static void nullValueSupplier(DynamicPropertyValues values) {
-			values.add("name", null);
+		static void nullValueSupplier(DynamicPropertyRegistry registry) {
+			registry.register("name", null);
 		}
 
-		static void valid1(DynamicPropertyValues values) {
-			values.add("p1a", () -> "v1a");
-			values.add("p1b", () -> "v1b");
+		static void valid1(DynamicPropertyRegistry registry) {
+			registry.register("p1a", () -> "v1a");
+			registry.register("p1b", () -> "v1b");
 		}
 
-		static void valid2(DynamicPropertyValues values) {
-			values.add("p2a", () -> "v2a");
-			values.add("p2b", () -> "v2b");
+		static void valid2(DynamicPropertyRegistry registry) {
+			registry.register("p2a", () -> "v2a");
+			registry.register("p2b", () -> "v2b");
 		}
 
 	}

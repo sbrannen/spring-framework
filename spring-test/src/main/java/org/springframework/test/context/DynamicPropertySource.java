@@ -22,9 +22,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.test.context.DynamicPropertyRegistry.DynamicPropertyResolver;
+
 /**
- * Method-level annotation for integration tests that need to add properties with
- * dynamic values to the {@code Environment}'s set of {@code PropertySources}.
+ * Method-level annotation for integration tests that need to register properties
+ * with dynamic values in the {@code Environment}'s set of {@code PropertySources}.
  *
  * <p>This annotation and its supporting infrastructure were originally designed
  * to allow properties from
@@ -34,12 +36,12 @@ import java.lang.annotation.Target;
  * the test's {@code ApplicationContext}.
  *
  * <p>Methods annotated with {@code @DynamicPropertySource} must be {@code static}
- * and must have a single {@link DynamicPropertyValues} argument which is used
+ * and must have a single {@link DynamicPropertyRegistry} argument which is used
  * to add <em>name-value</em> pairs to the {@code Environment}'s set of
  * {@code PropertySources}. Values are dynamic and provided via a
- * {@link java.util.concurrent.Callable Callable} which is only invoked when the
- * property is resolved. Typically, method references are used to supply values,
- * as in the following example.
+ * {@link DynamicPropertyResolver} which is only invoked when the property is
+ * resolved. Typically, method references are used to supply values, as in the
+ * following example.
  *
  * <h3>Example</h3>
  *
@@ -54,9 +56,9 @@ import java.lang.annotation.Target;
  *     // ...
  *
  *     &#064;DynamicPropertySource
- *     static void redisProperties(DynamicPropertyValues values) {
- *         values.add("redis.host", redis::getContainerIpAddress);
- *         values.add("redis.port", redis::getMappedPort);
+ *     static void redisProperties(DynamicPropertyRegistry registry) {
+ *         registry.register("redis.host", redis::getContainerIpAddress);
+ *         registry.register("redis.port", redis::getMappedPort);
  *     }
  *
  * }</pre>
@@ -64,7 +66,7 @@ import java.lang.annotation.Target;
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 5.2.5
- * @see DynamicPropertyValues
+ * @see DynamicPropertyRegistry
  * @see ContextConfiguration
  * @see TestPropertySource
  * @see org.springframework.core.env.PropertySource
