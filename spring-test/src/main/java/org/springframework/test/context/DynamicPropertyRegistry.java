@@ -16,6 +16,8 @@
 
 package org.springframework.test.context;
 
+import java.util.function.Supplier;
+
 /**
  * Functional interface used with {@link DynamicPropertySource @DynamicPropertySource}
  * annotated methods so that they can register properties in the {@code Environment} that
@@ -30,19 +32,10 @@ package org.springframework.test.context;
 public interface DynamicPropertyRegistry {
 
 	/**
-	 * Register a {@link DynamicPropertyResolver} for the given property name.
-	 * @param name the name of the property for which the resolver should be registered
-	 * @param dynamicPropertyResolver a {@code DynamicPropertyResolver} that will
-	 * resolve the property on demand
+	 * Register a {@link Supplier} for the given property name.
+	 * @param name the name of the property for which the supplier should be registered
+	 * @param valueSupplier a supplier that will provide the property value on demand
 	 */
-	void register(String name, DynamicPropertyResolver dynamicPropertyResolver);
-
-
-	@FunctionalInterface
-	interface DynamicPropertyResolver {
-
-		Object resolve() throws Exception;
-
-	}
+	void register(String name, Supplier<Object> valueSupplier);
 
 }

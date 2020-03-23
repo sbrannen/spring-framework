@@ -22,8 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.test.context.DynamicPropertyRegistry.DynamicPropertyResolver;
-
 /**
  * Method-level annotation for integration tests that need to register properties
  * with dynamic values in the {@code Environment}'s set of {@code PropertySources}.
@@ -38,10 +36,9 @@ import org.springframework.test.context.DynamicPropertyRegistry.DynamicPropertyR
  * <p>Methods annotated with {@code @DynamicPropertySource} must be {@code static}
  * and must have a single {@link DynamicPropertyRegistry} argument which is used
  * to add <em>name-value</em> pairs to the {@code Environment}'s set of
- * {@code PropertySources}. Values are dynamic and provided via a
- * {@link DynamicPropertyResolver} which is only invoked when the property is
- * resolved. Typically, method references are used to supply values, as in the
- * following example.
+ * {@code PropertySources}. Values are dynamic and provided via a {@link Supplier}
+ * which is only invoked when the property is resolved. Typically, method references
+ * are used to supply values, as in the following example.
  *
  * <h3>Example</h3>
  *

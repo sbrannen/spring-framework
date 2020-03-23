@@ -17,9 +17,9 @@
 package org.springframework.test.context.support;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.test.context.DynamicPropertyRegistry.DynamicPropertyResolver;
 import org.springframework.util.StringUtils;
 
 /**
@@ -30,25 +30,17 @@ import org.springframework.util.StringUtils;
  * @author Sam Brannen
  * @since 5.2.5
  */
-class DynamicValuesPropertySource extends EnumerablePropertySource<Map<String, DynamicPropertyResolver>>  {
+class DynamicValuesPropertySource extends EnumerablePropertySource<Map<String, Supplier<Object>>>  {
 
-	DynamicValuesPropertySource(String name, Map<String, DynamicPropertyResolver> dynamicPropertyResolversMap) {
-		super(name, dynamicPropertyResolversMap);
+	DynamicValuesPropertySource(String name, Map<String, Supplier<Object>> valueSuppliers) {
+		super(name, valueSuppliers);
 	}
 
 
 	@Override
 	public Object getProperty(String name) {
-		DynamicPropertyResolver dynamicPropertyResolver = this.source.get(name);
-		if (dynamicPropertyResolver != null) {
-			try {
-				return dynamicPropertyResolver.resolve();
-			}
-			catch (Exception ex) {
-				maskAsUncheckedException(ex);
-			}
-		}
-		return null;
+		Supplier<Object> valueSupplier = this.source.get(name);
+		return (valueSupplier != null ? valueSupplier.get() : null);
 	}
 
 	@Override
@@ -59,15 +51,6 @@ class DynamicValuesPropertySource extends EnumerablePropertySource<Map<String, D
 	@Override
 	public String[] getPropertyNames() {
 		return StringUtils.toStringArray(this.source.keySet());
-	}
-
-	private static void maskAsUncheckedException(Exception ex) {
-		DynamicValuesPropertySource.throwAsUncheckedException(ex);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T extends Throwable> void throwAsUncheckedException(Throwable throwable) throws T {
-		throw (T) throwable;
 	}
 
 }

@@ -22,13 +22,13 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertyRegistry.DynamicPropertyResolver;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.Assert;
@@ -74,8 +74,8 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 	}
 
 	@Nullable
-	private Map<String, DynamicPropertyResolver> buildDynamicPropertyResolversMap() {
-		Map<String, DynamicPropertyResolver> map = new LinkedHashMap<>();
+	private Map<String, Supplier<Object>> buildDynamicPropertyResolversMap() {
+		Map<String, Supplier<Object>> map = new LinkedHashMap<>();
 		DynamicPropertyRegistry dynamicPropertyRegistry = (name, valueSupplier) -> {
 			Assert.hasText(name, "'name' must not be null or blank");
 			Assert.notNull(valueSupplier, "'valueSupplier' must not be null");
