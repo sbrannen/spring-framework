@@ -23,8 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Method-level annotation for integration tests that need to register properties
- * with dynamic values in the {@code Environment}'s set of {@code PropertySources}.
+ * Method-level annotation for integration tests that need to add properties with
+ * dynamic values to the {@code Environment}'s set of {@code PropertySources}.
  *
  * <p>This annotation and its supporting infrastructure were originally designed
  * to allow properties from
@@ -54,8 +54,8 @@ import java.lang.annotation.Target;
  *
  *     &#064;DynamicPropertySource
  *     static void redisProperties(DynamicPropertyRegistry registry) {
- *         registry.register("redis.host", redis::getContainerIpAddress);
- *         registry.register("redis.port", redis::getMappedPort);
+ *         registry.add("redis.host", redis::getContainerIpAddress);
+ *         registry.add("redis.port", redis::getMappedPort);
  *     }
  *
  * }</pre>

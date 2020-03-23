@@ -41,8 +41,8 @@ class DynamicPropertySourceIntegrationTests {
 
 	@DynamicPropertySource
 	static void containerProperties(DynamicPropertyRegistry registry) {
-		registry.register("test.container.ip", container::getIpAddress);
-		registry.register("test.container.port", container::getPort);
+		registry.add("test.container.ip", container::getIpAddress);
+		registry.add("test.container.port", container::getPort);
 	}
 
 

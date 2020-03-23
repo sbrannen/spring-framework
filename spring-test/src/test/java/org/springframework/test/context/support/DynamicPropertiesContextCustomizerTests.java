@@ -127,25 +127,25 @@ class DynamicPropertiesContextCustomizerTests {
 		}
 
 		static void nullName(DynamicPropertyRegistry registry) {
-			registry.register(null, () -> "A");
+			registry.add(null, () -> "A");
 		}
 
 		static void emptyName(DynamicPropertyRegistry registry) {
-			registry.register("   ", () -> "A");
+			registry.add("   ", () -> "A");
 		}
 
 		static void nullValueSupplier(DynamicPropertyRegistry registry) {
-			registry.register("name", null);
+			registry.add("name", null);
 		}
 
 		static void valid1(DynamicPropertyRegistry registry) {
-			registry.register("p1a", () -> "v1a");
-			registry.register("p1b", () -> "v1b");
+			registry.add("p1a", () -> "v1a");
+			registry.add("p1b", () -> "v1b");
 		}
 
 		static void valid2(DynamicPropertyRegistry registry) {
-			registry.register("p2a", () -> "v2a");
-			registry.register("p2b", () -> "v2b");
+			registry.add("p2a", () -> "v2a");
+			registry.add("p2b", () -> "v2b");
 		}
 
 	}

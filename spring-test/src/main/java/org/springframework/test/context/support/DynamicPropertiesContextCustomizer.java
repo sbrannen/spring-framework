@@ -70,11 +70,11 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 			MergedContextConfiguration mergedConfig) {
 
 		MutablePropertySources sources = context.getEnvironment().getPropertySources();
-		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicPropertyResolversMap()));
+		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicPropertiesMap()));
 	}
 
 	@Nullable
-	private Map<String, Supplier<Object>> buildDynamicPropertyResolversMap() {
+	private Map<String, Supplier<Object>> buildDynamicPropertiesMap() {
 		Map<String, Supplier<Object>> map = new LinkedHashMap<>();
 		DynamicPropertyRegistry dynamicPropertyRegistry = (name, valueSupplier) -> {
 			Assert.hasText(name, "'name' must not be null or blank");
