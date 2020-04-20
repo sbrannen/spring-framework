@@ -50,6 +50,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
 
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -1374,6 +1375,43 @@ class MergedAnnotationsTests {
 		assertThat(synthesizedWebMapping.name()).isEqualTo("foo");
 		assertThat(synthesizedWebMapping.path()).containsExactly("/test");
 		assertThat(synthesizedWebMapping.value()).containsExactly("/test");
+	}
+
+	/**
+	 * It makes no sense to synthesize {@code @Id} since it declares zero attributes.
+	 */
+	@Test
+	void synthesizeShouldNotSynthesizeNonsynthesizableAnnotations() throws Exception {
+		Method method = getClass().getDeclaredMethod("getId");
+		Id id = method.getAnnotation(Id.class);
+		assertThat(id).isNotNull();
+
+		Id synthesizedId = MergedAnnotation.from(id).synthesize();
+		assertThat(id).isEqualTo(synthesizedId);
+		assertThat(synthesizedId).isNotInstanceOf(SynthesizedAnnotation.class);
+		assertThat(id).isSameAs(synthesizedId);
+	}
+
+	/**
+	 * If an attempt is made to synthesize an annotation from an annotation instance
+	 * that has already been synthesized, the original synthesized annotation should
+	 * ideally be returned as-is without extracting all of its attributes and
+	 * creating a new proxy instance with the same values.
+	 */
+	@Test
+	void synthesizeShouldNotResynthesizeAlreadySynthesizedAnnotations() throws Exception {
+		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
+		RequestMapping webMapping = method.getAnnotation(RequestMapping.class);
+		assertThat(webMapping).isNotNull();
+
+		RequestMapping synthesizedWebMapping1 = MergedAnnotation.from(webMapping).synthesize();
+		RequestMapping synthesizedWebMapping2 = MergedAnnotation.from(webMapping).synthesize();
+		assertThat(synthesizedWebMapping1).isEqualTo(synthesizedWebMapping2);
+		assertThat(synthesizedWebMapping1).isSameAs(synthesizedWebMapping2);
+
+		RequestMapping synthesizedAgainWebMapping = MergedAnnotation.from(synthesizedWebMapping1).synthesize();
+		assertThat(synthesizedWebMapping1).isEqualTo(synthesizedAgainWebMapping);
+		assertThat(synthesizedWebMapping1).isSameAs(synthesizedAgainWebMapping);
 	}
 
 	@Test
@@ -2949,6 +2987,18 @@ class MergedAnnotationsTests {
 		@RequestMapping(value = "/enigma", path = "/test", name = "baz")
 		public void handleMappedWithDifferentPathAndValueAttributes() {
 		}
+	}
+
+	/**
+	 * Mimics javax.persistence.Id
+	 */
+	@Retention(RUNTIME)
+	@interface Id {
+	}
+
+	@Id
+	private Long getId() {
+		return 42L;
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
