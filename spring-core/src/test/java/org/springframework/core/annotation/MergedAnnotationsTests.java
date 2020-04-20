@@ -1377,9 +1377,6 @@ class MergedAnnotationsTests {
 		assertThat(synthesizedWebMapping.value()).containsExactly("/test");
 	}
 
-	/**
-	 * It makes no sense to synthesize {@code @Id} since it declares zero attributes.
-	 */
 	@Test
 	void synthesizeShouldNotSynthesizeNonsynthesizableAnnotations() throws Exception {
 		Method method = getClass().getDeclaredMethod("getId");
@@ -1388,6 +1385,7 @@ class MergedAnnotationsTests {
 
 		Id synthesizedId = MergedAnnotation.from(id).synthesize();
 		assertThat(id).isEqualTo(synthesizedId);
+		// It doesn't make sense to synthesize {@code @Id} since it declares zero attributes.
 		assertThat(synthesizedId).isNotInstanceOf(SynthesizedAnnotation.class);
 		assertThat(id).isSameAs(synthesizedId);
 	}
@@ -1395,8 +1393,8 @@ class MergedAnnotationsTests {
 	/**
 	 * If an attempt is made to synthesize an annotation from an annotation instance
 	 * that has already been synthesized, the original synthesized annotation should
-	 * ideally be returned as-is without extracting all of its attributes and
-	 * creating a new proxy instance with the same values.
+	 * ideally be returned as-is without creating a new proxy instance with the same
+	 * values.
 	 */
 	@Test
 	void synthesizeShouldNotResynthesizeAlreadySynthesizedAnnotations() throws Exception {
@@ -1404,13 +1402,22 @@ class MergedAnnotationsTests {
 		RequestMapping webMapping = method.getAnnotation(RequestMapping.class);
 		assertThat(webMapping).isNotNull();
 
-		RequestMapping synthesizedWebMapping1 = MergedAnnotation.from(webMapping).synthesize();
+		MergedAnnotation<RequestMapping> mergedAnnotation1 = MergedAnnotation.from(webMapping);
+		RequestMapping synthesizedWebMapping1 = mergedAnnotation1.synthesize();
 		RequestMapping synthesizedWebMapping2 = MergedAnnotation.from(webMapping).synthesize();
+
+		assertThat(synthesizedWebMapping1).isInstanceOf(SynthesizedAnnotation.class);
+		assertThat(synthesizedWebMapping2).isInstanceOf(SynthesizedAnnotation.class);
 		assertThat(synthesizedWebMapping1).isEqualTo(synthesizedWebMapping2);
-		assertThat(synthesizedWebMapping1).isSameAs(synthesizedWebMapping2);
+
+		// Synthesizing an annotation from a different MergedAnnotation results in a different synthesized annotation instance.
+		assertThat(synthesizedWebMapping1).isNotSameAs(synthesizedWebMapping2);
+		// Synthesizing an annotation from the same MergedAnnotation results in the same synthesized annotation instance.
+		assertThat(synthesizedWebMapping1).isSameAs(mergedAnnotation1.synthesize());
 
 		RequestMapping synthesizedAgainWebMapping = MergedAnnotation.from(synthesizedWebMapping1).synthesize();
 		assertThat(synthesizedWebMapping1).isEqualTo(synthesizedAgainWebMapping);
+		// Synthesizing an already synthesized annotation results in the original synthesized annotation instance.
 		assertThat(synthesizedWebMapping1).isSameAs(synthesizedAgainWebMapping);
 	}
 
