@@ -331,17 +331,42 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@Override
 	@SuppressWarnings("unchecked")
 	protected A createSynthesized() {
-		if (this.rootAttributes instanceof Annotation) {
-			// Nothing to synthesize?
-			if (this.resolvedRootMirrors.length == 0 && this.resolvedMirrors.length == 0) {
-				return (A) this.rootAttributes;
-			}
-			// Already synthesized?
-			if (this.rootAttributes instanceof SynthesizedAnnotation) {
-				return (A) this.rootAttributes;
-			}
+		if (getType().isInstance(this.rootAttributes) && !isSynthesizable()) {
+			return (A) this.rootAttributes;
 		}
 		return SynthesizedMergedAnnotationInvocationHandler.createProxy(this, getType());
+	}
+
+	@SuppressWarnings("unchecked")
+	private boolean isSynthesizable() {
+		// Already synthesized?
+		if (this.rootAttributes instanceof SynthesizedAnnotation) {
+			return false;
+		}
+
+		// Has aliases or convention-based attribute overrides?
+		if (this.mapping.getMirrorSets().size() > 0) {
+			return true;
+		}
+
+		// Has nested annotations or arrays of annotations that are synthesizable?
+		if (this.mapping.getAttributes().hasNestedAnnotation()) {
+			AttributeMethods attributeMethods = this.mapping.getAttributes();
+			for (int i = 0; i < attributeMethods.size(); i++) {
+				Method method = attributeMethods.get(i);
+				Class<?> type = method.getReturnType();
+				if (type.isAnnotation() || (type.isArray() && type.getComponentType().isAnnotation())) {
+					Class<? extends Annotation> annotationType = (Class<? extends Annotation>) (type.isAnnotation() ? type : type.getComponentType());
+					AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(annotationType).get(0);
+					// Has aliases or convention-based attribute overrides?
+					if (mapping.getMirrorSets().size() > 0) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	@Override
