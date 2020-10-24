@@ -18,9 +18,9 @@ package org.springframework.test.context.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,7 +115,7 @@ abstract class ActiveProfilesUtils {
 		// Reverse the list so that we can traverse "down" the hierarchy.
 		Collections.reverse(profileArrays);
 
-		Set<String> activeProfiles = new LinkedHashSet<>();
+		Set<String> activeProfiles = new TreeSet<>();
 		for (String[] profiles : profileArrays) {
 			for (String profile : profiles) {
 				if (StringUtils.hasText(profile)) {
