@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationConfigurationException;
+import org.springframework.test.context.event.ApplicationEventsTestExecutionListener;
 import org.springframework.test.context.event.EventPublishingTestExecutionListener;
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -59,7 +60,8 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
-				SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class);
+				SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class,
+				ApplicationEventsTestExecutionListener.class);
 		assertRegisteredListeners(DefaultListenersTestCase.class, expected);
 	}
 
@@ -71,7 +73,8 @@ class TestExecutionListenersTests {
 		List<Class<?>> expected = asList(QuuxTestExecutionListener.class, ServletTestExecutionListener.class,
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
-				SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class);
+				SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class,
+				ApplicationEventsTestExecutionListener.class);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerPrependedTestCase.class, expected);
 	}
 
@@ -84,7 +87,7 @@ class TestExecutionListenersTests {
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
 				SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class,
-				BazTestExecutionListener.class);
+				ApplicationEventsTestExecutionListener.class, BazTestExecutionListener.class);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerAppendedTestCase.class, expected);
 	}
 
@@ -97,7 +100,7 @@ class TestExecutionListenersTests {
 				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
 				BarTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
 				TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class,
-				EventPublishingTestExecutionListener.class);
+				EventPublishingTestExecutionListener.class, ApplicationEventsTestExecutionListener.class);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerInsertedTestCase.class, expected);
 	}
 

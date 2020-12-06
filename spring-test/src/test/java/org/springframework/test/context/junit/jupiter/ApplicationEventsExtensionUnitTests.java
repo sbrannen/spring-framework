@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ParameterContext;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Oliver Drotbohm
  * @author Sam Brannen
- * @since 5.3.1
+ * @since 5.3.2
  */
 class ApplicationEventsExtensionUnitTests {
 
@@ -60,7 +61,7 @@ class ApplicationEventsExtensionUnitTests {
 	void createsThreadBoundApplicationEvents() throws Exception {
 		context.refresh();
 
-		extension.beforeAll(null);
+		// extension.beforeAll(null);
 
 		Map<String, ApplicationEvents> allEvents = new ConcurrentHashMap<>();
 		List<String> keys = Arrays.asList("first", "second", "third");
@@ -72,7 +73,7 @@ class ApplicationEventsExtensionUnitTests {
 				context.publishEvent(key);
 				allEvents.put(key, events);
 
-				extension.afterEach(null);
+				// extension.afterEach(null);
 
 				latch.countDown();
 			}).start();

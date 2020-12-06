@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit.jupiter;
+package org.springframework.test.context.event;
 
 import java.util.stream.Stream;
 
@@ -27,8 +27,8 @@ import org.springframework.context.ApplicationEvent;
  *
  * @author Sam Brannen
  * @author Oliver Drotbohm
- * @since 5.3.1
- * @see ApplicationEventsExtension
+ * @since 5.3.2
+ * @see org.springframework.test.context.junit.jupiter.ApplicationEventsExtension
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.ApplicationListener
  */

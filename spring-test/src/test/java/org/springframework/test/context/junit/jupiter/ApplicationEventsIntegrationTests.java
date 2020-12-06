@@ -32,7 +32,9 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.test.context.event.AfterTestExecutionEvent;
+import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.BeforeTestExecutionEvent;
+import org.springframework.test.context.event.RecordApplicationEvents;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,9 +42,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests for {@link ApplicationEvents}.
  *
  * @author Sam Brannen
- * @since 5.3.1
+ * @since 5.3.2
  */
 @SpringJUnitConfig
+@RecordApplicationEvents
 @ExtendWith(ApplicationEventsExtension.class)
 class ApplicationEventsIntegrationTests {
 
@@ -106,7 +109,7 @@ class ApplicationEventsIntegrationTests {
 		private final String message;
 
 
-		public CustomEvent(TestInfo testInfo, String message) {
+		CustomEvent(TestInfo testInfo, String message) {
 			super(testInfo.getTestClass().get());
 			this.testMethod = testInfo.getTestMethod().get();
 			this.message = message;
