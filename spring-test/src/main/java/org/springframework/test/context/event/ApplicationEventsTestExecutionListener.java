@@ -16,12 +16,12 @@
 
 package org.springframework.test.context.event;
 
-import java.util.Optional;
-
 import org.springframework.context.ApplicationContext;
-import org.springframework.lang.Nullable;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
+import org.springframework.util.Assert;
 
 /**
  * {@code TestExecutionListener} which provides support for {@link ApplicationEvents}.
@@ -32,37 +32,46 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 public class ApplicationEventsTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Returns {@code 15000}.
+	 * Returns {@code 1500}.
 	 */
 	@Override
 	public final int getOrder() {
-		return 15_000;
+		return 1500;
 	}
 
 	@Override
-	public void beforeTestMethod(TestContext testContext) throws Exception {
-		getThreadBoundApplicationListenerAdapter(testContext).ifPresent(
-			listenerAdapter -> listenerAdapter.registerDelegate(new DefaultApplicationEvents()));
+	public void prepareTestInstance(TestContext testContext) throws Exception {
+		if (recordingApplicationEvents(testContext)) {
+			getThreadBoundApplicationListenerAdapter(testContext).registerDelegate(new DefaultApplicationEvents());
+		}
 	}
 
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
-		getThreadBoundApplicationListenerAdapter(testContext).ifPresent(
-			listenerAdapter -> listenerAdapter.unregisterDelegate());
+		if (recordingApplicationEvents(testContext)) {
+			getThreadBoundApplicationListenerAdapter(testContext).unregisterDelegate();
+		}
 	}
 
-	@Nullable
-	private Optional<ThreadBoundApplicationListenerAdapter> getThreadBoundApplicationListenerAdapter(
-			TestContext testContext) {
+	private boolean recordingApplicationEvents(TestContext testContext) {
+		return AnnotatedElementUtils.hasAnnotation(testContext.getTestClass(), RecordApplicationEvents.class);
+	}
 
-		if (testContext.hasApplicationContext()) {
-			ApplicationContext applicationContext = testContext.getApplicationContext();
-			String beanName = ThreadBoundApplicationListenerAdapter.class.getName();
-			if (applicationContext.containsBean(beanName)) {
-				return Optional.of(applicationContext.getBean(beanName, ThreadBoundApplicationListenerAdapter.class));
-			}
+	@SuppressWarnings("resource")
+	private ThreadBoundApplicationListenerAdapter getThreadBoundApplicationListenerAdapter(TestContext testContext) {
+		ApplicationContext applicationContext = testContext.getApplicationContext();
+		String beanName = ThreadBoundApplicationListenerAdapter.class.getName();
+		if (applicationContext.containsBean(beanName)) {
+			return applicationContext.getBean(beanName, ThreadBoundApplicationListenerAdapter.class);
 		}
-		return Optional.empty();
+		// Else create and register a new ThreadBoundApplicationListenerAdapter.
+		Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext,
+			"The ApplicationContext for the test must be a ConfigurableApplicationContext");
+		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
+		ThreadBoundApplicationListenerAdapter listener = new ThreadBoundApplicationListenerAdapter();
+		cac.getBeanFactory().registerSingleton(beanName, listener);
+		cac.addApplicationListener(listener);
+		return listener;
 	}
 
 }
