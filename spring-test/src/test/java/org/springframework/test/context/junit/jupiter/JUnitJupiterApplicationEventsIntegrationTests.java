@@ -17,20 +17,16 @@
 package org.springframework.test.context.junit.jupiter;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
 import org.springframework.test.context.event.AfterTestExecutionEvent;
 import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.BeforeTestExecutionEvent;
@@ -40,18 +36,15 @@ import org.springframework.test.context.event.RecordApplicationEvents;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link ApplicationEvents}.
+ * Integration tests for {@link ApplicationEvents} in conjunction with JUnit Jupiter.
  *
  * @author Sam Brannen
  * @since 5.3.2
  */
 @SpringJUnitConfig
 @RecordApplicationEvents
-@ExtendWith(ApplicationEventsExtension.class)
 // @TestInstance(Lifecycle.PER_CLASS)
 class JUnitJupiterApplicationEventsIntegrationTests {
-
-	private static final List<CustomEvent> events = new ArrayList<>();
 
 	@Autowired
 	ApplicationContext context;
@@ -61,24 +54,26 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 
 
 	// TODO Consider supporting dependency injection of ApplicationEvents in constructors.
-	// JUnitJupiterApplicationEventsIntegrationTests(ApplicationEvents events) {
+	// @Autowired
+	// JUnitJupiterApplicationEventsIntegrationTests(ApplicationEvents applicationEvents) {
+	//     this.applicationEvents = applicationEvents;
 	// }
 
 
 	@BeforeEach
-	void beforeEach(ApplicationEvents events, TestInfo testInfo) {
-		assertThat(events).isNotNull();
-		assertThat(events.stream()).hasSize(2);
-		assertThat(events.stream(PrepareTestInstanceEvent.class)).hasSize(1);
+	void beforeEach(TestInfo testInfo) {
+		assertThat(applicationEvents).isNotNull();
+		assertThat(applicationEvents.stream()).hasSize(2);
+		assertThat(applicationEvents.stream(PrepareTestInstanceEvent.class)).hasSize(1);
 		context.publishEvent(new CustomEvent(testInfo, "beforeEach"));
-		assertThat(events.stream(CustomEvent.class)).hasSize(1);
-		assertThat(events.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
+		assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(1);
+		assertThat(applicationEvents.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
 				.containsExactly("beforeEach");
-		assertThat(events.stream()).hasSize(3);
+		assertThat(applicationEvents.stream()).hasSize(3);
 	}
 
 	@Test
-	void test1(ApplicationEvents events, TestInfo testInfo) {
+	void test1(@Autowired ApplicationEvents events, TestInfo testInfo) {
 		assertThat(events).isNotNull();
 		assertThat(events.stream()).hasSize(4);
 		assertThat(events.stream(BeforeTestExecutionEvent.class)).hasSize(1);
@@ -91,7 +86,7 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 	}
 
 	@Test
-	void test2(ApplicationEvents events, TestInfo testInfo) {
+	void test2(@Autowired ApplicationEvents events, TestInfo testInfo) {
 		assertThat(events).isNotNull();
 		assertThat(events.stream()).hasSize(4);
 		assertThat(events.stream(BeforeTestExecutionEvent.class)).hasSize(1);
@@ -104,7 +99,7 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 	}
 
 	@AfterEach
-	void afterEach(ApplicationEvents events, TestInfo testInfo) {
+	void afterEach(@Autowired ApplicationEvents events, TestInfo testInfo) {
 		assertThat(events).isNotNull();
 		assertThat(events.stream()).hasSize(6);
 		assertThat(events.stream(AfterTestExecutionEvent.class)).hasSize(1);
@@ -119,11 +114,6 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 
 	@Configuration
 	static class Config {
-
-		@EventListener
-		void processCustomEvent(CustomEvent event) {
-			events.add(event);
-		}
 	}
 
 	@SuppressWarnings("serial")
