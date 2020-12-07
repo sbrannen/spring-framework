@@ -28,7 +28,7 @@ import org.springframework.context.PayloadApplicationEvent;
  *
  * @author Oliver Drotbohm
  * @author Sam Brannen
- * @since 5.3.2
+ * @since 5.3.3
  */
 class DefaultApplicationEvents implements ApplicationEvents {
 

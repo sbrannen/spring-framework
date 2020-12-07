@@ -27,7 +27,7 @@ import org.springframework.lang.Nullable;
  *
  * @author Oliver Drotbohm
  * @author Sam Brannen
- * @since 5.3.2
+ * @since 5.3.3
  */
 class ThreadBoundApplicationListener implements ApplicationListener<ApplicationEvent> {
 
@@ -51,9 +51,8 @@ class ThreadBoundApplicationListener implements ApplicationListener<ApplicationE
 	}
 
 	/**
-	 * Get the {@link DefaultApplicationEvents} for the current thread.
-	 * @return the current {@code DefaultApplicationEvents}, or {@code null} if
-	 * not registered
+	 * Get the {@link ApplicationEvents} for the current thread.
+	 * @return the current {@code ApplicationEvents}, or {@code null} if not registered
 	 */
 	@Nullable
 	ApplicationEvents getApplicationEvents() {

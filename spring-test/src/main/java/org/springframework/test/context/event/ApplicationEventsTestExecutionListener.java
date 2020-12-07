@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * {@code TestExecutionListener} which provides support for {@link ApplicationEvents}.
  *
  * @author Sam Brannen
- * @since 5.3.2
+ * @since 5.3.3
  */
 public class ApplicationEventsTestExecutionListener extends AbstractTestExecutionListener {
 
