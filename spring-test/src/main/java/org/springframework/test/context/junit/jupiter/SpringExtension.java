@@ -52,6 +52,7 @@ import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.support.PropertyProvider;
 import org.springframework.test.context.support.TestConstructorUtils;
 import org.springframework.util.Assert;
@@ -218,6 +219,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * invoked with a fallback {@link PropertyProvider} that delegates its lookup
 	 * to {@link ExtensionContext#getConfigurationParameter(String)}.</li>
 	 * <li>The parameter is of type {@link ApplicationContext} or a sub-type thereof.</li>
+	 * <li>The parameter is of type {@link ApplicationEvents} or a sub-type thereof.</li>
 	 * <li>{@link ParameterResolutionDelegate#isAutowirable} returns {@code true}.</li>
 	 * </ol>
 	 * <p><strong>WARNING</strong>: If a test class {@code Constructor} is annotated
@@ -238,6 +240,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 				extensionContext.getConfigurationParameter(propertyName).orElse(null);
 		return (TestConstructorUtils.isAutowirableConstructor(executable, testClass, junitPropertyProvider) ||
 				ApplicationContext.class.isAssignableFrom(parameter.getType()) ||
+				ApplicationEvents.class.isAssignableFrom(parameter.getType()) ||
 				ParameterResolutionDelegate.isAutowirable(parameter, parameterContext.getIndex()));
 	}
 

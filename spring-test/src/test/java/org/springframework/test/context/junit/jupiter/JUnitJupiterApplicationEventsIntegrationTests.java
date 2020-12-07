@@ -73,7 +73,7 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 	}
 
 	@Test
-	void test1(@Autowired ApplicationEvents events, TestInfo testInfo) {
+	void test1(ApplicationEvents events, TestInfo testInfo) {
 		assertThat(events).isNotNull();
 		assertThat(events.stream()).hasSize(4);
 		assertThat(events.stream(BeforeTestExecutionEvent.class)).hasSize(1);
