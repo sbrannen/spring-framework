@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @since 5.3.2
  */
-public class ThreadBoundApplicationListenerAdapter implements ApplicationListener<ApplicationEvent> {
+class ThreadBoundApplicationListenerAdapter implements ApplicationListener<ApplicationEvent> {
 
 	private final ThreadLocal<ApplicationListener<ApplicationEvent>> delegateHolder = new ThreadLocal<>();
 
@@ -44,20 +44,20 @@ public class ThreadBoundApplicationListenerAdapter implements ApplicationListene
 	 * current thread.
 	 * @param listener the listener to register; never {@code null}
 	 */
-	public void registerDelegate(ApplicationListener<ApplicationEvent> listener) {
+	void registerDelegate(ApplicationListener<ApplicationEvent> listener) {
 		Assert.notNull(listener, "Delegate ApplicationListener must not be null");
 		this.delegateHolder.set(listener);
 	}
 
 	@Nullable
-	public ApplicationListener<ApplicationEvent> getDelegate() {
+	ApplicationListener<ApplicationEvent> getDelegate() {
 		return this.delegateHolder.get();
 	}
 
 	/**
 	 * Remove the registration of the current delegate {@link ApplicationListener}.
 	 */
-	public void unregisterDelegate() {
+	void unregisterDelegate() {
 		this.delegateHolder.remove();
 	}
 
