@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.PayloadApplicationEvent;
 
 /**
@@ -31,10 +30,14 @@ import org.springframework.context.PayloadApplicationEvent;
  * @author Sam Brannen
  * @since 5.3.2
  */
-class DefaultApplicationEvents implements ApplicationEvents, ApplicationListener<ApplicationEvent> {
+class DefaultApplicationEvents implements ApplicationEvents {
 
 	private final List<ApplicationEvent> events = new ArrayList<>();
 
+
+	void addEvent(ApplicationEvent event) {
+		this.events.add(event);
+	}
 
 	@Override
 	public Stream<ApplicationEvent> stream() {
@@ -52,11 +55,6 @@ class DefaultApplicationEvents implements ApplicationEvents, ApplicationListener
 	private Object unwrapPayloadEvent(Object source) {
 		return (PayloadApplicationEvent.class.isInstance(source) ?
 				((PayloadApplicationEvent<?>) source).getPayload() : source);
-	}
-
-	@Override
-	public void onApplicationEvent(ApplicationEvent event) {
-		this.events.add(event);
 	}
 
 }

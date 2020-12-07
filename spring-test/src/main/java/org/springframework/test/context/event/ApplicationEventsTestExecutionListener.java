@@ -21,8 +21,6 @@ import java.io.Serializable;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
@@ -48,14 +46,14 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 	@Override
 	public void prepareTestInstance(TestContext testContext) throws Exception {
 		if (recordingApplicationEvents(testContext)) {
-			getThreadBoundApplicationListenerAdapter(testContext).registerDelegate(new DefaultApplicationEvents());
+			getThreadBoundApplicationListener(testContext).registerApplicationEvents();
 		}
 	}
 
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
 		if (recordingApplicationEvents(testContext)) {
-			getThreadBoundApplicationListenerAdapter(testContext).unregisterDelegate();
+			getThreadBoundApplicationListener(testContext).unregisterApplicationEvents();
 		}
 	}
 
@@ -64,27 +62,28 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 	}
 
 	@SuppressWarnings("resource")
-	private ThreadBoundApplicationListenerAdapter getThreadBoundApplicationListenerAdapter(TestContext testContext) {
+	private ThreadBoundApplicationListener getThreadBoundApplicationListener(TestContext testContext) {
 		ApplicationContext applicationContext = testContext.getApplicationContext();
-		String beanName = ThreadBoundApplicationListenerAdapter.class.getName();
+		String beanName = ThreadBoundApplicationListener.class.getName();
 
 		if (applicationContext.containsBean(beanName)) {
-			return applicationContext.getBean(beanName, ThreadBoundApplicationListenerAdapter.class);
+			return applicationContext.getBean(beanName, ThreadBoundApplicationListener.class);
 		}
 
-		// Else create and register a new ThreadBoundApplicationListenerAdapter.
+		// Else create and register a new ThreadBoundApplicationListener.
 		Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext,
 			"The ApplicationContext for the test must be a ConfigurableApplicationContext");
 		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
-		ThreadBoundApplicationListenerAdapter listener = new ThreadBoundApplicationListenerAdapter();
+		ThreadBoundApplicationListener threadBoundApplicationListener = new ThreadBoundApplicationListener();
 		ConfigurableListableBeanFactory beanFactory = cac.getBeanFactory();
-		beanFactory.registerSingleton(beanName, listener);
-		cac.addApplicationListener(listener);
+		beanFactory.registerSingleton(beanName, threadBoundApplicationListener);
+		cac.addApplicationListener(threadBoundApplicationListener);
 
 		// Register ApplicationEvents as a resolvable dependency for @Autowired support in test classes.
-		beanFactory.registerResolvableDependency(ApplicationEvents.class, new ApplicationEventsObjectFactory(listener));
+		beanFactory.registerResolvableDependency(ApplicationEvents.class,
+				new ApplicationEventsObjectFactory(threadBoundApplicationListener));
 
-		return listener;
+		return threadBoundApplicationListener;
 	}
 
 	/**
@@ -93,18 +92,18 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 	@SuppressWarnings("serial")
 	private static class ApplicationEventsObjectFactory implements ObjectFactory<ApplicationEvents>, Serializable {
 
-		private final ThreadBoundApplicationListenerAdapter listener;
+		private final ThreadBoundApplicationListener threadBoundApplicationListener;
 
 
-		ApplicationEventsObjectFactory(ThreadBoundApplicationListenerAdapter listener) {
-			this.listener = listener;
+		ApplicationEventsObjectFactory(ThreadBoundApplicationListener threadBoundApplicationListener) {
+			this.threadBoundApplicationListener = threadBoundApplicationListener;
 		}
 
 		@Override
 		public ApplicationEvents getObject() {
-			ApplicationListener<ApplicationEvent> applicationListener = this.listener.getDelegate();
-			if (applicationListener instanceof ApplicationEvents) {
-				return (ApplicationEvents) applicationListener;
+			ApplicationEvents applicationEvents = this.threadBoundApplicationListener.getApplicationEvents();
+			if (applicationEvents != null) {
+				return applicationEvents;
 			}
 			throw new IllegalStateException("Failed to retrieve ApplicationEvents for the current test");
 		}
