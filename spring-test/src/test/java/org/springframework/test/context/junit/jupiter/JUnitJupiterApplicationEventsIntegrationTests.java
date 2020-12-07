@@ -48,16 +48,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringJUnitConfig
 @RecordApplicationEvents
 @ExtendWith(ApplicationEventsExtension.class)
-class ApplicationEventsIntegrationTests {
+// @TestInstance(Lifecycle.PER_CLASS)
+class JUnitJupiterApplicationEventsIntegrationTests {
 
 	private static final List<CustomEvent> events = new ArrayList<>();
 
 	@Autowired
 	ApplicationContext context;
 
+	@Autowired
+	ApplicationEvents applicationEvents;
+
 
 	// TODO Consider supporting dependency injection of ApplicationEvents in constructors.
-	// ApplicationEventsIntegrationTests(ApplicationEvents events) {
+	// JUnitJupiterApplicationEventsIntegrationTests(ApplicationEvents events) {
 	// }
 
 
@@ -74,7 +78,20 @@ class ApplicationEventsIntegrationTests {
 	}
 
 	@Test
-	void applicationEventsInjected(ApplicationEvents events, TestInfo testInfo) {
+	void test1(ApplicationEvents events, TestInfo testInfo) {
+		assertThat(events).isNotNull();
+		assertThat(events.stream()).hasSize(4);
+		assertThat(events.stream(BeforeTestExecutionEvent.class)).hasSize(1);
+		assertThat(events.stream(CustomEvent.class)).hasSize(1);
+		context.publishEvent(new CustomEvent(testInfo, "test"));
+		assertThat(events.stream(CustomEvent.class)).hasSize(2);
+		assertThat(events.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
+				.containsExactly("beforeEach", "test");
+		assertThat(events.stream()).hasSize(5);
+	}
+
+	@Test
+	void test2(ApplicationEvents events, TestInfo testInfo) {
 		assertThat(events).isNotNull();
 		assertThat(events.stream()).hasSize(4);
 		assertThat(events.stream(BeforeTestExecutionEvent.class)).hasSize(1);

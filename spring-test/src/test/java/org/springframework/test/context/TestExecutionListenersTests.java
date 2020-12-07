@@ -57,11 +57,15 @@ class TestExecutionListenersTests {
 
 	@Test
 	void defaultListeners() {
-		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
-				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
-				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
-				SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class,
-				ApplicationEventsTestExecutionListener.class);
+		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
+				DirtiesContextBeforeModesTestExecutionListener.class,//
+				ApplicationEventsTestExecutionListener.class,//
+				DependencyInjectionTestExecutionListener.class,//
+				DirtiesContextTestExecutionListener.class,//
+				TransactionalTestExecutionListener.class,//
+				SqlScriptsTestExecutionListener.class,//
+				EventPublishingTestExecutionListener.class
+			);
 		assertRegisteredListeners(DefaultListenersTestCase.class, expected);
 	}
 
@@ -70,11 +74,16 @@ class TestExecutionListenersTests {
 	 */
 	@Test
 	void defaultListenersMergedWithCustomListenerPrepended() {
-		List<Class<?>> expected = asList(QuuxTestExecutionListener.class, ServletTestExecutionListener.class,
-				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
-				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
-				SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class,
-				ApplicationEventsTestExecutionListener.class);
+		List<Class<?>> expected = asList(QuuxTestExecutionListener.class,//
+				ServletTestExecutionListener.class,//
+				DirtiesContextBeforeModesTestExecutionListener.class,//
+				ApplicationEventsTestExecutionListener.class,//
+				DependencyInjectionTestExecutionListener.class,//
+				DirtiesContextTestExecutionListener.class,//
+				TransactionalTestExecutionListener.class,//
+				SqlScriptsTestExecutionListener.class,//
+				EventPublishingTestExecutionListener.class
+			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerPrependedTestCase.class, expected);
 	}
 
@@ -83,11 +92,16 @@ class TestExecutionListenersTests {
 	 */
 	@Test
 	void defaultListenersMergedWithCustomListenerAppended() {
-		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
-				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
-				DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class,
-				SqlScriptsTestExecutionListener.class, EventPublishingTestExecutionListener.class,
-				ApplicationEventsTestExecutionListener.class, BazTestExecutionListener.class);
+		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
+				DirtiesContextBeforeModesTestExecutionListener.class,//
+				ApplicationEventsTestExecutionListener.class,//
+				DependencyInjectionTestExecutionListener.class,//
+				DirtiesContextTestExecutionListener.class,//
+				TransactionalTestExecutionListener.class,
+				SqlScriptsTestExecutionListener.class,//
+				EventPublishingTestExecutionListener.class,//
+				BazTestExecutionListener.class
+			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerAppendedTestCase.class, expected);
 	}
 
@@ -96,11 +110,16 @@ class TestExecutionListenersTests {
 	 */
 	@Test
 	void defaultListenersMergedWithCustomListenerInserted() {
-		List<Class<?>> expected = asList(ServletTestExecutionListener.class,
-				DirtiesContextBeforeModesTestExecutionListener.class, DependencyInjectionTestExecutionListener.class,
-				BarTestExecutionListener.class, DirtiesContextTestExecutionListener.class,
-				TransactionalTestExecutionListener.class, SqlScriptsTestExecutionListener.class,
-				EventPublishingTestExecutionListener.class, ApplicationEventsTestExecutionListener.class);
+		List<Class<?>> expected = asList(ServletTestExecutionListener.class,//
+				DirtiesContextBeforeModesTestExecutionListener.class,//
+				ApplicationEventsTestExecutionListener.class,//
+				DependencyInjectionTestExecutionListener.class,//
+				BarTestExecutionListener.class,//
+				DirtiesContextTestExecutionListener.class,//
+				TransactionalTestExecutionListener.class,//
+				SqlScriptsTestExecutionListener.class,//
+				EventPublishingTestExecutionListener.class
+			);
 		assertRegisteredListeners(MergedDefaultListenersWithCustomListenerInsertedTestCase.class, expected);
 	}
 

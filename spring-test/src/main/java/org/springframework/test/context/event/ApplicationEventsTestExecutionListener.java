@@ -16,7 +16,13 @@
 
 package org.springframework.test.context.event;
 
+import java.io.Serializable;
+
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
@@ -32,11 +38,11 @@ import org.springframework.util.Assert;
 public class ApplicationEventsTestExecutionListener extends AbstractTestExecutionListener {
 
 	/**
-	 * Returns {@code 1500}.
+	 * Returns {@code 1800}.
 	 */
 	@Override
 	public final int getOrder() {
-		return 1500;
+		return 1800;
 	}
 
 	@Override
@@ -61,17 +67,52 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 	private ThreadBoundApplicationListenerAdapter getThreadBoundApplicationListenerAdapter(TestContext testContext) {
 		ApplicationContext applicationContext = testContext.getApplicationContext();
 		String beanName = ThreadBoundApplicationListenerAdapter.class.getName();
+
 		if (applicationContext.containsBean(beanName)) {
 			return applicationContext.getBean(beanName, ThreadBoundApplicationListenerAdapter.class);
 		}
+
 		// Else create and register a new ThreadBoundApplicationListenerAdapter.
 		Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext,
 			"The ApplicationContext for the test must be a ConfigurableApplicationContext");
 		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
 		ThreadBoundApplicationListenerAdapter listener = new ThreadBoundApplicationListenerAdapter();
-		cac.getBeanFactory().registerSingleton(beanName, listener);
+		ConfigurableListableBeanFactory beanFactory = cac.getBeanFactory();
+		beanFactory.registerSingleton(beanName, listener);
 		cac.addApplicationListener(listener);
+
+		// Register ApplicationEvents as a resolvable dependency for @Autowired support in test classes.
+		beanFactory.registerResolvableDependency(ApplicationEvents.class, new ApplicationEventsObjectFactory(listener));
+
 		return listener;
+	}
+
+	/**
+	 * Factory that exposes the current {@link ApplicationEvents} object on demand.
+	 */
+	@SuppressWarnings("serial")
+	private static class ApplicationEventsObjectFactory implements ObjectFactory<ApplicationEvents>, Serializable {
+
+		private final ThreadBoundApplicationListenerAdapter listener;
+
+
+		ApplicationEventsObjectFactory(ThreadBoundApplicationListenerAdapter listener) {
+			this.listener = listener;
+		}
+
+		@Override
+		public ApplicationEvents getObject() {
+			ApplicationListener<ApplicationEvent> applicationListener = this.listener.getDelegate();
+			if (applicationListener instanceof ApplicationEvents) {
+				return (ApplicationEvents) applicationListener;
+			}
+			throw new IllegalStateException("Failed to retrieve ApplicationEvents for the current test");
+		}
+
+		@Override
+		public String toString() {
+			return "Current ApplicationEvents";
+		}
 	}
 
 }
