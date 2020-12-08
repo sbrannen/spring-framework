@@ -22,8 +22,8 @@ import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.util.Assert;
 
@@ -58,7 +58,7 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 	}
 
 	private boolean recordingApplicationEvents(TestContext testContext) {
-		return AnnotatedElementUtils.hasAnnotation(testContext.getTestClass(), RecordApplicationEvents.class);
+		return TestContextAnnotationUtils.hasAnnotation(testContext.getTestClass(), RecordApplicationEvents.class);
 	}
 
 	@SuppressWarnings("resource")
