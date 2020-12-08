@@ -51,6 +51,16 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 	}
 
 	@Override
+	public void beforeTestMethod(TestContext testContext) throws Exception {
+		if (recordingApplicationEvents(testContext)) {
+			// Register a new ApplicationEvents instance for the current thread?
+			// This is necessary if the test instance is shared -- for example,
+			// in TestNG or JUnit Jupiter with @TestInstance(PER_CLASS) semantics.
+			getThreadBoundApplicationListener(testContext).registerApplicationEventsIfNecessary();
+		}
+	}
+
+	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
 		if (recordingApplicationEvents(testContext)) {
 			getThreadBoundApplicationListener(testContext).unregisterApplicationEvents();

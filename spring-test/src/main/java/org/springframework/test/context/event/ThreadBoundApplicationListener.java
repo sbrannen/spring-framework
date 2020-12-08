@@ -44,6 +44,18 @@ class ThreadBoundApplicationListener implements ApplicationListener<ApplicationE
 
 	/**
 	 * Register a new {@link DefaultApplicationEvents} instance to be used for the
+	 * current thread, if necessary.
+	 * <p>If {@link #registerApplicationEvents()} has already been called for the
+	 * current thread, this method does not do anything.
+	 */
+	void registerApplicationEventsIfNecessary() {
+		if (getApplicationEvents() == null) {
+			registerApplicationEvents();
+		}
+	}
+
+	/**
+	 * Register a new {@link DefaultApplicationEvents} instance to be used for the
 	 * current thread.
 	 */
 	void registerApplicationEvents() {
