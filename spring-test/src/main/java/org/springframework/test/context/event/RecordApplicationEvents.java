@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * <em>composed annotations</em>.
  *
  * @author Sam Brannen
- * @since 5.3.2
+ * @since 5.3.3
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

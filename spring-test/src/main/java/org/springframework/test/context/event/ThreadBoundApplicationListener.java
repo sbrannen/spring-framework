@@ -72,8 +72,7 @@ class ThreadBoundApplicationListener implements ApplicationListener<ApplicationE
 	}
 
 	/**
-	 * Remove the registration of the {@link DefaultApplicationEvents} for the
-	 * current thread.
+	 * Remove the registration of the {@link ApplicationEvents} for the current thread.
 	 */
 	void unregisterApplicationEvents() {
 		this.applicationEvents.remove();

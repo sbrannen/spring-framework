@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests for {@link ApplicationEvents} in conjunction with JUnit 4.
  *
  * @author Sam Brannen
- * @since 5.3.2
+ * @since 5.3.3
  */
 @RunWith(SpringRunner.class)
 @RecordApplicationEvents

@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_METHOD;
  * Integration tests for {@link ApplicationEvents} in conjunction with JUnit Jupiter.
  *
  * @author Sam Brannen
- * @since 5.3.2
+ * @since 5.3.3
  */
 @SpringJUnitConfig
 @RecordApplicationEvents
