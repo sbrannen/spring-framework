@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.junit.jupiter;
+package org.springframework.test.context.junit.jupiter.event;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.RecordApplicationEvents;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
