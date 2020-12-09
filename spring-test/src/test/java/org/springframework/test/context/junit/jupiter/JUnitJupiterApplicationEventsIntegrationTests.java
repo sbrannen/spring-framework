@@ -60,7 +60,7 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 
 	@Nested
 	@TestInstance(PER_METHOD)
-	class TestInstancePerMethod {
+	class TestInstancePerMethodTests {
 
 		@BeforeEach
 		void beforeEach() {
@@ -105,8 +105,50 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 	}
 
 	@Nested
+	@TestInstance(PER_METHOD)
+	class TestInstancePerMethodWithClearedEventsTests {
+
+		@BeforeEach
+		void beforeEach() {
+			assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent");
+			context.publishEvent(new CustomEvent("beforeEach"));
+			assertCustomEvents(applicationEvents, "beforeEach");
+			assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent");
+			applicationEvents.clear();
+			assertThat(applicationEvents.stream()).isEmpty();
+		}
+
+		@Test
+		void test1(ApplicationEvents events, TestInfo testInfo) {
+			assertTestExpectations(events, testInfo);
+		}
+
+		@Test
+		void test2(@Autowired ApplicationEvents events, TestInfo testInfo) {
+			assertTestExpectations(events, testInfo);
+		}
+
+		private void assertTestExpectations(ApplicationEvents events, TestInfo testInfo) {
+			String testName = testInfo.getTestMethod().get().getName();
+
+			assertEventTypes(events, "BeforeTestExecutionEvent");
+			context.publishEvent(new CustomEvent(testName));
+			assertCustomEvents(events, testName);
+			assertEventTypes(events, "BeforeTestExecutionEvent", "CustomEvent");
+		}
+
+		@AfterEach
+		void afterEach(@Autowired ApplicationEvents events, TestInfo testInfo) {
+			events.clear();
+			context.publishEvent(new CustomEvent("afterEach"));
+			assertCustomEvents(events, "afterEach");
+			assertEventTypes(events, "CustomEvent");
+		}
+	}
+
+	@Nested
 	@TestInstance(PER_CLASS)
-	class TestInstancePerClass {
+	class TestInstancePerClassTests {
 
 		private boolean testAlreadyExecuted = false;
 

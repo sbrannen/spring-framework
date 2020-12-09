@@ -52,6 +52,11 @@ class DefaultApplicationEvents implements ApplicationEvents {
 				.map(type::cast);
 	}
 
+	@Override
+	public void clear() {
+		this.events.clear();
+	}
+
 	private Object unwrapPayloadEvent(Object source) {
 		return (PayloadApplicationEvent.class.isInstance(source) ?
 				((PayloadApplicationEvent<?>) source).getPayload() : source);

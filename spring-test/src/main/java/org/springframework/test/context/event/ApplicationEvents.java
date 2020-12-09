@@ -37,6 +37,8 @@ public interface ApplicationEvents {
 	/**
 	 * Stream all application events that were fired during test execution.
 	 * @return a stream of all application events
+	 * @see #stream(Class)
+	 * @see #clear()
 	 */
 	Stream<ApplicationEvent> stream();
 
@@ -47,7 +49,18 @@ public interface ApplicationEvents {
 	 * @param type the type of events or payloads to stream; never {@code null}
 	 * @return a stream of all application events or event payloads of the
 	 * specified type
+	 * @see #stream()
+	 * @see #clear()
 	 */
 	<T> Stream<T> stream(Class<T> type);
+
+	/**
+	 * Clear all application events recorded by this {@code ApplicationEvents} instance.
+	 * <p>Subsequent calls to {@link #stream()} or {@link #stream(Class)} will
+	 * only include events recorded since this method was invoked.
+	 * @see #stream()
+	 * @see #stream(Class)
+	 */
+	void clear();
 
 }
