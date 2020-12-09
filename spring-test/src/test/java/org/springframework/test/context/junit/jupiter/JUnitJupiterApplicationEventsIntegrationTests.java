@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit.jupiter;
 
-import java.lang.reflect.Method;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -29,12 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.event.AfterTestExecutionEvent;
 import org.springframework.test.context.event.ApplicationEvents;
-import org.springframework.test.context.event.BeforeTestClassEvent;
-import org.springframework.test.context.event.BeforeTestExecutionEvent;
-import org.springframework.test.context.event.BeforeTestMethodEvent;
-import org.springframework.test.context.event.PrepareTestInstanceEvent;
 import org.springframework.test.context.event.RecordApplicationEvents;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,15 +63,11 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 	class TestInstancePerMethod {
 
 		@BeforeEach
-		void beforeEach(TestInfo testInfo) {
-			assertThat(applicationEvents).isNotNull();
-			assertThat(applicationEvents.stream()).hasSize(2);
-			assertThat(applicationEvents.stream(PrepareTestInstanceEvent.class)).hasSize(1);
-			context.publishEvent(new CustomEvent(testInfo, "beforeEach"));
-			assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(1);
-			assertThat(applicationEvents.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
-					.containsExactly("beforeEach");
-			assertThat(applicationEvents.stream()).hasSize(3);
+		void beforeEach() {
+			assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent");
+			context.publishEvent(new CustomEvent("beforeEach"));
+			assertCustomEvents(applicationEvents, "beforeEach");
+			assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent");
 		}
 
 		@Test
@@ -92,28 +81,26 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 		}
 
 		private void assertTestExpectations(ApplicationEvents events, TestInfo testInfo) {
-			assertThat(events).isNotNull();
-			assertThat(events.stream()).hasSize(4);
-			assertThat(events.stream(BeforeTestExecutionEvent.class)).hasSize(1);
-			assertThat(events.stream(CustomEvent.class)).hasSize(1);
-			context.publishEvent(new CustomEvent(testInfo, "test"));
-			assertThat(events.stream(CustomEvent.class)).hasSize(2);
-			assertThat(events.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
-					.containsExactly("beforeEach", "test");
-			assertThat(events.stream()).hasSize(5);
+			String testName = testInfo.getTestMethod().get().getName();
+
+			assertEventTypes(events, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
+					"BeforeTestExecutionEvent");
+			context.publishEvent(new CustomEvent(testName));
+			assertCustomEvents(events, "beforeEach", testName);
+			assertEventTypes(events, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
+					"BeforeTestExecutionEvent", "CustomEvent");
 		}
 
 		@AfterEach
 		void afterEach(@Autowired ApplicationEvents events, TestInfo testInfo) {
-			assertThat(events).isNotNull();
-			assertThat(events.stream()).hasSize(6);
-			assertThat(events.stream(AfterTestExecutionEvent.class)).hasSize(1);
-			assertThat(events.stream(CustomEvent.class)).hasSize(2);
-			context.publishEvent(new CustomEvent(testInfo, "afterEach"));
-			assertThat(events.stream(CustomEvent.class)).hasSize(3);
-			assertThat(events.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
-					.containsExactly("beforeEach", "test", "afterEach");
-			assertThat(events.stream()).hasSize(7);
+			String testName = testInfo.getTestMethod().get().getName();
+
+			assertEventTypes(events, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
+				"BeforeTestExecutionEvent", "CustomEvent", "AfterTestExecutionEvent");
+			context.publishEvent(new CustomEvent("afterEach"));
+			assertCustomEvents(events, "beforeEach", testName, "afterEach");
+			assertEventTypes(events, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
+				"BeforeTestExecutionEvent", "CustomEvent", "AfterTestExecutionEvent", "CustomEvent");
 		}
 	}
 
@@ -122,26 +109,27 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 	class TestInstancePerClass {
 
 		private boolean testAlreadyExecuted = false;
-		private int count = 0;
 
 		@BeforeEach
 		void beforeEach(TestInfo testInfo) {
-			assertThat(applicationEvents).isNotNull();
 			if (!testAlreadyExecuted) {
-				assertThat(applicationEvents.stream(BeforeTestClassEvent.class)).hasSize(1);
-				assertThat(applicationEvents.stream(PrepareTestInstanceEvent.class)).hasSize(1);
-				assertThat(applicationEvents.stream(BeforeTestMethodEvent.class)).hasSize(1);
-				assertThat(applicationEvents.stream()).hasSize(count += 3);
+				assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestClassEvent",
+						"BeforeTestMethodEvent");
 			}
 			else {
-				assertThat(applicationEvents.stream(BeforeTestMethodEvent.class)).hasSize(1);
-				assertThat(applicationEvents.stream()).hasSize(count += 1);
+				assertEventTypes(applicationEvents, "BeforeTestMethodEvent");
 			}
-			context.publishEvent(new CustomEvent(testInfo, "beforeEach"));
-			assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(1);
-			assertThat(applicationEvents.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
-					.containsExactly("beforeEach");
-			assertThat(applicationEvents.stream()).hasSize(count += 1);
+
+			context.publishEvent(new CustomEvent("beforeEach"));
+			assertCustomEvents(applicationEvents, "beforeEach");
+
+			if (!testAlreadyExecuted) {
+				assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestClassEvent",
+						"BeforeTestMethodEvent", "CustomEvent");
+			}
+			else {
+				assertEventTypes(applicationEvents, "BeforeTestMethodEvent", "CustomEvent");
+			}
 		}
 
 		@Test
@@ -155,34 +143,68 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 		}
 
 		private void assertTestExpectations(ApplicationEvents events, TestInfo testInfo) {
-			assertThat(events).isNotNull();
-			assertThat(events.stream()).hasSize(count += 1);
-			assertThat(events.stream(BeforeTestExecutionEvent.class)).hasSize(1);
-			assertThat(events.stream(CustomEvent.class)).hasSize(1);
-			context.publishEvent(new CustomEvent(testInfo, "test"));
-			assertThat(events.stream(CustomEvent.class)).hasSize(2);
-			assertThat(events.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
-					.containsExactly("beforeEach", "test");
-			assertThat(events.stream()).hasSize(count += 1);
+			String testName = testInfo.getTestMethod().get().getName();
+
+			if (!testAlreadyExecuted) {
+				assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestClassEvent",
+						"BeforeTestMethodEvent", "CustomEvent", "BeforeTestExecutionEvent");
+			}
+			else {
+				assertEventTypes(applicationEvents, "BeforeTestMethodEvent", "CustomEvent", "BeforeTestExecutionEvent");
+			}
+
+			context.publishEvent(new CustomEvent(testName));
+			assertCustomEvents(events, "beforeEach", testName);
+
+			if (!testAlreadyExecuted) {
+				assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestClassEvent",
+						"BeforeTestMethodEvent", "CustomEvent", "BeforeTestExecutionEvent", "CustomEvent");
+			}
+			else {
+				assertEventTypes(applicationEvents, "BeforeTestMethodEvent", "CustomEvent", "BeforeTestExecutionEvent",
+						"CustomEvent");
+			}
 		}
 
 		@AfterEach
 		void afterEach(@Autowired ApplicationEvents events, TestInfo testInfo) {
-			assertThat(events).isNotNull();
-			assertThat(events.stream()).hasSize(count += 1);
-			assertThat(events.stream(AfterTestExecutionEvent.class)).hasSize(1);
-			assertThat(events.stream(CustomEvent.class)).hasSize(2);
-			context.publishEvent(new CustomEvent(testInfo, "afterEach"));
-			assertThat(events.stream(CustomEvent.class)).hasSize(3);
-			assertThat(events.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
-					.containsExactly("beforeEach", "test", "afterEach");
-			assertThat(events.stream()).hasSize(count += 1);
+			String testName = testInfo.getTestMethod().get().getName();
 
-			testAlreadyExecuted = true;
-			count = 0;
+			if (!testAlreadyExecuted) {
+				assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestClassEvent",
+						"BeforeTestMethodEvent", "CustomEvent", "BeforeTestExecutionEvent", "CustomEvent",
+						"AfterTestExecutionEvent");
+			}
+			else {
+				assertEventTypes(applicationEvents, "BeforeTestMethodEvent", "CustomEvent", "BeforeTestExecutionEvent",
+						"CustomEvent", "AfterTestExecutionEvent");
+			}
+
+			context.publishEvent(new CustomEvent("afterEach"));
+			assertCustomEvents(events, "beforeEach", testName, "afterEach");
+
+			if (!testAlreadyExecuted) {
+				assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestClassEvent",
+						"BeforeTestMethodEvent", "CustomEvent", "BeforeTestExecutionEvent", "CustomEvent",
+						"AfterTestExecutionEvent", "CustomEvent");
+				testAlreadyExecuted = true;
+			}
+			else {
+				assertEventTypes(applicationEvents, "BeforeTestMethodEvent", "CustomEvent", "BeforeTestExecutionEvent",
+						"CustomEvent", "AfterTestExecutionEvent", "CustomEvent");
+			}
 		}
 	}
 
+
+	private static void assertEventTypes(ApplicationEvents applicationEvents, String... types) {
+		assertThat(applicationEvents.stream().map(event -> event.getClass().getSimpleName()))
+			.containsExactly(types);
+	}
+
+	private static void assertCustomEvents(ApplicationEvents events, String... messages) {
+		assertThat(events.stream(CustomEvent.class)).extracting(CustomEvent::getMessage).containsExactly(messages);
+	}
 
 
 	@Configuration
@@ -192,18 +214,12 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 	@SuppressWarnings("serial")
 	static class CustomEvent extends ApplicationEvent {
 
-		private final Method testMethod;
 		private final String message;
 
 
-		CustomEvent(TestInfo testInfo, String message) {
-			super(testInfo.getTestClass().get());
-			this.testMethod = testInfo.getTestMethod().get();
+		CustomEvent(String message) {
+			super(message);
 			this.message = message;
-		}
-
-		String getTestName() {
-			return this.testMethod.getName();
 		}
 
 		String getMessage() {

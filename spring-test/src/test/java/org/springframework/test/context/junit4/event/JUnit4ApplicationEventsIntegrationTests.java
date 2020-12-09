@@ -18,17 +18,16 @@ package org.springframework.test.context.junit4.event;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.event.AfterTestExecutionEvent;
 import org.springframework.test.context.event.ApplicationEvents;
-import org.springframework.test.context.event.BeforeTestExecutionEvent;
-import org.springframework.test.context.event.PrepareTestInstanceEvent;
 import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -44,6 +43,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RecordApplicationEvents
 public class JUnit4ApplicationEventsIntegrationTests {
 
+	@Rule
+	public final TestName testName = new TestName();
+
 	@Autowired
 	ApplicationContext context;
 
@@ -53,53 +55,48 @@ public class JUnit4ApplicationEventsIntegrationTests {
 
 	@Before
 	public void beforeEach() {
-		assertThat(applicationEvents).isNotNull();
-		assertThat(applicationEvents.stream()).hasSize(2);
-		assertThat(applicationEvents.stream(PrepareTestInstanceEvent.class)).hasSize(1);
+		assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent");
 		context.publishEvent(new CustomEvent("beforeEach"));
-		assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(1);
 		assertThat(applicationEvents.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
 				.containsExactly("beforeEach");
-		assertThat(applicationEvents.stream()).hasSize(3);
+		assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent");
 	}
 
 	@Test
 	public void test1() {
-		assertThat(applicationEvents).isNotNull();
-		assertThat(applicationEvents.stream()).hasSize(4);
-		assertThat(applicationEvents.stream(BeforeTestExecutionEvent.class)).hasSize(1);
-		assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(1);
-		context.publishEvent(new CustomEvent("test"));
-		assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(2);
-		assertThat(applicationEvents.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
-				.containsExactly("beforeEach", "test");
-		assertThat(applicationEvents.stream()).hasSize(5);
+		assertTestExpectations("test1");
 	}
 
 	@Test
 	public void test2() {
-		assertThat(applicationEvents).isNotNull();
-		assertThat(applicationEvents.stream()).hasSize(4);
-		assertThat(applicationEvents.stream(BeforeTestExecutionEvent.class)).hasSize(1);
-		assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(1);
-		context.publishEvent(new CustomEvent("test"));
-		assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(2);
+		assertTestExpectations("test2");
+	}
+
+	private void assertTestExpectations(String testName) {
+		assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
+				"BeforeTestExecutionEvent");
+		context.publishEvent(new CustomEvent(testName));
 		assertThat(applicationEvents.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
-				.containsExactly("beforeEach", "test");
-		assertThat(applicationEvents.stream()).hasSize(5);
+				.containsExactly("beforeEach", testName);
+		assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
+				"BeforeTestExecutionEvent", "CustomEvent");
 	}
 
 	@After
 	public void afterEach() {
-		assertThat(applicationEvents).isNotNull();
-		assertThat(applicationEvents.stream()).hasSize(6);
-		assertThat(applicationEvents.stream(AfterTestExecutionEvent.class)).hasSize(1);
-		assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(2);
+		assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
+			"BeforeTestExecutionEvent", "CustomEvent", "AfterTestExecutionEvent");
 		context.publishEvent(new CustomEvent("afterEach"));
-		assertThat(applicationEvents.stream(CustomEvent.class)).hasSize(3);
 		assertThat(applicationEvents.stream(CustomEvent.class)).extracting(CustomEvent::getMessage)//
-				.containsExactly("beforeEach", "test", "afterEach");
-		assertThat(applicationEvents.stream()).hasSize(7);
+				.containsExactly("beforeEach", this.testName.getMethodName(), "afterEach");
+		assertEventTypes(applicationEvents, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
+			"BeforeTestExecutionEvent", "CustomEvent", "AfterTestExecutionEvent", "CustomEvent");
+	}
+
+
+	private static void assertEventTypes(ApplicationEvents applicationEvents, String... types) {
+		assertThat(applicationEvents.stream().map(event -> event.getClass().getSimpleName()))
+			.containsExactly(types);
 	}
 
 
