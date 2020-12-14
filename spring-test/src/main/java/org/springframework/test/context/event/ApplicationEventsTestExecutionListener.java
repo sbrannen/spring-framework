@@ -99,9 +99,7 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 
 		@Override
 		public ApplicationEvents getObject() {
-			ApplicationEvents applicationEvents = ApplicationEventsHolder.getApplicationEvents();
-			Assert.state(applicationEvents != null, "Failed to retrieve ApplicationEvents for the current test");
-			return applicationEvents;
+			return ApplicationEventsHolder.getRequiredApplicationEvents();
 		}
 
 		@Override

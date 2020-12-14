@@ -17,6 +17,7 @@
 package org.springframework.test.context.event;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 
 /**
  * Holder class to expose the application events published during the execution
@@ -49,6 +50,22 @@ public abstract class ApplicationEventsHolder {
 	public static ApplicationEvents getApplicationEvents() {
 		return applicationEvents.get();
 	}
+
+	/**
+	 * Get the {@link ApplicationEvents} for the current thread.
+	 * @return the current {@code ApplicationEvents}
+	 * @throws IllegalStateException if an instance of {@code ApplicationEvents}
+	 * has not been registered for the current thread
+	 */
+	@Nullable
+	public static ApplicationEvents getRequiredApplicationEvents() {
+		ApplicationEvents events = applicationEvents.get();
+		Assert.state(events != null, "Failed to retrieve ApplicationEvents for the current thread. " +
+				"Ensure that your test class is annotated with @RecordApplicationEvents " +
+				"and that the ApplicationEventsTestExecutionListener is registered.");
+		return events;
+	}
+
 
 	/**
 	 * Register a new {@link DefaultApplicationEvents} instance to be used for the
