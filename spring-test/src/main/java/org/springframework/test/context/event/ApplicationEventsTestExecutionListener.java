@@ -18,10 +18,17 @@ package org.springframework.test.context.event;
 
 import java.io.Serializable;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.Scope;
+import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.SimpleThreadScope;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -44,9 +51,17 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 	}
 
 	@Override
+	@SuppressWarnings("resource")
 	public void prepareTestInstance(TestContext testContext) throws Exception {
 		if (recordingApplicationEvents(testContext)) {
 			getThreadBoundApplicationListener(testContext).registerApplicationEvents();
+			ApplicationContext applicationContext = testContext.getApplicationContext();
+			Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext,
+					"The ApplicationContext for the test must be a ConfigurableApplicationContext");
+			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
+			ConfigurableListableBeanFactory beanFactory = cac.getBeanFactory();
+			Scope testScope = beanFactory.getRegisteredScope("test");
+			testScope.remove(ScopedProxyUtils.getTargetBeanName(ApplicationEvents.class.getName()));
 		}
 	}
 
@@ -56,14 +71,22 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 			// Register a new ApplicationEvents instance for the current thread?
 			// This is necessary if the test instance is shared -- for example,
 			// in TestNG or JUnit Jupiter with @TestInstance(PER_CLASS) semantics.
-			getThreadBoundApplicationListener(testContext).registerApplicationEventsIfNecessary();
+			// getThreadBoundApplicationListener(testContext).registerApplicationEventsIfNecessary();
 		}
 	}
 
 	@Override
+	@SuppressWarnings("resource")
 	public void afterTestMethod(TestContext testContext) throws Exception {
 		if (recordingApplicationEvents(testContext)) {
 			getThreadBoundApplicationListener(testContext).unregisterApplicationEvents();
+			ApplicationContext applicationContext = testContext.getApplicationContext();
+			Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext,
+					"The ApplicationContext for the test must be a ConfigurableApplicationContext");
+			ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
+			ConfigurableListableBeanFactory beanFactory = cac.getBeanFactory();
+			Scope testScope = beanFactory.getRegisteredScope("test");
+			testScope.remove(ScopedProxyUtils.getTargetBeanName(ApplicationEvents.class.getName()));
 		}
 	}
 
@@ -80,18 +103,33 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 			return applicationContext.getBean(beanName, ThreadBoundApplicationListener.class);
 		}
 
-		// Else create and register a new ThreadBoundApplicationListener.
+		// Register custom "test" scope.
 		Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext,
-			"The ApplicationContext for the test must be a ConfigurableApplicationContext");
+				"The ApplicationContext for the test must be a ConfigurableApplicationContext");
 		ConfigurableApplicationContext cac = (ConfigurableApplicationContext) applicationContext;
-		ThreadBoundApplicationListener threadBoundApplicationListener = new ThreadBoundApplicationListener();
 		ConfigurableListableBeanFactory beanFactory = cac.getBeanFactory();
+		beanFactory.registerScope("test", new SimpleThreadScope());
+
+		Assert.isInstanceOf(BeanDefinitionRegistry.class, beanFactory,
+				"The BeanFactory for the test must be a BeanDefinitionRegistry");
+		BeanDefinitionRegistry beanDefinitionRegistry = (BeanDefinitionRegistry) beanFactory;
+		GenericBeanDefinition beanDefinition = new GenericBeanDefinition();
+		beanDefinition.setBeanClass(DefaultApplicationEvents.class);
+		beanDefinition.setScope("test");
+
+		BeanDefinitionHolder beanDefinitionHolder = new BeanDefinitionHolder(beanDefinition, ApplicationEvents.class.getName());
+		beanDefinitionHolder = ScopedProxyUtils.createScopedProxy(beanDefinitionHolder, beanDefinitionRegistry, true);
+		BeanDefinitionReaderUtils.registerBeanDefinition(beanDefinitionHolder, beanDefinitionRegistry);
+
+		// Create and register a new ThreadBoundApplicationListener.
+		ThreadBoundApplicationListener threadBoundApplicationListener =
+				new ThreadBoundApplicationListener(applicationContext.getBean(DefaultApplicationEvents.class));
 		beanFactory.registerSingleton(beanName, threadBoundApplicationListener);
 		cac.addApplicationListener(threadBoundApplicationListener);
 
 		// Register ApplicationEvents as a resolvable dependency for @Autowired support in test classes.
-		beanFactory.registerResolvableDependency(ApplicationEvents.class,
-				new ApplicationEventsObjectFactory(threadBoundApplicationListener));
+//		beanFactory.registerResolvableDependency(ApplicationEvents.class,
+//				new ApplicationEventsObjectFactory(threadBoundApplicationListener));
 
 		return threadBoundApplicationListener;
 	}
