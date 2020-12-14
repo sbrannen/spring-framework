@@ -16,30 +16,38 @@
 
 package org.springframework.test.context.event;
 
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationListener;
 import org.springframework.lang.Nullable;
 
 /**
- * {@link ApplicationListener} that supports registration of a
- * {@link DefaultApplicationEvents} instance that is held in a {@link ThreadLocal}
- * and delegated to in {@link #onApplicationEvent(ApplicationEvent)}.
+ * Holder class to expose the application events published during the execution
+ * of a test in the form of a thread-bound {@link ApplicationEvents} object.
  *
- * @author Oliver Drotbohm
+ * <p>{@code ApplicationEvents} are registered in this holder and managed by
+ * the {@link ApplicationEventsTestExecutionListener}.
+ *
  * @author Sam Brannen
+ * @author Oliver Drotbohm
  * @since 5.3.3
+ * @see ApplicationEvents
+ * @see RecordApplicationEvents
  */
-class ThreadBoundApplicationListener implements ApplicationListener<ApplicationEvent> {
+public abstract class ApplicationEventsHolder {
 
-	private final ThreadLocal<DefaultApplicationEvents> applicationEvents = new ThreadLocal<>();
+	private static final ThreadLocal<DefaultApplicationEvents> applicationEvents = new ThreadLocal<>();
 
 
-	@Override
-	public void onApplicationEvent(ApplicationEvent event) {
-		DefaultApplicationEvents applicationEvents = this.applicationEvents.get();
-		if (applicationEvents != null) {
-			applicationEvents.addEvent(event);
-		}
+	private ApplicationEventsHolder() {
+		// no-op to prevent instantiation on this holder class
+	}
+
+
+	/**
+	 * Get the {@link ApplicationEvents} for the current thread.
+	 * @return the current {@code ApplicationEvents}, or {@code null} if not registered
+	 */
+	@Nullable
+	public static ApplicationEvents getApplicationEvents() {
+		return applicationEvents.get();
 	}
 
 	/**
@@ -48,7 +56,7 @@ class ThreadBoundApplicationListener implements ApplicationListener<ApplicationE
 	 * <p>If {@link #registerApplicationEvents()} has already been called for the
 	 * current thread, this method does not do anything.
 	 */
-	void registerApplicationEventsIfNecessary() {
+	static void registerApplicationEventsIfNecessary() {
 		if (getApplicationEvents() == null) {
 			registerApplicationEvents();
 		}
@@ -58,24 +66,15 @@ class ThreadBoundApplicationListener implements ApplicationListener<ApplicationE
 	 * Register a new {@link DefaultApplicationEvents} instance to be used for the
 	 * current thread.
 	 */
-	void registerApplicationEvents() {
-		this.applicationEvents.set(new DefaultApplicationEvents());
-	}
-
-	/**
-	 * Get the {@link ApplicationEvents} for the current thread.
-	 * @return the current {@code ApplicationEvents}, or {@code null} if not registered
-	 */
-	@Nullable
-	ApplicationEvents getApplicationEvents() {
-		return this.applicationEvents.get();
+	static void registerApplicationEvents() {
+		applicationEvents.set(new DefaultApplicationEvents());
 	}
 
 	/**
 	 * Remove the registration of the {@link ApplicationEvents} for the current thread.
 	 */
-	void unregisterApplicationEvents() {
-		this.applicationEvents.remove();
+	static void unregisterApplicationEvents() {
+		applicationEvents.remove();
 	}
 
 }

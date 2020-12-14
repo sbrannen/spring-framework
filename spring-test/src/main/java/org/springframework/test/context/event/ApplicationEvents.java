@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationEvent;
  * @author Sam Brannen
  * @author Oliver Drotbohm
  * @since 5.3.3
- * @see org.springframework.test.context.junit.jupiter.ApplicationEventsExtension
  * @see org.springframework.context.ApplicationEvent
  * @see org.springframework.context.ApplicationListener
  */
