@@ -31,19 +31,15 @@ import org.springframework.lang.Nullable;
  */
 class ThreadBoundApplicationListener implements ApplicationListener<ApplicationEvent> {
 
-	private final DefaultApplicationEvents applicationEvents;
+	private final ThreadLocal<DefaultApplicationEvents> applicationEvents = new ThreadLocal<>();
 
-	ThreadBoundApplicationListener(DefaultApplicationEvents applicationEvents) {
-		this.applicationEvents = applicationEvents;
-	}
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		this.applicationEvents.addEvent(event);
-//		DefaultApplicationEvents applicationEvents = this.applicationEvents.get();
-//		if (applicationEvents != null) {
-//			applicationEvents.addEvent(event);
-//		}
+		DefaultApplicationEvents applicationEvents = this.applicationEvents.get();
+		if (applicationEvents != null) {
+			applicationEvents.addEvent(event);
+		}
 	}
 
 	/**
@@ -63,7 +59,7 @@ class ThreadBoundApplicationListener implements ApplicationListener<ApplicationE
 	 * current thread.
 	 */
 	void registerApplicationEvents() {
-		// this.applicationEvents.set(new DefaultApplicationEvents());
+		this.applicationEvents.set(new DefaultApplicationEvents());
 	}
 
 	/**
@@ -72,14 +68,14 @@ class ThreadBoundApplicationListener implements ApplicationListener<ApplicationE
 	 */
 	@Nullable
 	ApplicationEvents getApplicationEvents() {
-		return this.applicationEvents;
+		return this.applicationEvents.get();
 	}
 
 	/**
 	 * Remove the registration of the {@link ApplicationEvents} for the current thread.
 	 */
 	void unregisterApplicationEvents() {
-		// this.applicationEvents.remove();
+		this.applicationEvents.remove();
 	}
 
 }
