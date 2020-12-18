@@ -84,7 +84,6 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 				TestContextAnnotationUtils.hasAnnotation(testContext.getTestClass(), RecordApplicationEvents.class));
 	}
 
-	@SuppressWarnings("resource")
 	private void registerListenerAndResolvableDependencyIfNecessary(ApplicationContext applicationContext) {
 		Assert.isInstanceOf(AbstractApplicationContext.class, applicationContext,
 				"The ApplicationContext for the test must be an AbstractApplicationContext");

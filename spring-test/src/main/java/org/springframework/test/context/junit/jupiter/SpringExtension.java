@@ -240,8 +240,17 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 				extensionContext.getConfigurationParameter(propertyName).orElse(null);
 		return (TestConstructorUtils.isAutowirableConstructor(executable, testClass, junitPropertyProvider) ||
 				ApplicationContext.class.isAssignableFrom(parameter.getType()) ||
-				ApplicationEvents.class.isAssignableFrom(parameter.getType()) ||
+				supportsApplicationEvents(parameterContext) ||
 				ParameterResolutionDelegate.isAutowirable(parameter, parameterContext.getIndex()));
+	}
+
+	private boolean supportsApplicationEvents(ParameterContext parameterContext) {
+		if (ApplicationEvents.class.isAssignableFrom(parameterContext.getParameter().getType())) {
+			Assert.isTrue(parameterContext.getDeclaringExecutable() instanceof Method,
+				"ApplicationEvents can only be injected into test and lifecycle methods");
+			return true;
+		}
+		return false;
 	}
 
 	/**

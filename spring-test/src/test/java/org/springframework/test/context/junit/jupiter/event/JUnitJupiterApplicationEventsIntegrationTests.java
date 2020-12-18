@@ -54,13 +54,6 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 	ApplicationEvents applicationEvents;
 
 
-	// TODO Consider supporting dependency injection of ApplicationEvents in constructors.
-	// @Autowired
-	// JUnitJupiterApplicationEventsIntegrationTests(ApplicationEvents applicationEvents) {
-	//     this.applicationEvents = applicationEvents;
-	// }
-
-
 	@Nested
 	@TestInstance(PER_METHOD)
 	class TestInstancePerMethodTests {
