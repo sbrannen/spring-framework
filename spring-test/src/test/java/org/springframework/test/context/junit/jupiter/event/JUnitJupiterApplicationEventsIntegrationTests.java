@@ -243,8 +243,8 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 			.containsExactly(types);
 	}
 
-	private static void assertPayloads(Stream<?> events, String... types) {
-		assertThat(events).extracting(Object::toString).containsExactly(types);
+	private static void assertPayloads(Stream<String> events, String... values) {
+		assertThat(events).extracting(Object::toString).containsExactly(values);
 	}
 
 	private static void assertCustomEvents(ApplicationEvents events, String... messages) {

@@ -45,6 +45,8 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 	private static final String RECORD_APPLICATION_EVENTS = Conventions.getQualifiedAttributeName(
 			ApplicationEventsTestExecutionListener.class, "recordApplicationEvents");
 
+	private static final Object applicationEventsMonitor = new Object();
+
 
 	/**
 	 * Returns {@code 1800}.
@@ -88,16 +90,19 @@ public class ApplicationEventsTestExecutionListener extends AbstractTestExecutio
 		Assert.isInstanceOf(AbstractApplicationContext.class, applicationContext,
 				"The ApplicationContext for the test must be an AbstractApplicationContext");
 		AbstractApplicationContext aac = (AbstractApplicationContext) applicationContext;
-		boolean notAlreadyRegistered = aac.getApplicationListeners().stream()
-				.map(Object::getClass)
-				.noneMatch(ApplicationEventsApplicationListener.class::equals);
-		if (notAlreadyRegistered) {
-			// Register a new ApplicationEventsApplicationListener.
-			aac.addApplicationListener(new ApplicationEventsApplicationListener());
+		// Synchronize to avoid race condition in parallel test execution
+		synchronized(applicationEventsMonitor) {
+			boolean notAlreadyRegistered = aac.getApplicationListeners().stream()
+					.map(Object::getClass)
+					.noneMatch(ApplicationEventsApplicationListener.class::equals);
+			if (notAlreadyRegistered) {
+				// Register a new ApplicationEventsApplicationListener.
+				aac.addApplicationListener(new ApplicationEventsApplicationListener());
 
-			// Register ApplicationEvents as a resolvable dependency for @Autowired support in test classes.
-			ConfigurableListableBeanFactory beanFactory = aac.getBeanFactory();
-			beanFactory.registerResolvableDependency(ApplicationEvents.class, new ApplicationEventsObjectFactory());
+				// Register ApplicationEvents as a resolvable dependency for @Autowired support in test classes.
+				ConfigurableListableBeanFactory beanFactory = aac.getBeanFactory();
+				beanFactory.registerResolvableDependency(ApplicationEvents.class, new ApplicationEventsObjectFactory());
+			}
 		}
 	}
 
