@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.junit.jupiter.event;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -87,9 +89,10 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 			assertEventTypes(events, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
 					"BeforeTestExecutionEvent");
 			context.publishEvent(new CustomEvent(testName));
+			context.publishEvent("payload1");
+			context.publishEvent("payload2");
 			assertCustomEvents(events, "beforeEach", testName);
-			assertEventTypes(events, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
-					"BeforeTestExecutionEvent", "CustomEvent");
+			assertPayloads(events.stream(String.class), "payload1", "payload2");
 		}
 
 		@AfterEach
@@ -97,11 +100,13 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 			String testName = testInfo.getTestMethod().get().getName();
 
 			assertEventTypes(events, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
-				"BeforeTestExecutionEvent", "CustomEvent", "AfterTestExecutionEvent");
+					"BeforeTestExecutionEvent", "CustomEvent", "PayloadApplicationEvent", "PayloadApplicationEvent",
+					"AfterTestExecutionEvent");
 			context.publishEvent(new CustomEvent("afterEach"));
 			assertCustomEvents(events, "beforeEach", testName, "afterEach");
 			assertEventTypes(events, "PrepareTestInstanceEvent", "BeforeTestMethodEvent", "CustomEvent",
-				"BeforeTestExecutionEvent", "CustomEvent", "AfterTestExecutionEvent", "CustomEvent");
+					"BeforeTestExecutionEvent", "CustomEvent", "PayloadApplicationEvent", "PayloadApplicationEvent",
+					"AfterTestExecutionEvent", "CustomEvent");
 		}
 	}
 
@@ -243,6 +248,10 @@ class JUnitJupiterApplicationEventsIntegrationTests {
 	private static void assertEventTypes(ApplicationEvents applicationEvents, String... types) {
 		assertThat(applicationEvents.stream().map(event -> event.getClass().getSimpleName()))
 			.containsExactly(types);
+	}
+
+	private static void assertPayloads(Stream<?> events, String... types) {
+		assertThat(events).extracting(Object::toString).containsExactly(types);
 	}
 
 	private static void assertCustomEvents(ApplicationEvents events, String... messages) {
