@@ -31,8 +31,20 @@ import org.springframework.util.Assert;
 /**
  * {@code TestExecutionListener} which provides support for {@link ApplicationEvents}.
  *
+ * <p>This listener manages the registration of {@code ApplicationEvents} for the
+ * current thread at various points within the test execution lifecycle and makes
+ * the current instance of {@code ApplicationEvents} available to tests via an
+ * {@link org.springframework.beans.factory.annotation.Autowired @Autowired}
+ * field in the test class.
+ *
+ * <p>If the test class is not annotated or meta-annotated with
+ * {@link RecordApplicationEvents @RecordApplicationEvents}, this listener
+ * effectively does nothing.
+ *
  * @author Sam Brannen
  * @since 5.3.3
+ * @see ApplicationEvents
+ * @see ApplicationEventsHolder
  */
 public class ApplicationEventsTestExecutionListener extends AbstractTestExecutionListener {
 

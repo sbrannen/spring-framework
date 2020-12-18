@@ -22,14 +22,31 @@ import org.springframework.context.ApplicationEvent;
 
 /**
  * {@code ApplicationEvents} encapsulates all {@linkplain ApplicationEvent
- * application events} that were fired during the execution of a single test
- * method.
+ * application events} that were fired during the execution of a single test method.
+ *
+ * <p>To use {@code ApplicationEvents} in your tests, do the following.
+ * <ul>
+ * <li>Ensure that your test class is annotated or meta-annotated with
+ * {@link RecordApplicationEvents @RecordApplicationEvents}.</li>
+ * <li>Ensure that the {@link ApplicationEventsTestExecutionListener} is
+ * registered. Note, however, that it is registered by default and only needs
+ * to be manually registered if you have custom configuration via
+ * {@link org.springframework.test.context.TestExecutionListeners @TestExecutionListeners}
+ * that does not include the default listeners.</li>
+ * <li>Annotate a field of type {@code ApplicationEvents} with
+ * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} and
+ * use that instance of {@code ApplicationEvents} in your test and lifecycle methods.</li>
+ * <li>With JUnit Jupiter, you may optionally declare a parameter of type
+ * {@code ApplicationEvents} in a test or lifecycle method as an alternative to
+ * an {@code @Autowired} field in the test class.</li>
+ * </ul>
  *
  * @author Sam Brannen
  * @author Oliver Drotbohm
  * @since 5.3.3
+ * @see RecordApplicationEvents
+ * @see ApplicationEventsTestExecutionListener
  * @see org.springframework.context.ApplicationEvent
- * @see org.springframework.context.ApplicationListener
  */
 public interface ApplicationEvents {
 

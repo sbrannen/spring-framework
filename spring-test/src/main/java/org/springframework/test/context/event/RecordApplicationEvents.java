@@ -30,11 +30,16 @@ import java.lang.annotation.Target;
  * that are published in the {@link org.springframework.context.ApplicationContext
  * ApplicationContext} during the execution of a single test.
  *
+ * <p>The recorded events can be accessed via the {@link ApplicationEvents} API
+ * within your tests.
+ *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
  * <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @since 5.3.3
+ * @see ApplicationEvents
+ * @see ApplicationEventsTestExecutionListener
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

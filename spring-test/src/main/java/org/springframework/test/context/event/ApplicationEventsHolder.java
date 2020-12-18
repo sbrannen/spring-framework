@@ -26,11 +26,21 @@ import org.springframework.util.Assert;
  * <p>{@code ApplicationEvents} are registered in this holder and managed by
  * the {@link ApplicationEventsTestExecutionListener}.
  *
+ * <p>Although this class is {@code public}, it is only intended for use within
+ * the <em>Spring TestContext Framework</em> or in the implementation of
+ * third-party extensions. Test authors should therefore allow the current
+ * instance of {@code ApplicationEvents} to be
+ * {@link org.springframework.beans.factory.annotation.Autowired @Autowired}
+ * into a field in the test class or injected via a parameter in test and
+ * lifecycle methods when using JUnit Jupiter and the {@link
+ * org.springframework.test.context.junit.jupiter.SpringExtension SpringExtension}.
+ *
  * @author Sam Brannen
  * @author Oliver Drotbohm
  * @since 5.3.3
  * @see ApplicationEvents
  * @see RecordApplicationEvents
+ * @see ApplicationEventsTestExecutionListener
  */
 public abstract class ApplicationEventsHolder {
 
@@ -38,7 +48,7 @@ public abstract class ApplicationEventsHolder {
 
 
 	private ApplicationEventsHolder() {
-		// no-op to prevent instantiation on this holder class
+		// no-op to prevent instantiation of this holder class
 	}
 
 
