@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,15 +29,17 @@ import java.util.TimeZone;
 import org.springframework.format.Formatter;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * A formatter for {@link java.util.Date} types.
- * Allows the configuration of an explicit date pattern and locale.
+ * <p>Supports the configuration of an explicit date pattern and locale.
  *
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  * @see SimpleDateFormat
  */
@@ -57,7 +59,13 @@ public class DateFormatter implements Formatter<Date> {
 
 
 	@Nullable
+	private Object source;
+
+	@Nullable
 	private String pattern;
+
+	@Nullable
+	private String[] fallbackPatterns;
 
 	private int style = DateFormat.DEFAULT;
 
@@ -87,12 +95,20 @@ public class DateFormatter implements Formatter<Date> {
 	}
 
 
+	public void setSource(Object source) {
+		this.source = source;
+	}
+
 	/**
 	 * Set the pattern to use to format date values.
 	 * <p>If not specified, DateFormat's default style will be used.
 	 */
 	public void setPattern(String pattern) {
 		this.pattern = pattern;
+	}
+
+	public void setFallbackPatterns(String... fallbackPatterns) {
+		this.fallbackPatterns = fallbackPatterns;
 	}
 
 	/**
@@ -159,12 +175,39 @@ public class DateFormatter implements Formatter<Date> {
 
 	@Override
 	public Date parse(String text, Locale locale) throws ParseException {
-		return getDateFormat(locale).parse(text);
+		try {
+			return getDateFormat(locale).parse(text);
+		}
+		catch (ParseException ex) {
+			if (!ObjectUtils.isEmpty(this.fallbackPatterns)) {
+				for (String pattern : this.fallbackPatterns) {
+					try {
+						DateFormat dateFormat = configureDateFormat(new SimpleDateFormat(pattern, locale));
+						return dateFormat.parse(text);
+					}
+					catch (ParseException ex2) {
+						// Ignore fallback parsing exceptions since the exception thrown below
+						// will include information from the "source" if available -- for example,
+						// the toString() of an @DateTimeFormat annotation.
+					}
+				}
+			}
+			if (this.source != null) {
+				throw new ParseException(
+					String.format("Unable to parse date \"%s\" using configuration from %s", text, this.source),
+					ex.getErrorOffset());
+			}
+			// else rethrow original exception
+			throw ex;
+		}
 	}
 
 
 	protected DateFormat getDateFormat(Locale locale) {
-		DateFormat dateFormat = createDateFormat(locale);
+		return configureDateFormat(createDateFormat(locale));
+	}
+
+	private DateFormat configureDateFormat(DateFormat dateFormat) {
 		if (this.timeZone != null) {
 			dateFormat.setTimeZone(this.timeZone);
 		}

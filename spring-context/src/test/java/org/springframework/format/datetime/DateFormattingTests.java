@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.format.datetime;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -25,16 +26,23 @@ import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.support.FormattingConversionService;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
+import org.springframework.validation.FieldError;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,10 +50,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Phillip Webb
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class DateFormattingTests {
 
-	private FormattingConversionService conversionService;
+	private final FormattingConversionService conversionService = new FormattingConversionService();
 
 	private DataBinder binder;
 
@@ -57,7 +66,6 @@ public class DateFormattingTests {
 	}
 
 	private void setup(DateFormatterRegistrar registrar) {
-		conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
 		registrar.registerFormatters(conversionService);
 
@@ -158,8 +166,9 @@ public class DateFormattingTests {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateAnnotatedPattern", "10/31/09 1:05");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("dateAnnotatedPattern")).isEqualTo("10/31/09 1:05");
+		BindingResult bindingResult = binder.getBindingResult();
+		assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+		assertThat(bindingResult.getFieldValue("dateAnnotatedPattern")).isEqualTo("10/31/09 1:05");
 	}
 
 	@Test
@@ -247,6 +256,49 @@ public class DateFormattingTests {
 	}
 
 
+	@Nested
+	class FallbackPatternTests {
+
+		@ParameterizedTest
+		@ValueSource(strings = {"2021-03-02", "3/2/21", "20210302", "2021.03.02"})
+		void annotatedDate(String propertyValue) {
+			String propertyName = "dateWithFallbackPatterns";
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add(propertyName, propertyValue);
+			binder.bind(propertyValues);
+			BindingResult bindingResult = binder.getBindingResult();
+			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("2021-03-02");
+		}
+
+		@Test
+		void annotatedDateWithUnsupportedPattern() {
+			String propertyValue = "210302";
+			String propertyName = "dateWithFallbackPatterns";
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add(propertyName, propertyValue);
+			binder.bind(propertyValues);
+			BindingResult bindingResult = binder.getBindingResult();
+			assertThat(bindingResult.getErrorCount()).isEqualTo(1);
+			FieldError fieldError = bindingResult.getFieldError(propertyName);
+			assertThat(fieldError.unwrap(TypeMismatchException.class))
+				.hasMessageContaining("for property 'dateWithFallbackPatterns'")
+				.hasCauseInstanceOf(ConversionFailedException.class).getCause()
+					.hasMessageContaining("for value '210302'")
+					.hasCauseInstanceOf(IllegalArgumentException.class).getCause()
+						.hasMessageContaining("Parse attempt failed for value [210302]")
+						.hasCauseInstanceOf(ParseException.class).getCause()
+							// Unable to parse date "210302" using configuration from
+							// @org.springframework.format.annotation.DateTimeFormat(
+							// pattern=yyyy-MM-dd, style=SS, iso=NONE, fallbackPatterns=[M/d/yy, yyyyMMdd, yyyy.MM.dd])
+							.hasMessageContainingAll(
+								"Unable to parse date \"210302\" using configuration from",
+								"@org.springframework.format.annotation.DateTimeFormat",
+								"yyyy-MM-dd", "M/d/yy", "yyyyMMdd", "yyyy.MM.dd");
+		}
+	}
+
+
 	@SuppressWarnings("unused")
 	private static class SimpleDateBean {
 
@@ -262,6 +314,9 @@ public class DateFormattingTests {
 
 		@DateTimeFormat(pattern="M/d/yy h:mm")
 		private Date dateAnnotatedPattern;
+
+		@DateTimeFormat(pattern = "yyyy-MM-dd", fallbackPatterns = { "M/d/yy", "yyyyMMdd", "yyyy.MM.dd" })
+		private Date dateWithFallbackPatterns;
 
 		@DateTimeFormat(iso=ISO.DATE)
 		private Date isoDate;
@@ -313,6 +368,14 @@ public class DateFormattingTests {
 
 		public void setDateAnnotatedPattern(Date dateAnnotatedPattern) {
 			this.dateAnnotatedPattern = dateAnnotatedPattern;
+		}
+
+		public Date getDateWithFallbackPatterns() {
+			return dateWithFallbackPatterns;
+		}
+
+		public void setDateWithFallbackPatterns(Date dateWithFallbackPatterns) {
+			this.dateWithFallbackPatterns = dateWithFallbackPatterns;
 		}
 
 		public Date getIsoDate() {

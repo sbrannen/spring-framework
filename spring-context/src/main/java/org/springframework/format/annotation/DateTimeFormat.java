@@ -50,6 +50,7 @@ import java.lang.annotation.Target;
  *
  * @author Keith Donald
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see java.time.format.DateTimeFormatter
  * @see org.joda.time.format.DateTimeFormat
@@ -87,6 +88,8 @@ public @interface DateTimeFormat {
 	 * when going through that {@code DateTimeFormatter} with strict resolution mode).
 	 */
 	String pattern() default "";
+
+	String[] fallbackPatterns() default {};
 
 
 	/**
