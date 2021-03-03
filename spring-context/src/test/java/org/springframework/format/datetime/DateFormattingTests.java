@@ -17,6 +17,7 @@
 package org.springframework.format.datetime;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -259,9 +260,9 @@ public class DateFormattingTests {
 	@Nested
 	class FallbackPatternTests {
 
-		@ParameterizedTest
-		@ValueSource(strings = {"2021-03-02", "3/2/21", "20210302", "2021.03.02"})
-		void annotatedDate(String propertyValue) {
+		@ParameterizedTest(name = "input date: {0}")
+		@ValueSource(strings = {"2021-03-02", "2021.03.02", "20210302", "3/2/21"})
+		void date(String propertyValue) {
 			String propertyName = "dateWithFallbackPatterns";
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
 			propertyValues.add(propertyName, propertyValue);
@@ -271,8 +272,20 @@ public class DateFormattingTests {
 			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("2021-03-02");
 		}
 
+		@ParameterizedTest(name = "input date: {0}")
+		@ValueSource(strings = {"2021-03-02", "2021.03.02", "20210302", "3/2/21"})
+		void isoDate(String propertyValue) {
+			String propertyName = "isoDateWithFallbackPatterns";
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add(propertyName, propertyValue);
+			binder.bind(propertyValues);
+			BindingResult bindingResult = binder.getBindingResult();
+			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("2021-03-02");
+		}
+
 		@Test
-		void annotatedDateWithUnsupportedPattern() {
+		void dateWithUnsupportedPattern() {
 			String propertyValue = "210302";
 			String propertyName = "dateWithFallbackPatterns";
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -320,6 +333,9 @@ public class DateFormattingTests {
 
 		@DateTimeFormat(iso=ISO.DATE)
 		private Date isoDate;
+
+		@DateTimeFormat(iso = ISO.DATE, fallbackPatterns = { "M/d/yy", "yyyyMMdd", "yyyy.MM.dd" })
+		private Date isoDateWithFallbackPatterns;
 
 		@DateTimeFormat(iso=ISO.TIME)
 		private Date isoTime;
@@ -384,6 +400,14 @@ public class DateFormattingTests {
 
 		public void setIsoDate(Date isoDate) {
 			this.isoDate = isoDate;
+		}
+
+		public Date getIsoDateWithFallbackPatterns() {
+			return this.isoDateWithFallbackPatterns;
+		}
+
+		public void setIsoDateWithFallbackPatterns(Date isoDateWithFallbackPatterns) {
+			this.isoDateWithFallbackPatterns = isoDateWithFallbackPatterns;
 		}
 
 		public Date getIsoTime() {

@@ -183,6 +183,10 @@ public class DateFormatter implements Formatter<Date> {
 				for (String pattern : this.fallbackPatterns) {
 					try {
 						DateFormat dateFormat = configureDateFormat(new SimpleDateFormat(pattern, locale));
+						// Align timezone for parsing format with printing format if ISO is set.
+						if (this.iso != null && this.iso != ISO.NONE) {
+							dateFormat.setTimeZone(UTC);
+						}
 						return dateFormat.parse(text);
 					}
 					catch (ParseException ex2) {
