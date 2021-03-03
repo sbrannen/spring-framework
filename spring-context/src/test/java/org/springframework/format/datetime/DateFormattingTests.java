@@ -261,7 +261,19 @@ public class DateFormattingTests {
 
 		@ParameterizedTest(name = "input date: {0}")
 		@ValueSource(strings = {"2021-03-02", "2021.03.02", "20210302", "3/2/21"})
-		void date(String propertyValue) {
+		void styleDate(String propertyValue) {
+			String propertyName = "styleDateWithFallbackPatterns";
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add(propertyName, propertyValue);
+			binder.bind(propertyValues);
+			BindingResult bindingResult = binder.getBindingResult();
+			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("3/2/21");
+		}
+
+		@ParameterizedTest(name = "input date: {0}")
+		@ValueSource(strings = {"2021-03-02", "2021.03.02", "20210302", "3/2/21"})
+		void patternDate(String propertyValue) {
 			String propertyName = "patternDateWithFallbackPatterns";
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
 			propertyValues.add(propertyName, propertyValue);
@@ -284,7 +296,7 @@ public class DateFormattingTests {
 		}
 
 		@Test
-		void dateWithUnsupportedPattern() {
+		void patternDateWithUnsupportedPattern() {
 			String propertyValue = "210302";
 			String propertyName = "patternDateWithFallbackPatterns";
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -323,6 +335,9 @@ public class DateFormattingTests {
 
 		@DateTimeFormat(style = "S-")
 		private Date styleDate;
+
+		@DateTimeFormat(style = "S-", fallbackPatterns = { "yyyy-MM-dd", "yyyyMMdd", "yyyy.MM.dd" })
+		private Date styleDateWithFallbackPatterns;
 
 		@DateTimeFormat(pattern = "M/d/yy h:mm")
 		private Date patternDate;
@@ -376,6 +391,14 @@ public class DateFormattingTests {
 
 		public void setStyleDate(Date styleDate) {
 			this.styleDate = styleDate;
+		}
+
+		public Date getStyleDateWithFallbackPatterns() {
+			return this.styleDateWithFallbackPatterns;
+		}
+
+		public void setStyleDateWithFallbackPatterns(Date styleDateWithFallbackPatterns) {
+			this.styleDateWithFallbackPatterns = styleDateWithFallbackPatterns;
 		}
 
 		public Date getPatternDate() {
