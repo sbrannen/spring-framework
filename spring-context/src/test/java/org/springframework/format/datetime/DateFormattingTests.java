@@ -261,6 +261,18 @@ public class DateFormattingTests {
 
 		@ParameterizedTest(name = "input date: {0}")
 		@ValueSource(strings = {"2021-03-02", "2021.03.02", "20210302", "3/2/21"})
+		void styleCalendar(String propertyValue) {
+			String propertyName = "styleCalendarWithFallbackPatterns";
+			MutablePropertyValues propertyValues = new MutablePropertyValues();
+			propertyValues.add(propertyName, propertyValue);
+			binder.bind(propertyValues);
+			BindingResult bindingResult = binder.getBindingResult();
+			assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+			assertThat(bindingResult.getFieldValue(propertyName)).isEqualTo("3/2/21");
+		}
+
+		@ParameterizedTest(name = "input date: {0}")
+		@ValueSource(strings = {"2021-03-02", "2021.03.02", "20210302", "3/2/21"})
 		void styleDate(String propertyValue) {
 			String propertyName = "styleDateWithFallbackPatterns";
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -333,6 +345,9 @@ public class DateFormattingTests {
 		@DateTimeFormat(style = "S-")
 		private Calendar styleCalendar;
 
+		@DateTimeFormat(style = "S-", fallbackPatterns = { "yyyy-MM-dd", "yyyyMMdd", "yyyy.MM.dd" })
+		private Calendar styleCalendarWithFallbackPatterns;
+
 		@DateTimeFormat(style = "S-")
 		private Date styleDate;
 
@@ -383,6 +398,14 @@ public class DateFormattingTests {
 
 		public void setStyleCalendar(Calendar styleCalendar) {
 			this.styleCalendar = styleCalendar;
+		}
+
+		public Calendar getStyleCalendarWithFallbackPatterns() {
+			return this.styleCalendarWithFallbackPatterns;
+		}
+
+		public void setStyleCalendarWithFallbackPatterns(Calendar styleCalendarWithFallbackPatterns) {
+			this.styleCalendarWithFallbackPatterns = styleCalendarWithFallbackPatterns;
 		}
 
 		public Date getStyleDate() {
