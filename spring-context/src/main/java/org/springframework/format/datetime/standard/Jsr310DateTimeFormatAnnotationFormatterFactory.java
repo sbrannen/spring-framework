@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.springframework.context.support.EmbeddedValueResolutionSupport;
@@ -40,6 +41,7 @@ import org.springframework.util.StringUtils;
  * JSR-310 <code>java.time</code> package in JDK 8.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  * @see org.springframework.format.annotation.DateTimeFormat
  */
@@ -93,8 +95,17 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 	@Override
 	@SuppressWarnings("unchecked")
 	public Parser<?> getParser(DateTimeFormat annotation, Class<?> fieldType) {
+		Set<String> resolvedFallbackPatterns = new LinkedHashSet<>();
+		for (String fallbackPattern : annotation.fallbackPatterns()) {
+			String resolvedFallbackPattern = resolveEmbeddedValue(fallbackPattern);
+			if (StringUtils.hasLength(resolvedFallbackPattern)) {
+				resolvedFallbackPatterns.add(resolvedFallbackPattern);
+			}
+		}
+
 		DateTimeFormatter formatter = getFormatter(annotation, fieldType);
-		return new TemporalAccessorParser((Class<? extends TemporalAccessor>) fieldType, formatter);
+		return new TemporalAccessorParser((Class<? extends TemporalAccessor>) fieldType,
+				formatter, resolvedFallbackPatterns, annotation);
 	}
 
 	/**

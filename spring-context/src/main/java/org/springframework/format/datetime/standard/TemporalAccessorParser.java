@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,21 @@ import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAccessor;
+import java.util.Collections;
 import java.util.Locale;
+import java.util.Set;
 
 import org.springframework.format.Parser;
+import org.springframework.lang.Nullable;
 
 /**
  * {@link Parser} implementation for a JSR-310 {@link java.time.temporal.TemporalAccessor},
- * using a {@link java.time.format.DateTimeFormatter}) (the contextual one, if available).
+ * using a {@link java.time.format.DateTimeFormatter} (the contextual one, if available).
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 4.0
  * @see DateTimeContextHolder#getFormatter
  * @see java.time.LocalDate#parse(CharSequence, java.time.format.DateTimeFormatter)
@@ -49,6 +54,11 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 
 	private final DateTimeFormatter formatter;
 
+	private final Set<String> fallbackPatterns;
+
+	@Nullable
+	private Object source;
+
 
 	/**
 	 * Create a new TemporalAccessorParser for the given TemporalAccessor type.
@@ -57,14 +67,47 @@ public final class TemporalAccessorParser implements Parser<TemporalAccessor> {
 	 * @param formatter the base DateTimeFormatter instance
 	 */
 	public TemporalAccessorParser(Class<? extends TemporalAccessor> temporalAccessorType, DateTimeFormatter formatter) {
+		this(temporalAccessorType, formatter, Collections.emptySet(), null);
+	}
+
+	TemporalAccessorParser(Class<? extends TemporalAccessor> temporalAccessorType, DateTimeFormatter formatter,
+			Set<String> fallbackPatterns, @Nullable Object source) {
 		this.temporalAccessorType = temporalAccessorType;
 		this.formatter = formatter;
+		this.fallbackPatterns = fallbackPatterns;
+		this.source = source;
 	}
 
 
 	@Override
 	public TemporalAccessor parse(String text, Locale locale) throws ParseException {
-		DateTimeFormatter formatterToUse = DateTimeContextHolder.getFormatter(this.formatter, locale);
+		try {
+			return doParse(text, locale, this.formatter);
+		}
+		catch (DateTimeParseException ex) {
+			for (String pattern : this.fallbackPatterns) {
+				try {
+					DateTimeFormatter fallbackFormatter = DateTimeFormatterUtils.createStrictDateTimeFormatter(pattern);
+					return doParse(text, locale, fallbackFormatter);
+				}
+				catch (DateTimeParseException ignoredException) {
+					// Ignore fallback parsing exceptions since the exception thrown below
+					// will include information from the "source" if available -- for example,
+					// the toString() of a @DateTimeFormat annotation.
+				}
+			}
+			if (this.source != null) {
+				throw new DateTimeParseException(
+					String.format("Unable to parse temporal value \"%s\" using configuration from %s", text, this.source),
+					text, ex.getErrorIndex());
+			}
+			// else rethrow original exception
+			throw ex;
+		}
+	}
+
+	private TemporalAccessor doParse(String text, Locale locale, DateTimeFormatter formatter) throws DateTimeParseException {
+		DateTimeFormatter formatterToUse = DateTimeContextHolder.getFormatter(formatter, locale);
 		if (LocalDate.class == this.temporalAccessorType) {
 			return LocalDate.parse(text, formatterToUse);
 		}
