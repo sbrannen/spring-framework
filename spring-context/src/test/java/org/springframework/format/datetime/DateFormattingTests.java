@@ -17,7 +17,6 @@
 package org.springframework.format.datetime;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -96,34 +95,34 @@ public class DateFormattingTests {
 	@Test
 	void testBindLongAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("millisAnnotated", "10/31/09");
+		propertyValues.add("styleMillis", "10/31/09");
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("millisAnnotated")).isEqualTo("10/31/09");
+		assertThat(binder.getBindingResult().getFieldValue("styleMillis")).isEqualTo("10/31/09");
 	}
 
 	@Test
 	void testBindCalendarAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("calendarAnnotated", "10/31/09");
+		propertyValues.add("styleCalendar", "10/31/09");
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("calendarAnnotated")).isEqualTo("10/31/09");
+		assertThat(binder.getBindingResult().getFieldValue("styleCalendar")).isEqualTo("10/31/09");
 	}
 
 	@Test
 	void testBindDateAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateAnnotated", "10/31/09");
+		propertyValues.add("styleDate", "10/31/09");
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("dateAnnotated")).isEqualTo("10/31/09");
+		assertThat(binder.getBindingResult().getFieldValue("styleDate")).isEqualTo("10/31/09");
 	}
 
 	@Test
 	void testBindDateArray() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateAnnotated", new String[]{"10/31/09 12:00 PM"});
+		propertyValues.add("styleDate", new String[]{"10/31/09 12:00 PM"});
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
 	}
@@ -131,10 +130,10 @@ public class DateFormattingTests {
 	@Test
 	void testBindDateAnnotatedWithError() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateAnnotated", "Oct X31, 2009");
+		propertyValues.add("styleDate", "Oct X31, 2009");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getFieldErrorCount("dateAnnotated")).isEqualTo(1);
-		assertThat(binder.getBindingResult().getFieldValue("dateAnnotated")).isEqualTo("Oct X31, 2009");
+		assertThat(binder.getBindingResult().getFieldErrorCount("styleDate")).isEqualTo(1);
+		assertThat(binder.getBindingResult().getFieldValue("styleDate")).isEqualTo("Oct X31, 2009");
 	}
 
 	@Test
@@ -142,19 +141,19 @@ public class DateFormattingTests {
 	void testBindDateAnnotatedWithFallbackError() {
 		// TODO This currently passes because of the Date(String) constructor fallback is used
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateAnnotated", "Oct 031, 2009");
+		propertyValues.add("styleDate", "Oct 031, 2009");
 		binder.bind(propertyValues);
-		assertThat(binder.getBindingResult().getFieldErrorCount("dateAnnotated")).isEqualTo(1);
-		assertThat(binder.getBindingResult().getFieldValue("dateAnnotated")).isEqualTo("Oct 031, 2009");
+		assertThat(binder.getBindingResult().getFieldErrorCount("styleDate")).isEqualTo(1);
+		assertThat(binder.getBindingResult().getFieldValue("styleDate")).isEqualTo("Oct 031, 2009");
 	}
 
 	@Test
 	void testBindDateAnnotatedPattern() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateAnnotatedPattern", "10/31/09 1:05");
+		propertyValues.add("patternDate", "10/31/09 1:05");
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("dateAnnotatedPattern")).isEqualTo("10/31/09 1:05");
+		assertThat(binder.getBindingResult().getFieldValue("patternDate")).isEqualTo("10/31/09 1:05");
 	}
 
 	@Test
@@ -165,17 +164,17 @@ public class DateFormattingTests {
 		registrar.setFormatter(dateFormatter);
 		setup(registrar);
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateAnnotatedPattern", "10/31/09 1:05");
+		propertyValues.add("patternDate", "10/31/09 1:05");
 		binder.bind(propertyValues);
 		BindingResult bindingResult = binder.getBindingResult();
 		assertThat(bindingResult.getErrorCount()).isEqualTo(0);
-		assertThat(bindingResult.getFieldValue("dateAnnotatedPattern")).isEqualTo("10/31/09 1:05");
+		assertThat(bindingResult.getFieldValue("patternDate")).isEqualTo("10/31/09 1:05");
 	}
 
 	@Test
 	void testBindDateTimeOverflow() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateAnnotatedPattern", "02/29/09 12:00 PM");
+		propertyValues.add("patternDate", "02/29/09 12:00 PM");
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(1);
 	}
@@ -210,10 +209,10 @@ public class DateFormattingTests {
 	@Test
 	void testBindNestedDateAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("children[0].dateAnnotated", "10/31/09");
+		propertyValues.add("children[0].styleDate", "10/31/09");
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
-		assertThat(binder.getBindingResult().getFieldValue("children[0].dateAnnotated")).isEqualTo("10/31/09");
+		assertThat(binder.getBindingResult().getFieldValue("children[0].styleDate")).isEqualTo("10/31/09");
 	}
 
 	@Test
@@ -263,7 +262,7 @@ public class DateFormattingTests {
 		@ParameterizedTest(name = "input date: {0}")
 		@ValueSource(strings = {"2021-03-02", "2021.03.02", "20210302", "3/2/21"})
 		void date(String propertyValue) {
-			String propertyName = "dateWithFallbackPatterns";
+			String propertyName = "patternDateWithFallbackPatterns";
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
 			propertyValues.add(propertyName, propertyValue);
 			binder.bind(propertyValues);
@@ -287,7 +286,7 @@ public class DateFormattingTests {
 		@Test
 		void dateWithUnsupportedPattern() {
 			String propertyValue = "210302";
-			String propertyName = "dateWithFallbackPatterns";
+			String propertyName = "patternDateWithFallbackPatterns";
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
 			propertyValues.add(propertyName, propertyValue);
 			binder.bind(propertyValues);
@@ -295,7 +294,7 @@ public class DateFormattingTests {
 			assertThat(bindingResult.getErrorCount()).isEqualTo(1);
 			FieldError fieldError = bindingResult.getFieldError(propertyName);
 			assertThat(fieldError.unwrap(TypeMismatchException.class))
-				.hasMessageContaining("for property 'dateWithFallbackPatterns'")
+				.hasMessageContaining("for property 'patternDateWithFallbackPatterns'")
 				.hasCauseInstanceOf(ConversionFailedException.class).getCause()
 					.hasMessageContaining("for value '210302'")
 					.hasCauseInstanceOf(IllegalArgumentException.class).getCause()
@@ -317,36 +316,37 @@ public class DateFormattingTests {
 
 		private Long millis;
 
-		private Long millisAnnotated;
+		private Long styleMillis;
 
-		@DateTimeFormat(style="S-")
-		private Calendar calendarAnnotated;
+		@DateTimeFormat(style = "S-")
+		private Calendar styleCalendar;
 
-		@DateTimeFormat(style="S-")
-		private Date dateAnnotated;
+		@DateTimeFormat(style = "S-")
+		private Date styleDate;
 
-		@DateTimeFormat(pattern="M/d/yy h:mm")
-		private Date dateAnnotatedPattern;
+		@DateTimeFormat(pattern = "M/d/yy h:mm")
+		private Date patternDate;
 
 		@DateTimeFormat(pattern = "yyyy-MM-dd", fallbackPatterns = { "M/d/yy", "yyyyMMdd", "yyyy.MM.dd" })
-		private Date dateWithFallbackPatterns;
+		private Date patternDateWithFallbackPatterns;
 
-		@DateTimeFormat(iso=ISO.DATE)
+		@DateTimeFormat(iso = ISO.DATE)
 		private Date isoDate;
 
 		@DateTimeFormat(iso = ISO.DATE, fallbackPatterns = { "M/d/yy", "yyyyMMdd", "yyyy.MM.dd" })
 		private Date isoDateWithFallbackPatterns;
 
-		@DateTimeFormat(iso=ISO.TIME)
+		@DateTimeFormat(iso = ISO.TIME)
 		private Date isoTime;
 
-		@DateTimeFormat(iso=ISO.DATE_TIME)
+		@DateTimeFormat(iso = ISO.DATE_TIME)
 		private Date isoDateTime;
 
 		private final List<SimpleDateBean> children = new ArrayList<>();
 
+
 		public Long getMillis() {
-			return millis;
+			return this.millis;
 		}
 
 		public void setMillis(Long millis) {
@@ -354,48 +354,48 @@ public class DateFormattingTests {
 		}
 
 		@DateTimeFormat(style="S-")
-		public Long getMillisAnnotated() {
-			return millisAnnotated;
+		public Long getStyleMillis() {
+			return this.styleMillis;
 		}
 
-		public void setMillisAnnotated(@DateTimeFormat(style="S-") Long millisAnnotated) {
-			this.millisAnnotated = millisAnnotated;
+		public void setStyleMillis(@DateTimeFormat(style="S-") Long styleMillis) {
+			this.styleMillis = styleMillis;
 		}
 
-		public Calendar getCalendarAnnotated() {
-			return calendarAnnotated;
+		public Calendar getStyleCalendar() {
+			return this.styleCalendar;
 		}
 
-		public void setCalendarAnnotated(Calendar calendarAnnotated) {
-			this.calendarAnnotated = calendarAnnotated;
+		public void setStyleCalendar(Calendar styleCalendar) {
+			this.styleCalendar = styleCalendar;
 		}
 
-		public Date getDateAnnotated() {
-			return dateAnnotated;
+		public Date getStyleDate() {
+			return this.styleDate;
 		}
 
-		public void setDateAnnotated(Date dateAnnotated) {
-			this.dateAnnotated = dateAnnotated;
+		public void setStyleDate(Date styleDate) {
+			this.styleDate = styleDate;
 		}
 
-		public Date getDateAnnotatedPattern() {
-			return dateAnnotatedPattern;
+		public Date getPatternDate() {
+			return this.patternDate;
 		}
 
-		public void setDateAnnotatedPattern(Date dateAnnotatedPattern) {
-			this.dateAnnotatedPattern = dateAnnotatedPattern;
+		public void setPatternDate(Date patternDate) {
+			this.patternDate = patternDate;
 		}
 
-		public Date getDateWithFallbackPatterns() {
-			return dateWithFallbackPatterns;
+		public Date getPatternDateWithFallbackPatterns() {
+			return this.patternDateWithFallbackPatterns;
 		}
 
-		public void setDateWithFallbackPatterns(Date dateWithFallbackPatterns) {
-			this.dateWithFallbackPatterns = dateWithFallbackPatterns;
+		public void setPatternDateWithFallbackPatterns(Date patternDateWithFallbackPatterns) {
+			this.patternDateWithFallbackPatterns = patternDateWithFallbackPatterns;
 		}
 
 		public Date getIsoDate() {
-			return isoDate;
+			return this.isoDate;
 		}
 
 		public void setIsoDate(Date isoDate) {
@@ -411,7 +411,7 @@ public class DateFormattingTests {
 		}
 
 		public Date getIsoTime() {
-			return isoTime;
+			return this.isoTime;
 		}
 
 		public void setIsoTime(Date isoTime) {
@@ -419,7 +419,7 @@ public class DateFormattingTests {
 		}
 
 		public Date getIsoDateTime() {
-			return isoDateTime;
+			return this.isoDateTime;
 		}
 
 		public void setIsoDateTime(Date isoDateTime) {
@@ -427,7 +427,7 @@ public class DateFormattingTests {
 		}
 
 		public List<SimpleDateBean> getChildren() {
-			return children;
+			return this.children;
 		}
 	}
 
