@@ -134,8 +134,10 @@ public class DateFormatter implements Formatter<Date> {
 	}
 
 	/**
-	 * Set the two character to use to format date values. The first character used for
-	 * the date style, the second is for the time style. Supported characters are
+	 * Set the two characters to use to format date values.
+	 * <p>The first character is used for the date style; the second is used for
+	 * the time style.
+	 * <p>Supported characters:
 	 * <ul>
 	 * <li>'S' = Small</li>
 	 * <li>'M' = Medium</li>
@@ -189,10 +191,10 @@ public class DateFormatter implements Formatter<Date> {
 						}
 						return dateFormat.parse(text);
 					}
-					catch (ParseException ex2) {
+					catch (ParseException ignoredException) {
 						// Ignore fallback parsing exceptions since the exception thrown below
 						// will include information from the "source" if available -- for example,
-						// the toString() of an @DateTimeFormat annotation.
+						// the toString() of a @DateTimeFormat annotation.
 					}
 				}
 			}

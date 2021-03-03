@@ -84,9 +84,8 @@ public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueReso
 			formatter.setPattern(pattern);
 		}
 
-		String[] fallbackPatterns = annotation.fallbackPatterns();
 		List<String> resolvedFallbackPatterns = new ArrayList<>();
-		for (String fallbackPattern : fallbackPatterns) {
+		for (String fallbackPattern : annotation.fallbackPatterns()) {
 			String resolvedFallbackPattern = resolveEmbeddedValue(fallbackPattern);
 			if (StringUtils.hasLength(resolvedFallbackPattern)) {
 				resolvedFallbackPatterns.add(resolvedFallbackPattern);
