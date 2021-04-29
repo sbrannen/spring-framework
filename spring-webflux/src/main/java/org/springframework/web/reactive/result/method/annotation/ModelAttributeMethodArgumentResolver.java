@@ -60,6 +60,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.0
  */
 public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentResolverSupport {
@@ -108,11 +109,20 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 
 		String name = ModelInitializer.getNameForParameter(parameter);
 		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
+		Map<String, Object> model = context.getModel().asMap();
+
+		ModelAttribute modelAttribute = parameter.getParameterAnnotation(ModelAttribute.class);
+		if (modelAttribute != null && !modelAttribute.binding()) {
+			return valueMono.flatMap(value -> {
+				model.put(name, value);
+				Object result = (adapter != null ? adapter.fromPublisher(valueMono) : value);
+				return Mono.just(result);
+			});
+		}
 
 		// unsafe(): we're intercepting, already serialized Publisher signals
 		Sinks.One<BindingResult> bindingResultSink = Sinks.unsafe().one();
 
-		Map<String, Object> model = context.getModel().asMap();
 		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultSink.asMono());
 
 		return valueMono.flatMap(value -> {
