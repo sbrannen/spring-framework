@@ -21,6 +21,8 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.validation.constraints.NotEmpty;
+
 import io.reactivex.rxjava3.core.Single;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +45,6 @@ import org.springframework.web.testfixture.method.ResolvableMethod;
 import org.springframework.web.testfixture.server.MockServerWebExchange;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 
 /**
  * Unit tests for {@link ModelAttributeMethodArgumentResolver}.
@@ -125,8 +126,7 @@ class ModelAttributeMethodArgumentResolverTests {
 				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Pojo.class);
 
 		testBindPojo("pojoMono", parameter, mono -> {
-			boolean condition = mono instanceof Mono;
-			assertThat(condition).as(mono.getClass().getName()).isTrue();
+			assertThat(mono).isInstanceOf(Mono.class);
 			Object value = ((Mono<?>) mono).block(Duration.ofSeconds(5));
 			assertThat(value.getClass()).isEqualTo(Pojo.class);
 			return (Pojo) value;
@@ -139,8 +139,7 @@ class ModelAttributeMethodArgumentResolverTests {
 				.annotPresent(ModelAttribute.class).arg(Single.class, Pojo.class);
 
 		testBindPojo("pojoSingle", parameter, single -> {
-			boolean condition = single instanceof Single;
-			assertThat(condition).as(single.getClass().getName()).isTrue();
+			assertThat(single).isInstanceOf(Single.class);
 			Object value = ((Single<?>) single).blockingGet();
 			assertThat(value.getClass()).isEqualTo(Pojo.class);
 			return (Pojo) value;
@@ -195,8 +194,12 @@ class ModelAttributeMethodArgumentResolverTests {
 		assertThat(nonBindingPojo).isNotNull();
 		assertThat(nonBindingPojo.getName()).isNull();
 
+		String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + modelKey;
+
 		Map<String, Object> model = bindContext.getModel().asMap();
-		assertThat(model).containsOnly(entry(modelKey, nonBindingPojo));
+		assertThat(model).hasSize(2);
+		assertThat(model.get(modelKey)).isSameAs(nonBindingPojo);
+		assertThat(model.get(bindingResultKey)).isInstanceOf(BindingResult.class);
 	}
 
 	@Test
@@ -255,8 +258,7 @@ class ModelAttributeMethodArgumentResolverTests {
 				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Pojo.class);
 
 		testBindPojo(modelKey, parameter, mono -> {
-			boolean condition = mono instanceof Mono;
-			assertThat(condition).as(mono.getClass().getName()).isTrue();
+			assertThat(mono).isInstanceOf(Mono.class);
 			Object value = ((Mono<?>) mono).block(Duration.ofSeconds(5));
 			assertThat(value.getClass()).isEqualTo(Pojo.class);
 			return (Pojo) value;
@@ -283,55 +285,90 @@ class ModelAttributeMethodArgumentResolverTests {
 	}
 
 	@Test
-	void validationError() throws Exception {
+	void validationErrorForPojo() throws Exception {
 		MethodParameter parameter = this.testMethod.annotNotPresent(ModelAttribute.class).arg(Pojo.class);
 		testValidationError(parameter, Function.identity());
 	}
 
 	@Test
-	void validationErrorToMono() throws Exception {
+	void validationErrorForMono() throws Exception {
 		MethodParameter parameter = this.testMethod
 				.annotNotPresent(ModelAttribute.class).arg(Mono.class, Pojo.class);
 
 		testValidationError(parameter,
 				resolvedArgumentMono -> {
 					Object value = resolvedArgumentMono.block(Duration.ofSeconds(5));
-					assertThat(value).isNotNull();
-					boolean condition = value instanceof Mono;
-					assertThat(condition).isTrue();
+					assertThat(value).isInstanceOf(Mono.class);
 					return (Mono<?>) value;
 				});
 	}
 
 	@Test
-	void validationErrorToSingle() throws Exception {
+	void validationErrorForSingle() throws Exception {
 		MethodParameter parameter = this.testMethod
 				.annotPresent(ModelAttribute.class).arg(Single.class, Pojo.class);
 
 		testValidationError(parameter,
 				resolvedArgumentMono -> {
 					Object value = resolvedArgumentMono.block(Duration.ofSeconds(5));
-					assertThat(value).isNotNull();
-					boolean condition = value instanceof Single;
-					assertThat(condition).isTrue();
+					assertThat(value).isInstanceOf(Single.class);
 					return Mono.from(((Single<?>) value).toFlowable());
 				});
 	}
 
-	private void testValidationError(MethodParameter param, Function<Mono<?>, Mono<?>> valueMonoExtractor)
+	@Test
+	void validationErrorWithoutBindingForPojo() throws Exception {
+		MethodParameter parameter = this.testMethod.annotPresent(ModelAttribute.class).arg(ValidatedPojo.class);
+		testValidationErrorWithoutBinding(parameter, Function.identity());
+	}
+
+	@Test
+	void validationErrorWithoutBindingForMono() throws Exception {
+		MethodParameter parameter = this.testMethod.annotPresent(ModelAttribute.class).arg(Mono.class, ValidatedPojo.class);
+
+		testValidationErrorWithoutBinding(parameter, resolvedArgumentMono -> {
+			Object value = resolvedArgumentMono.block(Duration.ofSeconds(5));
+			assertThat(value).isInstanceOf(Mono.class);
+			return (Mono<?>) value;
+		});
+	}
+
+	@Test
+	void validationErrorWithoutBindingForSingle() throws Exception {
+		MethodParameter parameter = this.testMethod.annotPresent(ModelAttribute.class).arg(Single.class, ValidatedPojo.class);
+
+		testValidationErrorWithoutBinding(parameter, resolvedArgumentMono -> {
+			Object value = resolvedArgumentMono.block(Duration.ofSeconds(5));
+			assertThat(value).isInstanceOf(Single.class);
+			return Mono.from(((Single<?>) value).toFlowable());
+		});
+	}
+
+	private void testValidationError(MethodParameter parameter, Function<Mono<?>, Mono<?>> valueMonoExtractor)
 			throws URISyntaxException {
 
-		ServerWebExchange exchange = postForm("age=invalid");
-		Mono<?> mono = createResolver().resolveArgument(param, this.bindContext, exchange);
+		testValidationError(parameter, valueMonoExtractor, "age=invalid", "age", "invalid");
+	}
+
+	private void testValidationErrorWithoutBinding(MethodParameter parameter, Function<Mono<?>, Mono<?>> valueMonoExtractor)
+			throws URISyntaxException {
+
+		testValidationError(parameter, valueMonoExtractor, "name=Enigma", "name", null);
+	}
+
+	private void testValidationError(MethodParameter param, Function<Mono<?>, Mono<?>> valueMonoExtractor,
+			String formData, String field, String rejectedValue) throws URISyntaxException {
+
+		Mono<?> mono = createResolver().resolveArgument(param, this.bindContext, postForm(formData));
 		mono = valueMonoExtractor.apply(mono);
 
 		StepVerifier.create(mono)
 				.consumeErrorWith(ex -> {
-					boolean condition = ex instanceof WebExchangeBindException;
-					assertThat(condition).isTrue();
+					assertThat(ex).isInstanceOf(WebExchangeBindException.class);
 					WebExchangeBindException bindException = (WebExchangeBindException) ex;
 					assertThat(bindException.getErrorCount()).isEqualTo(1);
-					assertThat(bindException.hasFieldErrors("age")).isTrue();
+					assertThat(bindException.hasFieldErrors(field)).isTrue();
+					assertThat(bindException.getFieldError(field).getRejectedValue()).isEqualTo(rejectedValue);
 				})
 				.verify();
 	}
@@ -377,10 +414,12 @@ class ModelAttributeMethodArgumentResolverTests {
 			@ModelAttribute @Validated Pojo pojo,
 			@ModelAttribute @Validated Mono<Pojo> mono,
 			@ModelAttribute @Validated Single<Pojo> single,
-			// @ModelAttribute(binding = false) @Validated NonBindingPojo nonBindingPojo,
 			@ModelAttribute(binding = false) NonBindingPojo nonBindingPojo,
 			@ModelAttribute(binding = false) Mono<NonBindingPojo> monoNonBindingPojo,
 			@ModelAttribute(binding = false) Single<NonBindingPojo> singleNonBindingPojo,
+			@ModelAttribute(binding = false) @Validated ValidatedPojo validatedPojo,
+			@ModelAttribute(binding = false) @Validated Mono<ValidatedPojo> monoValidatedPojo,
+			@ModelAttribute(binding = false) @Validated Single<ValidatedPojo> singleValidatedPojo,
 			Pojo pojoNotAnnotated,
 			String stringNotAnnotated,
 			Mono<Pojo> monoNotAnnotated,
@@ -395,13 +434,6 @@ class ModelAttributeMethodArgumentResolverTests {
 		private String name;
 
 		private int age;
-
-		public Pojo() {
-		}
-
-		public Pojo(String name) {
-			this.name = name;
-		}
 
 		public String getName() {
 			return name;
@@ -426,13 +458,6 @@ class ModelAttributeMethodArgumentResolverTests {
 
 		private String name;
 
-		public NonBindingPojo() {
-		}
-
-		public NonBindingPojo(String name) {
-			this.name = name;
-		}
-
 		public String getName() {
 			return this.name;
 		}
@@ -444,6 +469,27 @@ class ModelAttributeMethodArgumentResolverTests {
 		@Override
 		public String toString() {
 			return "NonBindingPojo [name=" + name + "]";
+		}
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class ValidatedPojo {
+
+		@NotEmpty
+		private String name;
+
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "ValidatedPojo [name=" + name + "]";
 		}
 	}
 

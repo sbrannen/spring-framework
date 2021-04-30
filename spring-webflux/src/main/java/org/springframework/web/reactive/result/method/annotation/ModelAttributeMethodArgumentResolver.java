@@ -109,25 +109,16 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 
 		String name = ModelInitializer.getNameForParameter(parameter);
 		Mono<?> valueMono = prepareAttributeMono(name, valueType, context, exchange);
-		Map<String, Object> model = context.getModel().asMap();
-
-		ModelAttribute modelAttribute = parameter.getParameterAnnotation(ModelAttribute.class);
-		if (modelAttribute != null && !modelAttribute.binding()) {
-			return valueMono.flatMap(value -> {
-				model.put(name, value);
-				Object result = (adapter != null ? adapter.fromPublisher(valueMono) : value);
-				return Mono.just(result);
-			});
-		}
 
 		// unsafe(): we're intercepting, already serialized Publisher signals
 		Sinks.One<BindingResult> bindingResultSink = Sinks.unsafe().one();
 
+		Map<String, Object> model = context.getModel().asMap();
 		model.put(BindingResult.MODEL_KEY_PREFIX + name, bindingResultSink.asMono());
 
 		return valueMono.flatMap(value -> {
 			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
-			return bindRequestParameters(binder, exchange)
+			return bindRequestParameters(parameter, binder, exchange)
 					.doOnError(bindingResultSink::tryEmitError)
 					.doOnSuccess(aVoid -> {
 						validateIfApplicable(binder, parameter);
@@ -152,6 +143,19 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 					}));
 		});
 	}
+
+	private Mono<Void> bindRequestParameters(MethodParameter parameter,
+			WebExchangeDataBinder binder, ServerWebExchange exchange) {
+
+		// Skip binding?
+		ModelAttribute modelAttribute = parameter.getParameterAnnotation(ModelAttribute.class);
+		if (modelAttribute != null && !modelAttribute.binding()) {
+			return Mono.empty();
+		}
+
+		return bindRequestParameters(binder, exchange);
+	}
+
 
 	/**
 	 * Extension point to bind the request to the target object.
