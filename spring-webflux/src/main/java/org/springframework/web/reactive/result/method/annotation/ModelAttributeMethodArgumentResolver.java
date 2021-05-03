@@ -118,7 +118,7 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 
 		return valueMono.flatMap(value -> {
 			WebExchangeDataBinder binder = context.createDataBinder(exchange, value, name);
-			return bindRequestParameters(parameter, binder, exchange)
+			return (bindingDisabled(parameter) ? Mono.empty() : bindRequestParameters(binder, exchange))
 					.doOnError(bindingResultSink::tryEmitError)
 					.doOnSuccess(aVoid -> {
 						validateIfApplicable(binder, parameter);
@@ -144,18 +144,15 @@ public class ModelAttributeMethodArgumentResolver extends HandlerMethodArgumentR
 		});
 	}
 
-	private Mono<Void> bindRequestParameters(MethodParameter parameter,
-			WebExchangeDataBinder binder, ServerWebExchange exchange) {
-
-		// Skip binding?
+	/**
+	 * Determine if binding should be disabled for the supplied {@link MethodParameter},
+	 * based on the {@link ModelAttribute#binding} annotation attribute.
+	 * @since 5.3.7
+	 */
+	private boolean bindingDisabled(MethodParameter parameter) {
 		ModelAttribute modelAttribute = parameter.getParameterAnnotation(ModelAttribute.class);
-		if (modelAttribute != null && !modelAttribute.binding()) {
-			return Mono.empty();
-		}
-
-		return bindRequestParameters(binder, exchange);
+		return (modelAttribute != null && !modelAttribute.binding());
 	}
-
 
 	/**
 	 * Extension point to bind the request to the target object.
