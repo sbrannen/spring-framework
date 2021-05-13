@@ -432,15 +432,20 @@ public abstract class ScriptUtils {
 	}
 
 	/**
-	 * Determine if the provided SQL script contains the specified delimiter.
+	 * Determine if the provided SQL script contains the specified statement delimiter.
 	 * <p>This method is intended to be used to find the string delimiting each
 	 * SQL statement &mdash; for example, a ';' character.
 	 * <p>Any occurrence of the delimiter within the script will be ignored if it
-	 * is enclosed within single quotes ({@code '}) or double quotes ({@code "})
-	 * or if it is escaped with a backslash ({@code \}).
+	 * is within a <em>literal</em> block of text enclosed in single quotes
+	 * ({@code '}) or double quotes ({@code "}) or if it is escaped with a backslash
+	 * ({@code \}).
 	 * @param script the SQL script to search within
-	 * @param delimiter the delimiter to search for
+	 * @param delimiter the statement delimiter to search for
+	 * @see #containsStatementSeparator(EncodedResource, String, String, String[], String, String)
+	 * @deprecated as of Spring Framework 5.3.8, in favor of
+	 * {@link #containsStatementSeparator(EncodedResource, String, String, String, String, String)}
 	 */
+	@Deprecated
 	public static boolean containsSqlScriptDelimiters(String script, String delimiter) {
 		boolean inSingleQuote = false;
 		boolean inDoubleQuote = false;
@@ -466,6 +471,85 @@ public abstract class ScriptUtils {
 			if (!inSingleQuote && !inDoubleQuote) {
 				if (script.startsWith(delimiter, i)) {
 					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determine if the provided SQL script contains the specified statement separator.
+	 * <p>This method is intended to be used to find the string separating each
+	 * SQL statement &mdash; for example, a ';' character.
+	 * <p>Any occurrence of the separator within the script will be ignored if it
+	 * is within a <em>literal</em> block of text enclosed in single quotes
+	 * ({@code '}) or double quotes ({@code "}), if it is escaped with a backslash
+	 * ({@code \}), or if it is within a single-line comment or block comment.
+	 * @param resource the resource from which the script was read, or {@code null}
+	 * if unknown
+	 * @param script the SQL script to search within
+	 * @param separator the statement separator to search for
+	 * @param commentPrefixes the prefixes that identify single-line comments
+	 * (typically {@code "--"})
+	 * @param blockCommentStartDelimiter the <em>start</em> block comment delimiter
+	 * (typically {@code "/*"})
+	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
+	 * (typically <code>"*&#47;"</code>)
+	 * @since 5.3.8
+	 */
+	public static boolean containsStatementSeparator(@Nullable EncodedResource resource, String script,
+			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
+			String blockCommentEndDelimiter) throws ScriptException {
+
+		boolean inSingleQuote = false;
+		boolean inDoubleQuote = false;
+		boolean inEscape = false;
+
+		for (int i = 0; i < script.length(); i++) {
+			char c = script.charAt(i);
+			if (inEscape) {
+				inEscape = false;
+				continue;
+			}
+			// MySQL style escapes
+			if (c == '\\') {
+				inEscape = true;
+				continue;
+			}
+			if (!inDoubleQuote && (c == '\'')) {
+				inSingleQuote = !inSingleQuote;
+			}
+			else if (!inSingleQuote && (c == '"')) {
+				inDoubleQuote = !inDoubleQuote;
+			}
+			if (!inSingleQuote && !inDoubleQuote) {
+				if (script.startsWith(separator, i)) {
+					return true;
+				}
+				else if (startsWithAny(script, commentPrefixes, i)) {
+					// Skip over any content from the start of the comment to the EOL
+					int indexOfNextNewline = script.indexOf('\n', i);
+					if (indexOfNextNewline > i) {
+						i = indexOfNextNewline;
+						continue;
+					}
+					else {
+						// If there's no EOL, we must be at the end of the script, so stop here.
+						break;
+					}
+				}
+				else if (script.startsWith(blockCommentStartDelimiter, i)) {
+					// Skip over any block comments
+					int indexOfCommentEnd = script.indexOf(blockCommentEndDelimiter, i);
+					if (indexOfCommentEnd > i) {
+						i = indexOfCommentEnd + blockCommentEndDelimiter.length() - 1;
+						continue;
+					}
+					else {
+						throw new ScriptParseException(
+								"Missing block comment end delimiter: " + blockCommentEndDelimiter, resource);
+					}
 				}
 			}
 		}

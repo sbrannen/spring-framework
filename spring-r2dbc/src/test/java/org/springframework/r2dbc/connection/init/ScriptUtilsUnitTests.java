@@ -34,6 +34,7 @@ import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_BLOC
 import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_COMMENT_PREFIXES;
 import static org.springframework.r2dbc.connection.init.ScriptUtils.DEFAULT_STATEMENT_SEPARATOR;
 import static org.springframework.r2dbc.connection.init.ScriptUtils.containsSqlScriptDelimiters;
+import static org.springframework.r2dbc.connection.init.ScriptUtils.containsStatementSeparator;
 import static org.springframework.r2dbc.connection.init.ScriptUtils.splitSqlScript;
 
 /**
@@ -209,8 +210,47 @@ public class ScriptUtilsUnitTests {
 		"'insert into users(first, last)\nvalues(''a\\\\'', ''b;'')'                        # ;      # false",
 		"'insert into users(first, last)\nvalues(''Charles'', ''d\\''Artagnan''); select 1' # ;      # true"
 	})
-	public void containsDelimiter(String script, String delimiter, boolean expected) {
+	@SuppressWarnings("deprecation")
+	public void containsDelimiterDeprecatedSupport(String script, String delimiter, boolean expected) {
 		assertThat(containsSqlScriptDelimiters(script, delimiter)).isEqualTo(expected);
+	}
+
+	@ParameterizedTest
+	@CsvSource(delimiter = '#', value = {
+		// semicolon
+		"'select 1\n select '';'''                                                          # ;      # false",
+		"'select 1\n select \";\"'                                                          # ;      # false",
+		"'select 1; select 2'                                                               # ;      # true",
+		// newline
+		"'select 1; select ''\n'''                                                          # '\n'   # false",
+		"'select 1; select \"\n\"'                                                          # '\n'   # false",
+		"'select 1\n select 2'                                                              # '\n'   # true",
+		// double newline
+		"'select 1\n select 2'                                                              # '\n\n' # false",
+		"'select 1\n\n select 2'                                                            # '\n\n' # true",
+		// semicolon with MySQL style escapes '\\'
+		"'insert into users(first, last)\nvalues(''a\\\\'', ''b;'')'                        # ;      # false",
+		"'insert into users(first, last)\nvalues(''Charles'', ''d\\''Artagnan''); select 1' # ;      # true",
+		// semicolon inside comments
+		"'-- a;b;c\ninsert into colors(color_num) values(42);'                              # ;      # true",
+		"'/* a;b;c */\ninsert into colors(color_num) values(42);'                           # ;      # true",
+		"'-- a;b;c\ninsert into colors(color_num) values(42)'                               # ;      # false",
+		"'/* a;b;c */\ninsert into colors(color_num) values(42)'                            # ;      # false",
+		// single quotes inside comments
+		"'-- What\\''s your favorite color?\ninsert into colors(color_num) values(42);'     # ;      # true",
+		"'-- What''s your favorite color?\ninsert into colors(color_num) values(42);'       # ;      # true",
+		"'/* What\\''s your favorite color? */\ninsert into colors(color_num) values(42);'  # ;      # true",
+		"'/* What''s your favorite color? */\ninsert into colors(color_num) values(42);'    # ;      # true",
+		// double quotes inside comments
+		"'-- double \" quotes\ninsert into colors(color_num) values(42);'                   # ;      # true",
+		"'-- double \\\" quotes\ninsert into colors(color_num) values(42);'                 # ;      # true",
+		"'/* double \" quotes */\ninsert into colors(color_num) values(42);'                # ;      # true",
+		"'/* double \\\" quotes */\ninsert into colors(color_num) values(42);'              # ;      # true"
+	})
+	public void containsSeparator(String script, String delimiter, boolean expected) {
+		boolean contains = containsStatementSeparator(null, script, delimiter, DEFAULT_COMMENT_PREFIXES,
+			DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
+		assertThat(contains).isEqualTo(expected);
 	}
 
 	private String readScript(String path) throws Exception {
