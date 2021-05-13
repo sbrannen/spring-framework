@@ -433,49 +433,19 @@ public abstract class ScriptUtils {
 
 	/**
 	 * Determine if the provided SQL script contains the specified statement delimiter.
-	 * <p>This method is intended to be used to find the string delimiting each
-	 * SQL statement &mdash; for example, a ';' character.
-	 * <p>Any occurrence of the delimiter within the script will be ignored if it
-	 * is within a <em>literal</em> block of text enclosed in single quotes
-	 * ({@code '}) or double quotes ({@code "}) or if it is escaped with a backslash
-	 * ({@code \}).
+	 * <p>As of Spring Framework 5.3.8, this method delegates to
+	 * {@link #containsStatementSeparator}, supplying {@code null} for the
+	 * {@link EncodedResource} and using the default comment prefixes and delimiters.
 	 * @param script the SQL script to search within
 	 * @param delimiter the statement delimiter to search for
 	 * @see #containsStatementSeparator(EncodedResource, String, String, String[], String, String)
-	 * @deprecated as of Spring Framework 5.3.8, in favor of
-	 * {@link #containsStatementSeparator(EncodedResource, String, String, String, String, String)}
+	 * @see #DEFAULT_COMMENT_PREFIXES
+	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
+	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
 	 */
-	@Deprecated
 	public static boolean containsSqlScriptDelimiters(String script, String delimiter) {
-		boolean inSingleQuote = false;
-		boolean inDoubleQuote = false;
-		boolean inEscape = false;
-
-		for (int i = 0; i < script.length(); i++) {
-			char c = script.charAt(i);
-			if (inEscape) {
-				inEscape = false;
-				continue;
-			}
-			// MySQL style escapes
-			if (c == '\\') {
-				inEscape = true;
-				continue;
-			}
-			if (!inDoubleQuote && (c == '\'')) {
-				inSingleQuote = !inSingleQuote;
-			}
-			else if (!inSingleQuote && (c == '"')) {
-				inDoubleQuote = !inDoubleQuote;
-			}
-			if (!inSingleQuote && !inDoubleQuote) {
-				if (script.startsWith(delimiter, i)) {
-					return true;
-				}
-			}
-		}
-
-		return false;
+		return containsStatementSeparator(null, script, delimiter, DEFAULT_COMMENT_PREFIXES,
+			DEFAULT_BLOCK_COMMENT_START_DELIMITER, DEFAULT_BLOCK_COMMENT_END_DELIMITER);
 	}
 
 	/**
