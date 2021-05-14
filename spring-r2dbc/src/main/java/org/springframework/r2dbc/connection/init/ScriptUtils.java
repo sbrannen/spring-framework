@@ -433,12 +433,14 @@ public abstract class ScriptUtils {
 
 	/**
 	 * Determine if the provided SQL script contains the specified statement delimiter.
-	 * <p>As of Spring Framework 5.3.8, this method delegates to
-	 * {@link #containsStatementSeparator}, supplying {@code null} for the
-	 * {@link EncodedResource} and using the default comment prefixes and delimiters.
+	 * <p>This method is intended to be used to find the string separating each
+	 * SQL statement &mdash; for example, a ';' character.
+	 * <p>Any occurrence of the delimiter within the script will be ignored if it
+	 * is within a <em>literal</em> block of text enclosed in single quotes
+	 * ({@code '}) or double quotes ({@code "}), if it is escaped with a backslash
+	 * ({@code \}), or if it is within a single-line comment or block comment.
 	 * @param script the SQL script to search within
 	 * @param delimiter the statement delimiter to search for
-	 * @see #containsStatementSeparator(EncodedResource, String, String, String[], String, String)
 	 * @see #DEFAULT_COMMENT_PREFIXES
 	 * @see #DEFAULT_BLOCK_COMMENT_START_DELIMITER
 	 * @see #DEFAULT_BLOCK_COMMENT_END_DELIMITER
@@ -468,7 +470,7 @@ public abstract class ScriptUtils {
 	 * (typically <code>"*&#47;"</code>)
 	 * @since 5.3.8
 	 */
-	public static boolean containsStatementSeparator(@Nullable EncodedResource resource, String script,
+	private static boolean containsStatementSeparator(@Nullable EncodedResource resource, String script,
 			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
 			String blockCommentEndDelimiter) throws ScriptException {
 
