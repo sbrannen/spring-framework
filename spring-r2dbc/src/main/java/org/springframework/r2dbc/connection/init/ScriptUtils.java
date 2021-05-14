@@ -432,8 +432,8 @@ public abstract class ScriptUtils {
 	}
 
 	/**
-	 * Determine if the provided SQL script contains the specified statement delimiter.
-	 * <p>This method is intended to be used to find the string separating each
+	 * Determine if the provided SQL script contains the specified delimiter.
+	 * <p>This method is intended to be used to find the string delimiting each
 	 * SQL statement &mdash; for example, a ';' character.
 	 * <p>Any occurrence of the delimiter within the script will be ignored if it
 	 * is within a <em>literal</em> block of text enclosed in single quotes
@@ -468,7 +468,7 @@ public abstract class ScriptUtils {
 	 * (typically {@code "/*"})
 	 * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter
 	 * (typically <code>"*&#47;"</code>)
-	 * @since 5.3.8
+	 * @since 5.2.16
 	 */
 	private static boolean containsStatementSeparator(@Nullable EncodedResource resource, String script,
 			String separator, String[] commentPrefixes, String blockCommentStartDelimiter,
