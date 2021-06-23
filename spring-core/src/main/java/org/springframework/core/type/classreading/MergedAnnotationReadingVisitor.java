@@ -121,7 +121,7 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 	@SuppressWarnings("unchecked")
 	@Nullable
 	static <A extends Annotation> AnnotationVisitor get(@Nullable ClassLoader classLoader,
-			@Nullable Supplier<Object> sourceSupplier, String descriptor, boolean visible,
+			@Nullable Object source, String descriptor, boolean visible,
 			Consumer<MergedAnnotation<A>> consumer) {
 
 		if (!visible) {
@@ -133,7 +133,6 @@ class MergedAnnotationReadingVisitor<A extends Annotation> extends AnnotationVis
 			return null;
 		}
 
-		Object source = (sourceSupplier != null ? sourceSupplier.get() : null);
 		try {
 			Class<A> annotationType = (Class<A>) ClassUtils.forName(typeName, classLoader);
 			return new MergedAnnotationReadingVisitor<>(classLoader, source, annotationType, consumer);
