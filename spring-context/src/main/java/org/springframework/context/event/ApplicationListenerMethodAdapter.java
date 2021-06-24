@@ -426,7 +426,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(bean, message));
 		sb.append("Resolved arguments: \n");
 		for (int i = 0; i < resolvedArgs.length; i++) {
-			sb.append("[").append(i).append("] ");
+			sb.append('[').append(i).append("] ");
 			if (resolvedArgs[i] == null) {
 				sb.append("[null] \n");
 			}
