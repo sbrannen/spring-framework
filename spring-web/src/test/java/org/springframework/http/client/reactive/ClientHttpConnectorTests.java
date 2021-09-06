@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class ClientHttpConnectorTests {
 		server.shutdown();
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(autoCloseArguments = false)
 	@MethodSource("org.springframework.http.client.reactive.ClientHttpConnectorTests#methodsWithConnectors")
 	void basic(ClientHttpConnector connector, HttpMethod method) throws Exception {
 		URI uri = this.server.url("/").uri();
@@ -198,7 +198,7 @@ public class ClientHttpConnectorTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@ParameterizedTest
+	@ParameterizedTest(autoCloseArguments = false)
 	@MethodSource("org.springframework.http.client.reactive.ClientHttpConnectorTests#connectors")
 	public @interface ParameterizedConnectorTest {
 
