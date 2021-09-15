@@ -77,6 +77,7 @@ dependencies {
 	testRuntimeOnly("org.junit.vintage:junit-vintage-engine") {
 		exclude group: "junit", module: "junit"
 	}
+	testRuntimeOnly("org.junit.support:testng-engine")
 	testRuntimeOnly("org.glassfish:javax.el")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-core")
 	testRuntimeOnly("com.sun.xml.bind:jaxb-impl")
@@ -85,10 +86,12 @@ dependencies {
 task junit(type: Test) {
 	description = "Runs JUnit 4 and JUnit Jupiter tests."
 	useJUnitPlatform {
+		includeEngines "junit-vintage", "junit-jupiter", "testng"
 		excludeTags "failing-test-case"
 	}
 	include(["**/*Tests.class", "**/*Test.class"])
-	exclude(["**/testng/**/*.*"])
+	// include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
+	// exclude(["**/testng/**/*.*"])
 	systemProperty("testGroups", project.properties.get("testGroups"))
 	// Java Util Logging for the JUnit Platform.
 	// systemProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager")
@@ -106,14 +109,14 @@ task testNG(type: Test) {
 
 test {
 	description = "Runs all tests."
-	dependsOn junit, testNG
+	dependsOn junit//, testNG
 	exclude(["**/*.*"])
 }
 
 task aggregateTestReports(type: TestReport) {
 	description = "Aggregates JUnit and TestNG test reports."
 	destinationDir = test.reports.html.outputLocation.get().getAsFile()
-	reportOn junit, testNG
+	reportOn junit//, testNG
 }
 
 check.dependsOn aggregateTestReports
