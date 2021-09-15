@@ -90,6 +90,7 @@ task junit(type: Test) {
 		excludeTags "failing-test-case"
 	}
 	include(["**/*Tests.class", "**/*Test.class"])
+	filter.excludeTestsMatching("*TestCase")
 	// include(["**/testng/**/*Tests.class", "**/testng/**/*Test.class"])
 	// exclude(["**/testng/**/*.*"])
 	systemProperty("testGroups", project.properties.get("testGroups"))
