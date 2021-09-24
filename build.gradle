@@ -255,6 +255,7 @@ configure(allprojects) { project ->
 		repositories {
 			mavenCentral()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
+			maven { url "https://repo.spring.io/snapshot" } // spring-javaformat-checkstyle 0.0.29-SNAPSHOT
 		}
 	}
 	configurations.all {
@@ -325,7 +326,7 @@ configure([rootProject] + javaProjects) { project ->
 		// JSR-305 only used for non-required meta-annotations
 		compileOnly("com.google.code.findbugs:jsr305")
 		testCompileOnly("com.google.code.findbugs:jsr305")
-		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.15")
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.29-SNAPSHOT")
 	}
 
 	ext.javadocLinks = [
