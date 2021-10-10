@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.SpringProperties;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.TestContextAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code BootstrapUtils} is a collection of utility methods to assist with
@@ -45,6 +47,9 @@ abstract class BootstrapUtils {
 	private static final String DEFAULT_BOOTSTRAP_CONTEXT_CLASS_NAME =
 			"org.springframework.test.context.support.DefaultBootstrapContext";
 
+	private static final String CACHE_AWARE_CONTEXT_LOADER_DELEGATE_PROPERTY_NAME =
+			"spring.test.context.default.CacheAwareContextLoaderDelegate";
+	
 	private static final String DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME =
 			"org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate";
 
@@ -92,8 +97,12 @@ abstract class BootstrapUtils {
 	private static CacheAwareContextLoaderDelegate createCacheAwareContextLoaderDelegate() {
 		Class<? extends CacheAwareContextLoaderDelegate> clazz = null;
 		try {
+			String className = SpringProperties.getProperty(CACHE_AWARE_CONTEXT_LOADER_DELEGATE_PROPERTY_NAME);
+			if (!StringUtils.hasText(className)) {
+				className = DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME;
+			}
 			clazz = (Class<? extends CacheAwareContextLoaderDelegate>) ClassUtils.forName(
-				DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME, BootstrapUtils.class.getClassLoader());
+				className, BootstrapUtils.class.getClassLoader());
 
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Instantiating CacheAwareContextLoaderDelegate from class [%s]",
