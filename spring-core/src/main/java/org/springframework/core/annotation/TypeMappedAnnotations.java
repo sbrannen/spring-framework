@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,9 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 	private final SearchStrategy searchStrategy;
 
 	@Nullable
+	private final Predicate<Class<?>> searchEnclosingClass;
+
+	@Nullable
 	private final Annotation[] annotations;
 
 	private final RepeatableContainers repeatableContainers;
@@ -68,11 +71,13 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 
 	private TypeMappedAnnotations(AnnotatedElement element, SearchStrategy searchStrategy,
-			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
+			Predicate<Class<?>> searchEnclosingClass, RepeatableContainers repeatableContainers,
+			AnnotationFilter annotationFilter) {
 
 		this.source = element;
 		this.element = element;
 		this.searchStrategy = searchStrategy;
+		this.searchEnclosingClass = searchEnclosingClass;
 		this.annotations = null;
 		this.repeatableContainers = repeatableContainers;
 		this.annotationFilter = annotationFilter;
@@ -84,6 +89,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 		this.source = source;
 		this.element = null;
 		this.searchStrategy = null;
+		this.searchEnclosingClass = null;
 		this.annotations = annotations;
 		this.repeatableContainers = repeatableContainers;
 		this.annotationFilter = annotationFilter;
@@ -239,7 +245,7 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 			return processor.finish(result);
 		}
 		if (this.element != null && this.searchStrategy != null) {
-			return AnnotationsScanner.scan(criteria, this.element, this.searchStrategy, processor);
+			return AnnotationsScanner.scan(criteria, this.element, this.searchStrategy, this.searchEnclosingClass, processor);
 		}
 		return null;
 	}
@@ -248,10 +254,17 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
-		if (AnnotationsScanner.isKnownEmpty(element, searchStrategy)) {
+		return from(element, searchStrategy, clazz -> false, repeatableContainers, annotationFilter);
+	}
+
+	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
+			Predicate<Class<?>> searchEnclosingClass, RepeatableContainers repeatableContainers,
+			AnnotationFilter annotationFilter) {
+
+		if (AnnotationsScanner.isKnownEmpty(element, searchStrategy, searchEnclosingClass)) {
 			return NONE;
 		}
-		return new TypeMappedAnnotations(element, searchStrategy, repeatableContainers, annotationFilter);
+		return new TypeMappedAnnotations(element, searchStrategy, searchEnclosingClass, repeatableContainers, annotationFilter);
 	}
 
 	static MergedAnnotations from(@Nullable Object source, Annotation[] annotations,

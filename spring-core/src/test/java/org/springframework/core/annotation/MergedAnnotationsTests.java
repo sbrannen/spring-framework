@@ -726,6 +726,38 @@ class MergedAnnotationsTests {
 		assertThat(classes).containsExactly(Component.class, Indexed.class);
 	}
 
+	/**
+	 * @since 6.0
+	 */
+	@Test
+	void streamTypeHierarchyWithCustomSearchEnclosingClassPredicateFromNonAnnotatedInnerClassWithAnnotatedEnclosingClass() {
+		SearchStrategy searchStrategy = SearchStrategy.TYPE_HIERARCHY;
+		Class<?> testCase = AnnotatedClass.NonAnnotatedInnerClass.class;
+
+		assertThat(MergedAnnotations.from(testCase, searchStrategy, clazz -> false).stream()).isEmpty();
+		assertThat(MergedAnnotations.from(testCase, searchStrategy, ClassUtils::isStaticClass).stream()).isEmpty();
+
+		Stream<Class<?>> classes = MergedAnnotations.from(testCase, searchStrategy, ClassUtils::isInnerClass)
+				.stream().map(MergedAnnotation::getType);
+		assertThat(classes).containsExactly(Component.class, Indexed.class);
+	}
+
+	/**
+	 * @since 6.0
+	 */
+	@Test
+	void streamTypeHierarchyWithCustomSearchEnclosingClassPredicateFromNonAnnotatedStaticNestedClassWithAnnotatedEnclosingClass() {
+		SearchStrategy searchStrategy = SearchStrategy.TYPE_HIERARCHY;
+		Class<?> testCase = AnnotatedClass.NonAnnotatedStaticNestedClass.class;
+
+		assertThat(MergedAnnotations.from(testCase, searchStrategy, clazz -> false).stream()).isEmpty();
+		assertThat(MergedAnnotations.from(testCase, searchStrategy, ClassUtils::isInnerClass).stream()).isEmpty();
+
+		Stream<Class<?>> classes = MergedAnnotations.from(testCase, searchStrategy, ClassUtils::isStaticClass)
+				.stream().map(MergedAnnotation::getType);
+		assertThat(classes).containsExactly(Component.class, Indexed.class);
+	}
+
 	@Test
 	@SuppressWarnings("deprecation")
 	void getFromMethodWithMethodAnnotationOnLeaf() throws Exception {

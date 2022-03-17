@@ -832,6 +832,17 @@ public abstract class ClassUtils {
 	}
 
 	/**
+	 * Determine if the supplied class is a static class.
+	 * @return {@code true} if the supplied class is a static class
+	 * @since 6.0
+	 * @see Modifier#isStatic(int)
+	 * @see #isInnerClass(Class)
+	 */
+	public static boolean isStaticClass(Class<?> clazz) {
+		return Modifier.isStatic(clazz.getModifiers());
+	}
+
+	/**
 	 * Determine if the supplied class is an <em>inner class</em>,
 	 * i.e. a non-static member of an enclosing class.
 	 * @return {@code true} if the supplied class is an inner class
