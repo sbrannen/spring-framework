@@ -252,12 +252,6 @@ final class TypeMappedAnnotations implements MergedAnnotations {
 
 
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
-			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
-
-		return from(element, searchStrategy, clazz -> false, repeatableContainers, annotationFilter);
-	}
-
-	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			Predicate<Class<?>> searchEnclosingClass, RepeatableContainers repeatableContainers,
 			AnnotationFilter annotationFilter) {
 

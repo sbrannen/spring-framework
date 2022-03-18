@@ -731,15 +731,23 @@ class MergedAnnotationsTests {
 	 */
 	@Test
 	void streamTypeHierarchyWithCustomSearchEnclosingClassPredicateFromNonAnnotatedInnerClassWithAnnotatedEnclosingClass() {
-		SearchStrategy searchStrategy = SearchStrategy.TYPE_HIERARCHY;
 		Class<?> testCase = AnnotatedClass.NonAnnotatedInnerClass.class;
 
-		assertThat(MergedAnnotations.from(testCase, searchStrategy, clazz -> false).stream()).isEmpty();
-		assertThat(MergedAnnotations.from(testCase, searchStrategy, ClassUtils::isStaticClass).stream()).isEmpty();
+		assertThat(MergedAnnotations.from(testCase, SearchAlgorithm.typeHierarchy().build()).stream()).isEmpty();
+		assertThat(MergedAnnotations.from(testCase, SearchAlgorithm.typeHierarchy().searchEnclosingClass(clazz -> false).build()).stream()).isEmpty();
+		assertThat(MergedAnnotations.from(testCase, SearchAlgorithm.typeHierarchy().searchEnclosingClass(ClassUtils::isStaticClass).build()).stream()).isEmpty();
 
-		Stream<Class<?>> classes = MergedAnnotations.from(testCase, searchStrategy, ClassUtils::isInnerClass)
-				.stream().map(MergedAnnotation::getType);
+		Stream<Class<?>> classes = MergedAnnotations.from(testCase,
+			SearchAlgorithm.typeHierarchy().searchEnclosingClass(ClassUtils::isInnerClass).build()).stream().map(MergedAnnotation::getType);
 		assertThat(classes).containsExactly(Component.class, Indexed.class);
+
+		SearchAlgorithm searchAlgorithm = SearchAlgorithm.typeHierarchy()
+				.searchEnclosingClass(ClassUtils::isInnerClass)
+				.repeatableContainers(RepeatableContainers.none())
+				.annotationFilter(annotationName -> annotationName.endsWith("Indexed"))
+				.build();
+		classes = MergedAnnotations.from(testCase, searchAlgorithm).stream().map(MergedAnnotation::getType);
+		assertThat(classes).containsExactly(Component.class);
 	}
 
 	/**
@@ -747,14 +755,13 @@ class MergedAnnotationsTests {
 	 */
 	@Test
 	void streamTypeHierarchyWithCustomSearchEnclosingClassPredicateFromNonAnnotatedStaticNestedClassWithAnnotatedEnclosingClass() {
-		SearchStrategy searchStrategy = SearchStrategy.TYPE_HIERARCHY;
 		Class<?> testCase = AnnotatedClass.NonAnnotatedStaticNestedClass.class;
 
-		assertThat(MergedAnnotations.from(testCase, searchStrategy, clazz -> false).stream()).isEmpty();
-		assertThat(MergedAnnotations.from(testCase, searchStrategy, ClassUtils::isInnerClass).stream()).isEmpty();
+		assertThat(MergedAnnotations.from(testCase, SearchAlgorithm.typeHierarchy().build()).stream()).isEmpty();
+		assertThat(MergedAnnotations.from(testCase, SearchAlgorithm.typeHierarchy().searchEnclosingClass(ClassUtils::isInnerClass).build()).stream()).isEmpty();
 
-		Stream<Class<?>> classes = MergedAnnotations.from(testCase, searchStrategy, ClassUtils::isStaticClass)
-				.stream().map(MergedAnnotation::getType);
+		Stream<Class<?>> classes = MergedAnnotations.from(testCase,
+			SearchAlgorithm.typeHierarchy().searchEnclosingClass(ClassUtils::isStaticClass).build()).stream().map(MergedAnnotation::getType);
 		assertThat(classes).containsExactly(Component.class, Indexed.class);
 	}
 

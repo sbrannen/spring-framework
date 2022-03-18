@@ -300,6 +300,11 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		return from(element, SearchStrategy.DIRECT);
 	}
 
+	static MergedAnnotations from(AnnotatedElement element, SearchAlgorithm searchAlgorithm) {
+		return from(element, searchAlgorithm.searchStrategy(), searchAlgorithm.searchEnclosingClass(),
+			searchAlgorithm.repeatableContainers(), searchAlgorithm.annotationFilter());
+	}
+
 	/**
 	 * Create a new {@link MergedAnnotations} instance containing all
 	 * annotations and meta-annotations from the specified element and,
@@ -311,12 +316,6 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 */
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy) {
 		return from(element, searchStrategy, RepeatableContainers.standardRepeatables());
-	}
-
-	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
-			Predicate<Class<?>> searchEnclosingClass) {
-
-		return from(element, searchStrategy, searchEnclosingClass, RepeatableContainers.standardRepeatables());
 	}
 
 	/**
@@ -336,12 +335,6 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		return from(element, searchStrategy, repeatableContainers, AnnotationFilter.PLAIN);
 	}
 
-	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
-			Predicate<Class<?>> searchEnclosingClass, RepeatableContainers repeatableContainers) {
-
-		return from(element, searchStrategy, searchEnclosingClass, repeatableContainers, AnnotationFilter.PLAIN);
-	}
-
 	/**
 	 * Create a new {@link MergedAnnotations} instance containing all
 	 * annotations and meta-annotations from the specified element and,
@@ -358,9 +351,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
-		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
-		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
-		return TypeMappedAnnotations.from(element, searchStrategy, repeatableContainers, annotationFilter);
+		return from(element, searchStrategy, clazz -> false, repeatableContainers, annotationFilter);
 	}
 
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
@@ -369,6 +360,7 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 
 		Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
 		Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
+		Assert.notNull(searchEnclosingClass, "searchEnclosingClass predicate must not be null");
 		return TypeMappedAnnotations.from(element, searchStrategy, searchEnclosingClass, repeatableContainers,
 				annotationFilter);
 	}
