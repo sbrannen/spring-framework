@@ -300,11 +300,6 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 		return from(element, SearchStrategy.DIRECT);
 	}
 
-	static MergedAnnotations from(AnnotatedElement element, SearchAlgorithm searchAlgorithm) {
-		return from(element, searchAlgorithm.searchStrategy(), searchAlgorithm.searchEnclosingClass(),
-			searchAlgorithm.repeatableContainers(), searchAlgorithm.annotationFilter());
-	}
-
 	/**
 	 * Create a new {@link MergedAnnotations} instance containing all
 	 * annotations and meta-annotations from the specified element and,
@@ -351,10 +346,10 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			RepeatableContainers repeatableContainers, AnnotationFilter annotationFilter) {
 
-		return from(element, searchStrategy, clazz -> false, repeatableContainers, annotationFilter);
+		return from(element, searchStrategy, Builder.neverSearch, repeatableContainers, annotationFilter);
 	}
 
-	static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
+	private static MergedAnnotations from(AnnotatedElement element, SearchStrategy searchStrategy,
 			Predicate<Class<?>> searchEnclosingClass, RepeatableContainers repeatableContainers,
 			AnnotationFilter annotationFilter) {
 
@@ -444,6 +439,124 @@ public interface MergedAnnotations extends Iterable<MergedAnnotation<Annotation>
 	 */
 	static MergedAnnotations of(Collection<MergedAnnotation<?>> annotations) {
 		return MergedAnnotationsCollection.of(annotations);
+	}
+
+	/**
+	 * Find only directly declared annotations, without considering
+	 * {@link Inherited @Inherited} annotations and without searching
+	 * superclasses or implemented interfaces.
+	 * @see SearchStrategy#DIRECT
+	 * @since 6.0
+	 */
+	static Builder findDirectlyDeclaredAnnotations() {
+		return new Builder(SearchStrategy.DIRECT);
+	}
+
+	/**
+	 * Find all directly declared annotations as well as any
+	 * {@link Inherited @Inherited} superclass annotations.
+	 * @see SearchStrategy#INHERITED_ANNOTATIONS
+	 * @since 6.0
+	 */
+	static Builder findInheritedAnnotations() {
+		return new Builder(SearchStrategy.INHERITED_ANNOTATIONS);
+	}
+
+	/**
+	 * Find all directly declared and superclass annotations.
+	 * <p>This search algorithm is similar to {@link #findInheritedAnnotations()}
+	 * except the annotations do not need to be meta-annotated with
+	 * {@link Inherited @Inherited}.
+	 * @see SearchStrategy#SUPERCLASS
+	 * @since 6.0
+	 */
+	static Builder findSuperclassAnnotations() {
+		return new Builder(SearchStrategy.SUPERCLASS);
+	}
+
+	/**
+	 * Find annotations in the type hierarchy by performing a full search of the
+	 * entire type hierarchy, including superclasses and implemented interfaces.
+	 * <p>Superclass annotations do not need to be meta-annotated with
+	 * {@link Inherited @Inherited}.
+	 * @see SearchStrategy#TYPE_HIERARCHY
+	 * @since 6.0
+	 */
+	static Builder findAnnotationsInTypeHierarchy() {
+		return new Builder(SearchStrategy.TYPE_HIERARCHY);
+	}
+
+	/**
+	 * Find annotations in the type hierarchy by performing a full search of the
+	 * entire type hierarchy, including superclasses and implemented interfaces.
+	 * <p>This search algorithm is similar to {@link #findAnnotationsInTypeHierarchy()}
+	 * except that {@linkplain Class#getEnclosingClass() enclosing classes} are also
+	 * recursively searched if the supplied {@link Predicate} evaluates to {@code true}.
+	 * Typically, the predicate will be used to differentiate between <em>inner classes</em>
+	 * and {@code static} nested classes. For example, to limit the enclosing class
+	 * search to inner classes, you can supply
+	 * {@link org.springframework.util.ClassUtils#isInnerClass(Class) ClassUtils::isInnerClass}
+	 * as the predicate. To force the algorithm to always search enclosing classes,
+	 * supply {@code clazz -> true} as the predicate.
+	 * <p>Superclass and enclosing class annotations do not need to be meta-annotated
+	 * with {@link Inherited @Inherited}.
+	 * @param searchEnclosingClass a predicate which evaluates to {@code true}
+	 * if a search should be performed on the enclosing class of the class
+	 * supplied to the predicate
+	 * @see SearchStrategy#TYPE_HIERARCHY
+	 * @since 6.0
+	 */
+	static Builder findAnnotationsInTypeHierarchy(Predicate<Class<?>> searchEnclosingClass) {
+		return new Builder(SearchStrategy.TYPE_HIERARCHY, searchEnclosingClass);
+	}
+
+
+	/**
+	 * Builder for configuration options for the search algorithm used in the
+	 * {@link MergedAnnotations} model.
+	 *
+	 * @since 6.0
+	 */
+	static final class Builder {
+
+		private static final Predicate<Class<?>> neverSearch = clazz -> false;
+
+		private final SearchStrategy searchStrategy;
+
+		private final Predicate<Class<?>> searchEnclosingClass;
+
+		private RepeatableContainers repeatableContainers = RepeatableContainers.standardRepeatables();
+
+		private AnnotationFilter annotationFilter = AnnotationFilter.PLAIN;
+
+
+		private Builder(SearchStrategy searchStrategy) {
+			this(searchStrategy, neverSearch);
+		}
+
+		private Builder(SearchStrategy searchStrategy, Predicate<Class<?>> searchEnclosingClass) {
+			this.searchStrategy = searchStrategy;
+			this.searchEnclosingClass = searchEnclosingClass;
+		}
+
+
+		public Builder usingRepeatableContainers(RepeatableContainers repeatableContainers) {
+			Assert.notNull(repeatableContainers, "RepeatableContainers must not be null");
+			this.repeatableContainers = repeatableContainers;
+			return this;
+		}
+
+		public Builder withAnnotationFilter(AnnotationFilter annotationFilter) {
+			Assert.notNull(annotationFilter, "AnnotationFilter must not be null");
+			this.annotationFilter = annotationFilter;
+			return this;
+		}
+
+		public MergedAnnotations from(AnnotatedElement element) {
+			return MergedAnnotations.from(element, this.searchStrategy, this.searchEnclosingClass,
+					this.repeatableContainers, this.annotationFilter);
+		}
+
 	}
 
 

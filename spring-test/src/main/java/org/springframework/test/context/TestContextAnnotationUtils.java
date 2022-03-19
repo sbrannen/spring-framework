@@ -31,7 +31,6 @@ import org.springframework.core.annotation.MergedAnnotationPredicates;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
-import org.springframework.core.annotation.SearchAlgorithm;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration;
@@ -92,10 +91,10 @@ public abstract class TestContextAnnotationUtils {
 	 * @see #findMergedAnnotation(Class, Class)
 	 */
 	public static boolean hasAnnotation(Class<?> clazz, Class<? extends Annotation> annotationType) {
-		SearchAlgorithm searchAlgorithm = SearchAlgorithm.typeHierarchy()
-				.searchEnclosingClass(TestContextAnnotationUtils::searchEnclosingClass)
-				.build();
-		return MergedAnnotations.from(clazz, searchAlgorithm).isPresent(annotationType);
+		return MergedAnnotations
+				.findAnnotationsInTypeHierarchy(TestContextAnnotationUtils::searchEnclosingClass)
+				.from(clazz)
+				.isPresent(annotationType);
 	}
 
 	/**
@@ -129,8 +128,10 @@ public abstract class TestContextAnnotationUtils {
 	private static <T extends Annotation> T findMergedAnnotation(Class<?> clazz, Class<T> annotationType,
 			Predicate<Class<?>> searchEnclosingClass) {
 
-		SearchAlgorithm searchAlgorithm = SearchAlgorithm.typeHierarchy().searchEnclosingClass(searchEnclosingClass).build();
-		MergedAnnotation<T> mergedAnnotation = MergedAnnotations.from(clazz, searchAlgorithm).get(annotationType);
+		MergedAnnotation<T> mergedAnnotation = MergedAnnotations
+				.findAnnotationsInTypeHierarchy(searchEnclosingClass)
+				.from(clazz)
+				.get(annotationType);
 		return (mergedAnnotation.isPresent() ? mergedAnnotation.synthesize() : null);
 	}
 
