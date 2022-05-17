@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Supplier;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -210,6 +212,31 @@ public final class CollectionFactory {
 					"Could not instantiate Collection type: " + collectionType.getName(), ex);
 			}
 		}
+	}
+
+//	@SafeVarargs
+//	@SuppressWarnings("unchecked")
+//	public static <E, C extends Collection<E>> C createCollection(Class<C> collectionType, E... elements) {
+//		return createCollection(collectionType, null, elements);
+//	}
+
+	@SafeVarargs
+	@SuppressWarnings("unchecked")
+	public static <E, C extends Collection<E>> C createCollection(Class<C> collectionType, @Nullable Class<E> elementType, E... elements) {
+		Assert.notNull(collectionType, "Collection type must not be null");
+		Assert.notNull(elements, "'elements' must not be null");
+		C collection = (C) createCollection(collectionType, elementType, elements.length);
+		Collections.addAll(collection, elements);
+		return collection;
+	}
+
+	@SafeVarargs
+	public static <E, C extends Collection<E>> C collectionOf(Supplier<C> collectionFactory, E... elements) {
+		Assert.notNull(collectionFactory, "'collectionFactory' must not be null");
+		Assert.notNull(elements, "'elements' must not be null");
+		C collection = collectionFactory.get();
+		Collections.addAll(collection, elements);
+		return collection;
 	}
 
 	/**

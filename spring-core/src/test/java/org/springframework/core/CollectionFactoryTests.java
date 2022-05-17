@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -40,9 +42,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static java.time.DayOfWeek.FRIDAY;
+import static java.time.DayOfWeek.SATURDAY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.springframework.core.CollectionFactory.collectionOf;
 import static org.springframework.core.CollectionFactory.createApproximateCollection;
 import static org.springframework.core.CollectionFactory.createApproximateMap;
 import static org.springframework.core.CollectionFactory.createCollection;
@@ -254,6 +259,84 @@ class CollectionFactoryTests {
 	void rejectsNullCollectionType() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				createCollection(null, Object.class, 0));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void createsCollectionsFromVarArgsForCollectionInterfaces() {
+		assertThat(createCollection(Collection.class, null, 99, 11, 22, 55))
+			.isInstanceOf(LinkedHashSet.class)
+			.containsExactly(99, 11, 22, 55);
+
+		assertThat(createCollection(Set.class, null, 99, 11, 22, 55))
+			.isInstanceOf(LinkedHashSet.class)
+			.containsExactly(99, 11, 22, 55);
+
+		assertThat(createCollection(SortedSet.class, null, 99, 11, 22, 55))
+			.isInstanceOf(TreeSet.class)
+			.containsExactly(11, 22, 55, 99);
+
+		assertThat(createCollection(NavigableSet.class, null, 99, 11, 22, 55))
+			.isInstanceOf(TreeSet.class)
+			.containsExactly(11, 22, 55, 99);
+
+		assertThat(createCollection(List.class, null, "foo", "bar"))
+			.isInstanceOf(ArrayList.class)
+			.containsExactly("foo", "bar");
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void createsCollectionsFromVarArgsForCollectionTypes() {
+		List<String> arrayListOfStrings = createCollection(ArrayList.class, null, "foo", "bar");
+		assertThat(arrayListOfStrings)
+			.isInstanceOf(ArrayList.class)
+			.containsExactly("foo", "bar");
+
+		List<Object> arrayListOfObjects = createCollection(ArrayList.class, null, "foo", 42);
+		assertThat(arrayListOfObjects)
+			.isInstanceOf(ArrayList.class)
+			.containsExactly("foo", 42);
+
+		List<String> linkedList = createCollection(LinkedList.class, null, "foo", "bar");
+		assertThat(linkedList)
+			.isInstanceOf(LinkedList.class)
+			.containsExactly("foo", "bar");
+
+		Set<Integer> hashSet = createCollection(HashSet.class, null, 4, 3, 2, 1);
+		assertThat(hashSet)
+			.isInstanceOf(HashSet.class)
+			.containsExactlyInAnyOrder(1, 2, 3, 4);
+
+		Set<Integer> linkedHashSet = createCollection(LinkedHashSet.class, null, 99, 11, 22, 55);
+		assertThat(linkedHashSet)
+			.isInstanceOf(LinkedHashSet.class)
+			.containsExactly(99, 11, 22, 55);
+
+		SortedSet<Integer> treeSet = createCollection(TreeSet.class, null, 99, 11, 22, 55);
+		assertThat(treeSet)
+			.isInstanceOf(TreeSet.class)
+			.containsExactly(11, 22, 55, 99);
+
+		Set<DayOfWeek> enumSet = createCollection(EnumSet.class, DayOfWeek.class, SATURDAY, FRIDAY);
+		assertThat(enumSet)
+			.isInstanceOf(EnumSet.class)
+			.containsExactly(FRIDAY, SATURDAY);
+	}
+
+	@Test
+	void collectionOfWorksCorrectly() {
+		List<String> list = collectionOf(ArrayList::new, "foo", "bar");
+		assertThat(list).isInstanceOf(ArrayList.class).containsExactly("foo", "bar");
+
+		Set<Integer> set = collectionOf(HashSet::new, 4, 3, 2, 1);
+		assertThat(set).isInstanceOf(HashSet.class).containsExactlyInAnyOrder(1, 2, 3, 4);
+
+		Set<Integer> orderedSet = collectionOf(LinkedHashSet::new, 4, 2, 3, 1);
+		assertThat(orderedSet).isInstanceOf(LinkedHashSet.class).containsExactlyInAnyOrder(4, 2, 3, 1);
+
+		SortedSet<Integer> sortedSet = collectionOf(TreeSet::new, 4, 3, 2, 1);
+		assertThat(sortedSet).isInstanceOf(TreeSet.class).containsExactly(1, 2, 3, 4);
 	}
 
 	@Test
