@@ -16,11 +16,6 @@
 
 package org.springframework.test.context.aot;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
@@ -35,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 6.0
  */
-class TestClassScannerTests {
+class TestClassScannerTests extends AbstractAotTests {
 
 	@Test
 	void scanBasicTestClasses() {
@@ -90,23 +85,6 @@ class TestClassScannerTests {
 	@Test
 	void scanEntireSpringTestModule() {
 		assertThat(scan()).hasSizeGreaterThan(400);
-	}
-
-	private Stream<Class<?>> scan() {
-		return new TestClassScanner(classpathRoots()).scan();
-	}
-
-	private Stream<Class<?>> scan(String... packageNames) {
-		return new TestClassScanner(classpathRoots()).scan(packageNames);
-	}
-
-	private Set<Path> classpathRoots() {
-		try {
-			return Set.of(Paths.get(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()));
-		}
-		catch (Exception ex) {
-			throw new RuntimeException(ex);
-		}
 	}
 
 }

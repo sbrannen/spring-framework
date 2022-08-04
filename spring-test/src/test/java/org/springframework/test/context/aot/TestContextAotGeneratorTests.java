@@ -16,10 +16,16 @@
 
 package org.springframework.test.context.aot;
 
+import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.generate.ClassNameGenerator;
+import org.springframework.aot.generate.GeneratedFiles.Kind;
+import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.context.ApplicationContextInitializer;
@@ -27,6 +33,8 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.aot.generate.TestGenerationContext;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
+import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
+import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
 import org.springframework.test.context.aot.samples.common.MessageService;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,28 +45,81 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  * @since 6.0
  */
+@CompileWithTargetClassAccess
 class TestContextAotGeneratorTests {
 
+	/**
+	 * @see AotSmokeTests#scanClassPathThenGenerateSourceFilesAndCompileThem()
+	 */
 	@Test
-	@CompileWithTargetClassAccess
-	void generateContextInitializer() throws Exception {
-		Class<?> testClass = BasicSpringJupiterTests.class;
-		TestGenerationContext generationContext = new TestGenerationContext(testClass);
-		TestContextAotGenerator generator = new TestContextAotGenerator(generationContext);
+	void generate() {
+		Stream<Class<?>> testClasses = Stream.of(
+			BasicSpringJupiterTests.class,
+			BasicSpringJupiterTests.NestedTests.class,
+			BasicSpringVintageTests.class,
+			BasicSpringTestNGTests.class);
 
-		ClassName className = generator.generateContextInitializer(testClass);
-		assertThat(className).isNotNull();
+		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 
-		compile(generationContext, className.reflectionName(), context -> {
-			MessageService messageService = context.getBean(MessageService.class);
-			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+		generator.generate(testClasses);
+
+		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream()
+			// .peek(System.out::println)
+			.filter(name -> name.startsWith("org/springframework/test/context/aot/samples/basic/"))
+			.map(name -> name.substring("org/springframework/test/context/aot/samples/basic/".length()))
+			.filter(name -> name.endsWith("__ApplicationContextInitializer.java"))
+			.map(name -> name.substring(0, name.length() - "__ApplicationContextInitializer.java".length()))
+			.map(name -> name.substring(0, name.indexOf("__")))
+			.toList();
+
+		assertThat(sourceFiles).containsExactlyInAnyOrder(
+			"BasicSpringJupiterTests",
+			"BasicSpringJupiterTests_NestedTests",
+			"BasicSpringVintageTests",
+			"BasicSpringTestNGTests");
+
+		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
+			// just make sure compilation completes without errors
 		});
 	}
 
+	@Test
+	void generateApplicationContextInitializer() {
+		// We cannot use @ParameterizedTest, since @CompileWithTargetClassAccess
+		// cannot support @ParameterizedTest methods.
+		Set.of(BasicSpringTestNGTests.class, BasicSpringVintageTests.class, BasicSpringJupiterTests.class)
+			.forEach(testClass -> {
+				ClassNameGenerator classNameGenerator = TestContextAotGenerator.createClassNameGenerator(testClass);
+				TestGenerationContext generationContext = new TestGenerationContext(classNameGenerator);
+				InMemoryGeneratedFiles generatedFiles = generationContext.getGeneratedFiles();
+				TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+
+				ClassName className = generator.generateApplicationContextInitializer(generationContext, testClass);
+				assertThat(className).isNotNull();
+				// System.err.println(className);
+				generationContext.writeGeneratedContent();
+
+//				generatedFiles.getGeneratedFiles(Kind.SOURCE).entrySet().stream()
+//					.forEach(entry -> System.err.println(entry.getKey()));
+
+//				generatedFiles.getGeneratedFiles(Kind.SOURCE).entrySet().stream()
+//					.filter(entry -> entry.getKey().endsWith("DefaultEventListenerFactory__BeanDefinitions.java"))
+//					.forEach(entry -> System.err.println(entry.getValue()));
+
+				compile(generatedFiles, className.reflectionName(), context -> {
+					MessageService messageService = context.getBean(MessageService.class);
+					assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+				});
+			});
+	}
+
+
 	@SuppressWarnings("unchecked")
-	private void compile(TestGenerationContext generationContext, String initializerClassName, Consumer<GenericApplicationContext> result) {
-		generationContext.writeGeneratedContent();
-		TestCompiler.forSystem().withFiles(generationContext.getGeneratedFiles()).compile(compiled -> {
+	private void compile(InMemoryGeneratedFiles generatedFiles, String initializerClassName,
+			Consumer<GenericApplicationContext> result) {
+
+		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
 			GenericApplicationContext gac = new GenericApplicationContext();
 			ApplicationContextInitializer<GenericApplicationContext> contextInitializer =
 					compiled.getInstance(ApplicationContextInitializer.class, initializerClassName);
