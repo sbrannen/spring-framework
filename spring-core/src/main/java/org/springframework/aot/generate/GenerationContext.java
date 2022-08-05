@@ -34,10 +34,12 @@ import org.springframework.aot.hint.SerializationHints;
  * </ul>
  *
  * <p>If a dedicated round of code generation is required while processing, it
- * is possible to create a specialized context using {@link #withName(String)}.
+ * is possible to create a specialized context using {@link #withName(String)} or
+ * {@link #withTargetClass(Class)}.
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public interface GenerationContext {
@@ -76,5 +78,15 @@ public interface GenerationContext {
 	 * @return a specialized {@link GenerationContext} for the specified name
 	 */
 	GenerationContext withName(String name);
+
+	/**
+	 * Create a new {@link GenerationContext} instance using the specified
+	 * default target class for generated assets for a dedicated round of
+	 * code generation.
+	 * @param defaultTarget the default target class to use
+	 * @return a specialized {@link GenerationContext} for the specified default
+	 * target class
+	 */
+	GenerationContext withTargetClass(Class<?> defaultTarget);
 
 }

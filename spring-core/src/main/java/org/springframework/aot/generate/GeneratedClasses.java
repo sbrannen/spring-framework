@@ -171,6 +171,11 @@ public class GeneratedClasses {
 				this.classes, this.classesByOwner);
 	}
 
+	GeneratedClasses withTargetClass(Class<?> defaultTarget) {
+		return new GeneratedClasses(this.classNameGenerator.withTargetClass(defaultTarget),
+				this.classes, this.classesByOwner);
+	}
+
 	private record Owner(String featureNamePrefix, String featureName, @Nullable Class<?> target) {
 
 	}

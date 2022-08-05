@@ -39,12 +39,9 @@ import org.springframework.javapoet.TypeSpec;
  * Internal code generator to create the {@link ApplicationContextInitializer}.
  *
  * @author Phillip Webb
- * @author Sam Brannen
  * @since 6.0
  */
 class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitializationCode {
-
-	private static final String FEATURE_NAME = "ApplicationContextInitializer";
 
 	private static final String INITIALIZE_METHOD = "initialize";
 
@@ -57,13 +54,7 @@ class ApplicationContextInitializationCodeGenerator implements BeanFactoryInitia
 
 	ApplicationContextInitializationCodeGenerator(GenerationContext generationContext) {
 		this.generatedClass = generationContext.getGeneratedClasses()
-				.addForFeature(FEATURE_NAME, this::generateType);
-		this.generatedClass.reserveMethodNames(INITIALIZE_METHOD);
-	}
-
-	ApplicationContextInitializationCodeGenerator(GenerationContext generationContext, Class<?> targetComponent) {
-		this.generatedClass = generationContext.getGeneratedClasses()
-				.addForFeatureComponent(FEATURE_NAME, targetComponent, this::generateType);
+				.addForFeature("ApplicationContextInitializer", this::generateType);
 		this.generatedClass.reserveMethodNames(INITIALIZE_METHOD);
 	}
 

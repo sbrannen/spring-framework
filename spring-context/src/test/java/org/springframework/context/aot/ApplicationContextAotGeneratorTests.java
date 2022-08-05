@@ -175,23 +175,23 @@ class ApplicationContextAotGeneratorTests {
 	}
 
 	@Test
-	void processAheadOfTimeForMultipleContextsWithExplicitTargetComponents() {
+	void processAheadOfTimeForMultipleContextsWithExplicitTargetClasses() {
 		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
 		TestGenerationContext generationContext = new TestGenerationContext();
 
-		generator.processAheadOfTime(simpleComponentContext(), generationContext, SimpleComponent.class);
-		generator.processAheadOfTime(autowiredComponentContext(), generationContext, AutowiredComponent.class);
+		generator.processAheadOfTime(simpleComponentContext(), generationContext.withTargetClass(SimpleComponent.class));
+		generator.processAheadOfTime(autowiredComponentContext(), generationContext.withTargetClass(AutowiredComponent.class));
 		generationContext.writeGeneratedContent();
 
 		InMemoryGeneratedFiles generatedFiles = generationContext.getGeneratedFiles();
 		assertThat(generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet()).containsExactlyInAnyOrder(
 			"org/springframework/context/testfixture/context/generator/SimpleComponent__ApplicationContextInitializer.java",
 			"org/springframework/context/testfixture/context/generator/SimpleComponent__BeanDefinitions.java",
+			"org/springframework/context/testfixture/context/generator/SimpleComponent__BeanFactoryRegistrations.java",
 			"org/springframework/context/testfixture/context/generator/annotation/AutowiredComponent__ApplicationContextInitializer.java",
 			"org/springframework/context/testfixture/context/generator/annotation/AutowiredComponent__Autowiring.java",
 			"org/springframework/context/testfixture/context/generator/annotation/AutowiredComponent__BeanDefinitions.java",
-			"org/springframework/core/testfixture/aot/generate/TestTarget__BeanFactoryRegistrations.java",
-			"org/springframework/core/testfixture/aot/generate/TestTarget__BeanFactoryRegistrations1.java");
+			"org/springframework/context/testfixture/context/generator/annotation/AutowiredComponent__BeanFactoryRegistrations.java");
 	}
 
 

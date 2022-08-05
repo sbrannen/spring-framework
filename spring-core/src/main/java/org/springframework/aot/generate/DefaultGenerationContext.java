@@ -33,6 +33,7 @@ import org.springframework.util.Assert;
  *
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.0
  */
 public class DefaultGenerationContext implements GenerationContext {
@@ -85,6 +86,14 @@ public class DefaultGenerationContext implements GenerationContext {
 		this.runtimeHints = existing.runtimeHints;
 	}
 
+	private DefaultGenerationContext(DefaultGenerationContext existing, Class<?> defaultTarget) {
+		this.sequenceGenerator = existing.sequenceGenerator;
+		this.generatedClasses = existing.generatedClasses.withTargetClass(defaultTarget);
+		this.generatedFiles = existing.generatedFiles;
+		this.runtimeHints = existing.runtimeHints;
+	}
+
+
 	@Override
 	public GeneratedClasses getGeneratedClasses() {
 		return this.generatedClasses;
@@ -103,6 +112,11 @@ public class DefaultGenerationContext implements GenerationContext {
 	@Override
 	public GenerationContext withName(String name) {
 		return new DefaultGenerationContext(this, name);
+	}
+
+	@Override
+	public GenerationContext withTargetClass(Class<?> defaultTarget) {
+		return new DefaultGenerationContext(this, defaultTarget);
 	}
 
 	/**
