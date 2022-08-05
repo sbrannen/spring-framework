@@ -31,6 +31,7 @@ import org.springframework.javapoet.ClassName;
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 6.0
  */
 public class ApplicationContextAotGenerator {
@@ -47,10 +48,35 @@ public class ApplicationContextAotGenerator {
 	 */
 	public ClassName processAheadOfTime(GenericApplicationContext applicationContext,
 			GenerationContext generationContext) {
+
+		return processAheadOfTime(applicationContext, generationContext,
+				new ApplicationContextInitializationCodeGenerator(generationContext));
+	}
+
+	/**
+	 * Process the specified {@link GenericApplicationContext} ahead-of-time for the
+	 * specified {@code targetComponent} using the specified {@link GenerationContext}.
+	 * <p>Return the {@link ClassName} of the {@link ApplicationContextInitializer}
+	 * to use to restore an optimized state of the application context.
+	 * @param applicationContext the non-refreshed application context to process
+	 * @param generationContext the generation context to use
+	 * @param targetComponent the target component
+	 * @return the {@code ClassName} of the {@code ApplicationContextInitializer}
+	 * entry point
+	 */
+	public ClassName processAheadOfTime(GenericApplicationContext applicationContext,
+			GenerationContext generationContext, Class<?> targetComponent) {
+
+		return processAheadOfTime(applicationContext, generationContext,
+				new ApplicationContextInitializationCodeGenerator(generationContext, targetComponent));
+	}
+
+	private ClassName processAheadOfTime(
+			GenericApplicationContext applicationContext, GenerationContext generationContext,
+			ApplicationContextInitializationCodeGenerator codeGenerator) {
+
 		applicationContext.refreshForAotProcessing();
 		DefaultListableBeanFactory beanFactory = applicationContext.getDefaultListableBeanFactory();
-		ApplicationContextInitializationCodeGenerator codeGenerator =
-				new ApplicationContextInitializationCodeGenerator(generationContext);
 		new BeanFactoryInitializationAotContributions(beanFactory).applyTo(generationContext, codeGenerator);
 		return codeGenerator.getGeneratedClass().getName();
 	}

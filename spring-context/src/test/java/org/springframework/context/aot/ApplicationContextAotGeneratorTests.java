@@ -20,6 +20,8 @@ import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.aot.generate.GeneratedFiles.Kind;
+import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.test.generator.compile.Compiled;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.beans.BeansException;
@@ -51,13 +53,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Stephane Nicoll
  * @author Phillip Webb
+ * @author Sam Brannen
  */
 class ApplicationContextAotGeneratorTests {
 
 	@Test
 	void processAheadOfTimeWhenHasSimpleBean() {
-		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		applicationContext.registerBeanDefinition("test", new RootBeanDefinition(SimpleComponent.class));
+		GenericApplicationContext applicationContext = simpleComponentContext();
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
 			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("test");
@@ -67,16 +69,7 @@ class ApplicationContextAotGeneratorTests {
 
 	@Test
 	void processAheadOfTimeWhenHasAutowiring() {
-		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		applicationContext.registerBeanDefinition(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
-				BeanDefinitionBuilder
-					.rootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class)
-					.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
-		applicationContext.registerBeanDefinition("autowiredComponent", new RootBeanDefinition(AutowiredComponent.class));
-		applicationContext.registerBeanDefinition("number",
-				BeanDefinitionBuilder
-					.rootBeanDefinition(Integer.class, "valueOf")
-					.addConstructorArgValue("42").getBeanDefinition());
+		GenericApplicationContext applicationContext = autowiredComponentContext();
 		testCompiledResult(applicationContext, (initializer, compiled) -> {
 			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).containsOnly("autowiredComponent", "number");
@@ -159,6 +152,67 @@ class ApplicationContextAotGeneratorTests {
 			GenericApplicationContext freshApplicationContext = toFreshApplicationContext(initializer);
 			assertThat(freshApplicationContext.getBeanDefinitionNames()).isEmpty();
 		});
+	}
+
+	@Test
+	void processAheadOfTimeForMultipleContexts() {
+		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
+		TestGenerationContext generationContext = new TestGenerationContext();
+
+		generator.processAheadOfTime(simpleComponentContext(), generationContext);
+		generator.processAheadOfTime(autowiredComponentContext(), generationContext);
+		generationContext.writeGeneratedContent();
+
+		InMemoryGeneratedFiles generatedFiles = generationContext.getGeneratedFiles();
+		assertThat(generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet()).containsExactlyInAnyOrder(
+			"org/springframework/context/testfixture/context/generator/SimpleComponent__BeanDefinitions.java",
+			"org/springframework/context/testfixture/context/generator/annotation/AutowiredComponent__Autowiring.java",
+			"org/springframework/context/testfixture/context/generator/annotation/AutowiredComponent__BeanDefinitions.java",
+			"org/springframework/core/testfixture/aot/generate/TestTarget__ApplicationContextInitializer.java",
+			"org/springframework/core/testfixture/aot/generate/TestTarget__ApplicationContextInitializer1.java",
+			"org/springframework/core/testfixture/aot/generate/TestTarget__BeanFactoryRegistrations.java",
+			"org/springframework/core/testfixture/aot/generate/TestTarget__BeanFactoryRegistrations1.java");
+	}
+
+	@Test
+	void processAheadOfTimeForMultipleContextsWithExplicitTargetComponents() {
+		ApplicationContextAotGenerator generator = new ApplicationContextAotGenerator();
+		TestGenerationContext generationContext = new TestGenerationContext();
+
+		generator.processAheadOfTime(simpleComponentContext(), generationContext, SimpleComponent.class);
+		generator.processAheadOfTime(autowiredComponentContext(), generationContext, AutowiredComponent.class);
+		generationContext.writeGeneratedContent();
+
+		InMemoryGeneratedFiles generatedFiles = generationContext.getGeneratedFiles();
+		assertThat(generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet()).containsExactlyInAnyOrder(
+			"org/springframework/context/testfixture/context/generator/SimpleComponent__ApplicationContextInitializer.java",
+			"org/springframework/context/testfixture/context/generator/SimpleComponent__BeanDefinitions.java",
+			"org/springframework/context/testfixture/context/generator/annotation/AutowiredComponent__ApplicationContextInitializer.java",
+			"org/springframework/context/testfixture/context/generator/annotation/AutowiredComponent__Autowiring.java",
+			"org/springframework/context/testfixture/context/generator/annotation/AutowiredComponent__BeanDefinitions.java",
+			"org/springframework/core/testfixture/aot/generate/TestTarget__BeanFactoryRegistrations.java",
+			"org/springframework/core/testfixture/aot/generate/TestTarget__BeanFactoryRegistrations1.java");
+	}
+
+
+	private GenericApplicationContext simpleComponentContext() {
+		GenericApplicationContext applicationContext = new GenericApplicationContext();
+		applicationContext.registerBeanDefinition("test", new RootBeanDefinition(SimpleComponent.class));
+		return applicationContext;
+	}
+
+	private GenericApplicationContext autowiredComponentContext() {
+		GenericApplicationContext applicationContext = new GenericApplicationContext();
+		applicationContext.registerBeanDefinition(AnnotationConfigUtils.AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
+				BeanDefinitionBuilder
+					.rootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class)
+					.setRole(BeanDefinition.ROLE_INFRASTRUCTURE).getBeanDefinition());
+		applicationContext.registerBeanDefinition("autowiredComponent", new RootBeanDefinition(AutowiredComponent.class));
+		applicationContext.registerBeanDefinition("number",
+				BeanDefinitionBuilder
+					.rootBeanDefinition(Integer.class, "valueOf")
+					.addConstructorArgValue("42").getBeanDefinition());
+		return applicationContext;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
