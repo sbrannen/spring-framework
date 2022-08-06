@@ -18,6 +18,7 @@ package org.springframework.test.context.aot.samples.basic;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.0
  */
 @ContextConfiguration(classes = BasicTestConfiguration.class)
+@TestPropertySource(properties = "test.engine = testng")
 public class BasicSpringTestNGTests extends AbstractTestNGSpringContextTests {
 
 	@Autowired

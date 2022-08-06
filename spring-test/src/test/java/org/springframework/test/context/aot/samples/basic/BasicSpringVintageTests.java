@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -31,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = BasicTestConfiguration.class)
+@TestPropertySource(properties = "test.engine = vintage")
 public class BasicSpringVintageTests {
 
 	@Autowired

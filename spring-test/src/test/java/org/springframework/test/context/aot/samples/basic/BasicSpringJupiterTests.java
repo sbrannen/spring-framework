@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 // for repeated annotations.
 @ExtendWith(DummyExtension.class)
 @SpringJUnitConfig(BasicTestConfiguration.class)
+@TestPropertySource(properties = "test.engine = jupiter")
 public class BasicSpringJupiterTests {
 
 	@org.junit.jupiter.api.Test
