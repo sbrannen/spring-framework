@@ -74,7 +74,7 @@ class TestContextAotGenerator {
 			}
 			try {
 				DefaultGenerationContext generationContext =
-						new DefaultGenerationContext(createClassNameGenerator(testClass), this.generatedFiles);
+						new DefaultGenerationContext(new ClassNameGenerator(testClass), this.generatedFiles);
 				generateApplicationContextInitializer(generationContext, testClass);
 				generationContext.writeGeneratedContent();
 				// TODO Process RuntimeHints.
@@ -155,14 +155,6 @@ class TestContextAotGenerator {
 							testClass.getCanonicalName(), contextLoader.getClass().getName()));
 		}
 		return gac;
-	}
-
-	static ClassNameGenerator createClassNameGenerator(Class<?> testClass) {
-		return new ClassNameGenerator(testClass, buildFeatureNamePrefix(testClass));
-	}
-
-	static String buildFeatureNamePrefix(Class<?> testClass) {
-		return testClass.getCanonicalName().replace('.', '_') + "__";
 	}
 
 }

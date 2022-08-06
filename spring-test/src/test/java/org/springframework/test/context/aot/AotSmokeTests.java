@@ -50,7 +50,6 @@ class AotSmokeTests extends AbstractAotTests {
 			.map(name -> name.substring("org/springframework/test/context/aot/samples/basic/".length()))
 			.filter(name -> name.endsWith("__ApplicationContextInitializer.java"))
 			.map(name -> name.substring(0, name.length() - "__ApplicationContextInitializer.java".length()))
-			.map(name -> name.substring(0, name.indexOf("__")))
 			.toList();
 
 		assertThat(sourceFiles).containsExactlyInAnyOrder(

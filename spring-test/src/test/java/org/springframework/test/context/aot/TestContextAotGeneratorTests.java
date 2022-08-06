@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.aot;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -70,7 +71,6 @@ class TestContextAotGeneratorTests {
 			.map(name -> name.substring("org/springframework/test/context/aot/samples/basic/".length()))
 			.filter(name -> name.endsWith("__ApplicationContextInitializer.java"))
 			.map(name -> name.substring(0, name.length() - "__ApplicationContextInitializer.java".length()))
-			.map(name -> name.substring(0, name.indexOf("__")))
 			.toList();
 
 		assertThat(sourceFiles).containsExactlyInAnyOrder(
@@ -86,46 +86,50 @@ class TestContextAotGeneratorTests {
 
 	@Test
 	void generateApplicationContextInitializer() {
+		List<ClassName> classNames = new ArrayList<>();
+		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		// We cannot use @ParameterizedTest, since @CompileWithTargetClassAccess
 		// cannot support @ParameterizedTest methods.
 		Set.of(BasicSpringTestNGTests.class, BasicSpringVintageTests.class, BasicSpringJupiterTests.class)
 			.forEach(testClass -> {
-				ClassNameGenerator classNameGenerator = TestContextAotGenerator.createClassNameGenerator(testClass);
-				TestGenerationContext generationContext = new TestGenerationContext(classNameGenerator);
-				InMemoryGeneratedFiles generatedFiles = generationContext.getGeneratedFiles();
+				ClassNameGenerator classNameGenerator = new ClassNameGenerator(testClass);
+				TestGenerationContext generationContext = new TestGenerationContext(classNameGenerator, generatedFiles);
 				TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 
 				ClassName className = generator.generateApplicationContextInitializer(generationContext, testClass);
 				assertThat(className).isNotNull();
+				classNames.add(className);
 				// System.err.println(className);
 				generationContext.writeGeneratedContent();
 
-//				generatedFiles.getGeneratedFiles(Kind.SOURCE).entrySet().stream()
-//					.forEach(entry -> System.err.println(entry.getKey()));
+				// generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().forEach(System.err::println);
 
-//				generatedFiles.getGeneratedFiles(Kind.SOURCE).entrySet().stream()
-//					.filter(entry -> entry.getKey().endsWith("DefaultEventListenerFactory__BeanDefinitions.java"))
-//					.forEach(entry -> System.err.println(entry.getValue()));
+				// generatedFiles.getGeneratedFiles(Kind.SOURCE).entrySet().stream()
+				// 	.filter(entry -> entry.getKey().endsWith("DefaultEventListenerFactory__BeanDefinitions.java"))
+				// 	.forEach(entry -> System.err.println(entry.getValue()));
 
-				compile(generatedFiles, className.reflectionName(), context -> {
-					MessageService messageService = context.getBean(MessageService.class);
-					assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
-				});
 			});
+
+		compile(generatedFiles, classNames, context -> {
+			MessageService messageService = context.getBean(MessageService.class);
+			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+		});
 	}
 
 
 	@SuppressWarnings("unchecked")
-	private void compile(InMemoryGeneratedFiles generatedFiles, String initializerClassName,
+	private void compile(InMemoryGeneratedFiles generatedFiles, List<ClassName> classNames,
 			Consumer<GenericApplicationContext> result) {
 
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
-			GenericApplicationContext gac = new GenericApplicationContext();
-			ApplicationContextInitializer<GenericApplicationContext> contextInitializer =
-					compiled.getInstance(ApplicationContextInitializer.class, initializerClassName);
-			contextInitializer.initialize(gac);
-			gac.refresh();
-			result.accept(gac);
+			classNames.forEach(className -> {
+				GenericApplicationContext gac = new GenericApplicationContext();
+				ApplicationContextInitializer<GenericApplicationContext> contextInitializer =
+						compiled.getInstance(ApplicationContextInitializer.class, className.reflectionName());
+				contextInitializer.initialize(gac);
+				gac.refresh();
+				result.accept(gac);
+			});
 		});
 	}
 
