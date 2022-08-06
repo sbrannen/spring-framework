@@ -37,13 +37,14 @@ class AotSmokeTests extends AbstractAotTests {
 
 	@Test
 	// Using @CompileWithTargetClassAccess results in the following exception in classpathRoots():
-	// java.lang.NullPointerException: Cannot invoke "java.net.URL.toURI()" because the return value of "java.security.CodeSource.getLocation()" is null
+	// java.lang.NullPointerException: Cannot invoke "java.net.URL.toURI()" because the return
+	// value of "java.security.CodeSource.getLocation()" is null
 	void scanClassPathThenGenerateSourceFilesAndCompileThem() {
 		Stream<Class<?>> testClasses = scan("org.springframework.test.context.aot.samples.basic");
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 
-		generator.generate(testClasses);
+		generator.processAheadOfTime(testClasses);
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream()
 			// .peek(System.out::println)
 			.filter(name -> name.startsWith("org/springframework/test/context/aot/samples/basic/"))

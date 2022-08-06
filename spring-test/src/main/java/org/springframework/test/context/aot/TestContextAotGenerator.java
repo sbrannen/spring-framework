@@ -62,14 +62,16 @@ class TestContextAotGenerator {
 		this.generatedFiles = generatedFiles;
 	}
 
+
 	/**
-	 * Generate AOT artifacts for each of the supplied integration test classes.
+	 * Process each of the supplied integration test classes and generate AOT
+	 * artifacts.
 	 * @throws TestContextAotException if an error occurs during AOT processing
 	 */
-	public void generate(Stream<Class<?>> testClasses) throws TestContextAotException {
+	public void processAheadOfTime(Stream<Class<?>> testClasses) throws TestContextAotException {
 		testClasses.forEach(testClass -> {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Generating test AOT artifacts for test class [%s]"
+				logger.debug("Generating AOT artifacts for test class [%s]"
 						.formatted(testClass.getCanonicalName()));
 			}
 			try {
@@ -82,7 +84,7 @@ class TestContextAotGenerator {
 			}
 			catch (Exception ex) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Failed to generate test AOT artifacts for test class [%s]"
+					logger.warn("Failed to generate AOT artifacts for test class [%s]"
 							.formatted(testClass.getCanonicalName()), ex);
 				}
 			}

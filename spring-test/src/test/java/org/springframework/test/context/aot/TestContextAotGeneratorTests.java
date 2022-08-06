@@ -63,7 +63,7 @@ class TestContextAotGeneratorTests {
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 
-		generator.generate(testClasses);
+		generator.processAheadOfTime(testClasses);
 
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream()
 			// .peek(System.out::println)
@@ -85,11 +85,11 @@ class TestContextAotGeneratorTests {
 	}
 
 	@Test
+	// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
+	// cannot support @ParameterizedTest methods.
 	void generateApplicationContextInitializer() {
 		List<ClassName> classNames = new ArrayList<>();
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		// We cannot use @ParameterizedTest, since @CompileWithTargetClassAccess
-		// cannot support @ParameterizedTest methods.
 		Set.of(BasicSpringTestNGTests.class, BasicSpringVintageTests.class, BasicSpringJupiterTests.class)
 			.forEach(testClass -> {
 				ClassNameGenerator classNameGenerator = new ClassNameGenerator(testClass);
@@ -99,15 +99,7 @@ class TestContextAotGeneratorTests {
 				ClassName className = generator.generateApplicationContextInitializer(generationContext, testClass);
 				assertThat(className).isNotNull();
 				classNames.add(className);
-				// System.err.println(className);
 				generationContext.writeGeneratedContent();
-
-				// generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().forEach(System.err::println);
-
-				// generatedFiles.getGeneratedFiles(Kind.SOURCE).entrySet().stream()
-				// 	.filter(entry -> entry.getKey().endsWith("DefaultEventListenerFactory__BeanDefinitions.java"))
-				// 	.forEach(entry -> System.err.println(entry.getValue()));
-
 			});
 
 		compile(generatedFiles, classNames, context -> {
