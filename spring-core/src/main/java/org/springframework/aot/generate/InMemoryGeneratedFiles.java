@@ -17,7 +17,9 @@
 package org.springframework.aot.generate;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -31,6 +33,7 @@ import org.springframework.util.Assert;
  * {@link GeneratedFiles} implementation that keeps generated files in-memory.
  *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 6.0
  */
 public class InMemoryGeneratedFiles implements GeneratedFiles {
@@ -45,8 +48,27 @@ public class InMemoryGeneratedFiles implements GeneratedFiles {
 		Assert.notNull(content, "'content' must not be null");
 		Map<String, InputStreamSource> paths = this.files.computeIfAbsent(kind,
 				key -> new LinkedHashMap<>());
-		Assert.state(!paths.containsKey(path), () -> "Path '" + path + "' already in use");
-		paths.put(path, content);
+		if (paths.containsKey(path)) {
+			assertEqualContent(path, paths.get(path), content);
+			// if identical content already exists under the given path, we simply ignore it.
+		}
+		else {
+			paths.put(path, content);
+		}
+	}
+
+	private void assertEqualContent(String path, InputStreamSource originalContent,
+			InputStreamSource newContent) {
+		try {
+			byte[] originalBytes = originalContent.getInputStream().readAllBytes();
+			byte[] newBytes = newContent.getInputStream().readAllBytes();
+			if (!Arrays.equals(originalBytes, newBytes)) {
+				throw new IllegalStateException("Path '" + path + "' already in use with different content");
+			}
+		}
+		catch (IOException ex) {
+			throw new UncheckedIOException(ex);
+		}
 	}
 
 	/**
