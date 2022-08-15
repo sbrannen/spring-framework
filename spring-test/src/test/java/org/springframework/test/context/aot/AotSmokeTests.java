@@ -45,19 +45,9 @@ class AotSmokeTests extends AbstractAotTests {
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 
 		generator.processAheadOfTime(testClasses);
-		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream()
-			// .peek(System.out::println)
-			.filter(name -> name.startsWith("org/springframework/test/context/aot/samples/basic/"))
-			.map(name -> name.substring("org/springframework/test/context/aot/samples/basic/".length()))
-			.filter(name -> name.endsWith("__ApplicationContextInitializer.java"))
-			.map(name -> name.substring(0, name.length() - "__ApplicationContextInitializer.java".length()))
-			.toList();
 
-		assertThat(sourceFiles).containsExactlyInAnyOrder(
-			"BasicSpringJupiterTests",
-			"BasicSpringJupiterTests_NestedTests",
-			"BasicSpringVintageTests",
-			"BasicSpringTestNGTests");
+		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
+		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
 
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
 			// just make sure compilation completes without errors

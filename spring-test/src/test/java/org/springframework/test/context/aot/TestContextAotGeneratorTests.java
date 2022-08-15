@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.aot.generate.ClassNameGenerator;
+import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
 import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
@@ -32,7 +32,6 @@ import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.javapoet.ClassName;
-import org.springframework.test.aot.generate.TestGenerationContext;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
@@ -47,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.0
  */
 @CompileWithTargetClassAccess
-class TestContextAotGeneratorTests {
+class TestContextAotGeneratorTests extends AbstractAotTests {
 
 	/**
 	 * @see AotSmokeTests#scanClassPathThenGenerateSourceFilesAndCompileThem()
@@ -65,19 +64,8 @@ class TestContextAotGeneratorTests {
 
 		generator.processAheadOfTime(testClasses);
 
-		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream()
-			// .peek(System.out::println)
-			.filter(name -> name.startsWith("org/springframework/test/context/aot/samples/basic/"))
-			.map(name -> name.substring("org/springframework/test/context/aot/samples/basic/".length()))
-			.filter(name -> name.endsWith("__ApplicationContextInitializer.java"))
-			.map(name -> name.substring(0, name.length() - "__ApplicationContextInitializer.java".length()))
-			.toList();
-
-		assertThat(sourceFiles).containsExactlyInAnyOrder(
-			"BasicSpringJupiterTests",
-			"BasicSpringJupiterTests_NestedTests",
-			"BasicSpringVintageTests",
-			"BasicSpringTestNGTests");
+		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
+		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
 
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
 			// just make sure compilation completes without errors
@@ -90,12 +78,10 @@ class TestContextAotGeneratorTests {
 	void generateApplicationContextInitializer() {
 		List<ClassName> classNames = new ArrayList<>();
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 		Set.of(BasicSpringTestNGTests.class, BasicSpringVintageTests.class, BasicSpringJupiterTests.class)
 			.forEach(testClass -> {
-				ClassNameGenerator classNameGenerator = new ClassNameGenerator(testClass);
-				TestGenerationContext generationContext = new TestGenerationContext(classNameGenerator, generatedFiles);
-				TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
-
+				DefaultGenerationContext generationContext = generator.createGenerationContext(testClass);
 				ClassName className = generator.generateApplicationContextInitializer(generationContext, testClass);
 				assertThat(className).isNotNull();
 				classNames.add(className);

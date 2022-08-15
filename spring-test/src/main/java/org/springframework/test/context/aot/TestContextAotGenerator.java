@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.aot;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +26,7 @@ import org.springframework.aot.generate.ClassNameGenerator;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
@@ -50,7 +52,11 @@ class TestContextAotGenerator {
 
 	private final ApplicationContextAotGenerator aotGenerator = new ApplicationContextAotGenerator();
 
+	private final AtomicInteger sequence = new AtomicInteger();
+
 	private final GeneratedFiles generatedFiles;
+
+	private final RuntimeHints runtimeHints;
 
 
 	/**
@@ -59,13 +65,32 @@ class TestContextAotGenerator {
 	 * @param generatedFiles the {@code GeneratedFiles} to use
 	 */
 	public TestContextAotGenerator(GeneratedFiles generatedFiles) {
+		this(generatedFiles, new RuntimeHints());
+	}
+
+	/**
+	 * Create a new {@link TestContextAotGenerator} that uses the supplied
+	 * {@link GeneratedFiles} and {@link RuntimeHints}.
+	 * @param generatedFiles the {@code GeneratedFiles} to use
+	 * @param runtimeHints the {@code RuntimeHints} to use
+	 */
+	public TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
 		this.generatedFiles = generatedFiles;
+		this.runtimeHints = runtimeHints;
 	}
 
 
 	/**
-	 * Process each of the supplied integration test classes and generate AOT
-	 * artifacts.
+	 * Get the {@link RuntimeHints} gathered during {@linkplain #processAheadOfTime(Stream)
+	 * AOT processing}.
+	 */
+	public final RuntimeHints getRuntimeHints() {
+		return this.runtimeHints;
+	}
+
+	/**
+	 * Process each of the supplied Spring integration test classes and generate
+	 * AOT artifacts.
 	 * @throws TestContextAotException if an error occurs during AOT processing
 	 */
 	public void processAheadOfTime(Stream<Class<?>> testClasses) throws TestContextAotException {
@@ -75,12 +100,9 @@ class TestContextAotGenerator {
 						.formatted(testClass.getCanonicalName()));
 			}
 			try {
-				DefaultGenerationContext generationContext =
-						new DefaultGenerationContext(new ClassNameGenerator(testClass), this.generatedFiles);
+				DefaultGenerationContext generationContext = createGenerationContext(testClass);
 				generateApplicationContextInitializer(generationContext, testClass);
 				generationContext.writeGeneratedContent();
-				// TODO Process RuntimeHints.
-				// RuntimeHints runtimeHints = generationContext.getRuntimeHints();
 			}
 			catch (Exception ex) {
 				if (logger.isWarnEnabled()) {
@@ -157,6 +179,17 @@ class TestContextAotGenerator {
 							testClass.getCanonicalName(), contextLoader.getClass().getName()));
 		}
 		return gac;
+	}
+
+	DefaultGenerationContext createGenerationContext(Class<?> testClass) {
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(testClass);
+		DefaultGenerationContext generationContext =
+				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
+		return generationContext.withName(nextTestContextId());
+	}
+
+	private String nextTestContextId() {
+		return "TestContext%03d_".formatted(this.sequence.incrementAndGet());
 	}
 
 }
