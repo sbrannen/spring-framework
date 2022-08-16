@@ -34,30 +34,30 @@ abstract class AbstractAotTests {
 			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_ApplicationContextInitializer.java",
 			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterSharedConfigTests__TestContext001_BeanFactoryRegistrations.java",
 			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext001_BeanDefinitions.java",
-			// BasicSpringJupiterTests
+			// BasicSpringJupiterTests -- not generated b/c already generated for BasicSpringJupiterSharedConfigTests.
+			// "org/springframework/context/event/DefaultEventListenerFactory__TestContext00?_BeanDefinitions.java",
+			// "org/springframework/context/event/EventListenerMethodProcessor__TestContext00?_BeanDefinitions.java",
+			// "org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests__TestContext00?_ApplicationContextInitializer.java",
+			// "org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests__TestContext00?_BeanFactoryRegistrations.java",
+			// "org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext00?_BeanDefinitions.java",
+			// BasicSpringJupiterTests.NestedTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext002_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext002_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests__TestContext002_ApplicationContextInitializer.java",
-			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests__TestContext002_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext002_BeanFactoryRegistrations.java",
 			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext002_BeanDefinitions.java",
-			// BasicSpringJupiterTests.NestedTests
+			// BasicSpringTestNGTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext003_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext003_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext003_ApplicationContextInitializer.java",
-			"org/springframework/test/context/aot/samples/basic/BasicSpringJupiterTests_NestedTests__TestContext003_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext003_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext003_BeanFactoryRegistrations.java",
 			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext003_BeanDefinitions.java",
-			// BasicSpringTestNGTests
+			// BasicSpringVintageTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext004_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext004_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext004_ApplicationContextInitializer.java",
-			"org/springframework/test/context/aot/samples/basic/BasicSpringTestNGTests__TestContext004_BeanFactoryRegistrations.java",
-			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext004_BeanDefinitions.java",
-			// BasicSpringVintageTests
-			"org/springframework/context/event/DefaultEventListenerFactory__TestContext005_BeanDefinitions.java",
-			"org/springframework/context/event/EventListenerMethodProcessor__TestContext005_BeanDefinitions.java",
-			"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext005_ApplicationContextInitializer.java",
-			"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext005_BeanFactoryRegistrations.java",
-			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext005_BeanDefinitions.java"
+			"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext004_ApplicationContextInitializer.java",
+			"org/springframework/test/context/aot/samples/basic/BasicSpringVintageTests__TestContext004_BeanFactoryRegistrations.java",
+			"org/springframework/test/context/aot/samples/basic/BasicTestConfiguration__TestContext004_BeanDefinitions.java"
 		};
 
 	Stream<Class<?>> scan() {

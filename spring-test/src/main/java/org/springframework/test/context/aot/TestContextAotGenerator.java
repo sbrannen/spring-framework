@@ -28,6 +28,7 @@ import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.javapoet.ClassName;
@@ -37,6 +38,8 @@ import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@code TestContextAotGenerator} generates AOT artifacts for integration tests
@@ -94,42 +97,53 @@ class TestContextAotGenerator {
 	 * @throws TestContextAotException if an error occurs during AOT processing
 	 */
 	public void processAheadOfTime(Stream<Class<?>> testClasses) throws TestContextAotException {
-		testClasses.forEach(testClass -> {
+		MultiValueMap<MergedContextConfiguration, Class<?>> map = new LinkedMultiValueMap<>();
+		testClasses.forEach(testClass -> map.add(buildMergedContextConfiguration(testClass), testClass));
+
+		map.forEach((mergedConfig, classes) -> {
+			// System.err.println(mergedConfig + " -> " + classes);
 			if (logger.isDebugEnabled()) {
-				logger.debug("Generating AOT artifacts for test class [%s]"
-						.formatted(testClass.getCanonicalName()));
+				logger.debug("Generating AOT artifacts for test classes [%s]"
+						.formatted(classes.stream().map(Class::getCanonicalName).toList()));
 			}
 			try {
+				// Use first test class discovered for a given unique MergedContextConfiguration.
+				Class<?> testClass = classes.get(0);
 				DefaultGenerationContext generationContext = createGenerationContext(testClass);
-				generateApplicationContextInitializer(generationContext, testClass);
+				ClassName className = processAheadOfTime(mergedConfig, generationContext);
+				// TODO Store ClassName in a map analogous to TestContextAotProcessor in Spring Native.
 				generationContext.writeGeneratedContent();
 			}
 			catch (Exception ex) {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Failed to generate AOT artifacts for test class [%s]"
-							.formatted(testClass.getCanonicalName()), ex);
+					logger.warn("Failed to generate AOT artifacts for test classes [%s]"
+							.formatted(classes.stream().map(Class::getCanonicalName).toList()), ex);
 				}
 			}
 		});
 	}
 
 	/**
-	 * Generate an {@link org.springframework.context.ApplicationContextInitializer
-	 * ApplicationContextInitializer} for the supplied test class.
-	 * @param testClass the test class for which the initializer should be generated
+	 * Process the specified {@link MergedContextConfiguration} ahead-of-time
+	 * using the specified {@link GenerationContext}.
+	 * <p>Return the {@link ClassName} of the {@link ApplicationContextInitializer}
+	 * to use to restore an optimized state of the test application context for
+	 * the given {@code MergedContextConfiguration}.
+	 * @param mergedConfig the {@code MergedContextConfiguration} to process
+	 * @param generationContext the generation context to use
 	 * @return the {@link ClassName} for the generated {@code ApplicationContextInitializer}
 	 * @throws TestContextAotException if an error occurs during AOT processing
 	 */
-	ClassName generateApplicationContextInitializer(GenerationContext generationContext, Class<?> testClass)
-			throws TestContextAotException {
+	ClassName processAheadOfTime(MergedContextConfiguration mergedConfig,
+			GenerationContext generationContext) throws TestContextAotException {
 
-		GenericApplicationContext gac = loadContextForAotProcessing(testClass);
+		GenericApplicationContext gac = loadContextForAotProcessing(mergedConfig);
 		try {
 			return this.aotGenerator.processAheadOfTime(gac, generationContext);
 		}
 		catch (Throwable ex) {
 			throw new TestContextAotException("Failed to process test class [%s] for AOT"
-					.formatted(testClass.getCanonicalName()), ex);
+					.formatted(mergedConfig.getTestClass().getCanonicalName()), ex);
 		}
 	}
 
@@ -142,43 +156,40 @@ class TestContextAotGenerator {
 	 * context or if one of the prerequisites is not met
 	 * @see SmartContextLoader#loadContextForAotProcessing(MergedContextConfiguration)
 	 */
-	private GenericApplicationContext loadContextForAotProcessing(Class<?> testClass)
-			throws TestContextAotException {
+	private GenericApplicationContext loadContextForAotProcessing(
+			MergedContextConfiguration mergedConfig) throws TestContextAotException {
 
-		TestContextBootstrapper testContextBootstrapper =
-				BootstrapUtils.resolveTestContextBootstrapper(testClass);
-		MergedContextConfiguration mergedContextConfiguration =
-				testContextBootstrapper.buildMergedContextConfiguration();
-		ContextLoader contextLoader = mergedContextConfiguration.getContextLoader();
+		Class<?> testClass = mergedConfig.getTestClass();
+		ContextLoader contextLoader = mergedConfig.getContextLoader();
 		Assert.notNull(contextLoader, """
 				Cannot load an ApplicationContext with a NULL 'contextLoader'. \
 				Consider annotating test class [%s] with @ContextConfiguration or \
 				@ContextHierarchy.""".formatted(testClass.getCanonicalName()));
 
-		if (!(contextLoader instanceof SmartContextLoader smartContextLoader)) {
-			throw new TestContextAotException("""
-					Cannot generate AOT artifacts for test class [%s]. The configured \
-					ContextLoader [%s] must be a SmartContextLoader.""".formatted(
-							testClass.getCanonicalName(), contextLoader.getClass().getName()));
+		if (contextLoader instanceof SmartContextLoader smartContextLoader) {
+			try {
+				ApplicationContext context = smartContextLoader.loadContextForAotProcessing(mergedConfig);
+				if (context instanceof GenericApplicationContext gac) {
+					return gac;
+				}
+			}
+			catch (Exception ex) {
+				throw new TestContextAotException(
+						"Failed to load ApplicationContext for AOT processing for test class [%s]"
+							.formatted(testClass.getCanonicalName()), ex);
+			}
 		}
+		throw new TestContextAotException("""
+				Cannot generate AOT artifacts for test class [%s]. The configured \
+				ContextLoader [%s] must be a SmartContextLoader and must create a \
+				GenericApplicationContext.""".formatted(testClass.getCanonicalName(),
+					contextLoader.getClass().getName()));
+	}
 
-		ApplicationContext context;
-		try {
-			context = smartContextLoader.loadContextForAotProcessing(mergedContextConfiguration);
-		}
-		catch (Exception ex) {
-			throw new TestContextAotException(
-					"Failed to load ApplicationContext for AOT processing for test class [%s]"
-						.formatted(testClass.getCanonicalName()), ex);
-		}
-
-		if (!(context instanceof GenericApplicationContext gac)) {
-			throw new TestContextAotException("""
-					Cannot generate AOT artifacts for test class [%s]. The configured \
-					ContextLoader [%s] must create a GenericApplicationContext.""".formatted(
-							testClass.getCanonicalName(), contextLoader.getClass().getName()));
-		}
-		return gac;
+	MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass) {
+		TestContextBootstrapper testContextBootstrapper =
+				BootstrapUtils.resolveTestContextBootstrapper(testClass);
+		return testContextBootstrapper.buildMergedContextConfiguration();
 	}
 
 	DefaultGenerationContext createGenerationContext(Class<?> testClass) {

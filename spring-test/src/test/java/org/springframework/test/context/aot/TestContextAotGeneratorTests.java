@@ -32,6 +32,7 @@ import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.javapoet.ClassName;
+import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
@@ -88,7 +89,8 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 				BasicSpringJupiterSharedConfigTests.class
 				).forEach(testClass -> {
 					DefaultGenerationContext generationContext = generator.createGenerationContext(testClass);
-					ClassName className = generator.generateApplicationContextInitializer(generationContext, testClass);
+					MergedContextConfiguration mergedConfig = generator.buildMergedContextConfiguration(testClass);
+					ClassName className = generator.processAheadOfTime(mergedConfig, generationContext);
 					assertThat(className).isNotNull();
 					classNames.add(className);
 					generationContext.writeGeneratedContent();
