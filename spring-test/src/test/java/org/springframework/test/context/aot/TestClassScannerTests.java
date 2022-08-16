@@ -18,6 +18,7 @@ package org.springframework.test.context.aot;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
@@ -36,6 +37,7 @@ class TestClassScannerTests extends AbstractAotTests {
 	void scanBasicTestClasses() {
 		assertThat(scan("org.springframework.test.context.aot.samples.basic"))
 			.containsExactlyInAnyOrder(
+				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringVintageTests.class,
@@ -46,7 +48,8 @@ class TestClassScannerTests extends AbstractAotTests {
 	@Test
 	void scanTestSuitesForJupiter() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.jupiter"))
-			.containsExactlyInAnyOrder(BasicSpringJupiterTests.class, BasicSpringJupiterTests.NestedTests.class);
+			.containsExactlyInAnyOrder(BasicSpringJupiterSharedConfigTests.class,
+				BasicSpringJupiterTests.class, BasicSpringJupiterTests.NestedTests.class);
 	}
 
 	@Test
@@ -65,6 +68,7 @@ class TestClassScannerTests extends AbstractAotTests {
 	void scanTestSuitesForAllTestEngines() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.all"))
 			.containsExactlyInAnyOrder(
+				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringVintageTests.class,
@@ -76,6 +80,7 @@ class TestClassScannerTests extends AbstractAotTests {
 	void scanTestSuitesWithNestedSuites() {
 		assertThat(scan("org.springframework.test.context.aot.samples.suites.nested"))
 			.containsExactlyInAnyOrder(
+				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringVintageTests.class

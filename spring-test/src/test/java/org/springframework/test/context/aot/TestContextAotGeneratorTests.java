@@ -32,6 +32,7 @@ import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.javapoet.ClassName;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests;
@@ -54,10 +55,11 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	@Test
 	void generate() {
 		Stream<Class<?>> testClasses = Stream.of(
-			BasicSpringJupiterTests.class,
-			BasicSpringJupiterTests.NestedTests.class,
-			BasicSpringVintageTests.class,
-			BasicSpringTestNGTests.class);
+				BasicSpringJupiterSharedConfigTests.class,
+				BasicSpringJupiterTests.class,
+				BasicSpringJupiterTests.NestedTests.class,
+				BasicSpringTestNGTests.class,
+				BasicSpringVintageTests.class);
 
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
@@ -79,14 +81,18 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		List<ClassName> classNames = new ArrayList<>();
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
-		Set.of(BasicSpringTestNGTests.class, BasicSpringVintageTests.class, BasicSpringJupiterTests.class)
-			.forEach(testClass -> {
-				DefaultGenerationContext generationContext = generator.createGenerationContext(testClass);
-				ClassName className = generator.generateApplicationContextInitializer(generationContext, testClass);
-				assertThat(className).isNotNull();
-				classNames.add(className);
-				generationContext.writeGeneratedContent();
-			});
+		Set.of(
+				BasicSpringTestNGTests.class,
+				BasicSpringVintageTests.class,
+				BasicSpringJupiterTests.class,
+				BasicSpringJupiterSharedConfigTests.class
+				).forEach(testClass -> {
+					DefaultGenerationContext generationContext = generator.createGenerationContext(testClass);
+					ClassName className = generator.generateApplicationContextInitializer(generationContext, testClass);
+					assertThat(className).isNotNull();
+					classNames.add(className);
+					generationContext.writeGeneratedContent();
+				});
 
 		compile(generatedFiles, classNames, context -> {
 			MessageService messageService = context.getBean(MessageService.class);

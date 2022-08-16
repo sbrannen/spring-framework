@@ -16,25 +16,23 @@
 
 package org.springframework.test.context.aot.samples.basic;
 
-import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.samples.common.MessageService;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Uses configuration identical to {@link BasicSpringJupiterTests}.
+ *
  * @author Sam Brannen
  * @since 6.0
  */
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = BasicTestConfiguration.class)
-@TestPropertySource(properties = "test.engine = vintage")
-public class BasicSpringVintageTests {
+@SpringJUnitConfig(BasicTestConfiguration.class)
+@TestPropertySource(properties = "test.engine = jupiter")
+public class BasicSpringJupiterSharedConfigTests {
 
 	@Autowired
 	MessageService messageService;
@@ -42,10 +40,10 @@ public class BasicSpringVintageTests {
 	@Value("${test.engine}")
 	String testEngine;
 
-	@org.junit.Test
-	public void test() {
+	@org.junit.jupiter.api.Test
+	void test() {
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
-		assertThat(testEngine).isEqualTo("vintage");
+		assertThat(testEngine).isEqualTo("jupiter");
 	}
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.test.context.aot.samples.basic;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.samples.common.MessageService;
@@ -35,9 +36,13 @@ public class BasicSpringTestNGTests extends AbstractTestNGSpringContextTests {
 	@Autowired
 	MessageService messageService;
 
+	@Value("${test.engine}")
+	String testEngine;
+
 	@org.testng.annotations.Test
 	public void test() {
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+		assertThat(testEngine).isEqualTo("testng");
 	}
 
 }
