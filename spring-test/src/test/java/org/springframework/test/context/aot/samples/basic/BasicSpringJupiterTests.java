@@ -22,6 +22,7 @@ import org.junit.jupiter.api.extension.Extension;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -40,9 +41,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BasicSpringJupiterTests {
 
 	@org.junit.jupiter.api.Test
-	void test(@Autowired MessageService messageService, @Value("${test.engine}") String testEngine) {
+	void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
+			@Value("${test.engine}") String testEngine) {
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
 		assertThat(testEngine).isEqualTo("jupiter");
+		assertThat(context.getEnvironment().getProperty("test.engine"))
+			.as("@TestPropertySource").isEqualTo("jupiter");
+		assertThat(context.getEnvironment().getProperty("explicit"))
+			.as("@PropertySource").isEqualTo("enigma");
 	}
 
 	@Nested
@@ -50,11 +56,15 @@ public class BasicSpringJupiterTests {
 	public class NestedTests {
 
 		@org.junit.jupiter.api.Test
-		void test(@Autowired MessageService messageService, @Value("${test.engine}") String testEngine,
-				@Value("${foo}") String foo) {
+		void test(@Autowired ApplicationContext context, @Autowired MessageService messageService,
+				@Value("${test.engine}") String testEngine, @Value("${foo}") String foo) {
 			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
 			assertThat(foo).isEqualTo("bar");
 			assertThat(testEngine).isEqualTo("jupiter");
+			assertThat(context.getEnvironment().getProperty("test.engine"))
+				.as("@TestPropertySource").isEqualTo("jupiter");
+			assertThat(context.getEnvironment().getProperty("explicit"))
+				.as("@PropertySource").isEqualTo("enigma");
 		}
 
 	}

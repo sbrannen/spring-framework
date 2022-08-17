@@ -18,6 +18,7 @@ package org.springframework.test.context.aot.samples.basic;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -35,6 +36,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BasicSpringJupiterSharedConfigTests {
 
 	@Autowired
+	ApplicationContext context;
+
+	@Autowired
 	MessageService messageService;
 
 	@Value("${test.engine}")
@@ -44,6 +48,10 @@ public class BasicSpringJupiterSharedConfigTests {
 	void test() {
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
 		assertThat(testEngine).isEqualTo("jupiter");
+		assertThat(context.getEnvironment().getProperty("test.engine"))
+			.as("@TestPropertySource").isEqualTo("jupiter");
+		assertThat(context.getEnvironment().getProperty("explicit"))
+			.as("@PropertySource").isEqualTo("enigma");
 	}
 
 }

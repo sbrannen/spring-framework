@@ -18,6 +18,7 @@ package org.springframework.test.context.aot.samples.basic;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.samples.common.MessageService;
@@ -34,6 +35,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BasicSpringTestNGTests extends AbstractTestNGSpringContextTests {
 
 	@Autowired
+	ApplicationContext context;
+
+	@Autowired
 	MessageService messageService;
 
 	@Value("${test.engine}")
@@ -43,6 +47,10 @@ public class BasicSpringTestNGTests extends AbstractTestNGSpringContextTests {
 	public void test() {
 		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
 		assertThat(testEngine).isEqualTo("testng");
+		assertThat(context.getEnvironment().getProperty("test.engine"))
+			.as("@TestPropertySource").isEqualTo("testng");
+		assertThat(context.getEnvironment().getProperty("explicit"))
+			.as("@PropertySource").isEqualTo("enigma");
 	}
 
 }
