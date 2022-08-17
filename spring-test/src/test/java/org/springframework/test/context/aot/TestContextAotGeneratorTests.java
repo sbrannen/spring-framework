@@ -79,22 +79,22 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
 	// cannot support @ParameterizedTest methods.
 	void generateApplicationContextInitializer() {
-		List<ClassName> classNames = new ArrayList<>();
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
-		Set.of(
+		Set<Class<?>> testClasses = Set.of(
 				BasicSpringTestNGTests.class,
 				BasicSpringVintageTests.class,
 				BasicSpringJupiterTests.class,
-				BasicSpringJupiterSharedConfigTests.class
-				).forEach(testClass -> {
-					DefaultGenerationContext generationContext = generator.createGenerationContext(testClass);
-					MergedContextConfiguration mergedConfig = generator.buildMergedContextConfiguration(testClass);
-					ClassName className = generator.processAheadOfTime(mergedConfig, generationContext);
-					assertThat(className).isNotNull();
-					classNames.add(className);
-					generationContext.writeGeneratedContent();
-				});
+				BasicSpringJupiterSharedConfigTests.class);
+		List<ClassName> classNames = new ArrayList<>();
+		testClasses.forEach(testClass -> {
+			DefaultGenerationContext generationContext = generator.createGenerationContext(testClass);
+			MergedContextConfiguration mergedConfig = generator.buildMergedContextConfiguration(testClass);
+			ClassName className = generator.processAheadOfTime(mergedConfig, generationContext);
+			assertThat(className).isNotNull();
+			classNames.add(className);
+			generationContext.writeGeneratedContent();
+		});
 
 		compile(generatedFiles, classNames, context -> {
 			MessageService messageService = context.getBean(MessageService.class);
