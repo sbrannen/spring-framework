@@ -50,8 +50,6 @@ public class BasicSpringJupiterSharedConfigTests {
 		assertThat(testEngine).isEqualTo("jupiter");
 		assertThat(context.getEnvironment().getProperty("test.engine"))
 			.as("@TestPropertySource").isEqualTo("jupiter");
-		assertThat(context.getEnvironment().getProperty("explicit"))
-			.as("@PropertySource").isEqualTo("enigma");
 	}
 
 }

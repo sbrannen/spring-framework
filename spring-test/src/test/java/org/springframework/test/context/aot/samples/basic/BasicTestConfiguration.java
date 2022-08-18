@@ -18,7 +18,6 @@ package org.springframework.test.context.aot.samples.basic;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.aot.samples.common.DefaultMessageService;
 import org.springframework.test.context.aot.samples.common.MessageService;
 
@@ -27,7 +26,6 @@ import org.springframework.test.context.aot.samples.common.MessageService;
  * @since 6.0
  */
 @Configuration(proxyBeanMethods = false)
-@PropertySource("/org/springframework/test/context/env/explicit.properties")
 class BasicTestConfiguration {
 
 	@Bean

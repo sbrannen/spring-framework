@@ -49,8 +49,6 @@ public class BasicSpringTestNGTests extends AbstractTestNGSpringContextTests {
 		assertThat(testEngine).isEqualTo("testng");
 		assertThat(context.getEnvironment().getProperty("test.engine"))
 			.as("@TestPropertySource").isEqualTo("testng");
-		assertThat(context.getEnvironment().getProperty("explicit"))
-			.as("@PropertySource").isEqualTo("enigma");
 	}
 
 }

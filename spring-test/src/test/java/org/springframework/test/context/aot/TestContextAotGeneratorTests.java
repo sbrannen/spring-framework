@@ -99,10 +99,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		compile(generatedFiles, classNames, context -> {
 			MessageService messageService = context.getBean(MessageService.class);
 			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
-			// We cannot assert that properties are present in the Environment until we
-			// address https://github.com/spring-projects/spring-framework/issues/28976
-			// assertThat(context.getEnvironment().getProperty("explicit"))
-			// 	.as("@PropertySource").isEqualTo("enigma");
+			// TODO Support @TestPropertySource in AOT testing mode.
 			// assertThat(context.getEnvironment().getProperty("test.engine"))
 			// 	.as("@TestPropertySource").isNotNull();
 		});

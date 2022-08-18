@@ -52,8 +52,6 @@ public class BasicSpringVintageTests {
 		assertThat(testEngine).isEqualTo("vintage");
 		assertThat(context.getEnvironment().getProperty("test.engine"))
 			.as("@TestPropertySource").isEqualTo("vintage");
-		assertThat(context.getEnvironment().getProperty("explicit"))
-			.as("@PropertySource").isEqualTo("enigma");
 	}
 
 }
