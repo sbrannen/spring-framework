@@ -26,6 +26,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.aot.AotContextLoader;
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,9 +57,32 @@ import org.springframework.util.StringUtils;
  * @since 2.5
  * @see #loadContext(MergedContextConfiguration)
  */
-public abstract class AbstractGenericContextLoader extends AbstractContextLoader {
+public abstract class AbstractGenericContextLoader extends AbstractContextLoader implements AotContextLoader {
 
 	protected static final Log logger = LogFactory.getLog(AbstractGenericContextLoader.class);
+
+	@Override
+	public ApplicationContext createContextForAotRuntime(MergedContextConfiguration mergedConfig) {
+		return createContext();
+	}
+
+	@Override
+	public void prepareContextForAotRuntime(ApplicationContext context, MergedContextConfiguration mergedConfig) {
+		if (!(context instanceof GenericApplicationContext gac)) {
+			throw new IllegalArgumentException("Can only prepare a GenericApplicationContext for AOT runtime.");
+		}
+		prepareContext(gac);
+		prepareContext(gac, mergedConfig);
+	}
+
+	@Override
+	public void customizeContextForAotRuntime(ApplicationContext context, MergedContextConfiguration mergedConfig) {
+		if (!(context instanceof GenericApplicationContext gac)) {
+			throw new IllegalArgumentException("Can only customize a GenericApplicationContext for AOT runtime.");
+		}
+		customizeContext(gac);
+		customizeContext(gac, mergedConfig);
+	}
 
 	/**
 	 * Load a {@link GenericApplicationContext} for the supplied
