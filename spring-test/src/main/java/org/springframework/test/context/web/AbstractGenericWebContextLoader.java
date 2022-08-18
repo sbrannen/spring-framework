@@ -29,6 +29,7 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.context.MergedContextConfiguration;
+import org.springframework.test.context.aot.AotContextLoader;
 import org.springframework.test.context.support.AbstractContextLoader;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
@@ -57,9 +58,45 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * @see #loadContext(MergedContextConfiguration)
  * @see #loadContext(String...)
  */
-public abstract class AbstractGenericWebContextLoader extends AbstractContextLoader {
+public abstract class AbstractGenericWebContextLoader extends AbstractContextLoader implements AotContextLoader {
 
 	protected static final Log logger = LogFactory.getLog(AbstractGenericWebContextLoader.class);
+
+
+	// AotContextLoader
+
+	@Override
+	public ApplicationContext createContextForAotRuntime(MergedContextConfiguration mergedConfig) {
+		return createContext();
+	}
+
+	@Override
+	public void prepareContextForAotRuntime(ApplicationContext context, MergedContextConfiguration mergedConfig) {
+		if (!(context instanceof GenericWebApplicationContext wac)) {
+			throw new IllegalArgumentException("Can only prepare a GenericWebApplicationContext for AOT runtime.");
+		}
+		if (!(mergedConfig instanceof WebMergedContextConfiguration webMergedConfig)) {
+			throw new IllegalArgumentException("""
+					Cannot prepare a WebApplicationContext for non-web merged context configuration %s. \
+					Consider annotating your test class with @WebAppConfiguration.""".formatted(mergedConfig));
+		}
+
+		configureWebResources(wac, webMergedConfig);
+		prepareContext(wac, webMergedConfig);
+	}
+
+	@Override
+	public void customizeContextForAotRuntime(ApplicationContext context, MergedContextConfiguration mergedConfig) {
+		if (!(context instanceof GenericWebApplicationContext wac)) {
+			throw new IllegalArgumentException("Can only customize a GenericWebApplicationContext for AOT runtime.");
+		}
+		if (!(mergedConfig instanceof WebMergedContextConfiguration webMergedConfig)) {
+			throw new IllegalArgumentException("""
+					Cannot customize a WebApplicationContext for non-web merged context configuration %s. \
+					Consider annotating your test class with @WebAppConfiguration.""".formatted(mergedConfig));
+		}
+		customizeContext(wac, webMergedConfig);
+	}
 
 
 	// SmartContextLoader
