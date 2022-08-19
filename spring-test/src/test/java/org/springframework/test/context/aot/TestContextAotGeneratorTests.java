@@ -89,62 +89,55 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	}
 
 	@Test
-	// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
-	// cannot support @ParameterizedTest methods.
 	void processAheadOfTimeWithBasicTests() {
-		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+		// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
+		// cannot support @ParameterizedTest methods.
 		Set<Class<?>> testClasses = Set.of(
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
 				BasicSpringTestNGTests.class,
 				BasicSpringVintageTests.class);
-		List<Mapping> mappings = processAheadOfTime(generator, testClasses);
 
-		compile(generatedFiles, mappings, context -> {
+		processAheadOfTime(testClasses, context -> {
+			assertThat(context.getEnvironment().getProperty("test.engine"))
+				.as("Environment").isNotNull();
+
 			MessageService messageService = context.getBean(MessageService.class);
 			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
-			assertThat(context.getEnvironment().getProperty("test.engine"))
-				.as("@TestPropertySource").isNotNull();
 		});
 	}
 
 	@Test
-	// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
-	// cannot support @ParameterizedTest methods.
 	void processAheadOfTimeWithXmlTests() {
-		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+		// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
+		// cannot support @ParameterizedTest methods.
 		Set<Class<?>> testClasses = Set.of(
 				XmlSpringJupiterTests.class,
 				XmlSpringTestNGTests.class,
 				XmlSpringVintageTests.class);
-		List<Mapping> mappings = processAheadOfTime(generator, testClasses);
 
-		compile(generatedFiles, mappings, context -> {
-			MessageService messageService = context.getBean(MessageService.class);
-			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+		processAheadOfTime(testClasses, context -> {
 			assertThat(context.getEnvironment().getProperty("test.engine"))
 				.as("Environment").isNotNull();
+
+			MessageService messageService = context.getBean(MessageService.class);
+			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
 		});
 	}
 
 	@Test
-	// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
-	// cannot support @ParameterizedTest methods.
 	void processAheadOfTimeWithWebTests() {
-		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
-		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+		// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
+		// cannot support @ParameterizedTest methods.
 		Set<Class<?>> testClasses = Set.of(
 				WebSpringJupiterTests.class,
 				WebSpringTestNGTests.class,
 				WebSpringVintageTests.class);
-		List<Mapping> mappings = processAheadOfTime(generator, testClasses);
 
-		compile(generatedFiles, mappings, context -> {
+		processAheadOfTime(testClasses, context -> {
 			assertThat(context.getEnvironment().getProperty("test.engine"))
-				.as("@TestPropertySource").isNotNull();
+				.as("Environment").isNotNull();
 
 			MockMvc mockMvc = webAppContextSetup((WebApplicationContext) context).build();
 			mockMvc.perform(get("/hello"))
@@ -152,6 +145,23 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		});
 	}
 
+
+	@SuppressWarnings("unchecked")
+	private void processAheadOfTime(Set<Class<?>> testClasses, ThrowingConsumer<ApplicationContext> result) {
+		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+		List<Mapping> mappings = processAheadOfTime(generator, testClasses);
+		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
+			mappings.forEach(mapping -> {
+				MergedContextConfiguration mergedConfig = mapping.mergedConfig();
+				ApplicationContextInitializer<GenericApplicationContext> contextInitializer =
+						compiled.getInstance(ApplicationContextInitializer.class, mapping.className().reflectionName());
+				AotRuntimeContextLoader aotRuntimeContextLoader = new AotRuntimeContextLoader();
+				GenericApplicationContext context = aotRuntimeContextLoader.loadContext(mergedConfig, contextInitializer);
+				result.accept(context);
+			});
+		});
+	}
 
 	private List<Mapping> processAheadOfTime(TestContextAotGenerator generator, Set<Class<?>> testClasses) {
 		List<Mapping> mappings = new ArrayList<>();
@@ -164,20 +174,6 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			generationContext.writeGeneratedContent();
 		});
 		return mappings;
-	}
-
-	@SuppressWarnings("unchecked")
-	private void compile(InMemoryGeneratedFiles generatedFiles, List<Mapping> mappings, ThrowingConsumer<ApplicationContext> result) {
-		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
-			mappings.forEach(mapping -> {
-				MergedContextConfiguration mergedConfig = mapping.mergedConfig();
-				ApplicationContextInitializer<GenericApplicationContext> contextInitializer =
-						compiled.getInstance(ApplicationContextInitializer.class, mapping.className().reflectionName());
-				AotRuntimeContextLoader aotRuntimeContextLoader = new AotRuntimeContextLoader();
-				GenericApplicationContext context = aotRuntimeContextLoader.loadContext(mergedConfig, contextInitializer);
-				result.accept(context);
-			});
-		});
 	}
 
 
