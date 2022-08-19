@@ -27,7 +27,9 @@ import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedClasses;
 import org.springframework.aot.generate.GeneratedFiles;
 import org.springframework.aot.generate.GenerationContext;
+import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
@@ -217,6 +219,9 @@ class TestContextAotGenerator {
 		AotTestMappingsCodeGenerator codeGenerator =
 				new AotTestMappingsCodeGenerator(classNameMappings, generatedClasses);
 		generationContext.writeGeneratedContent();
+		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
+		this.runtimeHints.reflection().registerType(TypeReference.of(className),
+				builder -> builder.withMembers(MemberCategory.INVOKE_PUBLIC_METHODS));
 	}
 
 }

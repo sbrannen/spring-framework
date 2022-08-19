@@ -25,6 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.aot.generate.DefaultGenerationContext;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
 import org.springframework.aot.generate.InMemoryGeneratedFiles;
+import org.springframework.aot.hint.MemberCategory;
+import org.springframework.aot.hint.ReflectionHints;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.aot.test.generator.compile.CompileWithTargetClassAccess;
 import org.springframework.aot.test.generator.compile.TestCompiler;
 import org.springframework.context.ApplicationContext;
@@ -79,6 +82,11 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 
 		generator.processAheadOfTime(testClasses.stream().sorted(comparing(Class::getName)));
+
+		ReflectionHints reflectionHints = generator.getRuntimeHints().reflection();
+		assertThat(reflectionHints.getTypeHint(TypeReference.of(AotTestMappings.GENERATED_MAPPINGS_CLASS_NAME)))
+				.satisfies(typeHint ->
+						assertThat(typeHint.getMemberCategories()).containsExactly(MemberCategory.INVOKE_PUBLIC_METHODS));
 
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
 		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
