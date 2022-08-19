@@ -19,7 +19,6 @@ package org.springframework.test.context.aot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -48,6 +47,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.function.ThrowingConsumer;
 import org.springframework.web.context.WebApplicationContext;
 
+import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -67,8 +67,8 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	 * @see AotSmokeTests#scanClassPathThenGenerateSourceFilesAndCompileThem()
 	 */
 	@Test
-	void generate() {
-		Stream<Class<?>> testClasses = Stream.of(
+	void processAheadOfTimeAndGenerateAotTestMappings() {
+		Set<Class<?>> testClasses = Set.of(
 				BasicSpringJupiterSharedConfigTests.class,
 				BasicSpringJupiterTests.class,
 				BasicSpringJupiterTests.NestedTests.class,
@@ -78,13 +78,22 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
 
-		generator.processAheadOfTime(testClasses);
+		generator.processAheadOfTime(testClasses.stream().sorted(comparing(Class::getName)));
 
 		List<String> sourceFiles = generatedFiles.getGeneratedFiles(Kind.SOURCE).keySet().stream().toList();
 		assertThat(sourceFiles).containsExactlyInAnyOrder(expectedSourceFilesForBasicSpringTests);
 
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(compiled -> {
-			// just make sure compilation completes without errors
+			AotTestMappings aotTestMappings = new AotTestMappings();
+			testClasses.forEach(testClass -> {
+				MergedContextConfiguration mergedConfig = generator.buildMergedContextConfiguration(testClass);
+				ApplicationContextInitializer<GenericApplicationContext> contextInitializer =
+						aotTestMappings.getContextInitializer(testClass);
+				assertThat(contextInitializer).isNotNull();
+				AotRuntimeContextLoader aotRuntimeContextLoader = new AotRuntimeContextLoader();
+				GenericApplicationContext context = aotRuntimeContextLoader.loadContext(mergedConfig, contextInitializer);
+				assertContextForBasicTests(context);
+			});
 		});
 	}
 
@@ -99,13 +108,14 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 				BasicSpringTestNGTests.class,
 				BasicSpringVintageTests.class);
 
-		processAheadOfTime(testClasses, context -> {
-			assertThat(context.getEnvironment().getProperty("test.engine"))
-				.as("Environment").isNotNull();
+		processAheadOfTime(testClasses, this::assertContextForBasicTests);
+	}
 
-			MessageService messageService = context.getBean(MessageService.class);
-			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
-		});
+	private void assertContextForBasicTests(ApplicationContext context) {
+		assertThat(context.getEnvironment().getProperty("test.engine")).as("Environment").isNotNull();
+
+		MessageService messageService = context.getBean(MessageService.class);
+		assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
 	}
 
 	@Test
