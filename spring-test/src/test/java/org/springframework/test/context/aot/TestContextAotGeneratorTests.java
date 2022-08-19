@@ -41,6 +41,9 @@ import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.aot.samples.web.WebSpringJupiterTests;
 import org.springframework.test.context.aot.samples.web.WebSpringTestNGTests;
 import org.springframework.test.context.aot.samples.web.WebSpringVintageTests;
+import org.springframework.test.context.aot.samples.xml.XmlSpringJupiterTests;
+import org.springframework.test.context.aot.samples.xml.XmlSpringTestNGTests;
+import org.springframework.test.context.aot.samples.xml.XmlSpringVintageTests;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.function.ThrowingConsumer;
 import org.springframework.web.context.WebApplicationContext;
@@ -108,6 +111,28 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	}
 
 	@Test
+	// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
+	// cannot support @ParameterizedTest methods.
+	void processAheadOfTimeWithXmlTests() {
+		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
+		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
+		Set<Class<?>> testClasses = Set.of(
+				XmlSpringJupiterTests.class,
+				XmlSpringTestNGTests.class,
+				XmlSpringVintageTests.class);
+		List<Mapping> mappings = processAheadOfTime(generator, testClasses);
+
+		compile(generatedFiles, mappings, context -> {
+			MessageService messageService = context.getBean(MessageService.class);
+			assertThat(messageService.generateMessage()).isEqualTo("Hello, AOT!");
+			assertThat(context.getEnvironment().getProperty("test.engine"))
+				.as("Environment").isNotNull();
+		});
+	}
+
+	@Test
+	// We cannot parameterize with the test classes, since @CompileWithTargetClassAccess
+	// cannot support @ParameterizedTest methods.
 	void processAheadOfTimeWithWebTests() {
 		InMemoryGeneratedFiles generatedFiles = new InMemoryGeneratedFiles();
 		TestContextAotGenerator generator = new TestContextAotGenerator(generatedFiles);
