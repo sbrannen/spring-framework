@@ -19,13 +19,18 @@ package org.springframework.test.context.cache;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.lang.Nullable;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
+import org.springframework.test.context.aot.AotRuntimeContextLoader;
+import org.springframework.test.context.aot.AotTestMappings;
 import org.springframework.util.Assert;
 
 /**
@@ -87,7 +92,12 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 			ApplicationContext context = this.contextCache.get(mergedContextConfiguration);
 			if (context == null) {
 				try {
-					context = loadContextInternal(mergedContextConfiguration);
+					if (AotDetector.useGeneratedArtifacts()) {
+						context = loadContextInAotMode(mergedContextConfiguration);
+					}
+					else {
+						context = loadContextInternal(mergedContextConfiguration);
+					}
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format("Storing ApplicationContext [%s] in cache under key [%s]",
 								System.identityHashCode(context), mergedContextConfiguration));
@@ -151,6 +161,23 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		}
 
 		return applicationContext;
+	}
+
+	protected ApplicationContext loadContextInAotMode(MergedContextConfiguration mergedConfig) throws Exception {
+		AotTestMappings aotTestMappings = new AotTestMappings();
+		Class<?> testClass = mergedConfig.getTestClass();
+
+		// Fallback to standard behavior if AOT is not supported for the test class.
+		if (!aotTestMappings.isSupportedTestClass(testClass)) {
+			return loadContextInternal(mergedConfig);
+		}
+
+		ApplicationContextInitializer<GenericApplicationContext> contextInitializer =
+				aotTestMappings.getContextInitializer(testClass);
+		Assert.state(contextInitializer != null,
+				() -> "Failed to load AOT ApplicationContextInitializer for test class [%s]"
+						.formatted(testClass.getName()));
+		return new AotRuntimeContextLoader().loadContext(mergedConfig, contextInitializer);
 	}
 
 }
