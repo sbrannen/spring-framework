@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.aot;
 
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -31,6 +32,7 @@ import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.TypeReference;
+import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
@@ -60,6 +62,8 @@ public class TestContextAotGenerator {
 
 	private final ApplicationContextAotGenerator aotGenerator = new ApplicationContextAotGenerator();
 
+	private final AotServices<TestContextAotProcessor> aotProcessors;
+
 	private final AtomicInteger sequence = new AtomicInteger();
 
 	private final GeneratedFiles generatedFiles;
@@ -83,6 +87,7 @@ public class TestContextAotGenerator {
 	 * @param runtimeHints the {@code RuntimeHints} to use
 	 */
 	public TestContextAotGenerator(GeneratedFiles generatedFiles, RuntimeHints runtimeHints) {
+		this.aotProcessors = AotServices.factories().load(TestContextAotProcessor.class);
 		this.generatedFiles = generatedFiles;
 		this.runtimeHints = runtimeHints;
 	}
@@ -121,6 +126,8 @@ public class TestContextAotGenerator {
 				Assert.state(!initializerClassMappings.containsKey(initializer),
 						() -> "ClassName [%s] already encountered".formatted(initializer.reflectionName()));
 				initializerClassMappings.addAll(initializer, testClasses);
+				this.aotProcessors.forEach(processor -> processor.processAheadOfTime(
+						mergedConfig, Collections.unmodifiableList(testClasses), generationContext));
 				generationContext.writeGeneratedContent();
 			}
 			catch (Exception ex) {
