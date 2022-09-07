@@ -18,13 +18,16 @@ package org.springframework.test.context.aot.samples.basic;
 
 import org.junit.runner.RunWith;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
+import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.aot.TestAotProperties;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -63,10 +66,32 @@ public class BasicSpringVintageTests {
 	}
 
 	public static class CustomXmlBootstrapper extends DefaultTestContextBootstrapper {
+
 		@Override
 		protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
 			return GenericXmlContextLoader.class;
 		}
+
+		@Override
+		protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
+			String stringKey = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName();
+			String booleanKey = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active";
+			if (AotDetector.useGeneratedArtifacts()) {
+				assertThat(TestAotProperties.getString(stringKey))
+					.as("AOT String property must already be present during AOT run-time execution")
+					.isEqualTo("org.example.Main");
+				assertThat(TestAotProperties.getBoolean(booleanKey))
+					.as("AOT boolean property must already be present during AOT run-time execution")
+					.isTrue();
+			}
+			else {
+				// Set AOT properties during AOT build-time processing
+				TestAotProperties.setProperty(stringKey, "org.example.Main");
+				TestAotProperties.setProperty(booleanKey, "TrUe");
+			}
+			return mergedConfig;
+		}
+
 	}
 
 }
