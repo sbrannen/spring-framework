@@ -76,18 +76,19 @@ public class BasicSpringVintageTests {
 		protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
 			String stringKey = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName();
 			String booleanKey = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active";
+			TestAotProperties testAotProperties = TestAotProperties.getInstance();
 			if (AotDetector.useGeneratedArtifacts()) {
-				assertThat(TestAotProperties.getString(stringKey))
+				assertThat(testAotProperties.getString(stringKey))
 					.as("AOT String property must already be present during AOT run-time execution")
 					.isEqualTo("org.example.Main");
-				assertThat(TestAotProperties.getBoolean(booleanKey))
+				assertThat(testAotProperties.getBoolean(booleanKey))
 					.as("AOT boolean property must already be present during AOT run-time execution")
 					.isTrue();
 			}
 			else {
 				// Set AOT properties during AOT build-time processing
-				TestAotProperties.setProperty(stringKey, "org.example.Main");
-				TestAotProperties.setProperty(booleanKey, "TrUe");
+				testAotProperties.setProperty(stringKey, "org.example.Main");
+				testAotProperties.setProperty(booleanKey, "TrUe");
 			}
 			return mergedConfig;
 		}

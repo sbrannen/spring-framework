@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.aot;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +41,12 @@ import org.springframework.javapoet.TypeSpec;
  */
 class TestAotPropertiesCodeGenerator {
 
+	private static final String GENERATED_SUFFIX = "Generated";
+
+	static final String GENERATED_PROPERTIES_CLASS_NAME = TestAotProperties.class.getName() + "__" + GENERATED_SUFFIX;
+
+	static final String GENERATED_PROPERTIES_METHOD_NAME = "getProperties";
+
 	private static final Log logger = LogFactory.getLog(TestAotPropertiesCodeGenerator.class);
 
 	// Map<String, String>
@@ -55,7 +60,7 @@ class TestAotPropertiesCodeGenerator {
 
 	TestAotPropertiesCodeGenerator(Map<String, String> properties, GeneratedClasses generatedClasses) {
 		this.properties = properties;
-		this.generatedClass = generatedClasses.addForFeature("Generated", this::generateType);
+		this.generatedClass = generatedClasses.addForFeature(GENERATED_SUFFIX, this::generateType);
 	}
 
 
@@ -72,7 +77,7 @@ class TestAotPropertiesCodeGenerator {
 	}
 
 	private MethodSpec generateMethod() {
-		MethodSpec.Builder method = MethodSpec.methodBuilder(TestAotProperties.GENERATED_PROPERTIES_METHOD_NAME);
+		MethodSpec.Builder method = MethodSpec.methodBuilder(GENERATED_PROPERTIES_METHOD_NAME);
 		method.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 		method.returns(MAP_TYPE);
 		method.addCode(generateCode());

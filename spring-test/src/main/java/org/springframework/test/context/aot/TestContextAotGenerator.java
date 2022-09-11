@@ -111,7 +111,7 @@ public class TestContextAotGenerator {
 	public void processAheadOfTime(Stream<Class<?>> testClasses) throws TestContextAotException {
 		try {
 			// Make sure AOT properties are cleared before processing
-			TestAotProperties.reset();
+			TestAotPropertiesFactory.reset();
 
 			MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
 			testClasses.forEach(testClass -> mergedConfigMappings.add(buildMergedContextConfiguration(testClass), testClass));
@@ -122,7 +122,7 @@ public class TestContextAotGenerator {
 		}
 		finally {
 			// Clear AOT properties after processing
-			TestAotProperties.reset();
+			TestAotPropertiesFactory.reset();
 		}
 	}
 
@@ -258,7 +258,7 @@ public class TestContextAotGenerator {
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
 
-		Map<String, String> properties = TestAotProperties.getProperties();
+		Map<String, String> properties = TestAotPropertiesFactory.getProperties();
 		TestAotPropertiesCodeGenerator codeGenerator =
 				new TestAotPropertiesCodeGenerator(properties, generatedClasses);
 		generationContext.writeGeneratedContent();

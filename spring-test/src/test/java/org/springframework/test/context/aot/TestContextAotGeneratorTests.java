@@ -61,7 +61,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_CONSTRUCTORS;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_DECLARED_METHODS;
 import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS;
@@ -113,16 +113,17 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(ThrowingConsumer.of(compiled -> {
 			try {
 				System.setProperty(AotDetector.AOT_ENABLED, "true");
-				TestAotProperties.reset();
+				TestAotPropertiesFactory.reset();
 
-				assertThatIllegalStateException()
-					.isThrownBy(() -> TestAotProperties.setProperty("foo", "bar"))
+				TestAotProperties testAotProperties = TestAotProperties.getInstance();
+				assertThatExceptionOfType(UnsupportedOperationException.class)
+					.isThrownBy(() -> testAotProperties.setProperty("foo", "bar"))
 					.withMessage("AOT properties cannot be modified during AOT run-time execution");
 				String key = "@SpringBootConfiguration-" + BasicSpringVintageTests.class.getName();
-				assertThat(TestAotProperties.getString(key)).isEqualTo("org.example.Main");
-				assertThat(TestAotProperties.getBoolean(key + "-active")).isTrue();
-				assertThat(TestAotProperties.getString("bogus")).isNull();
-				assertThat(TestAotProperties.getBoolean("bogus")).isFalse();
+				assertThat(testAotProperties.getString(key)).isEqualTo("org.example.Main");
+				assertThat(testAotProperties.getBoolean(key + "-active")).isTrue();
+				assertThat(testAotProperties.getString("bogus")).isNull();
+				assertThat(testAotProperties.getBoolean("bogus")).isFalse();
 
 				TestAotMappings testAotMappings = new TestAotMappings();
 				for (Class<?> testClass : testClasses) {
@@ -145,14 +146,14 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			}
 			finally {
 				System.clearProperty(AotDetector.AOT_ENABLED);
-				TestAotProperties.reset();
+				TestAotPropertiesFactory.reset();
 			}
 		}));
 	}
 
 	private static void assertRuntimeHints(RuntimeHints runtimeHints) {
 		assertReflectionRegistered(runtimeHints, TestAotMappings.GENERATED_MAPPINGS_CLASS_NAME, INVOKE_PUBLIC_METHODS);
-		assertReflectionRegistered(runtimeHints, TestAotProperties.GENERATED_PROPERTIES_CLASS_NAME, INVOKE_PUBLIC_METHODS);
+		assertReflectionRegistered(runtimeHints, TestAotPropertiesCodeGenerator.GENERATED_PROPERTIES_CLASS_NAME, INVOKE_PUBLIC_METHODS);
 
 		Stream.of(
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
