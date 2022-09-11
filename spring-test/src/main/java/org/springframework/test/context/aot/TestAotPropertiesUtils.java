@@ -19,7 +19,6 @@ package org.springframework.test.context.aot;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aot.AotDetector;
 import org.springframework.lang.Nullable;
@@ -28,34 +27,48 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Factory for {@link TestAotProperties}.
+ * Utilities for working with {@link TestAotProperties}.
+ *
+ * <p>Solely for internal use within the framework.
  *
  * @author Sam Brannen
  * @since 6.0
  */
-final class TestAotPropertiesFactory {
+public final class TestAotPropertiesUtils {
 
 	@Nullable
 	private static volatile Map<String, String> properties;
 
 
-	private TestAotPropertiesFactory() {
+	private TestAotPropertiesUtils() {
+	}
+
+
+	/**
+	 * Set the generated {@link TestAotProperties} in the supplied component if
+	 * it implements {@link TestAotPropertiesAware}.
+	 * <p>This method should only be invoked if {@link AotDetector#useGeneratedArtifacts()}
+	 * returns {@code true}.
+	 */
+	public static void setTestAotProperties(Object component) {
+		if (component instanceof TestAotPropertiesAware tapAware) {
+			TestAotProperties testAotProperties = new DefaultTestAotProperties(getGeneratedProperties());
+			tapAware.setTestAotProperties(testAotProperties);
+		}
 	}
 
 	/**
-	 * Get the underlying properties map.
+	 * Get the generated properties map.
 	 * <p>If the map is not already loaded, this method loads the map from the
-	 * generated class when running in {@linkplain AotDetector#useGeneratedArtifacts()
-	 * AOT execution mode} and otherwise creates a new map for storing properties
-	 * during the AOT processing phase.
+	 * generated class.
 	 */
-	static Map<String, String> getProperties() {
+	static Map<String, String> getGeneratedProperties() {
 		Map<String, String> props = properties;
 		if (props == null) {
-			synchronized (TestAotPropertiesFactory.class) {
+			synchronized (TestAotPropertiesUtils.class) {
 				props = properties;
 				if (props == null) {
-					props = (AotDetector.useGeneratedArtifacts() ? loadPropertiesMap() : new ConcurrentHashMap<>());
+					props = loadPropertiesMap();
 					properties = props;
 				}
 			}
@@ -64,11 +77,11 @@ final class TestAotPropertiesFactory {
 	}
 
 	/**
-	 * Reset test AOT properties.
-	 * <p>Only for internal use.
+	 * Reset test AOT properties so that the next invocation of
+	 * {@link #getGeneratedProperties()} causes the generated map to be reloaded.
 	 */
 	static void reset() {
-		synchronized (TestAotPropertiesFactory.class) {
+		synchronized (TestAotPropertiesUtils.class) {
 			properties = null;
 		}
 	}

@@ -30,11 +30,11 @@ import org.springframework.util.Assert;
  */
 class DefaultTestAotProperties implements TestAotProperties {
 
-	private final Map<String, String> properties;
+	final Map<String, String> map;
 
 
-	DefaultTestAotProperties(Map<String, String> properties) {
-		this.properties = properties;
+	DefaultTestAotProperties(Map<String, String> map) {
+		this.map = map;
 	}
 
 
@@ -42,21 +42,21 @@ class DefaultTestAotProperties implements TestAotProperties {
 	public void setProperty(String key, String value) {
 		assertNotInAotRuntime();
 		Assert.notNull(value, "'value' must not be null");
-		Assert.isTrue(!this.properties.containsKey(key),
+		Assert.isTrue(!this.map.containsKey(key),
 				() -> "AOT properties cannot be overridden. Key '%s' is already in use.".formatted(key));
-		this.properties.put(key, value);
+		this.map.put(key, value);
 	}
 
 	@Override
 	public void removeProperty(String key) {
 		assertNotInAotRuntime();
-		this.properties.remove(key);
+		this.map.remove(key);
 	}
 
 	@Override
 	@Nullable
 	public String getString(String key) {
-		return this.properties.get(key);
+		return this.map.get(key);
 	}
 
 

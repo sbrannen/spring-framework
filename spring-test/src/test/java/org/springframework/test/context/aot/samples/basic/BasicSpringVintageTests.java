@@ -22,12 +22,14 @@ import org.springframework.aot.AotDetector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.lang.Nullable;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.aot.TestAotProperties;
+import org.springframework.test.context.aot.TestAotPropertiesAware;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -65,7 +67,15 @@ public class BasicSpringVintageTests {
 			.as("@TestPropertySource").isEqualTo("vintage");
 	}
 
-	public static class CustomXmlBootstrapper extends DefaultTestContextBootstrapper {
+	public static class CustomXmlBootstrapper extends DefaultTestContextBootstrapper implements TestAotPropertiesAware {
+
+		@Nullable
+		private TestAotProperties testAotProperties;
+
+		@Override
+		public void setTestAotProperties(TestAotProperties testAotProperties) {
+			this.testAotProperties = testAotProperties;
+		}
 
 		@Override
 		protected Class<? extends ContextLoader> getDefaultContextLoaderClass(Class<?> testClass) {
@@ -76,19 +86,20 @@ public class BasicSpringVintageTests {
 		protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
 			String stringKey = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName();
 			String booleanKey = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active";
-			TestAotProperties testAotProperties = TestAotProperties.getInstance();
 			if (AotDetector.useGeneratedArtifacts()) {
-				assertThat(testAotProperties.getString(stringKey))
+				assertThat(this.testAotProperties.getString(stringKey))
 					.as("AOT String property must already be present during AOT run-time execution")
 					.isEqualTo("org.example.Main");
-				assertThat(testAotProperties.getBoolean(booleanKey))
+				assertThat(this.testAotProperties.getBoolean(booleanKey))
 					.as("AOT boolean property must already be present during AOT run-time execution")
 					.isTrue();
 			}
 			else {
 				// Set AOT properties during AOT build-time processing
-				testAotProperties.setProperty(stringKey, "org.example.Main");
-				testAotProperties.setProperty(booleanKey, "TrUe");
+				if (this.testAotProperties != null) {
+					this.testAotProperties.setProperty(stringKey, "org.example.Main");
+					this.testAotProperties.setProperty(booleanKey, "TrUe");
+				}
 			}
 			return mergedConfig;
 		}

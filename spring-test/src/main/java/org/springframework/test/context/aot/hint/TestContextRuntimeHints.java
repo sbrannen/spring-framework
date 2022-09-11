@@ -28,6 +28,8 @@ import org.springframework.aot.hint.TypeHint;
 import org.springframework.aot.hint.TypeReference;
 import org.springframework.util.ClassUtils;
 
+import static org.springframework.aot.hint.MemberCategory.INVOKE_PUBLIC_METHODS;
+
 /**
  * {@link RuntimeHintsRegistrar} implementation that makes types and annotations
  * from the <em>Spring TestContext Framework</em> available at runtime.
@@ -49,6 +51,11 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 		registerPublicConstructors(reflectionHints,
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
 			org.springframework.test.context.support.DefaultBootstrapContext.class
+		);
+
+		// Loaded reflectively in BootstrapUtils
+		registerPublicMethods(reflectionHints,
+			org.springframework.test.context.aot.TestAotPropertiesUtils.class
 		);
 
 		if (groovyPresent) {
@@ -82,6 +89,10 @@ class TestContextRuntimeHints implements RuntimeHintsRegistrar {
 
 	private static List<TypeReference> listOf(String... classNames) {
 		return Arrays.stream(classNames).map(TypeReference::of).toList();
+	}
+
+	private static void registerPublicMethods(ReflectionHints reflectionHints, Class<?> type) {
+		reflectionHints.registerType(type, INVOKE_PUBLIC_METHODS);
 	}
 
 	private static void registerAnnotation(ReflectionHints reflectionHints, Class<? extends Annotation> annotationType) {

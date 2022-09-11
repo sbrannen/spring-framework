@@ -17,7 +17,7 @@
 package org.springframework.test.context.aot;
 
 import java.util.Collections;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -64,6 +64,8 @@ public class TestContextAotGenerator {
 
 	private final ApplicationContextAotGenerator aotGenerator = new ApplicationContextAotGenerator();
 
+	private final DefaultTestAotProperties testAotProperties = new DefaultTestAotProperties(new ConcurrentHashMap<>());
+
 	private final AotServices<TestRuntimeHintsRegistrar> testRuntimeHintsRegistrars;
 
 	private final AtomicInteger sequence = new AtomicInteger();
@@ -109,21 +111,12 @@ public class TestContextAotGenerator {
 	 * @throws TestContextAotException if an error occurs during AOT processing
 	 */
 	public void processAheadOfTime(Stream<Class<?>> testClasses) throws TestContextAotException {
-		try {
-			// Make sure AOT properties are cleared before processing
-			TestAotPropertiesFactory.reset();
+		MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
+		testClasses.forEach(testClass -> mergedConfigMappings.add(buildMergedContextConfiguration(testClass), testClass));
+		MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
 
-			MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
-			testClasses.forEach(testClass -> mergedConfigMappings.add(buildMergedContextConfiguration(testClass), testClass));
-			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
-
-			generateTestAotMappings(initializerClassMappings);
-			generateTestAotProperties();
-		}
-		finally {
-			// Clear AOT properties after processing
-			TestAotPropertiesFactory.reset();
-		}
+		generateTestAotMappings(initializerClassMappings);
+		generateTestAotProperties();
 	}
 
 	private MultiValueMap<ClassName, Class<?>> processAheadOfTime(MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings) {
@@ -195,6 +188,8 @@ public class TestContextAotGenerator {
 				Consider annotating test class [%s] with @ContextConfiguration or \
 				@ContextHierarchy.""".formatted(testClass.getName()));
 
+		supplyTestAotPropertiesIfNecessary(contextLoader);
+
 		if (contextLoader instanceof AotContextLoader aotContextLoader) {
 			try {
 				ApplicationContext context = aotContextLoader.loadContextForAotProcessing(mergedConfig);
@@ -219,13 +214,23 @@ public class TestContextAotGenerator {
 		TestContextBootstrapper testContextBootstrapper =
 				BootstrapUtils.resolveTestContextBootstrapper(testClass);
 		registerDeclaredConstructors(testContextBootstrapper.getClass()); // @BootstrapWith
+		supplyTestAotPropertiesIfNecessary(testContextBootstrapper);
+
 		testContextBootstrapper.getTestExecutionListeners().forEach(listener -> {
 			registerDeclaredConstructors(listener.getClass()); // @TestExecutionListeners
+			supplyTestAotPropertiesIfNecessary(listener);
 			if (listener instanceof AotTestExecutionListener aotListener) {
 				aotListener.processAheadOfTime(testClass, this.runtimeHints, getClass().getClassLoader());
 			}
 		});
+
 		return testContextBootstrapper.buildMergedContextConfiguration();
+	}
+
+	private void supplyTestAotPropertiesIfNecessary(Object component) {
+		if (component instanceof TestAotPropertiesAware tapAware) {
+			tapAware.setTestAotProperties(this.testAotProperties);
+		}
 	}
 
 	DefaultGenerationContext createGenerationContext(Class<?> testClass) {
@@ -258,9 +263,8 @@ public class TestContextAotGenerator {
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
 
-		Map<String, String> properties = TestAotPropertiesFactory.getProperties();
 		TestAotPropertiesCodeGenerator codeGenerator =
-				new TestAotPropertiesCodeGenerator(properties, generatedClasses);
+				new TestAotPropertiesCodeGenerator(this.testAotProperties.map, generatedClasses);
 		generationContext.writeGeneratedContent();
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
 		registerPublicMethods(className);

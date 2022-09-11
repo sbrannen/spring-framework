@@ -18,12 +18,14 @@ package org.springframework.test.context;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.SpringProperties;
 import org.springframework.lang.Nullable;
@@ -61,7 +63,14 @@ public abstract class BootstrapUtils {
 	private static final String WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME =
 			"org.springframework.test.context.web.WebAppConfiguration";
 
+	private static final String TEST_AOT_PROPERTIES_UTILS_CLASS_NAME =
+			"org.springframework.test.context.aot.TestAotPropertiesUtils";
+
+	private static final String SET_TEST_AOT_PROPERTIES_METHOD_NAME = "setTestAotProperties";
+
 	private static final Class<? extends Annotation> webAppConfigurationClass = loadWebAppConfigurationClass();
+
+	private static final Method setTestAotPropertiesMethod = loadSetTestAotPropertiesMethod();
 
 	private static final Log logger = LogFactory.getLog(BootstrapUtils.class);
 
@@ -169,6 +178,9 @@ public abstract class BootstrapUtils {
 			TestContextBootstrapper testContextBootstrapper =
 					BeanUtils.instantiateClass(clazz, TestContextBootstrapper.class);
 			testContextBootstrapper.setBootstrapContext(bootstrapContext);
+			if (AotDetector.useGeneratedArtifacts()) {
+				setTestAotPropertiesMethod.invoke(null, testContextBootstrapper);
+			}
 			return testContextBootstrapper;
 		}
 		catch (IllegalStateException ex) {
@@ -225,6 +237,20 @@ public abstract class BootstrapUtils {
 		catch (ClassNotFoundException | LinkageError ex) {
 			throw new IllegalStateException(
 				"Failed to load class for @" + WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME, ex);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Method loadSetTestAotPropertiesMethod() {
+		String className = TEST_AOT_PROPERTIES_UTILS_CLASS_NAME;
+		String methodName = SET_TEST_AOT_PROPERTIES_METHOD_NAME;
+		try {
+			Class<?> clazz = ClassUtils.forName(className, BootstrapUtils.class.getClassLoader());
+			return clazz.getMethod(methodName, Object.class);
+		}
+		catch (ClassNotFoundException | LinkageError | NoSuchMethodException ex) {
+			throw new IllegalStateException(
+					"Failed to load method %s from class %s".formatted(methodName, className), ex);
 		}
 	}
 

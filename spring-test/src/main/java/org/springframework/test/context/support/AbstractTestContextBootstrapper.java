@@ -29,6 +29,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.aot.AotDetector;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -52,6 +53,7 @@ import org.springframework.test.context.TestContextBootstrapper;
 import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
+import org.springframework.test.context.aot.TestAotPropertiesUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -175,6 +177,10 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			AnnotationAwareOrderComparator.sort(listeners);
 		}
 
+		if (AotDetector.useGeneratedArtifacts()) {
+			listeners.forEach(TestAotPropertiesUtils::setTestAotProperties);
+		}
+
 		if (logger.isInfoEnabled()) {
 			logger.info("Using TestExecutionListeners: " + listeners);
 		}
@@ -287,6 +293,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			logger.info(String.format(
 					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s], using %s",
 					testClass.getName(), contextLoader.getClass().getSimpleName()));
+		}
+		if (AotDetector.useGeneratedArtifacts()) {
+			TestAotPropertiesUtils.setTestAotProperties(contextLoader);
 		}
 		return buildMergedContextConfiguration(testClass, defaultConfigAttributesList, null,
 				cacheAwareContextLoaderDelegate, false);

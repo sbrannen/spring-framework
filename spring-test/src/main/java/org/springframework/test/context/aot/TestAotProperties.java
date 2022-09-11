@@ -42,26 +42,15 @@ import org.springframework.lang.Nullable;
  * in {@link AotTestExecutionListener#processAheadOfTime processAheadOfTime()}.
  * Any other test component &mdash; such as a
  * {@link org.springframework.test.context.TestContextBootstrapper TestContextBootstrapper}
- * &mdash; can choose to contribute a property at any point time. Note that
- * contributing a property during standard JVM test execution will not have any
- * adverse side effect since AOT properties will be ignored in that scenario. In
- * any case, you should use {@link AotDetector#useGeneratedArtifacts()} to determine
- * if invocations of {@link #setProperty(String, String)} are permitted.
+ * &mdash; can choose to contribute a property at any point in time. In any case,
+ * you should use {@link AotDetector#useGeneratedArtifacts()} to determine
+ * if invocations of {@link #setProperty(String, String)} and {@link #removeProperty(String)}
+ * are permitted.
  *
  * @author Sam Brannen
  * @since 6.0
  */
 public interface TestAotProperties {
-
-	/**
-	 * Get the current instance of {@code TestAotProperties} to use.
-	 * <p>See the class-level {@link TestAotProperties Javadoc} for details on
-	 * the two possible modes.
-	 */
-	static TestAotProperties getInstance() {
-		return new DefaultTestAotProperties(TestAotPropertiesFactory.getProperties());
-	}
-
 
 	/**
 	 * Set a {@code String} property for later retrieval during AOT run-time execution.

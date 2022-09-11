@@ -113,9 +113,9 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(ThrowingConsumer.of(compiled -> {
 			try {
 				System.setProperty(AotDetector.AOT_ENABLED, "true");
-				TestAotPropertiesFactory.reset();
+				TestAotPropertiesUtils.reset();
 
-				TestAotProperties testAotProperties = TestAotProperties.getInstance();
+				TestAotProperties testAotProperties = new DefaultTestAotProperties(TestAotPropertiesUtils.getGeneratedProperties());
 				assertThatExceptionOfType(UnsupportedOperationException.class)
 					.isThrownBy(() -> testAotProperties.setProperty("foo", "bar"))
 					.withMessage("AOT properties cannot be modified during AOT run-time execution");
@@ -146,7 +146,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			}
 			finally {
 				System.clearProperty(AotDetector.AOT_ENABLED);
-				TestAotPropertiesFactory.reset();
+				TestAotPropertiesUtils.reset();
 			}
 		}));
 	}
@@ -154,6 +154,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	private static void assertRuntimeHints(RuntimeHints runtimeHints) {
 		assertReflectionRegistered(runtimeHints, TestAotMappings.GENERATED_MAPPINGS_CLASS_NAME, INVOKE_PUBLIC_METHODS);
 		assertReflectionRegistered(runtimeHints, TestAotPropertiesCodeGenerator.GENERATED_PROPERTIES_CLASS_NAME, INVOKE_PUBLIC_METHODS);
+		assertReflectionRegistered(runtimeHints, TestAotPropertiesUtils.class, INVOKE_PUBLIC_METHODS);
 
 		Stream.of(
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
