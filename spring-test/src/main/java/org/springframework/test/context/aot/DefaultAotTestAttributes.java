@@ -23,47 +23,47 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of {@link TestAotProperties} backed by a {@link Map}.
+ * Default implementation of {@link AotTestAttributes} backed by a {@link Map}.
  *
  * @author Sam Brannen
  * @since 6.0
  */
-class DefaultTestAotProperties implements TestAotProperties {
+class DefaultAotTestAttributes implements AotTestAttributes {
 
-	private final Map<String, String> properties;
+	private final Map<String, String> attributes;
 
 
-	DefaultTestAotProperties(Map<String, String> properties) {
-		this.properties = properties;
+	DefaultAotTestAttributes(Map<String, String> attributes) {
+		this.attributes = attributes;
 	}
 
 
 	@Override
-	public void setProperty(String key, String value) {
+	public void setAttribute(String name, String value) {
 		assertNotInAotRuntime();
 		Assert.notNull(value, "'value' must not be null");
-		Assert.isTrue(!this.properties.containsKey(key),
-				() -> "AOT properties cannot be overridden. Key '%s' is already in use.".formatted(key));
-		this.properties.put(key, value);
+		Assert.isTrue(!this.attributes.containsKey(name),
+				() -> "AOT attributes cannot be overridden. Name '%s' is already in use.".formatted(name));
+		this.attributes.put(name, value);
 	}
 
 	@Override
-	public void removeProperty(String key) {
+	public void removeAttribute(String name) {
 		assertNotInAotRuntime();
-		this.properties.remove(key);
+		this.attributes.remove(name);
 	}
 
 	@Override
 	@Nullable
-	public String getString(String key) {
-		return this.properties.get(key);
+	public String getString(String name) {
+		return this.attributes.get(name);
 	}
 
 
 	private static void assertNotInAotRuntime() {
 		if (AotDetector.useGeneratedArtifacts()) {
 			throw new UnsupportedOperationException(
-				"AOT properties cannot be modified during AOT run-time execution");
+				"AOT attributes cannot be modified during AOT run-time execution");
 		}
 	}
 

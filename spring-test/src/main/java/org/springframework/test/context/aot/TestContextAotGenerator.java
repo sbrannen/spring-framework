@@ -110,19 +110,19 @@ public class TestContextAotGenerator {
 	 */
 	public void processAheadOfTime(Stream<Class<?>> testClasses) throws TestContextAotException {
 		try {
-			// Make sure AOT properties are cleared before processing
-			TestAotPropertiesFactory.reset();
+			// Make sure AOT attributes are cleared before processing
+			AotTestAttributesFactory.reset();
 
 			MultiValueMap<MergedContextConfiguration, Class<?>> mergedConfigMappings = new LinkedMultiValueMap<>();
 			testClasses.forEach(testClass -> mergedConfigMappings.add(buildMergedContextConfiguration(testClass), testClass));
 			MultiValueMap<ClassName, Class<?>> initializerClassMappings = processAheadOfTime(mergedConfigMappings);
 
 			generateTestAotMappings(initializerClassMappings);
-			generateTestAotProperties();
+			generateAotTestAttributes();
 		}
 		finally {
-			// Clear AOT properties after processing
-			TestAotPropertiesFactory.reset();
+			// Clear AOT attributes after processing
+			AotTestAttributesFactory.reset();
 		}
 	}
 
@@ -252,15 +252,15 @@ public class TestContextAotGenerator {
 		registerPublicMethods(className);
 	}
 
-	private void generateTestAotProperties() {
-		ClassNameGenerator classNameGenerator = new ClassNameGenerator(TestAotProperties.class);
+	private void generateAotTestAttributes() {
+		ClassNameGenerator classNameGenerator = new ClassNameGenerator(AotTestAttributes.class);
 		DefaultGenerationContext generationContext =
 				new DefaultGenerationContext(classNameGenerator, this.generatedFiles, this.runtimeHints);
 		GeneratedClasses generatedClasses = generationContext.getGeneratedClasses();
 
-		Map<String, String> properties = TestAotPropertiesFactory.getProperties();
-		TestAotPropertiesCodeGenerator codeGenerator =
-				new TestAotPropertiesCodeGenerator(properties, generatedClasses);
+		Map<String, String> attributes = AotTestAttributesFactory.getAttributes();
+		AotTestAttributesCodeGenerator codeGenerator =
+				new AotTestAttributesCodeGenerator(attributes, generatedClasses);
 		generationContext.writeGeneratedContent();
 		String className = codeGenerator.getGeneratedClass().getName().reflectionName();
 		registerPublicMethods(className);

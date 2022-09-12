@@ -75,7 +75,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 
 /**
  * Tests for {@link TestContextAotGenerator}, {@link TestAotMappings},
- * {@link TestAotProperties}, {@link AotContextLoader}, and run-time hints.
+ * {@link AotTestAttributes}, {@link AotContextLoader}, and run-time hints.
  *
  * @author Sam Brannen
  * @since 6.0
@@ -113,17 +113,18 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 		TestCompiler.forSystem().withFiles(generatedFiles).compile(ThrowingConsumer.of(compiled -> {
 			try {
 				System.setProperty(AotDetector.AOT_ENABLED, "true");
-				TestAotPropertiesFactory.reset();
+				AotTestAttributesFactory.reset();
 
-				TestAotProperties testAotProperties = TestAotProperties.getInstance();
+				AotTestAttributes aotAttributes = AotTestAttributes.getInstance();
 				assertThatExceptionOfType(UnsupportedOperationException.class)
-					.isThrownBy(() -> testAotProperties.setProperty("foo", "bar"))
-					.withMessage("AOT properties cannot be modified during AOT run-time execution");
+					.isThrownBy(() -> aotAttributes.setAttribute("foo", "bar"))
+					.withMessage("AOT attributes cannot be modified during AOT run-time execution");
 				String key = "@SpringBootConfiguration-" + BasicSpringVintageTests.class.getName();
-				assertThat(testAotProperties.getString(key)).isEqualTo("org.example.Main");
-				assertThat(testAotProperties.getBoolean(key + "-active")).isTrue();
-				assertThat(testAotProperties.getString("bogus")).isNull();
-				assertThat(testAotProperties.getBoolean("bogus")).isFalse();
+				assertThat(aotAttributes.getString(key)).isEqualTo("org.example.Main");
+				assertThat(aotAttributes.getBoolean(key + "-active1")).isTrue();
+				assertThat(aotAttributes.getBoolean(key + "-active2")).isTrue();
+				assertThat(aotAttributes.getString("bogus")).isNull();
+				assertThat(aotAttributes.getBoolean("bogus")).isFalse();
 
 				TestAotMappings testAotMappings = new TestAotMappings();
 				for (Class<?> testClass : testClasses) {
@@ -146,14 +147,14 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 			}
 			finally {
 				System.clearProperty(AotDetector.AOT_ENABLED);
-				TestAotPropertiesFactory.reset();
+				AotTestAttributesFactory.reset();
 			}
 		}));
 	}
 
 	private static void assertRuntimeHints(RuntimeHints runtimeHints) {
 		assertReflectionRegistered(runtimeHints, TestAotMappings.GENERATED_MAPPINGS_CLASS_NAME, INVOKE_PUBLIC_METHODS);
-		assertReflectionRegistered(runtimeHints, TestAotPropertiesCodeGenerator.GENERATED_PROPERTIES_CLASS_NAME, INVOKE_PUBLIC_METHODS);
+		assertReflectionRegistered(runtimeHints, AotTestAttributesCodeGenerator.GENERATED_ATTRIBUTES_CLASS_NAME, INVOKE_PUBLIC_METHODS);
 
 		Stream.of(
 			org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate.class,
@@ -356,7 +357,7 @@ class TestContextAotGeneratorTests extends AbstractAotTests {
 	private static final String[] expectedSourceFiles = {
 			// Global
 			"org/springframework/test/context/aot/TestAotMappings__Generated.java",
-			"org/springframework/test/context/aot/TestAotProperties__Generated.java",
+			"org/springframework/test/context/aot/AotTestAttributes__Generated.java",
 			// BasicSpringJupiterSharedConfigTests
 			"org/springframework/context/event/DefaultEventListenerFactory__TestContext001_BeanDefinitions.java",
 			"org/springframework/context/event/EventListenerMethodProcessor__TestContext001_BeanDefinitions.java",

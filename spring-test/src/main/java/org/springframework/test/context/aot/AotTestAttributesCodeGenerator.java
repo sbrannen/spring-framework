@@ -34,32 +34,32 @@ import org.springframework.javapoet.TypeName;
 import org.springframework.javapoet.TypeSpec;
 
 /**
- * Internal code generator for {@link TestAotProperties}.
+ * Internal code generator for {@link AotTestAttributes}.
  *
  * @author Sam Brannen
  * @since 6.0
  */
-class TestAotPropertiesCodeGenerator {
+class AotTestAttributesCodeGenerator {
 
 	private static final String GENERATED_SUFFIX = "Generated";
 
-	static final String GENERATED_PROPERTIES_CLASS_NAME = TestAotProperties.class.getName() + "__" + GENERATED_SUFFIX;
+	static final String GENERATED_ATTRIBUTES_CLASS_NAME = AotTestAttributes.class.getName() + "__" + GENERATED_SUFFIX;
 
-	static final String GENERATED_PROPERTIES_METHOD_NAME = "getProperties";
+	static final String GENERATED_ATTRIBUTES_METHOD_NAME = "getAttributes";
 
-	private static final Log logger = LogFactory.getLog(TestAotPropertiesCodeGenerator.class);
+	private static final Log logger = LogFactory.getLog(AotTestAttributesCodeGenerator.class);
 
 	// Map<String, String>
 	private static final TypeName MAP_TYPE = ParameterizedTypeName.get(Map.class, String.class, String.class);
 
 
-	private final Map<String, String> properties;
+	private final Map<String, String> attributes;
 
 	private final GeneratedClass generatedClass;
 
 
-	TestAotPropertiesCodeGenerator(Map<String, String> properties, GeneratedClasses generatedClasses) {
-		this.properties = properties;
+	AotTestAttributesCodeGenerator(Map<String, String> attributes, GeneratedClasses generatedClasses) {
+		this.attributes = attributes;
 		this.generatedClass = generatedClasses.addForFeature(GENERATED_SUFFIX, this::generateType);
 	}
 
@@ -69,15 +69,15 @@ class TestAotPropertiesCodeGenerator {
 	}
 
 	private void generateType(TypeSpec.Builder type) {
-		logger.debug(LogMessage.format("Generating AOT test properties in %s",
+		logger.debug(LogMessage.format("Generating AOT test attributes in %s",
 				this.generatedClass.getName().reflectionName()));
-		type.addJavadoc("Generated map for {@link $T}.", TestAotProperties.class);
+		type.addJavadoc("Generated map for {@link $T}.", AotTestAttributes.class);
 		type.addModifiers(Modifier.PUBLIC);
 		type.addMethod(generateMethod());
 	}
 
 	private MethodSpec generateMethod() {
-		MethodSpec.Builder method = MethodSpec.methodBuilder(GENERATED_PROPERTIES_METHOD_NAME);
+		MethodSpec.Builder method = MethodSpec.methodBuilder(GENERATED_ATTRIBUTES_METHOD_NAME);
 		method.addModifiers(Modifier.PUBLIC, Modifier.STATIC);
 		method.returns(MAP_TYPE);
 		method.addCode(generateCode());
@@ -87,8 +87,8 @@ class TestAotPropertiesCodeGenerator {
 	private CodeBlock generateCode() {
 		CodeBlock.Builder code = CodeBlock.builder();
 		code.addStatement("$T map = new $T<>()", MAP_TYPE, HashMap.class);
-		this.properties.forEach((key, value) -> {
-			logger.debug(LogMessage.format("Storing AOT test property: %s = %s", key, value));
+		this.attributes.forEach((key, value) -> {
+			logger.trace(LogMessage.format("Storing AOT test attribute: %s = %s", key, value));
 			code.addStatement("map.put($S, $S)", key, value);
 		});
 		code.addStatement("return map");

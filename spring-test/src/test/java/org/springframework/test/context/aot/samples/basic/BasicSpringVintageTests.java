@@ -27,7 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.aot.TestAotProperties;
+import org.springframework.test.context.aot.AotTestAttributes;
 import org.springframework.test.context.aot.samples.basic.BasicSpringVintageTests.CustomXmlBootstrapper;
 import org.springframework.test.context.aot.samples.common.MessageService;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -75,20 +75,25 @@ public class BasicSpringVintageTests {
 		@Override
 		protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
 			String stringKey = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName();
-			String booleanKey = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active";
-			TestAotProperties testAotProperties = TestAotProperties.getInstance();
+			String booleanKey1 = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active1";
+			String booleanKey2 = "@SpringBootConfiguration-" + mergedConfig.getTestClass().getName() + "-active2";
+			AotTestAttributes aotAttributes = AotTestAttributes.getInstance();
 			if (AotDetector.useGeneratedArtifacts()) {
-				assertThat(testAotProperties.getString(stringKey))
-					.as("AOT String property must already be present during AOT run-time execution")
+				assertThat(aotAttributes.getString(stringKey))
+					.as("AOT String attribute must already be present during AOT run-time execution")
 					.isEqualTo("org.example.Main");
-				assertThat(testAotProperties.getBoolean(booleanKey))
-					.as("AOT boolean property must already be present during AOT run-time execution")
+				assertThat(aotAttributes.getBoolean(booleanKey1))
+					.as("AOT boolean attribute 1 must already be present during AOT run-time execution")
+					.isTrue();
+				assertThat(aotAttributes.getBoolean(booleanKey2))
+					.as("AOT boolean attribute 2 must already be present during AOT run-time execution")
 					.isTrue();
 			}
 			else {
-				// Set AOT properties during AOT build-time processing
-				testAotProperties.setProperty(stringKey, "org.example.Main");
-				testAotProperties.setProperty(booleanKey, "TrUe");
+				// Set AOT attributes during AOT build-time processing
+				aotAttributes.setAttribute(stringKey, "org.example.Main");
+				aotAttributes.setAttribute(booleanKey1, "TrUe");
+				aotAttributes.setAttribute(booleanKey2, true);
 			}
 			return mergedConfig;
 		}

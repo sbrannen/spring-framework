@@ -28,61 +28,61 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Factory for {@link TestAotProperties}.
+ * Factory for {@link AotTestAttributes}.
  *
  * @author Sam Brannen
  * @since 6.0
  */
-final class TestAotPropertiesFactory {
+final class AotTestAttributesFactory {
 
 	@Nullable
-	private static volatile Map<String, String> properties;
+	private static volatile Map<String, String> attributes;
 
 
-	private TestAotPropertiesFactory() {
+	private AotTestAttributesFactory() {
 	}
 
 	/**
-	 * Get the underlying properties map.
+	 * Get the underlying attributes map.
 	 * <p>If the map is not already loaded, this method loads the map from the
 	 * generated class when running in {@linkplain AotDetector#useGeneratedArtifacts()
-	 * AOT execution mode} and otherwise creates a new map for storing properties
+	 * AOT execution mode} and otherwise creates a new map for storing attributes
 	 * during the AOT processing phase.
 	 */
-	static Map<String, String> getProperties() {
-		Map<String, String> props = properties;
-		if (props == null) {
-			synchronized (TestAotPropertiesFactory.class) {
-				props = properties;
-				if (props == null) {
-					props = (AotDetector.useGeneratedArtifacts() ? loadPropertiesMap() : new ConcurrentHashMap<>());
-					properties = props;
+	static Map<String, String> getAttributes() {
+		Map<String, String> attrs = attributes;
+		if (attrs == null) {
+			synchronized (AotTestAttributesFactory.class) {
+				attrs = attributes;
+				if (attrs == null) {
+					attrs = (AotDetector.useGeneratedArtifacts() ? loadAttributesMap() : new ConcurrentHashMap<>());
+					attributes = attrs;
 				}
 			}
 		}
-		return props;
+		return attrs;
 	}
 
 	/**
-	 * Reset test AOT properties.
+	 * Reset AOT test attributes.
 	 * <p>Only for internal use.
 	 */
 	static void reset() {
-		synchronized (TestAotPropertiesFactory.class) {
-			properties = null;
+		synchronized (AotTestAttributesFactory.class) {
+			attributes = null;
 		}
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private static Map<String, String> loadPropertiesMap() {
-		String className = TestAotPropertiesCodeGenerator.GENERATED_PROPERTIES_CLASS_NAME;
-		String methodName = TestAotPropertiesCodeGenerator.GENERATED_PROPERTIES_METHOD_NAME;
+	private static Map<String, String> loadAttributesMap() {
+		String className = AotTestAttributesCodeGenerator.GENERATED_ATTRIBUTES_CLASS_NAME;
+		String methodName = AotTestAttributesCodeGenerator.GENERATED_ATTRIBUTES_METHOD_NAME;
 		try {
 			Class<?> clazz = ClassUtils.forName(className, null);
 			Method method = ReflectionUtils.findMethod(clazz, methodName);
 			Assert.state(method != null, () -> "No %s() method found in %s".formatted(methodName, clazz.getName()));
-			Map<String, String> properties = (Map<String, String>) ReflectionUtils.invokeMethod(method, null);
-			return Collections.unmodifiableMap(properties);
+			Map<String, String> attributes = (Map<String, String>) ReflectionUtils.invokeMethod(method, null);
+			return Collections.unmodifiableMap(attributes);
 		}
 		catch (IllegalStateException ex) {
 			throw ex;
