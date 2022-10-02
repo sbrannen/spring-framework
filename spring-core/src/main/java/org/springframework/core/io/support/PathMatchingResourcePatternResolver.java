@@ -738,15 +738,39 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		URI rootDirUri;
 		String rootDir;
+		boolean isWindowsFileSystem;
 		try {
 			rootDirUri = rootDirResource.getURI();
-			rootDir = rootDirUri.getPath();
-			// If the URI is for a "resource" in the GraalVM native image file system, we have to
-			// ensure that the root directory does not end in a slash while simultaneously ensuring
-			// that the root directory is not an empty string (since fileSystem.getPath("").resolve(str)
-			// throws an ArrayIndexOutOfBoundsException in a native image).
-			if ("resource".equals(rootDirUri.getScheme()) && (rootDir.length() > 1) && rootDir.endsWith("/")) {
-				rootDir = rootDir.substring(0, rootDir.length() - 1);
+			String scheme = rootDirUri.getScheme();
+			isWindowsFileSystem = ResourceUtils.URL_PROTOCOL_FILE.equals(scheme) && (File.separatorChar == '\\');
+
+			// Do NOT use URI#getPath, because it will return null if the "path" does not start
+			// with a slash -- for example, on Windows with a URI like file:C:/Users/Jane/resources/
+			// which is missing a "/" before the "C:".
+			rootDir = rootDirUri.getSchemeSpecificPart();
+
+			// If the leading slash is missing in the URI, we have to patch the URI to include it.
+			// Otherwise, we later encounter various exceptions when trying to resolve the actual
+			// file system since uri.resolve("/") will lose the scheme of the original URI, etc.
+			if (!rootDir.startsWith("/")) {
+				rootDirUri = new URI(scheme + ":/" + rootDir);
+			}
+
+			if (rootDir.length() > 1) {
+				if (isWindowsFileSystem) {
+					// If the URI is for a "file" in the Windows file system, we have to strip off
+					// a leading slash, since /C:/MyDir is not a valid path within the Windows
+					// file system.
+					rootDir = stripLeadingSlash(rootDir);
+				}
+				else if ("resource".equals(scheme)) {
+					// If the URI is for a "resource" in the GraalVM native image file system,
+					// we have to ensure that the root directory does not end in a slash while
+					// simultaneously ensuring that the root directory is not an empty string
+					// (since fileSystem.getPath("").resolve(path) throws an
+					// ArrayIndexOutOfBoundsException in a native image).
+					rootDir = stripTrailingSlash(rootDir);
+				}
 			}
 		}
 		catch (Exception ex) {
@@ -763,9 +787,14 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 		try {
 			Path rootPath = fileSystem.getPath(rootDir);
-			String resourcePattern = rootPath.resolve(subPattern).toString();
+			// To build the resourcePattern, we unfortunately cannot use
+			// rootPath.resolve(subPattern).toString(), because sun.nio.fs.WindowsFileSystem
+			// does not permit wildcards ('*') in a java.nio.file.Path.
+			boolean needsSlash = !(rootDir.endsWith("/") || subPattern.startsWith("/"));
+			String resourcePattern = rootDir + (needsSlash ? "/" : "") + subPattern;
+			String resourcePatternToUse = resourcePattern;
 			Predicate<Path> isMatchingFile =
-					path -> Files.isRegularFile(path) && getPathMatcher().match(resourcePattern, path.toString());
+					path -> Files.isRegularFile(path) && getPathMatcher().match(resourcePatternToUse, path.toString().replace('\\', '/'));
 			if (logger.isTraceEnabled()) {
 				logger.trace("Searching directory [%s] for files matching pattern [%s]"
 						.formatted(rootPath.toAbsolutePath(), subPattern));
@@ -902,15 +931,25 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	}
 
 	private Resource convertToResource(URI uri) {
-		return ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme()) ?
-				new FileSystemResource(uri.getPath()) :
-				UrlResource.from(uri);
+		if (ResourceUtils.URL_PROTOCOL_FILE.equals(uri.getScheme())){
+			String path = uri.getPath();
+			if (File.separatorChar == '\\') {
+				path = stripLeadingSlash(path).replace('/', '\\');
+			}
+			return new FileSystemResource(path);
+		}
+		else {
+			return UrlResource.from(uri);
+		}
 	}
 
 	private static String stripLeadingSlash(String path) {
 		return (path.startsWith("/") ? path.substring(1) : path);
 	}
 
+	private static String stripTrailingSlash(String path) {
+		return (path.endsWith("/") ? path.substring(0, path.length() - 1) : path);
+	}
 
 	/**
 	 * Inner delegate class, avoiding a hard JBoss VFS API dependency at runtime.
