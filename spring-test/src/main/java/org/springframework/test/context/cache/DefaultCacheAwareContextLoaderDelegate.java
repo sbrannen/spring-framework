@@ -16,6 +16,8 @@
 
 package org.springframework.test.context.cache;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -62,7 +64,7 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	private final ContextCache contextCache;
 
 	@Nullable
-	private ApplicationContextFailureProcessor contextFailureProcessor;
+	private List<ApplicationContextFailureProcessor> contextFailureProcessors;
 
 
 	/**
@@ -118,16 +120,19 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 					Throwable cause = ex;
 					if (ex instanceof ContextLoadException cle) {
 						cause = cle.getCause();
-						if (this.contextFailureProcessor != null) {
-							try {
-								this.contextFailureProcessor.processLoadFailure(cle.getApplicationContext(), cause);
-							}
-							catch (Throwable throwable) {
-								if (logger.isDebugEnabled()) {
-									logger.debug("Ignoring exception thrown from ApplicationContextFailureProcessor [%s]: %s"
-											.formatted(this.contextFailureProcessor, throwable));
+						if (!this.contextFailureProcessors.isEmpty()) {
+							Throwable causeToUse = cause;
+							this.contextFailureProcessors.forEach(processor -> {
+								try {
+									processor.processLoadFailure(cle.getApplicationContext(), causeToUse);
 								}
-							}
+								catch (Throwable throwable) {
+									if (logger.isDebugEnabled()) {
+										logger.debug("Ignoring exception thrown from ApplicationContextFailureProcessor [%s]: %s"
+											.formatted(processor, throwable));
+									}
+								}
+							});
 						}
 					}
 					throw new IllegalStateException(
@@ -155,8 +160,8 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 	}
 
 	@Override
-	public void setContextFailureProcessor(@Nullable ApplicationContextFailureProcessor contextFailureProcessor) {
-		this.contextFailureProcessor = contextFailureProcessor;
+	public void setContextFailureProcessors(List<ApplicationContextFailureProcessor> contextFailureProcessors) {
+		this.contextFailureProcessors = contextFailureProcessors;
 	}
 
 

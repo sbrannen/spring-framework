@@ -99,8 +99,10 @@ class ContextLoadFailureTests {
 	static class CustomTestContextBootstrapper extends DefaultTestContextBootstrapper {
 
 		@Override
-		protected ApplicationContextFailureProcessor getApplicationContextFailureProcessor() {
-			return (context, exception) -> loadFailures.add(new LoadFailure(context, exception));
+		protected List<ApplicationContextFailureProcessor> getApplicationContextFailureProcessors() {
+			ApplicationContextFailureProcessor processor = (context, exception) ->
+					loadFailures.add(new LoadFailure(context, exception));
+			return List.of(processor);
 		}
 	}
 

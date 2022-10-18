@@ -16,6 +16,8 @@
 
 package org.springframework.test.context;
 
+import java.util.List;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.lang.Nullable;
@@ -102,16 +104,16 @@ public interface CacheAwareContextLoaderDelegate {
 	void closeContext(MergedContextConfiguration mergedContextConfiguration, @Nullable HierarchyMode hierarchyMode);
 
 	/**
-	 * Set the {@link ApplicationContextFailureProcessor} to use.
-	 * <p>The default implementation ignores the supplied processor.
+	 * Set the list of {@link ApplicationContextFailureProcessor} instances to use.
+	 * <p>The default implementation ignores the supplied processors.
 	 * <p>Concrete implementations should override this method to store a reference
-	 * to the supplied processor and use it to process {@link ContextLoadException
+	 * to the list of processors and use them to process {@link ContextLoadException
 	 * ContextLoadExceptions} thrown from context loaders in
 	 * {@link #loadContext(MergedContextConfiguration)}.
-	 * @param contextFailureProcessor the context failure processor to use
+	 * @param contextFailureProcessors the context failure processors to use
 	 * @since 6.0
 	 */
-	default void setContextFailureProcessor(@Nullable ApplicationContextFailureProcessor contextFailureProcessor) {
+	default void setContextFailureProcessors(List<ApplicationContextFailureProcessor> contextFailureProcessors) {
 		// no-op
 	}
 

@@ -507,28 +507,28 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	protected CacheAwareContextLoaderDelegate getCacheAwareContextLoaderDelegate() {
 		CacheAwareContextLoaderDelegate delegate = getBootstrapContext().getCacheAwareContextLoaderDelegate();
-		ApplicationContextFailureProcessor contextFailureProcessor = getApplicationContextFailureProcessor();
-		if (contextFailureProcessor != null) {
-			delegate.setContextFailureProcessor(contextFailureProcessor);
-		}
+		delegate.setContextFailureProcessors(getApplicationContextFailureProcessors());
 		return delegate;
 	}
 
 	/**
-	 * Get the {@link ApplicationContextFailureProcessor} to use.
-	 * <p>The default implementation returns {@code null}.
-	 * <p>Concrete subclasses may choose to override this method to provide an
-	 * {@code ApplicationContextFailureProcessor} that will be supplied to the
-	 * configured {@code CacheAwareContextLoaderDelegate} in
-	 * {@link #getCacheAwareContextLoaderDelegate()}.
-	 * @return the context failure processor to use, or {@code null} if no processor
-	 * should be used
+	 * Get the {@link ApplicationContextFailureProcessor} instances for this bootstrapper.
+	 * <p>The default implementation uses the {@link SpringFactoriesLoader} mechanism
+	 * for loading factories configured in all {@code META-INF/spring.factories}
+	 * files on the classpath.
 	 * @since 6.0
+	 * @see SpringFactoriesLoader#loadFactories
 	 * @see #getCacheAwareContextLoaderDelegate()
 	 */
-	@Nullable
-	protected ApplicationContextFailureProcessor getApplicationContextFailureProcessor() {
-		return null;
+	protected List<ApplicationContextFailureProcessor> getApplicationContextFailureProcessors() {
+		SpringFactoriesLoader loader = SpringFactoriesLoader.forDefaultResourceLocation(getClass().getClassLoader());
+		List<ApplicationContextFailureProcessor> processors =
+				loader.load(ApplicationContextFailureProcessor.class, this::handleInstantiationFailure);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Loaded default ApplicationContextFailureProcessor implementations from location [%s]: %s"
+					.formatted(SpringFactoriesLoader.FACTORIES_RESOURCE_LOCATION, classNames(processors)));
+		}
+		return Collections.unmodifiableList(processors);
 	}
 
 	/**
