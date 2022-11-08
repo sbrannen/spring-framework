@@ -53,7 +53,7 @@ public class SimpleBeanFactoryAwareAspectInstanceFactory implements AspectInstan
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-		Assert.notNull(this.aspectBeanName, "'aspectBeanName' is required");
+		Assert.state(this.aspectBeanName != null, "No 'aspectBeanName' set");
 	}
 
 

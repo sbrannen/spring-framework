@@ -158,7 +158,7 @@ public class RequestMappingHandlerAdapter
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.applicationContext, "ApplicationContext is required");
+		Assert.state(this.applicationContext != null, "ApplicationContext is required");
 
 		if (CollectionUtils.isEmpty(this.messageReaders)) {
 			ServerCodecConfigurer codecConfigurer = ServerCodecConfigurer.create();

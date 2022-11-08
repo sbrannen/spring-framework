@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,8 +170,8 @@ public class MethodInvoker {
 
 		Class<?> targetClass = getTargetClass();
 		String targetMethod = getTargetMethod();
-		Assert.notNull(targetClass, "Either 'targetClass' or 'targetObject' is required");
-		Assert.notNull(targetMethod, "Property 'targetMethod' is required");
+		Assert.state(targetClass != null, "Either 'targetClass' or 'targetObject' is required");
+		Assert.state(targetMethod != null, "Property 'targetMethod' is required");
 
 		Object[] arguments = getArguments();
 		Class<?>[] argTypes = new Class<?>[arguments.length];

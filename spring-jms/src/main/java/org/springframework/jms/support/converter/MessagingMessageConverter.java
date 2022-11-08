@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,8 +94,8 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.notNull(this.payloadConverter, "Property 'payloadConverter' is required");
-		Assert.notNull(this.headerMapper, "Property 'headerMapper' is required");
+		Assert.state(this.payloadConverter != null, "Property 'payloadConverter' is required");
+		Assert.state(this.headerMapper != null, "Property 'headerMapper' is required");
 	}
 
 

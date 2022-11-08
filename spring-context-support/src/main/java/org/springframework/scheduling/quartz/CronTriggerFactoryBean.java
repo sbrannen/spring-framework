@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -229,7 +229,7 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 
 	@Override
 	public void afterPropertiesSet() throws ParseException {
-		Assert.notNull(this.cronExpression, "Property 'cronExpression' is required");
+		Assert.state(this.cronExpression != null, "Property 'cronExpression' is required");
 
 		if (this.name == null) {
 			this.name = this.beanName;

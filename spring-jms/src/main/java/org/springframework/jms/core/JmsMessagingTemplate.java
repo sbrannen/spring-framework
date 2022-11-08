@@ -165,7 +165,7 @@ public class JmsMessagingTemplate extends AbstractMessagingTemplate<Destination>
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.notNull(this.jmsTemplate, "Property 'connectionFactory' or 'jmsTemplate' is required");
+		Assert.state(this.jmsTemplate != null, "Property 'connectionFactory' or 'jmsTemplate' is required");
 		if (!this.converterSet && this.jmsTemplate.getMessageConverter() != null) {
 			((MessagingMessageConverter) this.jmsMessageConverter)
 					.setPayloadConverter(this.jmsTemplate.getMessageConverter());

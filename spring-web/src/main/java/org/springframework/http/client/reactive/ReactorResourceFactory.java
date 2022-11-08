@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,7 +197,7 @@ public class ReactorResourceFactory implements InitializingBean, DisposableBean 
 	@Override
 	public void afterPropertiesSet() {
 		if (this.useGlobalResources) {
-			Assert.isTrue(this.loopResources == null && this.connectionProvider == null,
+			Assert.state(this.loopResources == null && this.connectionProvider == null,
 					"'useGlobalResources' is mutually exclusive with explicitly configured resources");
 			HttpResources httpResources = HttpResources.get();
 			if (this.globalResourcesConsumer != null) {

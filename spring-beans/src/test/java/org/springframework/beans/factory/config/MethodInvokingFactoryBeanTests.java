@@ -29,6 +29,7 @@ import org.springframework.util.MethodInvoker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Unit tests for {@link MethodInvokingFactoryBean} and {@link MethodInvokingBean}.
@@ -45,7 +46,7 @@ public class MethodInvokingFactoryBeanTests {
 
 		// assert that only static OR non-static are set, but not both or none
 		MethodInvokingFactoryBean mcfb = new MethodInvokingFactoryBean();
-		assertThatIllegalArgumentException().isThrownBy(mcfb::afterPropertiesSet);
+		assertThatIllegalStateException().isThrownBy(mcfb::afterPropertiesSet);
 
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetObject(this);
@@ -67,7 +68,7 @@ public class MethodInvokingFactoryBeanTests {
 		// missing method
 		mcfb = new MethodInvokingFactoryBean();
 		mcfb.setTargetObject(this);
-		assertThatIllegalArgumentException().isThrownBy(mcfb::afterPropertiesSet);
+		assertThatIllegalStateException().isThrownBy(mcfb::afterPropertiesSet);
 
 		// bogus method
 		mcfb = new MethodInvokingFactoryBean();

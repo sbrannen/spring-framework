@@ -198,7 +198,7 @@ public class ReactorNetty2ResourceFactory implements InitializingBean, Disposabl
 	@Override
 	public void afterPropertiesSet() {
 		if (this.useGlobalResources) {
-			Assert.isTrue(this.loopResources == null && this.connectionProvider == null,
+			Assert.state(this.loopResources == null && this.connectionProvider == null,
 					"'useGlobalResources' is mutually exclusive with explicitly configured resources");
 			HttpResources httpResources = HttpResources.get();
 			if (this.globalResourcesConsumer != null) {

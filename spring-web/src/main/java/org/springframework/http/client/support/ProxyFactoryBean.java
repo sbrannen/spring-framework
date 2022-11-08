@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,10 +71,10 @@ public class ProxyFactoryBean implements FactoryBean<Proxy>, InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws IllegalArgumentException {
-		Assert.notNull(this.type, "Property 'type' is required");
-		Assert.notNull(this.hostname, "Property 'hostname' is required");
+		Assert.state(this.type != null, "Property 'type' is required");
+		Assert.state(this.hostname != null, "Property 'hostname' is required");
 		if (this.port < 0 || this.port > 65535) {
-			throw new IllegalArgumentException("Property 'port' value out of range: " + this.port);
+			throw new IllegalStateException("Property 'port' value out of range: " + this.port);
 		}
 
 		SocketAddress socketAddress = new InetSocketAddress(this.hostname, this.port);

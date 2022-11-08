@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ public abstract class AbstractRoutingConnectionFactory implements ConnectionFact
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.notNull(this.targetConnectionFactories, "Property 'targetConnectionFactories' must not be null");
+		Assert.state(this.targetConnectionFactories != null, "Property 'targetConnectionFactories' must not be null");
 
 		this.resolvedConnectionFactories = CollectionUtils.newHashMap(this.targetConnectionFactories.size());
 		this.targetConnectionFactories.forEach((key, value) -> {

@@ -139,8 +139,8 @@ public class MarshallingMessageConverter implements MessageConverter, Initializi
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
-		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
+		Assert.state(this.marshaller != null, "Property 'marshaller' is required");
+		Assert.state(this.unmarshaller != null, "Property 'unmarshaller' is required");
 	}
 
 
