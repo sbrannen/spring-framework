@@ -842,6 +842,22 @@ public class MockHttpServletRequestBuilder
 		return request;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder(this.method);
+		sb.append(' ').append(this.url);
+
+		String query = null;
+		if (!this.parameters.isEmpty()) {
+			query = UriComponentsBuilder.newInstance().queryParams(this.parameters).build().encode().getQuery();
+		}
+		if (query != null) {
+			sb.append('?').append(query);
+		}
+
+		return sb.toString();
+	}
+
 
 	private static void addToMap(Map<String, Object> map, String name, Object value) {
 		Assert.hasLength(name, "'name' must not be empty");
