@@ -56,6 +56,9 @@ public abstract class ConfigurationClassUtils {
 
 	static final String CONFIGURATION_CLASS_LITE = "lite";
 
+	static final String CONFIGURATION_CLASS_CANDIDATE_ATTRIBUTE =
+			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClassCandidate");
+
 	static final String CONFIGURATION_CLASS_ATTRIBUTE =
 			Conventions.getQualifiedAttributeName(ConfigurationClassPostProcessor.class, "configurationClass");
 
@@ -136,7 +139,8 @@ public abstract class ConfigurationClassUtils {
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
-		else if (config != null || isConfigurationCandidate(metadata)) {
+		else if (config != null || Boolean.TRUE.equals(beanDef.getAttribute(CONFIGURATION_CLASS_CANDIDATE_ATTRIBUTE)) ||
+				isConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {

@@ -255,6 +255,7 @@ public class AnnotatedBeanDefinitionReader {
 			return;
 		}
 
+		abd.setAttribute(ConfigurationClassUtils.CONFIGURATION_CLASS_CANDIDATE_ATTRIBUTE, Boolean.TRUE);
 		abd.setInstanceSupplier(supplier);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(abd);
 		abd.setScope(scopeMetadata.getScopeName());
