@@ -51,6 +51,7 @@ import org.springframework.util.ClassUtils;
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 2.5
  * @see ContextAnnotationAutowireCandidateResolver
  * @see ConfigurationClassPostProcessor
@@ -288,7 +289,7 @@ public abstract class AnnotationConfigUtils {
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 
 		// Direct annotation present or meta-present?
-		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationType.getName()));
+		addAttributes(result, metadata.getAllMergedAnnotationAttributes(annotationType.getName()));
 
 		// Container annotation present or meta-present?
 		Map<String, Object> container = metadata.getAnnotationAttributes(containerType.getName());
@@ -300,6 +301,14 @@ public abstract class AnnotationConfigUtils {
 
 		// Return merged result
 		return Collections.unmodifiableSet(result);
+	}
+
+	private static void addAttributes(
+			Set<AnnotationAttributes> result, Set<? extends Map<String, Object>> attributesList) {
+
+			for (Map<String, Object> attributes : attributesList) {
+				result.add(AnnotationAttributes.fromMap(attributes));
+			}
 	}
 
 	private static void addAttributesIfNotNull(

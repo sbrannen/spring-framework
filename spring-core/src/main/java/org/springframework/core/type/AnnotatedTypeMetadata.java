@@ -17,7 +17,10 @@
 package org.springframework.core.type;
 
 import java.lang.annotation.Annotation;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
@@ -149,6 +152,49 @@ public interface AnnotatedTypeMetadata {
 				.map(MergedAnnotation::withNonMergedAttributes)
 				.collect(MergedAnnotationCollectors.toMultiValueMap(
 						map -> (map.isEmpty() ? null : map), adaptations));
+	}
+
+	/**
+	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
+	 * defined on the underlying element, as direct annotation or meta-annotation).
+	 * <p>Note: in contrast to {@link #getAllAnnotationAttributes(String)},
+	 * this method <em>does</em> take attribute overrides on composed annotations
+	 * into account.
+	 * @param annotationName the fully qualified class name of the annotation
+	 * type to look for
+	 * @return a list of maps of attributes, with the attribute name as map key
+	 * (e.g. "key") and the attribute value as map value; never {@code null} but
+	 * potentially empty if no such annotations are found
+	 * @since 6.1
+	 * @see #getAllMergedAnnotationAttributes(String, boolean)
+	 */
+	default Set<? extends Map<String, Object>> getAllMergedAnnotationAttributes(String annotationName) {
+		return getAllMergedAnnotationAttributes(annotationName, false);
+	}
+
+	/**
+	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
+	 * defined on the underlying element, as direct annotation or meta-annotation).
+	 * <p>Note: in contrast to {@link #getAllAnnotationAttributes(String, boolean)},
+	 * this method <em>does</em> take attribute overrides on composed annotations
+	 * into account.
+	 * @param annotationName the fully qualified class name of the annotation
+	 * type to look for
+	 * @param classValuesAsString whether to convert class references to String
+	 * @return a list of maps of attributes, with the attribute name as map key
+	 * (e.g. "key") and the attribute value as map value; never {@code null} but
+	 * potentially empty if no such annotations are found
+	 * @since 6.1
+	 * @see #getAllMergedAnnotationAttributes(String)
+	 */
+	default Set<? extends Map<String, Object>> getAllMergedAnnotationAttributes(
+			String annotationName, boolean classValuesAsString) {
+
+		Adapt[] adaptations = Adapt.values(classValuesAsString, true);
+		return getAnnotations().stream(annotationName)
+				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getMetaTypes))
+				.map(annotation -> annotation.asAnnotationAttributes(adaptations))
+				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 }
