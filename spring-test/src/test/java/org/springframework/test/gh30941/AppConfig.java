@@ -21,5 +21,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConnectedToModuleA
 @ConnectedToModuleB
+@PropertySourceA
+@PropertySourceB
 class AppConfig {
 }

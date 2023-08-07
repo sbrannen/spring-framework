@@ -19,6 +19,7 @@ package org.springframework.test.gh30941;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.gh30941.a.ModuleAClient;
 import org.springframework.test.gh30941.b.ModuleBClient;
@@ -26,7 +27,7 @@ import org.springframework.test.gh30941.b.ModuleBClient;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringJUnitConfig(AppConfig.class)
-class ComponentScanTests {
+class ComponentScanAndPropertySourceTests {
 
 	@Autowired
 	ModuleAClient clientA;
@@ -34,10 +35,15 @@ class ComponentScanTests {
 	@Autowired
 	ModuleBClient clientB;
 
+	@Autowired
+	Environment env;
+
 	@Test
 	void test() {
 		assertThat(clientA).isNotNull();
 		assertThat(clientB).isNotNull();
+		assertThat(env.getProperty("A")).isEqualTo("apple");
+		assertThat(env.getProperty("B")).isEqualTo("banana");
 	}
 
 }
