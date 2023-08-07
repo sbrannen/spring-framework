@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.test.gh30941;
+package org.springframework.test.gh30941.b;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.stereotype.Component;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.gh30941.b.ModuleBClient;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@ComponentScan(basePackageClasses = ModuleBClient.class)
-@interface ConnectedToModuleB {
+@Component
+public class ComponentB {
 }

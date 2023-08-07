@@ -22,10 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.gh30941.a.ModuleAClient;
+import org.springframework.test.gh30941.b.ComponentB;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@ComponentScan(basePackageClasses = ModuleAClient.class)
-@interface ConnectedToModuleA {
+@ComponentScan(basePackageClasses = ComponentB.class)
+@interface ScanPackageB {
 }

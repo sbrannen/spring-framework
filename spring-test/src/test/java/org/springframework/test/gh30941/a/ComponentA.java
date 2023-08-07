@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.test.gh30941.b;
+package org.springframework.test.gh30941.a;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class ModuleBClient {
+public class ComponentA {
 }

@@ -19,8 +19,8 @@ package org.springframework.test.gh30941;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConnectedToModuleA
-@ConnectedToModuleB
+@ScanPackageA
+@ScanPackageB
 @PropertySourceA
 @PropertySourceB
 class AppConfig {

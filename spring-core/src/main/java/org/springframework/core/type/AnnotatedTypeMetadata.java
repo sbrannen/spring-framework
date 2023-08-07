@@ -160,11 +160,11 @@ public interface AnnotatedTypeMetadata {
 	 * <p>Note: in contrast to {@link #getAllAnnotationAttributes(String)},
 	 * this method <em>does</em> take attribute overrides on composed annotations
 	 * into account.
-	 * @param annotationName the fully qualified class name of the annotation
+	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
-	 * @return a list of maps of attributes, with the attribute name as map key
-	 * (e.g. "key") and the attribute value as map value; never {@code null} but
-	 * potentially empty if no such annotations are found
+	 * @return a set of maps of attributes, with each annotation attribute name
+	 * as map key (e.g. "location") and the attribute's value as map value; never
+	 * {@code null} but potentially empty if no such annotations are found
 	 * @since 6.1
 	 * @see #getAllMergedAnnotationAttributes(String, boolean)
 	 */
@@ -178,12 +178,14 @@ public interface AnnotatedTypeMetadata {
 	 * <p>Note: in contrast to {@link #getAllAnnotationAttributes(String, boolean)},
 	 * this method <em>does</em> take attribute overrides on composed annotations
 	 * into account.
-	 * @param annotationName the fully qualified class name of the annotation
+	 * @param annotationName the fully-qualified class name of the annotation
 	 * type to look for
 	 * @param classValuesAsString whether to convert class references to String
-	 * @return a list of maps of attributes, with the attribute name as map key
-	 * (e.g. "key") and the attribute value as map value; never {@code null} but
-	 * potentially empty if no such annotations are found
+	 * class names for exposure as values in the returned Map, instead of Class
+	 * references which might potentially have to be loaded first
+	 * @return a set of maps of attributes, with each annotation attribute name
+	 * as map key (e.g. "location") and the attribute's value as map value; never
+	 * {@code null} but potentially empty if no such annotations are found
 	 * @since 6.1
 	 * @see #getAllMergedAnnotationAttributes(String)
 	 */
