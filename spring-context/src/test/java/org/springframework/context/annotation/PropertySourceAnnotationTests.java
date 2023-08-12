@@ -246,6 +246,9 @@ class PropertySourceAnnotationTests {
 		ctx.getBean(MultipleComposedAnnotationsConfig.class);
 		assertEnvironmentContainsProperty(ctx, "from.p1");
 		assertEnvironmentContainsProperty(ctx, "from.p2");
+		assertEnvironmentContainsProperty(ctx, "from.p3");
+		assertEnvironmentContainsProperty(ctx, "from.p4");
+		assertEnvironmentContainsProperty(ctx, "from.p5");
 		ctx.close();
 	}
 
@@ -517,12 +520,19 @@ class PropertySourceAnnotationTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@PropertySource("classpath:org/springframework/context/annotation/p2.properties")
-	@interface PropertySource2 {
+	@PropertySources({
+		@PropertySource("classpath:org/springframework/context/annotation/p3.properties"),
+	})
+	@interface PropertySource23 {
 	}
 
 	@Configuration
 	@PropertySource1
-	@PropertySource2
+	@PropertySource23
+	@PropertySources({
+		@PropertySource("classpath:org/springframework/context/annotation/p4.properties")
+	})
+	@PropertySource("classpath:org/springframework/context/annotation/p5.properties")
 	static class MultipleComposedAnnotationsConfig {
 	}
 

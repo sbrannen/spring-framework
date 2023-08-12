@@ -21,7 +21,9 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.core.annotation.MergedAnnotationCollectors;
@@ -155,47 +157,35 @@ public interface AnnotatedTypeMetadata {
 	}
 
 	/**
-	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
-	 * defined on the underlying element, as direct annotation or meta-annotation).
-	 * <p>Note: in contrast to {@link #getAllAnnotationAttributes(String)},
-	 * this method <em>does</em> take attribute overrides on composed annotations
-	 * into account.
-	 * @param annotationName the fully-qualified class name of the annotation
-	 * type to look for
-	 * @return a set of maps of attributes, with each annotation attribute name
-	 * as map key (e.g. "location") and the attribute's value as map value; never
-	 * {@code null} but potentially empty if no such annotations are found
+	 * Retrieve all <em>repeatable annotations</em> of the given type within the
+	 * annotation hierarchy <em>above</em> the underlying element (as direct
+	 * annotation or meta-annotation); and for each annotation found, merge that
+	 * annotation's attributes with <em>matching</em> attributes from annotations
+	 * in lower levels of the annotation hierarchy and store the results in an
+	 * instance of {@link AnnotationAttributes}.
+	 * <p>{@link org.springframework.core.annotation.AliasFor @AliasFor} semantics
+	 * are fully supported, both within a single annotation and within annotation
+	 * hierarchies.
+	 * @param containerType the type of the container that holds the annotations
+	 * @param annotationType the annotation type to find
+	 * @return the set of all merged repeatable {@code AnnotationAttributes} found,
+	 * or an empty set if none were found
 	 * @since 6.1
-	 * @see #getAllMergedAnnotationAttributes(String, boolean)
 	 */
-	default Set<? extends Map<String, Object>> getAllMergedAnnotationAttributes(String annotationName) {
-		return getAllMergedAnnotationAttributes(annotationName, false);
-	}
-
-	/**
-	 * Retrieve all attributes of all annotations of the given type, if any (i.e. if
-	 * defined on the underlying element, as direct annotation or meta-annotation).
-	 * <p>Note: in contrast to {@link #getAllAnnotationAttributes(String, boolean)},
-	 * this method <em>does</em> take attribute overrides on composed annotations
-	 * into account.
-	 * @param annotationName the fully-qualified class name of the annotation
-	 * type to look for
-	 * @param classValuesAsString whether to convert class references to String
-	 * class names for exposure as values in the returned Map, instead of Class
-	 * references which might potentially have to be loaded first
-	 * @return a set of maps of attributes, with each annotation attribute name
-	 * as map key (e.g. "location") and the attribute's value as map value; never
-	 * {@code null} but potentially empty if no such annotations are found
-	 * @since 6.1
-	 * @see #getAllMergedAnnotationAttributes(String)
-	 */
-	default Set<? extends Map<String, Object>> getAllMergedAnnotationAttributes(
-			String annotationName, boolean classValuesAsString) {
+	default Set<AnnotationAttributes> getMergedRepeatableAnnotationAttributes(
+			Class<? extends Annotation> containerType, Class<? extends Annotation> annotationType,
+			boolean classValuesAsString) {
 
 		Adapt[] adaptations = Adapt.values(classValuesAsString, true);
-		return getAnnotations().stream(annotationName)
-				.filter(MergedAnnotationPredicates.unique(MergedAnnotation::getMetaTypes))
+		return getAnnotations().stream()
+				.filter(MergedAnnotationPredicates.typeIn(containerType, annotationType))
 				.map(annotation -> annotation.asAnnotationAttributes(adaptations))
+				.flatMap(attributes -> {
+					if (containerType.equals(attributes.annotationType())) {
+						return Stream.of(attributes.getAnnotationArray(MergedAnnotation.VALUE));
+					}
+					return Stream.of(attributes);
+				})
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
