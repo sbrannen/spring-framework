@@ -16,6 +16,7 @@
 
 package org.springframework.context.annotation;
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -53,6 +55,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Sam Brannen
  * @since 2.5
  * @see org.springframework.stereotype.Component#value()
  * @see org.springframework.stereotype.Repository#value()
@@ -96,6 +99,12 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	@Nullable
 	protected String determineBeanNameFromAnnotation(AnnotatedBeanDefinition annotatedDef) {
 		AnnotationMetadata amd = annotatedDef.getMetadata();
+
+		String explicitComponentName = getExplicitComponentName(amd);
+		if (explicitComponentName != null) {
+			return explicitComponentName;
+		}
+
 		Set<String> types = amd.getAnnotationTypes();
 		String beanName = null;
 		for (String type : types) {
@@ -118,6 +127,17 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 			}
 		}
 		return beanName;
+	}
+
+	private String getExplicitComponentName(AnnotationMetadata metadata) {
+		MergedAnnotation<Annotation>  mergedAnnotation = metadata.getAnnotations().get(COMPONENT_ANNOTATION_CLASSNAME);
+		if (mergedAnnotation.isPresent()) {
+			String name = mergedAnnotation.getString(MergedAnnotation.VALUE);
+			if (StringUtils.hasText(name)) {
+				return name;
+			}
+		}
+		return null;
 	}
 
 	/**
