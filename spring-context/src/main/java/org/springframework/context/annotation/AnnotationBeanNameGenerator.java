@@ -117,6 +117,10 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 				if (isStereotypeWithNameValue(type, metaTypes, attributes)) {
 					Object value = attributes.get("value");
 					if (value instanceof String currentName && !currentName.isBlank()) {
+						// TODO Log warning about use of convention-based annotation attribute override for @Component(value).
+						// The following statement incorrectly logs warning about @Named and @ManagedBean.
+						//
+						// System.err.println("Deprecated use of convention-based annotation attribute override for @Component(value) in " + type);
 						if (beanName != null && !currentName.equals(beanName)) {
 							throw new IllegalStateException("Stereotype annotations suggest inconsistent " +
 									"component names: '" + beanName + "' versus '" + currentName + "'");
