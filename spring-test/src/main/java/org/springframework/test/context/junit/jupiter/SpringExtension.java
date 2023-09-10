@@ -52,6 +52,7 @@ import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
 import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.lang.Nullable;
+import org.springframework.test.context.ExecutableInvoker;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestContextManager;
@@ -122,7 +123,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 */
 	@Override
 	public void beforeAll(ExtensionContext context) throws Exception {
-		getTestContextManager(context).beforeTestClass();
+		TestContextManager testContextManager = getTestContextManager(context);
+		adaptExecutableInvoker(testContextManager, context);
+		testContextManager.beforeTestClass();
 	}
 
 	/**
@@ -131,7 +134,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	@Override
 	public void afterAll(ExtensionContext context) throws Exception {
 		try {
-			getTestContextManager(context).afterTestClass();
+			TestContextManager testContextManager = getTestContextManager(context);
+			adaptExecutableInvoker(testContextManager, context);
+			testContextManager.afterTestClass();
 		}
 		finally {
 			getStore(context).remove(context.getRequiredTestClass());
@@ -148,7 +153,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws Exception {
 		validateAutowiredConfig(context);
 		validateRecordApplicationEventsConfig(context);
-		getTestContextManager(context).prepareTestInstance(testInstance);
+		TestContextManager testContextManager = getTestContextManager(context);
+		adaptExecutableInvoker(testContextManager, context);
+		testContextManager.prepareTestInstance(testInstance);
 	}
 
 	/**
@@ -223,7 +230,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	public void beforeEach(ExtensionContext context) throws Exception {
 		Object testInstance = context.getRequiredTestInstance();
 		Method testMethod = context.getRequiredTestMethod();
-		getTestContextManager(context).beforeTestMethod(testInstance, testMethod);
+		TestContextManager testContextManager = getTestContextManager(context);
+		adaptExecutableInvoker(testContextManager, context);
+		testContextManager.beforeTestMethod(testInstance, testMethod);
 	}
 
 	/**
@@ -233,7 +242,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	public void beforeTestExecution(ExtensionContext context) throws Exception {
 		Object testInstance = context.getRequiredTestInstance();
 		Method testMethod = context.getRequiredTestMethod();
-		getTestContextManager(context).beforeTestExecution(testInstance, testMethod);
+		TestContextManager testContextManager = getTestContextManager(context);
+		adaptExecutableInvoker(testContextManager, context);
+		testContextManager.beforeTestExecution(testInstance, testMethod);
 	}
 
 	/**
@@ -244,7 +255,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		Object testInstance = context.getRequiredTestInstance();
 		Method testMethod = context.getRequiredTestMethod();
 		Throwable testException = context.getExecutionException().orElse(null);
-		getTestContextManager(context).afterTestExecution(testInstance, testMethod, testException);
+		TestContextManager testContextManager = getTestContextManager(context);
+		adaptExecutableInvoker(testContextManager, context);
+		testContextManager.afterTestExecution(testInstance, testMethod, testException);
 	}
 
 	/**
@@ -255,7 +268,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		Object testInstance = context.getRequiredTestInstance();
 		Method testMethod = context.getRequiredTestMethod();
 		Throwable testException = context.getExecutionException().orElse(null);
-		getTestContextManager(context).afterTestMethod(testInstance, testMethod, testException);
+		TestContextManager testContextManager = getTestContextManager(context);
+		adaptExecutableInvoker(testContextManager, context);
+		testContextManager.afterTestMethod(testInstance, testMethod, testException);
 	}
 
 	/**
@@ -350,6 +365,10 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		return context.getRoot().getStore(TEST_CONTEXT_MANAGER_NAMESPACE);
 	}
 
+	private static void adaptExecutableInvoker(TestContextManager testContextManager, ExtensionContext context) {
+		testContextManager.getTestContext().setExecutableInvoker(new ExecutableInvokerAdapter(context));
+	}
+
 	private static boolean isAutowiredTestOrLifecycleMethod(Method method) {
 		MergedAnnotations mergedAnnotations =
 				MergedAnnotations.from(method, SearchStrategy.DIRECT, RepeatableContainers.none());
@@ -362,6 +381,26 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 			}
 		}
 		return false;
+	}
+
+	private static final class ExecutableInvokerAdapter implements ExecutableInvoker {
+
+		private final ExtensionContext extensionContext;
+
+		ExecutableInvokerAdapter(ExtensionContext extensionContext) {
+			this.extensionContext = extensionContext;
+		}
+
+		@Override
+		public Object invoke(Method method, Object target) throws Exception {
+			return this.extensionContext.getExecutableInvoker().invoke(method, target);
+		}
+
+		@Override
+		public <T> T invoke(Constructor<T> constructor) throws Exception {
+			return this.extensionContext.getExecutableInvoker().invoke(constructor);
+		}
+
 	}
 
 }
