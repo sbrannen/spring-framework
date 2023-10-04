@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,14 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -448,7 +452,22 @@ abstract class AnnotationsScanner {
 			cached = true;
 		}
 		else {
-			annotations = source.getDeclaredAnnotations();
+			if (source instanceof Class<?> clazz && clazz.isAnonymousClass()) {
+				// Find TYPE_USE annotations on an anonymous class.
+				List<Annotation> annotationList = new ArrayList<>();
+				AnnotatedType annotatedSuperclass = clazz.getAnnotatedSuperclass();
+				if (annotatedSuperclass != null) {
+					Collections.addAll(annotationList, annotatedSuperclass.getDeclaredAnnotations());
+				}
+				for (AnnotatedType annotatedInterface : clazz.getAnnotatedInterfaces()) {
+					Collections.addAll(annotationList, annotatedInterface.getDeclaredAnnotations());
+				}
+				annotations = annotationList.toArray(Annotation[]::new);
+			}
+			else {
+				// Find standard "declaration" annotations.
+				annotations = source.getDeclaredAnnotations();
+			}
 			if (annotations.length != 0) {
 				boolean allIgnored = true;
 				for (int i = 0; i < annotations.length; i++) {

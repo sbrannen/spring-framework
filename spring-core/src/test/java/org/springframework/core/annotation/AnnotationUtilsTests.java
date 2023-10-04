@@ -994,7 +994,15 @@ class AnnotationUtilsTests {
 		assertThat(findAnnotation(new MetaMetaAnnotatedClass() {}.getClass(), TypeUseAnnotation.class)).isNull();
 
 		assertThat(findAnnotation(new @TypeUseAnnotation Object() {}.getClass(), TypeUseAnnotation.class)).isNotNull();
-		assertThat(findAnnotation(new @TypeUseAnnotation MetaMetaAnnotatedClass() {}.getClass(), TypeUseAnnotation.class)).isNotNull();
+		MetaMetaAnnotatedClass metaMetaAnnotatedClass = new @TypeUseAnnotation MetaMetaAnnotatedClass() {};
+		assertThat(findAnnotation(metaMetaAnnotatedClass.getClass(), TypeUseAnnotation.class)).isNotNull();
+
+		// Ensure that we can still find annotations in the class hierarchy.
+		assertThat(findAnnotation(metaMetaAnnotatedClass.getClass(), MetaMeta.class)).isNotNull();
+		assertThat(findAnnotation(metaMetaAnnotatedClass.getClass(), Meta2.class)).isNotNull();
+		Component component = findAnnotation(metaMetaAnnotatedClass.getClass(), Component.class);
+		assertThat(component).isNotNull();
+		assertThat(component.value()).isEqualTo("meta2");
 	}
 
 	@Test  // gh-28896
@@ -1003,7 +1011,14 @@ class AnnotationUtilsTests {
 		assertThat(findAnnotation(new InterfaceWithMetaAnnotation() {}.getClass(), TypeUseAnnotation.class)).isNull();
 
 		assertThat(findAnnotation(new @TypeUseAnnotation Serializable() {}.getClass(), TypeUseAnnotation.class)).isNotNull();
-		assertThat(findAnnotation(new @TypeUseAnnotation InterfaceWithMetaAnnotation() {}.getClass(), TypeUseAnnotation.class)).isNotNull();
+		InterfaceWithMetaAnnotation interfaceWithMetaAnnotation = new @TypeUseAnnotation InterfaceWithMetaAnnotation() {};
+		assertThat(findAnnotation(interfaceWithMetaAnnotation.getClass(), TypeUseAnnotation.class)).isNotNull();
+
+		// Ensure that we can still find annotations in the interface hierarchy.
+		assertThat(findAnnotation(interfaceWithMetaAnnotation.getClass(), Meta1.class)).isNotNull();
+		Component component = findAnnotation(interfaceWithMetaAnnotation.getClass(), Component.class);
+		assertThat(component).isNotNull();
+		assertThat(component.value()).isEqualTo("meta1");
 	}
 
 	@SafeVarargs
