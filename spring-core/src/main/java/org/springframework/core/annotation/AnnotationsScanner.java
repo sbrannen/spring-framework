@@ -18,10 +18,14 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -448,7 +452,20 @@ abstract class AnnotationsScanner {
 			cached = true;
 		}
 		else {
-			annotations = source.getDeclaredAnnotations();
+			if (source instanceof Class<?> clazz && clazz.isAnonymousClass()) {
+				List<Annotation> annotationList = new ArrayList<>();
+				AnnotatedType annotatedSuperclass = clazz.getAnnotatedSuperclass();
+				if (annotatedSuperclass != null) {
+					Collections.addAll(annotationList, annotatedSuperclass.getDeclaredAnnotations());
+				}
+				for (AnnotatedType annotatedInterface : clazz.getAnnotatedInterfaces()) {
+					Collections.addAll(annotationList, annotatedInterface.getDeclaredAnnotations());
+				}
+				annotations = annotationList.toArray(Annotation[]::new);
+			}
+			else {
+				annotations = source.getDeclaredAnnotations();
+			}
 			if (annotations.length != 0) {
 				boolean allIgnored = true;
 				for (int i = 0; i < annotations.length; i++) {
@@ -462,7 +479,7 @@ abstract class AnnotationsScanner {
 					}
 				}
 				annotations = (allIgnored ? NO_ANNOTATIONS : annotations);
-				if (source instanceof Class || source instanceof Member) {
+				if (source instanceof Class<?> || source instanceof Member) {
 					declaredAnnotationCache.put(source, annotations);
 					cached = true;
 				}

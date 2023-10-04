@@ -23,15 +23,12 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.annotation.AnnotationTypeMapping.MirrorSets.MirrorSet;
@@ -564,17 +561,23 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 
-		// check if we are dealing with an annotation on an anonymous class (no need for class hierarchy traversal)
-		final A annotationOnAnonymous = Stream
-				.concat(Stream.of(clazz.getAnnotatedSuperclass()), Arrays.stream(clazz.getAnnotatedInterfaces()))
-				.filter(Objects::nonNull)
-				.map(a -> findAnnotation(a, annotationType))
-				.filter(Objects::nonNull)
-				.findFirst()
-				.orElse(null);
-		if (annotationOnAnonymous != null) {
-			return annotationOnAnonymous;
-		}
+		// If we are dealing with a TYPE_USE annotation on an anonymous class,
+		// we have to search via the AnnotatedType APIs.
+//		if (clazz.isAnonymousClass()) {
+//			AnnotatedType annotatedSuperclass = clazz.getAnnotatedSuperclass();
+//			if (annotatedSuperclass != null) {
+//				A annotation = findAnnotation(annotatedSuperclass, annotationType);
+//				if (annotation != null) {
+//					return annotation;
+//				}
+//			}
+//			for (AnnotatedType annotatedType : clazz.getAnnotatedInterfaces()) {
+//				A annotation = findAnnotation(annotatedType, annotationType);
+//				if (annotation != null) {
+//					return annotation;
+//				}
+//			}
+//		}
 
 		// Shortcut: directly present on the element, with no merging needed?
 		if (AnnotationFilter.PLAIN.matches(annotationType) ||
