@@ -988,20 +988,22 @@ class AnnotationUtilsTests {
 		assertThat(findAnnotation(SubclassOfDeprecatedClass.class, Deprecated.class)).isNotNull();
 	}
 
-	@Test
+	@Test  // gh-28896
 	void findAnnotationOnAnonymousClassWithSuperclass() {
-		assertThat(findAnnotation((new @TypeUseAnnotation Object() {}).getClass(), TypeUseAnnotation.class)).isNotNull();
-		assertThat(findAnnotation((new @TypeUseAnnotation MetaMetaAnnotatedClass() {}).getClass(), TypeUseAnnotation.class)).isNotNull();
-		assertThat(findAnnotation((new Object() {}).getClass(), TypeUseAnnotation.class)).isNull();
-		assertThat(findAnnotation((new MetaMetaAnnotatedClass() {}).getClass(), TypeUseAnnotation.class)).isNull();
+		assertThat(findAnnotation(new Object() {}.getClass(), TypeUseAnnotation.class)).isNull();
+		assertThat(findAnnotation(new MetaMetaAnnotatedClass() {}.getClass(), TypeUseAnnotation.class)).isNull();
+
+		assertThat(findAnnotation(new @TypeUseAnnotation Object() {}.getClass(), TypeUseAnnotation.class)).isNotNull();
+		assertThat(findAnnotation(new @TypeUseAnnotation MetaMetaAnnotatedClass() {}.getClass(), TypeUseAnnotation.class)).isNotNull();
 	}
 
-	@Test
+	@Test  // gh-28896
 	void findAnnotationOnAnonymousClassWithInterface() {
-		assertThat(findAnnotation((new @TypeUseAnnotation Serializable() {}).getClass(), TypeUseAnnotation.class)).isNotNull();
-		assertThat(findAnnotation((new @TypeUseAnnotation InterfaceWithMetaAnnotation() {}).getClass(), TypeUseAnnotation.class)).isNotNull();
-		assertThat(findAnnotation((new Serializable() {}).getClass(), TypeUseAnnotation.class)).isNull();
-		assertThat(findAnnotation((new InterfaceWithMetaAnnotation() {}).getClass(), TypeUseAnnotation.class)).isNull();
+		assertThat(findAnnotation(new Serializable() {}.getClass(), TypeUseAnnotation.class)).isNull();
+		assertThat(findAnnotation(new InterfaceWithMetaAnnotation() {}.getClass(), TypeUseAnnotation.class)).isNull();
+
+		assertThat(findAnnotation(new @TypeUseAnnotation Serializable() {}.getClass(), TypeUseAnnotation.class)).isNotNull();
+		assertThat(findAnnotation(new @TypeUseAnnotation InterfaceWithMetaAnnotation() {}.getClass(), TypeUseAnnotation.class)).isNotNull();
 	}
 
 	@SafeVarargs
@@ -1856,4 +1858,5 @@ class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface TypeUseAnnotation {
 	}
+
 }
