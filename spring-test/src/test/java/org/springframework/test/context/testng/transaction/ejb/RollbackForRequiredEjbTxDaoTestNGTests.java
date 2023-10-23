@@ -19,6 +19,7 @@ package org.springframework.test.context.testng.transaction.ejb;
 import org.testng.annotations.Test;
 
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Test(suiteName = "Rollback for REQUIRED")
 @Rollback
+@DisabledInAotMode // @EJB is not supported in AOT mode
 public class RollbackForRequiredEjbTxDaoTestNGTests extends CommitForRequiredEjbTxDaoTestNGTests {
 
 	/**

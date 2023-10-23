@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.context.transaction.ejb.dao.RequiredEjbTxTestEntityDao;
 
@@ -35,6 +36,7 @@ import org.springframework.test.context.transaction.ejb.dao.RequiredEjbTxTestEnt
 @Test(suiteName = "Commit for REQUIRED")
 @ContextConfiguration("/org/springframework/test/context/transaction/ejb/required-tx-config.xml")
 @Commit
+@DisabledInAotMode // @EJB is not supported in AOT mode
 public class CommitForRequiredEjbTxDaoTestNGTests extends AbstractEjbTxDaoTestNGTests {
 
 	/* test methods in superclass */

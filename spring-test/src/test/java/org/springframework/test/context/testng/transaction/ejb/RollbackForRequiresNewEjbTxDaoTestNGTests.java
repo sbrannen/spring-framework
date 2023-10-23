@@ -19,6 +19,7 @@ package org.springframework.test.context.testng.transaction.ejb;
 import org.testng.annotations.Test;
 
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 
 /**
@@ -38,6 +39,7 @@ import org.springframework.test.context.transaction.TransactionalTestExecutionLi
  */
 @Test(suiteName = "Rollback for REQUIRES_NEW")
 @Rollback
+@DisabledInAotMode // @EJB is not supported in AOT mode
 public class RollbackForRequiresNewEjbTxDaoTestNGTests extends CommitForRequiresNewEjbTxDaoTestNGTests {
 
 	/* test methods in superclass */

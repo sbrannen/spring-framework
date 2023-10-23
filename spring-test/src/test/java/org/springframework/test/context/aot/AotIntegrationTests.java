@@ -22,6 +22,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Disabled;
@@ -37,6 +38,7 @@ import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 import org.junit.platform.launcher.listeners.TestExecutionSummary.Failure;
 import org.opentest4j.MultipleFailuresError;
+import org.opentest4j.TestAbortedException;
 
 import org.springframework.aot.AotDetector;
 import org.springframework.aot.generate.GeneratedFiles.Kind;
@@ -128,8 +130,8 @@ class AotIntegrationTests extends AbstractAotTests {
 		// AOT BUILD-TIME: CLASSPATH SCANNING
 		//
 		// 1) You can limit execution to a particular set of test classes.
-		// List<Class<?>> testClasses = List.of(org.springframework.test.web.servlet.samples.spr.EncodedUriTests.class,
-		// 		org.springframework.test.web.servlet.samples.spr.HttpOptionsTests.class);
+		// List<Class<?>> testClasses = List.of(
+		// 		org.springframework.test.context.testng.transaction.ejb.CommitForRequiredEjbTxDaoTestNGTests.class);
 		//
 		// 2) Or you can use the TestClassScanner to find test classes.
 		List<Class<?>> testClasses = createTestClassScanner()
@@ -141,8 +143,6 @@ class AotIntegrationTests extends AbstractAotTests {
 				// We only include test classes named *Tests so that we don't pick up
 				// internal TestCase classes that aren't really tests.
 				.filter(clazz -> clazz.getSimpleName().endsWith("Tests"))
-				// We don't have a way to abort a TestNG test mid-flight, and @EJB is not supported in AOT.
-				.filter(clazz -> !clazz.getPackageName().contains("testng.transaction.ejb"))
 				.toList();
 
 		// AOT BUILD-TIME: PROCESSING
@@ -195,6 +195,7 @@ class AotIntegrationTests extends AbstractAotTests {
 	private static void printFailingTestClasses(TestExecutionSummary summary) {
 		System.err.println("Failing Test Classes:");
 		summary.getFailures().stream()
+				.filter(isNotTestAbortedException())
 				.map(failure -> failure.getTestIdentifier().getSource())
 				.flatMap(Optional::stream)
 				.map(AotIntegrationTests::getJavaClassName)
@@ -202,6 +203,11 @@ class AotIntegrationTests extends AbstractAotTests {
 				.sorted()
 				.forEach(System.err::println);
 		System.err.println();
+	}
+
+	private static Predicate<? super Failure> isNotTestAbortedException() {
+		return failure -> !(failure.getException() instanceof TestAbortedException ||
+				failure.getException() instanceof org.testng.SkipException);
 	}
 
 	private static String getJavaClassName(TestSource source) {

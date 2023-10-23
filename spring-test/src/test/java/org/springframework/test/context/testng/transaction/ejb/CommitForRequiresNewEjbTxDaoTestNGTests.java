@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.context.transaction.ejb.dao.RequiresNewEjbTxTestEntityDao;
 
@@ -35,6 +36,7 @@ import org.springframework.test.context.transaction.ejb.dao.RequiresNewEjbTxTest
 @Test(suiteName = "Commit for REQUIRES_NEW")
 @ContextConfiguration("/org/springframework/test/context/transaction/ejb/requires-new-tx-config.xml")
 @Commit
+@DisabledInAotMode // @EJB is not supported in AOT mode
 public class CommitForRequiresNewEjbTxDaoTestNGTests extends AbstractEjbTxDaoTestNGTests {
 
 	/* test methods in superclass */
