@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2023 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ package org.springframework.test.context.support;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -35,8 +33,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * {@link ContextCustomizer} to support
- * {@link DynamicPropertySource @DynamicPropertySource} methods.
+ * {@link ContextCustomizer} which supports
+ * {@link DynamicPropertySource @DynamicPropertySource} methods and registers a
+ * {@link DynamicPropertyRegistry} as a singleton bean in the container for use
+ * in {@code @Bean} methods.
  *
  * @author Phillip Webb
  * @author Sam Brannen
@@ -45,7 +45,9 @@ import org.springframework.util.ReflectionUtils;
  */
 class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
-	private static final String PROPERTY_SOURCE_NAME = "Dynamic Test Properties";
+	private static final String DYNAMIC_PROPERTY_REGISTRY_BEAN_NAME =
+			DynamicPropertiesContextCustomizer.class.getName() + ".dynamicPropertyRegistry";
+
 
 	private final Set<Method> methods;
 
@@ -66,22 +68,18 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
 	@Override
 	public void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
-		MutablePropertySources sources = context.getEnvironment().getPropertySources();
-		sources.addFirst(new DynamicValuesPropertySource(PROPERTY_SOURCE_NAME, buildDynamicPropertiesMap()));
-	}
+		ConfigurableEnvironment environment = context.getEnvironment();
+		DynamicValuesPropertySource propertySource = getOrAdd(environment);
 
-	private Map<String, Supplier<Object>> buildDynamicPropertiesMap() {
-		Map<String, Supplier<Object>> map = new LinkedHashMap<>();
-		DynamicPropertyRegistry dynamicPropertyRegistry = (name, valueSupplier) -> {
-			Assert.hasText(name, "'name' must not be null or blank");
-			Assert.notNull(valueSupplier, "'valueSupplier' must not be null");
-			map.put(name, valueSupplier);
-		};
+		if (!context.containsBean(DYNAMIC_PROPERTY_REGISTRY_BEAN_NAME)) {
+			ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
+			beanFactory.registerSingleton(DYNAMIC_PROPERTY_REGISTRY_BEAN_NAME, propertySource.dynamicPropertyRegistry);
+		}
+
 		this.methods.forEach(method -> {
 			ReflectionUtils.makeAccessible(method);
-			ReflectionUtils.invokeMethod(method, null, dynamicPropertyRegistry);
+			ReflectionUtils.invokeMethod(method, null, propertySource.dynamicPropertyRegistry);
 		});
-		return Collections.unmodifiableMap(map);
 	}
 
 	Set<Method> getMethods() {
@@ -98,6 +96,19 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 	@Override
 	public int hashCode() {
 		return this.methods.hashCode();
+	}
+
+
+	private static DynamicValuesPropertySource getOrAdd(ConfigurableEnvironment environment) {
+		PropertySource<?> propertySource = environment.getPropertySources()
+				.get(DynamicValuesPropertySource.PROPERTY_SOURCE_NAME);
+		if (propertySource == null) {
+			environment.getPropertySources().addFirst(new DynamicValuesPropertySource());
+			return getOrAdd(environment);
+		}
+		Assert.state(propertySource instanceof DynamicValuesPropertySource,
+				"Incorrect DynamicValuesPropertySource type registered");
+		return (DynamicValuesPropertySource) propertySource;
 	}
 
 }
