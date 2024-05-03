@@ -36,8 +36,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MethodInvoker;
 
-import static org.springframework.util.ObjectUtils.isArray;
-
 /**
  * Utility methods used by the reflection resolver code to discover the appropriate
  * methods, constructors, and fields that should be used in expressions.
@@ -450,28 +448,29 @@ public abstract class ReflectionHelper {
 	}
 
 	/**
-	 * Package up the arguments so that they correctly match what is expected in requiredParameterTypes.
-	 * <p>For example, if requiredParameterTypes is {@code (int, String[])} because the second parameter
-	 * was declared {@code String...}, then if arguments is {@code [1,"a","b"]} then it must be
-	 * repackaged as {@code [1,new String[]{"a","b"}]} in order to match the expected types.
+	 * Package up the supplied {@code args} so that they correctly match what is
+	 * expected in {@code requiredParameterTypes}.
+	 * <p>For example, if {@code requiredParameterTypes} is {@code (int, String[])}
+	 * because the second parameter was declared as {@code String...}, then if
+	 * {@code args} is {@code [1, "a", "b"]} it must be repackaged as
+	 * {@code [1, new String[] {"a", "b"}]} in order to match the expected types.
 	 * @param requiredParameterTypes the types of the parameters for the invocation
-	 * @param args the arguments to be setup ready for the invocation
-	 * @return a repackaged array of arguments where any varargs setup has been done
+	 * @param args the arguments to be set up for the invocation
+	 * @return a repackaged array of arguments where any varargs setup has performed
 	 */
 	public static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {
-		int parameterCount = requiredParameterTypes.length;
-		Assert.notEmpty(requiredParameterTypes, "Required parameter types must not be empty");
+		Assert.notEmpty(requiredParameterTypes, "Required parameter types array must not be empty");
 
+		int parameterCount = requiredParameterTypes.length;
 		Class<?> lastRequiredParameterType = requiredParameterTypes[parameterCount - 1];
-		Assert.isTrue(lastRequiredParameterType.isArray(), "Method must be varargs");
+		Assert.isTrue(lastRequiredParameterType.isArray(),
+				"The last required parameter type must be an array to support varargs invocation");
 
 		int argumentCount = args.length;
-		Object lastArgument = argumentCount > 0 ? args[argumentCount - 1] : null;
+		Object lastArgument = (argumentCount > 0 ? args[argumentCount - 1] : null);
 
 		// Check if repackaging is needed...
-		if (parameterCount != args.length ||
-			(!isArray(lastArgument) && differentTypes(lastRequiredParameterType, lastArgument))) {
-
+		if (parameterCount != argumentCount || !lastRequiredParameterType.isInstance(lastArgument)) {
 			// Create an array for the leading arguments plus the varargs array argument.
 			Object[] newArgs = new Object[parameterCount];
 			// Copy all leading arguments to the new array, omitting the varargs array argument.
@@ -492,12 +491,10 @@ public abstract class ReflectionHelper {
 			newArgs[newArgs.length - 1] = varargsArray;
 			return newArgs;
 		}
+
 		return args;
 	}
 
-	private static boolean differentTypes(Class<?> lastRequiredParameterType, @Nullable Object lastArgument) {
-		return lastArgument == null || lastRequiredParameterType != lastArgument.getClass();
-	}
 
 	/**
 	 * Arguments match kinds.

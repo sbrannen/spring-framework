@@ -6631,10 +6631,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				}
 			}
 		}
-
-		public String[] seventeen() {
-			return new String[] { "aaa", "bbb", "ccc" };
-		}
 	}
 
 
@@ -6862,6 +6858,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 					s += varg;
 				}
 			}
+		}
+
+		public String[] seventeen() {
+			return new String[] { "aaa", "bbb", "ccc" };
 		}
 	}
 
