@@ -45,6 +45,7 @@ import org.springframework.validation.DataBinder;
 import org.springframework.validation.FieldError;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 /**
  * @author Phillip Webb
@@ -53,6 +54,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Sam Brannen
  */
 class DateFormattingTests {
+
+	private static final String SPACE = " ";
+
+	// \u202F is a narrow non-breaking space (NNBSP).
+	private static final String NNBSP = "\u202F";
+
+	// JDK <= 19 requires a standard space before "AM/PM".
+	// JDK >= 20 requires a NNBSP before "AM/PM", by default.
+	private static final String TIME_SEPARATOR = (Runtime.version().feature() < 20 ? SPACE : NNBSP);
+
 
 	private final FormattingConversionService conversionService = new FormattingConversionService();
 
@@ -116,6 +127,59 @@ class DateFormattingTests {
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isEqualTo(0);
 		assertThat(binder.getBindingResult().getFieldValue("styleDate")).isEqualTo("10/31/09");
+	}
+
+	@Test
+	void testBindDateTime() {
+		testBindDateTime(TIME_SEPARATOR, false);
+	}
+
+	@Test
+	void testBindDateTime_PostJDK23() {
+		assumeJava23OrHigher();
+
+		testBindDateTime(SPACE, true);
+	}
+
+	private void testBindDateTime(String timeSeparator, boolean lenient) {
+		DateFormatter dateFormatter = new DateFormatter();
+		dateFormatter.setStylePattern("MM");
+		dateFormatter.setLenient(lenient);
+		DateFormatterRegistrar registrar = new DateFormatterRegistrar();
+		registrar.setFormatter(dateFormatter);
+		setup(registrar);
+
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateTime", "Oct 31, 2009, 12:00:00%sPM".formatted(timeSeparator));
+		binder.bind(propertyValues);
+		BindingResult bindingResult = binder.getBindingResult();
+		assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+		String value = bindingResult.getFieldValue("dateTime").toString();
+		// \p{Zs} matches any Unicode space character
+		assertThat(value).startsWith("Oct 31, 2009").matches(".+?12:00:00\\p{Zs}PM");
+	}
+
+	@Test
+	void testBindDateTimeAnnotated() {
+		testBindDateTimeAnnotated(TIME_SEPARATOR);
+	}
+
+	@Test
+	void testBindDateTimeAnnotated_PostJDK23() {
+		assumeJava23OrHigher();
+
+		testBindDateTimeAnnotated(SPACE);
+	}
+
+	private void testBindDateTimeAnnotated(String timeSeparator) {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("styleDateTime", "Oct 31, 2009, 12:00:00%sPM".formatted(timeSeparator));
+		binder.bind(propertyValues);
+		BindingResult bindingResult = binder.getBindingResult();
+		assertThat(bindingResult.getErrorCount()).isEqualTo(0);
+		String value = bindingResult.getFieldValue("styleDateTime").toString();
+		// \p{Zs} matches any Unicode space character
+		assertThat(value).startsWith("Oct 31, 2009").matches(".+?12:00:00\\p{Zs}PM");
 	}
 
 	@Test
@@ -370,6 +434,13 @@ class DateFormattingTests {
 	}
 
 
+	private static void assumeJava23OrHigher() {
+		// We currently use an "assumption" instead of @EnabledForJreRange, since
+		// org.junit.jupiter.api.condition.JRE does not yet support JAVA_23.
+		assumeThat(Runtime.version().feature()).isGreaterThanOrEqualTo(23);
+	}
+
+
 	@SuppressWarnings("unused")
 	private static class SimpleDateBean {
 
@@ -385,6 +456,11 @@ class DateFormattingTests {
 
 		@DateTimeFormat(style = "S-")
 		private Date styleDate;
+
+		private Date dateTime;
+
+		@DateTimeFormat(style = "MM", lenient = true)
+		private Date styleDateTime;
 
 		@DateTimeFormat(style = "S-", fallbackPatterns = { "yyyy-MM-dd", "yyyyMMdd", "yyyy.MM.dd" })
 		private Date styleDateWithFallbackPatterns;
@@ -449,6 +525,22 @@ class DateFormattingTests {
 
 		public void setStyleDate(Date styleDate) {
 			this.styleDate = styleDate;
+		}
+
+		public Date getDateTime() {
+			return this.dateTime;
+		}
+
+		public void setDateTime(Date dateTime) {
+			this.dateTime = dateTime;
+		}
+
+		public Date getStyleDateTime() {
+			return this.styleDateTime;
+		}
+
+		public void setStyleDateTime(Date styleDateTime) {
+			this.styleDateTime = styleDateTime;
 		}
 
 		public Date getStyleDateWithFallbackPatterns() {

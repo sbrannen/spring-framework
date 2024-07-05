@@ -45,14 +45,15 @@ class DateTimeFormatterFactoryBeanTests {
 	@Test
 	void getObject() {
 		factory.afterPropertiesSet();
-		assertThat(factory.getObject().toString()).isEqualTo(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString());
+		DateTimeFormatter formatter = factory.getObject();
+		assertThat(formatter).asString().contains(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString());
 	}
 
 	@Test
 	void getObjectIsAlwaysSingleton() {
 		factory.afterPropertiesSet();
 		DateTimeFormatter formatter = factory.getObject();
-		assertThat(formatter.toString()).isEqualTo(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString());
+		assertThat(formatter).asString().contains(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString());
 		factory.setStylePattern("LL");
 		assertThat(factory.getObject()).isSameAs(formatter);
 	}

@@ -166,7 +166,9 @@ public class DateTimeFormatterFactory {
 	 * @see #createDateTimeFormatter(DateTimeFormatter)
 	 */
 	public DateTimeFormatter createDateTimeFormatter() {
-		return createDateTimeFormatter(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+		DateTimeFormatter fallbackFormatter =
+				DateTimeFormatterUtils.createLenientDateTimeFormatter(FormatStyle.MEDIUM);
+		return createDateTimeFormatter(fallbackFormatter);
 	}
 
 	/**
@@ -191,13 +193,13 @@ public class DateTimeFormatterFactory {
 			};
 		}
 		else if (this.dateStyle != null && this.timeStyle != null) {
-			dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(this.dateStyle, this.timeStyle);
+			dateTimeFormatter = DateTimeFormatterUtils.createLenientDateTimeFormatter(this.dateStyle, this.timeStyle);
 		}
 		else if (this.dateStyle != null) {
-			dateTimeFormatter = DateTimeFormatter.ofLocalizedDate(this.dateStyle);
+			dateTimeFormatter = DateTimeFormatterUtils.createLenientDateTimeFormatter(this.dateStyle, null);
 		}
 		else if (this.timeStyle != null) {
-			dateTimeFormatter = DateTimeFormatter.ofLocalizedTime(this.timeStyle);
+			dateTimeFormatter = DateTimeFormatterUtils.createLenientDateTimeFormatter(null, this.timeStyle);
 		}
 
 		if (dateTimeFormatter != null && this.timeZone != null) {

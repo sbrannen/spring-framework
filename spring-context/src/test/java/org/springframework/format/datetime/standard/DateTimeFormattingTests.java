@@ -59,6 +59,7 @@ import org.springframework.validation.DataBinder;
 import org.springframework.validation.FieldError;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.junit.jupiter.api.condition.JRE.JAVA_19;
 import static org.junit.jupiter.api.condition.JRE.JAVA_20;
 
@@ -71,10 +72,14 @@ import static org.junit.jupiter.api.condition.JRE.JAVA_20;
  */
 class DateTimeFormattingTests {
 
-	// JDK <= 19 requires a standard space before "AM/PM".
-	// JDK >= 20 requires a NNBSP before "AM/PM".
+	private static final String SPACE = " ";
+
 	// \u202F is a narrow non-breaking space (NNBSP).
-	private static final String TIME_SEPARATOR = (Runtime.version().feature() < 20 ? " " : "\u202F");
+	private static final String NNBSP = "\u202F";
+
+	// JDK <= 19 requires a standard space before "AM/PM".
+	// JDK >= 20 requires a NNBSP before "AM/PM", by default.
+	private static final String TIME_SEPARATOR = (Runtime.version().feature() < 20 ? SPACE : NNBSP);
 
 
 	private final FormattingConversionService conversionService = new FormattingConversionService();
@@ -218,8 +223,19 @@ class DateTimeFormattingTests {
 
 	@Test
 	void testBindLocalTime() {
+		testBindLocalTime(TIME_SEPARATOR);
+	}
+
+	@Test
+	void testBindLocalTime_PostJDK23() {
+		assumeJava23OrHigher();
+
+		testBindLocalTime(SPACE);
+	}
+
+	private void testBindLocalTime(String timeSeparator) {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localTime", "12:00%sPM".formatted(TIME_SEPARATOR));
+		propertyValues.add("localTime", "12:00%sPM".formatted(timeSeparator));
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		// \p{Zs} matches any Unicode space character
@@ -238,11 +254,22 @@ class DateTimeFormattingTests {
 
 	@Test
 	void testBindLocalTimeWithSpecificStyle() {
+		testBindLocalTimeWithSpecificStyle(TIME_SEPARATOR);
+	}
+
+	@Test
+	void testBindLocalTimeWithSpecificStyle_PostJDK23() {
+		assumeJava23OrHigher();
+
+		testBindLocalTimeWithSpecificStyle(SPACE);
+	}
+
+	private void testBindLocalTimeWithSpecificStyle(String timeSeparator) {
 		DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
 		registrar.setTimeStyle(FormatStyle.MEDIUM);
 		setup(registrar);
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("localTime", "12:00:00%sPM".formatted(TIME_SEPARATOR));
+		propertyValues.add("localTime", "12:00:00%sPM".formatted(timeSeparator));
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		// \p{Zs} matches any Unicode space character
@@ -263,8 +290,19 @@ class DateTimeFormattingTests {
 
 	@Test
 	void testBindLocalTimeAnnotated() {
+		testBindLocalTimeAnnotated(TIME_SEPARATOR);
+	}
+
+	@Test
+	void testBindLocalTimeAnnotated_PostJDK23() {
+		assumeJava23OrHigher();
+
+		testBindLocalTimeAnnotated(SPACE);
+	}
+
+	private void testBindLocalTimeAnnotated(String timeSeparator) {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("styleLocalTime", "12:00:00%sPM".formatted(TIME_SEPARATOR));
+		propertyValues.add("styleLocalTime", "12:00:00%sPM".formatted(timeSeparator));
 		binder.bind(propertyValues);
 		assertThat(binder.getBindingResult().getErrorCount()).isZero();
 		// \p{Zs} matches any Unicode space character
@@ -594,6 +632,17 @@ class DateTimeFormattingTests {
 			styleLocalTime(propertyValue);
 		}
 
+		@ParameterizedTest(name = "input date: {0}")  // gh-30649
+		// For JDK 23+, a NNBSP should be supported before the "PM" as well as a standard
+		// space as long as lenient parsing has been configured.
+		// \u202F is a narrow non-breaking space (NNBSP).
+		@ValueSource(strings = {"12:00:00\u202FPM", "12:00:00 PM"})
+		void styleLocalTime_PostJDK23(String propertyValue) {
+			assumeJava23OrHigher();
+
+			styleLocalTime(propertyValue);
+		}
+
 		private void styleLocalTime(String propertyValue) {
 			String propertyName = "styleLocalTimeWithFallbackPatterns";
 			MutablePropertyValues propertyValues = new MutablePropertyValues();
@@ -658,6 +707,13 @@ class DateTimeFormattingTests {
 			assertThat(binder.getBindingResult().getFieldValue("instant"))
 					.hasToString("1970-01-01T00:00:01.234Z");
 		}
+	}
+
+
+	private static void assumeJava23OrHigher() {
+		// We currently use an "assumption" instead of @EnabledForJreRange, since
+		// org.junit.jupiter.api.condition.JRE does not yet support JAVA_23.
+		assumeThat(Runtime.version().feature()).isGreaterThanOrEqualTo(23);
 	}
 
 

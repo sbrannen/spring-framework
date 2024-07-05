@@ -51,7 +51,8 @@ class DateTimeFormatterFactoryTests {
 
 	@Test
 	void createDateTimeFormatter() {
-		assertThat(factory.createDateTimeFormatter().toString()).isEqualTo(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString());
+		DateTimeFormatter formatter = factory.createDateTimeFormatter();
+		assertThat(formatter).asString().contains(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).toString());
 	}
 
 	@Test

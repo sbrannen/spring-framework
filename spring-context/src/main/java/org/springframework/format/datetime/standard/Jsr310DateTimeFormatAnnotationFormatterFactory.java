@@ -126,6 +126,9 @@ public class Jsr310DateTimeFormatAnnotationFormatterFactory extends EmbeddedValu
 		if (StringUtils.hasLength(pattern)) {
 			factory.setPattern(pattern);
 		}
+
+		// factory.setLenient(annotation.lenient());
+
 		return factory.createDateTimeFormatter();
 	}
 

@@ -83,6 +83,8 @@ public class DateTimeFormatAnnotationFormatterFactory extends EmbeddedValueResol
 			formatter.setFallbackPatterns(resolvedFallbackPatterns.toArray(new String[0]));
 		}
 
+		formatter.setLenient(annotation.lenient());
+
 		return formatter;
 	}
 

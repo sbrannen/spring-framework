@@ -16,15 +16,20 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.FormatStyle;
 import java.time.format.ResolverStyle;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
  * Internal {@link DateTimeFormatter} utilities.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 5.3.5
  */
 abstract class DateTimeFormatterUtils {
@@ -36,6 +41,7 @@ abstract class DateTimeFormatterUtils {
 	 * @param pattern the pattern to use
 	 * @return a new {@code DateTimeFormatter}
 	 * @see ResolverStyle#STRICT
+	 * @see #createLenientDateTimeFormatter(FormatStyle)
 	 */
 	static DateTimeFormatter createStrictDateTimeFormatter(String pattern) {
 		// Using strict resolution to align with Joda-Time and standard DateFormat behavior:
@@ -43,6 +49,45 @@ abstract class DateTimeFormatterUtils {
 		// However, with strict resolution, a year digit needs to be specified as 'u'...
 		String patternToUse = StringUtils.replace(pattern, "yy", "uu");
 		return DateTimeFormatter.ofPattern(patternToUse).withResolverStyle(ResolverStyle.STRICT);
+	}
+
+	/**
+	 * Create a {@link DateTimeFormatter} for the supplied date/time style, configured
+	 * with {@linkplain DateTimeFormatterBuilder#parseLenient() lenient} parsing.
+	 * <p>Note that the lenient parsing does not affect the {@linkplain ResolverStyle
+	 * resolution strategy}.
+	 * @param dateTimeStyle the date/time style to use
+	 * @return a new {@code DateTimeFormatter}
+	 * @since 6.2
+	 * @see DateTimeFormatterBuilder#parseLenient()
+	 * @see #createLenientDateTimeFormatter(FormatStyle, FormatStyle)
+	 * @see #createStrictDateTimeFormatter(String)
+	 */
+	static DateTimeFormatter createLenientDateTimeFormatter(FormatStyle dateTimeStyle) {
+		return createLenientDateTimeFormatter(dateTimeStyle, dateTimeStyle);
+	}
+
+	/**
+	 * Create a {@link DateTimeFormatter} for the supplied date and time styles, configured
+	 * with {@linkplain DateTimeFormatterBuilder#parseLenient() lenient} parsing.
+	 * <p>Note that the lenient parsing does not affect the {@linkplain ResolverStyle
+	 * resolution strategy}.
+	 * @param dateStyle the date style to use
+	 * @param timeStyle the time style to use
+	 * @return a new {@code DateTimeFormatter}
+	 * @since 6.2
+	 * @see DateTimeFormatterBuilder#parseLenient()
+	 * @see #createLenientDateTimeFormatter(FormatStyle)
+	 * @see #createStrictDateTimeFormatter(String)
+	 */
+	static DateTimeFormatter createLenientDateTimeFormatter(
+			@Nullable FormatStyle dateStyle, @Nullable FormatStyle timeStyle) {
+
+		return new DateTimeFormatterBuilder()
+				.parseLenient()
+				.appendLocalized(dateStyle, timeStyle)
+				.toFormatter()
+				.withChronology(IsoChronology.INSTANCE);
 	}
 
 }

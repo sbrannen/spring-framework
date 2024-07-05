@@ -43,6 +43,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  *
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 4.0
  * @see #setDateStyle
  * @see #setTimeStyle
@@ -211,9 +212,9 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
 	private DateTimeFormatter getFallbackFormatter(Type type) {
 		return switch (type) {
-			case DATE -> DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
-			case TIME -> DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
-			case DATE_TIME -> DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
+			case DATE -> DateTimeFormatterUtils.createLenientDateTimeFormatter(FormatStyle.SHORT, null);
+			case TIME -> DateTimeFormatterUtils.createLenientDateTimeFormatter(null, FormatStyle.SHORT);
+			case DATE_TIME -> DateTimeFormatterUtils.createLenientDateTimeFormatter(FormatStyle.SHORT);
 		};
 	}
 
