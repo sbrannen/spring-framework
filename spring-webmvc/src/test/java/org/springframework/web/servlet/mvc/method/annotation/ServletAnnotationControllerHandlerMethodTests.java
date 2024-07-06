@@ -31,6 +31,7 @@ import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -171,6 +172,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Sam Brannen
  */
 class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
+
+	private static final String SPACE = " ";
+
+	// \u202F is a narrow non-breaking space (NNBSP).
+	private static final String NNBSP = "\u202F";
+
+	// JDK <= 19 requires a standard space before "AM/PM".
+	// JDK >= 20 requires a NNBSP before "AM/PM", by default.
+	private static final String TIME_SEPARATOR = (Runtime.version().feature() < 20 ? SPACE : NNBSP);
+
 
 	static Stream<Boolean> pathPatternsArguments() {
 		return Stream.of(true, false);
@@ -2250,13 +2261,27 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 
 	@PathPatternsParameterizedTest
 	void dataClassBindingWithLocalDate(boolean usePathPatterns) throws Exception {
-		initDispatcherServlet(DateClassController.class, usePathPatterns);
+		initDispatcherServlet(LocalDateClassController.class, usePathPatterns);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
 		request.addParameter("date", "2010-01-01");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertThat(response.getContentAsString()).isEqualTo("2010-01-01");
+	}
+
+	@PathPatternsParameterizedTest
+	void dataClassBindingWithLocalDateTime(boolean usePathPatterns) throws Exception {
+		initDispatcherServlet(LocalDateTimeClassController.class, usePathPatterns);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bind");
+		request.addParameter("dateTime", "Jul 8, 2024, 10:30:45%sAM".formatted(TIME_SEPARATOR));
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		// \p{Zs} matches any Unicode space character
+		assertThat(response.getContentAsString())
+				.startsWith("Jul 8, 2024")
+				.matches(".+?10:30:45\\p{Zs}AM");
 	}
 
 	@PathPatternsParameterizedTest
@@ -4253,18 +4278,18 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		}
 	}
 
-	static class DateClass {
+	static class LocalDateClass {
 
 		@DateTimeFormat(pattern = "yyyy-MM-dd")
 		public LocalDate date;
 
-		public DateClass(LocalDate date) {
+		public LocalDateClass(LocalDate date) {
 			this.date = date;
 		}
 	}
 
 	@RestController
-	static class DateClassController {
+	static class LocalDateClassController {
 
 		@InitBinder
 		public void initBinder(WebDataBinder binder) {
@@ -4273,16 +4298,46 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		}
 
 		@RequestMapping("/bind")
-		public String handle(DateClass data, BindingResult result) {
+		public String handle(LocalDateClass data, BindingResult result) {
 			if (result.hasErrors()) {
 				return result.getFieldError().toString();
 			}
-			assertThat(data).isNotNull();
-			assertThat(data.date).isNotNull();
-			assertThat(data.date.getYear()).isEqualTo(2010);
-			assertThat(data.date.getMonthValue()).isEqualTo(1);
-			assertThat(data.date.getDayOfMonth()).isEqualTo(1);
+			assertThat(data).as("LocalDateClass").isNotNull();
+			assertThat(data.date).as("LocalDate")
+					.hasYear(2010).hasMonthValue(1).hasDayOfMonth(1);
 			return result.getFieldValue("date").toString();
+		}
+	}
+
+	static class LocalDateTimeClass {
+
+		@DateTimeFormat(style = "MM")
+		public LocalDateTime dateTime;
+
+		public LocalDateTimeClass(LocalDateTime dateTime) {
+			this.dateTime = dateTime;
+		}
+	}
+
+	@RestController
+	static class LocalDateTimeClassController {
+
+		@InitBinder
+		public void initBinder(WebDataBinder binder) {
+			binder.initDirectFieldAccess();
+			binder.setConversionService(new DefaultFormattingConversionService());
+		}
+
+		@RequestMapping(path = "/bind", produces = "text/plain;charset=UTF-8")
+		public String handle(LocalDateTimeClass data, BindingResult result) {
+			if (result.hasErrors()) {
+				return result.getFieldError().toString();
+			}
+			assertThat(data).as("LocalDateTimeClass").isNotNull();
+			assertThat(data.dateTime).as("LocalDateTime")
+					.hasYear(2024).hasMonthValue(7).hasDayOfMonth(8)
+					.hasHour(10).hasMinute(30).hasSecond(45);
+			return result.getFieldValue("dateTime").toString();
 		}
 	}
 
@@ -4389,10 +4444,10 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 		private final DataClass nestedParam2;
 
 		@Valid
-		private final DateClass nestedParam3;
+		private final LocalDateClass nestedParam3;
 
 		public NestedDataAndDateClass(
-				@NotNull String param1, DataClass nestedParam2, DateClass nestedParam3) {
+				@NotNull String param1, DataClass nestedParam2, LocalDateClass nestedParam3) {
 
 			this.param1 = param1;
 			this.nestedParam2 = nestedParam2;
@@ -4407,7 +4462,7 @@ class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandl
 			return this.nestedParam2;
 		}
 
-		public DateClass getNestedParam3() {
+		public LocalDateClass getNestedParam3() {
 			return this.nestedParam3;
 		}
 	}
