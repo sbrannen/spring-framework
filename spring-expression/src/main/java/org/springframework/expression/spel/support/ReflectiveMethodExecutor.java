@@ -17,6 +17,7 @@
 package org.springframework.expression.spel.support;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
@@ -74,7 +75,22 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 	 */
 	public ReflectiveMethodExecutor(Method method, @Nullable Class<?> targetClass) {
 		this.originalMethod = method;
-		this.methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, targetClass);
+
+		Method methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, targetClass);
+		if (!Modifier.isPublic(methodToInvoke.getDeclaringClass().getModifiers())) {
+			this.publicDeclaringClass = CodeFlow.findPublicDeclaringClass(method);
+			this.computedPublicDeclaringClass = true;
+			if (this.publicDeclaringClass != null) {
+				Method candidate = ReflectionUtils.findMethod(
+						this.publicDeclaringClass, method.getName(), method.getParameterTypes());
+				if (candidate != null) {
+					methodToInvoke = candidate;
+				}
+			}
+		}
+		this.methodToInvoke = methodToInvoke;
+		// this.methodToInvoke = ClassUtils.getInterfaceMethodIfPossible(method, targetClass);
+
 		if (method.isVarArgs()) {
 			this.varargsPosition = method.getParameterCount() - 1;
 		}

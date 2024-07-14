@@ -512,7 +512,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 	 * field) to use each time {@link #read(EvaluationContext, Object, String)}
 	 * is called.
 	 * <p>This method will return this {@code ReflectivePropertyAccessor} instance
-	 * if it is unable to build a optimized accessor.
+	 * if it is unable to build an optimized accessor.
 	 * <p>Note: An optimized accessor is currently only usable for read attempts.
 	 * Do not call this method if you need a read-write accessor.
 	 */
