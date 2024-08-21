@@ -23,8 +23,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +40,7 @@ import a.ClassHavingNestedClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -498,6 +502,174 @@ class ClassUtilsTests {
 			Method method = ClassUtils.getStaticMethod(NestedClass.class, "staticMethod", String.class);
 			method.invoke(null, "test");
 			assertThat(NestedClass.overloadedCalled).as("argument method was not invoked.").isTrue();
+		}
+
+	}
+
+
+	@Nested  // gh-33216
+	class GetPubliclyAccessibleMethodTests {
+
+		@Test
+		void nonPublicMethod(TestInfo testInfo) {
+			Method originalMethod = testInfo.getTestMethod().get();
+
+			// Prerequisites for this use case:
+			assertNotPublic(originalMethod);
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertNotPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test
+		// This method is intentionally public.
+		public void publicMethodInNonPublicType(TestInfo testInfo) {
+			Method originalMethod = testInfo.getTestMethod().get();
+
+			// Prerequisites for this use case:
+			assertPublic(originalMethod);
+			assertNotPublic(originalMethod.getDeclaringClass());
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertNotPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test
+		void publicMethodInPublicType() throws Exception {
+			Class<?> originalType = String.class;
+			Method originalMethod = originalType.getDeclaredMethod("toString");
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(originalType);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test
+		void publicInterfaceMethodInPublicType() throws Exception {
+			Class<?> originalType = ArrayList.class;
+			Method originalMethod = originalType.getDeclaredMethod("size");
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			// We do not expect the method to be found in List.class.
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(originalType);
+			assertThat(publiclyAccessibleMethod).isSameAs(originalMethod);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test
+		void publicMethodInJavaLangObjectDeclaredInNonPublicType() throws Exception {
+			List<String> unmodifiableList = Collections.unmodifiableList(Arrays.asList("foo", "bar"));
+			Class<?> targetClass = unmodifiableList.getClass();
+
+			// Prerequisites for this use case:
+			assertNotPublic(targetClass);
+
+			Method originalMethod = targetClass.getMethod("toString");
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(Object.class);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test
+		void publicMethodInJavaTimeZoneIdDeclaredInNonPublicSubclass() throws Exception {
+			// Returns a package-private java.time.ZoneRegion.
+			ZoneId zoneId = ZoneId.of("CET");
+			Class<?> targetClass = zoneId.getClass();
+
+			// Prerequisites for this use case:
+			assertNotPublic(targetClass);
+
+			Method originalMethod = targetClass.getDeclaredMethod("getId");
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(ZoneId.class);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		@Test
+		void privateSubclassOverridesPropertyInPublicInterface() throws Exception {
+			Method originalMethod = PrivateSubclass.class.getDeclaredMethod("getText");
+
+			// Prerequisite: type must not be public for this use case.
+			assertNotPublic(originalMethod.getDeclaringClass());
+
+			Method publiclyAccessibleMethod = ClassUtils.getPubliclyAccessibleMethodIfPossible(originalMethod, null);
+			assertThat(publiclyAccessibleMethod.getDeclaringClass()).isEqualTo(PublicInterface.class);
+			assertPubliclyAccessible(publiclyAccessibleMethod);
+		}
+
+		private static void assertPubliclyAccessible(Method method) {
+			assertPublic(method);
+			assertPublic(method.getDeclaringClass());
+		}
+
+		private static void assertNotPubliclyAccessible(Method method) {
+			assertThat(!isPublic(method) || !isPublic(method.getDeclaringClass()))
+					.as("%s must not be publicly accessible", method)
+					.isTrue();
+		}
+
+		private static void assertPublic(Member member) {
+			assertThat(isPublic(member)).as("%s must be public", member).isTrue();
+		}
+
+		private static void assertPublic(Class<?> clazz) {
+			assertThat(isPublic(clazz)).as("%s must be public", clazz).isTrue();
+		}
+
+		private static void assertNotPublic(Member member) {
+			assertThat(!isPublic(member)).as("%s must be not be public", member).isTrue();
+		}
+
+		private static void assertNotPublic(Class<?> clazz) {
+			assertThat(!isPublic(clazz)).as("%s must be not be public", clazz).isTrue();
+		}
+
+		private static boolean isPublic(Class<?> clazz) {
+			return Modifier.isPublic(clazz.getModifiers());
+		}
+
+		private static boolean isPublic(Member member) {
+			return Modifier.isPublic(member.getModifiers());
+		}
+
+		private interface PrivateInterface {
+
+			String getMessage();
+
+			String getIndex(int index);
+		}
+
+		private static class PrivateSubclass extends PublicSuperclass implements PublicInterface, PrivateInterface {
+
+			@Override
+			public int getNumber() {
+				return 2;
+			}
+
+			@Override
+			public String getText() {
+				return "enigma";
+			}
+
+			@Override
+			public String getMessage() {
+				return "hello";
+			}
+
+			@Override
+			public String getIndex2(int index) {
+				return "sub-" + (2 * index);
+			}
+
+			@Override
+			public String getFruit(int index) {
+				return "fruit-" + index;
+			}
 		}
 
 	}

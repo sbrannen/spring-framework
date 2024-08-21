@@ -153,7 +153,7 @@ class PropertyAccessTests extends AbstractExpressionTests {
 	}
 
 	@Test  // gh-33216
-	void accessingPropertyOfJavaUtilTimeZoneDeclaredInNonPublicType() throws Exception {
+	void accessingPropertyOfJavaTimeZoneIdDeclaredInNonPublicSubclass() throws Exception {
 		String ID = "CET";
 		ZoneId zoneId = ZoneId.of(ID);
 
@@ -166,6 +166,7 @@ class PropertyAccessTests extends AbstractExpressionTests {
 		String result = expression.getValue(new StandardEvaluationContext(zoneId), String.class);
 		assertThat(result).isEqualTo(ID);
 	}
+
 	@Test
 	void shouldAlwaysUsePropertyAccessorFromEvaluationContext() {
 		SpelExpressionParser parser = new SpelExpressionParser();
