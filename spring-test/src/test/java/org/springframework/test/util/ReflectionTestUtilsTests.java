@@ -32,6 +32,7 @@ import org.springframework.test.util.subpackage.StaticMethods;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.springframework.test.util.ReflectionTestUtils.getField;
 import static org.springframework.test.util.ReflectionTestUtils.invokeGetterMethod;
 import static org.springframework.test.util.ReflectionTestUtils.invokeMethod;
@@ -133,6 +134,29 @@ class ReflectionTestUtilsTests {
 		assertSetFieldAndGetFieldBehaviorForProxy(proxy, this.person);
 	}
 
+	@Test
+	void invokePrivateSetterMethodViaCglibProxy() {
+		ProxyFactory pf = new ProxyFactory(this.person);
+		pf.setProxyTargetClass(true);
+		Person proxy = (Person) pf.getProxy();
+		assertThat(AopUtils.isCglibProxy(proxy)).as("Proxy is a CGLIB proxy").isTrue();
+
+		// Set reflectively
+		// invokeSetterMethod(AopTestUtils.getUltimateTargetObject(proxy), "favoriteNumber", PI, Number.class);
+		invokeSetterMethod(proxy, "favoriteNumber", PI, Number.class);
+
+		assertSoftly(softly -> {
+			// Get reflectively
+			softly.assertThat(getField(proxy, "favoriteNumber")).as("'favorite number' (private field)").isEqualTo(PI);
+
+			// Get directly
+			softly.assertThat(proxy.getFavoriteNumber()).as("'favorite number' (getter on proxy)").isEqualTo(PI);
+
+			// Get directly from Target
+			softly.assertThat(this.person.getFavoriteNumber()).as("'favorite number' (getter on target)").isEqualTo(PI);
+		});
+	}
+
 	private static void assertSetFieldAndGetFieldBehavior(Person person) {
 		// Set reflectively
 		setField(person, "id", 99L, long.class);
@@ -156,7 +180,7 @@ class ReflectionTestUtilsTests {
 		assertThat(person.getAge()).as("age (private field)").isEqualTo(42);
 		assertThat(person.getEyeColor()).as("eye color (package private field)").isEqualTo("blue");
 		assertThat(person.likesPets()).as("'likes pets' flag (package private boolean field)").isTrue();
-		assertThat(person.getFavoriteNumber()).as("'favorite number' (package field)").isEqualTo(PI);
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (private field)").isEqualTo(PI);
 	}
 
 	private static void assertSetFieldAndGetFieldBehaviorForProxy(Person proxy, Person target) {
@@ -168,7 +192,7 @@ class ReflectionTestUtilsTests {
 		assertThat(target.getAge()).as("age (private field)").isEqualTo(42);
 		assertThat(target.getEyeColor()).as("eye color (package private field)").isEqualTo("blue");
 		assertThat(target.likesPets()).as("'likes pets' flag (package private boolean field)").isTrue();
-		assertThat(target.getFavoriteNumber()).as("'favorite number' (package field)").isEqualTo(PI);
+		assertThat(target.getFavoriteNumber()).as("'favorite number' (private field)").isEqualTo(PI);
 	}
 
 	@Test
@@ -188,7 +212,7 @@ class ReflectionTestUtilsTests {
 
 		assertThat(person.getName()).as("name (protected field)").isNull();
 		assertThat(person.getEyeColor()).as("eye color (package private field)").isNull();
-		assertThat(person.getFavoriteNumber()).as("'favorite number' (package field)").isNull();
+		assertThat(person.getFavoriteNumber()).as("'favorite number' (private field)").isNull();
 	}
 
 	@Test

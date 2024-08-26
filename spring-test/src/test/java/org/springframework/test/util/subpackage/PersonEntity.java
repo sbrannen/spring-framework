@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,8 @@ public class PersonEntity extends PersistentEntity implements Person {
 		return this.favoriteNumber;
 	}
 
-	protected void setFavoriteNumber(Number favoriteNumber) {
+	@SuppressWarnings("unused")
+	private void setFavoriteNumber(Number favoriteNumber) {
 		this.favoriteNumber = favoriteNumber;
 	}
 

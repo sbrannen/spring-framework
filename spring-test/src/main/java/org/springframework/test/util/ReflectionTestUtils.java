@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2019 the original author or authors.
+ * Copyright 2002-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -355,6 +356,10 @@ public abstract class ReflectionTestUtils {
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Invoking setter method '%s' on %s with value [%s]", setterMethodName,
 					safeToString(target), value));
+		}
+
+		if (Modifier.isPrivate(method.getModifiers()) && springAopPresent) {
+			target = AopTestUtils.getUltimateTargetObject(target);
 		}
 
 		ReflectionUtils.makeAccessible(method);
