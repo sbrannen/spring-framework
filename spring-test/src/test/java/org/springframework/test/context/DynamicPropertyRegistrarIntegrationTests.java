@@ -29,9 +29,10 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 
 /**
- * Integration tests for {@link DynamicPropertyRegistry} bean support.
+ * Integration tests for {@link DynamicPropertyRegistrar} bean support.
  *
  * @author Sam Brannen
  * @since 6.2
@@ -39,10 +40,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringJUnitConfig
 @TestPropertySource(properties = "api.url: https://example.com/test")
-class DynamicPropertyRegistryIntegrationTests {
+class DynamicPropertyRegistrarIntegrationTests {
 
 	private static final String API_URL = "api.url";
 
+	@Test
+	void customDynamicPropertyRegistryCanExistInApplicationContext(
+			@Autowired DynamicPropertyRegistry dynamicPropertyRegistry) {
+
+		assertThatRuntimeException()
+				.isThrownBy(() -> dynamicPropertyRegistry.add("test", () -> "test"))
+				.withMessage("Boom!");
+	}
 
 	@Test
 	void dynamicPropertySourceOverridesTestPropertySource(@Autowired ConfigurableEnvironment env) {
@@ -90,16 +99,25 @@ class DynamicPropertyRegistryIntegrationTests {
 	@Import({ EnvironmentInjectedService.class, ConstructorInjectedService.class, SetterInjectedService.class })
 	static class Config {
 
-		// Annotating this @Bean method with @DynamicPropertySource ensures that
-		// this bean will be instantiated before any other singleton beans in the
+		@Bean
+		ApiServer apiServer() {
+			return new ApiServer();
+		}
+
+		// Accepting ApiServer as a method argument ensures that the apiServer
+		// bean will be instantiated before any other singleton beans in the
 		// context which further ensures that the dynamic "api.url" property is
 		// available to all standard singleton beans.
 		@Bean
-		@DynamicPropertySource
-		ApiServer apiServer(DynamicPropertyRegistry registry) {
-			ApiServer apiServer = new ApiServer();
-			registry.add(API_URL, apiServer::getUrl);
-			return apiServer;
+		DynamicPropertyRegistrar apiServerProperties(ApiServer apiServer) {
+			return registry -> registry.add(API_URL, apiServer::getUrl);
+		}
+
+		@Bean
+		DynamicPropertyRegistry dynamicPropertyRegistry() {
+			return (name, valueSupplier) -> {
+				throw new RuntimeException("Boom!");
+			};
 		}
 
 	}

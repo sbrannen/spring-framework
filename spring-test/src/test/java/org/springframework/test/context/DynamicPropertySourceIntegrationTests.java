@@ -23,6 +23,7 @@ import org.junit.jupiter.api.TestInstance;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -30,14 +31,16 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
 /**
- * Integration tests for {@link DynamicPropertySource @DynamicPropertySource}.
+ * Integration tests for {@link DynamicPropertySource @DynamicPropertySource} and
+ * {@link DynamicPropertyRegistrar} bean support.
  *
  * @author Phillip Webb
  * @author Sam Brannen
- * @see DynamicPropertyRegistryIntegrationTests
+ * @see DynamicPropertyRegistrarIntegrationTests
  */
 @SpringJUnitConfig
 @TestPropertySource(properties = "test.container.ip: test")
@@ -54,8 +57,12 @@ class DynamicPropertySourceIntegrationTests {
 	static final DemoContainer container = new DemoContainer();
 
 	@DynamicPropertySource
-	static void containerProperties(DynamicPropertyRegistry registry) {
+	static void containerPropertiesIpAddress(DynamicPropertyRegistry registry) {
 		registry.add(TEST_CONTAINER_IP, container::getIpAddress);
+	}
+
+	@DynamicPropertySource
+	static void containerPropertiesPort(DynamicPropertyRegistry registry) {
 		registry.add("test.container.port", container::getPort);
 	}
 
@@ -63,6 +70,16 @@ class DynamicPropertySourceIntegrationTests {
 	@AfterAll
 	void clearSystemProperty() {
 		System.clearProperty(TEST_CONTAINER_IP);
+	}
+
+	@Test
+	@DisplayName("A custom DynamicPropertyRegistry bean can exist in the ApplicationContext")
+	void customDynamicPropertyRegistryCanExistInApplicationContext(
+			@Autowired DynamicPropertyRegistry dynamicPropertyRegistry) {
+
+		assertThatRuntimeException()
+				.isThrownBy(() -> dynamicPropertyRegistry.add("test", () -> "test"))
+				.withMessage("Boom!");
 	}
 
 	@Test
@@ -74,9 +91,11 @@ class DynamicPropertySourceIntegrationTests {
 		assertThat(propertySources.contains("Inlined Test Properties")).isTrue();
 		assertThat(propertySources.contains("systemProperties")).isTrue();
 		assertThat(propertySources.get("Dynamic Test Properties").getProperty(TEST_CONTAINER_IP)).isEqualTo("127.0.0.1");
+		// assertThat(propertySources.get("Dynamic Test Properties").getProperty("magic.word")).isEqualTo("enigma");
 		assertThat(propertySources.get("Inlined Test Properties").getProperty(TEST_CONTAINER_IP)).isEqualTo("test");
 		assertThat(propertySources.get("systemProperties").getProperty(TEST_CONTAINER_IP)).isEqualTo("system");
 		assertThat(env.getProperty(TEST_CONTAINER_IP)).isEqualTo("127.0.0.1");
+		// assertThat(env.getProperty("magic.word")).isEqualTo("enigma");
 	}
 
 	@Test
@@ -90,6 +109,19 @@ class DynamicPropertySourceIntegrationTests {
 	@Configuration
 	@Import(Service.class)
 	static class Config {
+
+		@Bean
+		DynamicPropertyRegistrar magicWordProperties() {
+			return registry -> registry.add("magic.word", () -> "engima");
+		}
+
+		@Bean
+		DynamicPropertyRegistry dynamicPropertyRegistry() {
+			return (name, valueSupplier) -> {
+				throw new RuntimeException("Boom!");
+			};
+		}
+
 	}
 
 	static class Service {
