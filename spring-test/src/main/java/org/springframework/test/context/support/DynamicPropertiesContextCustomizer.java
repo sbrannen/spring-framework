@@ -26,20 +26,20 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MutablePropertySources;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link ContextCustomizer} which supports
- * {@link DynamicPropertySource @DynamicPropertySource} methods and registers a
- * {@link DynamicPropertyRegistry} as a singleton bean in the container for use
- * in {@code @Configuration} classes and {@code @Bean} methods.
+ * {@link org.springframework.test.context.DynamicPropertySource @DynamicPropertySource}
+ * methods and registers a {@link DynamicPropertyRegistrarBeanInitializer} in the
+ * container to eagerly initialize
+ * {@link org.springframework.test.context.DynamicPropertyRegistrar DynamicPropertyRegistrar}
+ * beans.
  *
  * @author Phillip Webb
  * @author Sam Brannen
@@ -79,10 +79,7 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
 		if (!this.methods.isEmpty()) {
 			ConfigurableEnvironment environment = context.getEnvironment();
-			DefaultDynamicPropertyRegistry dynamicPropertyRegistry =
-					new DefaultDynamicPropertyRegistry(environment, false);
-			MutablePropertySources propertySources = environment.getPropertySources();
-			propertySources.addFirst(new DynamicValuesPropertySource(dynamicPropertyRegistry.valueSuppliers));
+			DefaultDynamicPropertyRegistry dynamicPropertyRegistry = new DefaultDynamicPropertyRegistry(environment);
 			this.methods.forEach(method -> {
 				ReflectionUtils.makeAccessible(method);
 				ReflectionUtils.invokeMethod(method, null, dynamicPropertyRegistry);

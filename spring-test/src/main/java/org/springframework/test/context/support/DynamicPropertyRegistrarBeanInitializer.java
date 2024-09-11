@@ -60,9 +60,7 @@ class DynamicPropertyRegistrarBeanInitializer implements BeanFactoryInitializer<
 		String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 				beanFactory, DynamicPropertyRegistrar.class);
 		if (beanNames.length > 0) {
-			DefaultDynamicPropertyRegistry dynamicPropertyRegistry =
-					new DefaultDynamicPropertyRegistry(this.environment, true);
-
+			DefaultDynamicPropertyRegistry dynamicPropertyRegistry = new DefaultDynamicPropertyRegistry(this.environment);
 			for (String name : beanNames) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Eagerly initializing DynamicPropertyRegistrar bean '%s'".formatted(name));

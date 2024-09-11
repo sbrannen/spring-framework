@@ -17,10 +17,16 @@
 package org.springframework.test.context.support;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.function.SupplierUtils;
 
@@ -36,9 +42,18 @@ class DynamicValuesPropertySource extends MapPropertySource {
 
 	static final String PROPERTY_SOURCE_NAME = "Dynamic Test Properties";
 
+	private static final Lock propertySourcesLock = new ReentrantLock();
+
+	final Map<String, Supplier<Object>> valueSuppliers;
+
+
+	DynamicValuesPropertySource() {
+		this(Collections.synchronizedMap(new LinkedHashMap<>()));
+	}
 
 	DynamicValuesPropertySource(Map<String, Supplier<Object>> valueSuppliers) {
 		super(PROPERTY_SOURCE_NAME, Collections.unmodifiableMap(valueSuppliers));
+		this.valueSuppliers = valueSuppliers;
 	}
 
 
@@ -46,6 +61,31 @@ class DynamicValuesPropertySource extends MapPropertySource {
 	@Nullable
 	public Object getProperty(String name) {
 		return SupplierUtils.resolve(super.getProperty(name));
+	}
+
+
+	static DynamicValuesPropertySource getOrCreate(ConfigurableEnvironment environment) {
+		propertySourcesLock.lock();
+		try {
+			MutablePropertySources propertySources = environment.getPropertySources();
+			PropertySource<?> ps = propertySources.get(PROPERTY_SOURCE_NAME);
+			if (ps instanceof DynamicValuesPropertySource dynamicValuesPropertySource) {
+				return dynamicValuesPropertySource;
+			}
+			else if (ps == null) {
+				DynamicValuesPropertySource dynamicValuesPropertySource = new DynamicValuesPropertySource();
+				propertySources.addFirst(dynamicValuesPropertySource);
+				return dynamicValuesPropertySource;
+			}
+			else {
+				throw new IllegalStateException(
+						"PropertySource with name '%s' must be a DynamicValuesPropertySource"
+							.formatted(PROPERTY_SOURCE_NAME));
+			}
+		}
+		finally {
+			propertySourcesLock.unlock();
+		}
 	}
 
 }

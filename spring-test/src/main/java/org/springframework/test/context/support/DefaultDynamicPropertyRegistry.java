@@ -16,16 +16,10 @@
 
 package org.springframework.test.context.support;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MutablePropertySources;
-import org.springframework.core.env.PropertySource;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.util.Assert;
 
@@ -37,18 +31,13 @@ import org.springframework.util.Assert;
  */
 final class DefaultDynamicPropertyRegistry implements DynamicPropertyRegistry {
 
-	final Map<String, Supplier<Object>> valueSuppliers = Collections.synchronizedMap(new LinkedHashMap<>());
-
-	private final ConfigurableEnvironment environment;
-
-	private final boolean lazilyRegisterPropertySource;
-
-	private final Lock propertySourcesLock = new ReentrantLock();
+	private final Map<String, Supplier<Object>> valueSuppliers;
 
 
-	DefaultDynamicPropertyRegistry(ConfigurableEnvironment environment, boolean lazilyRegisterPropertySource) {
-		this.environment = environment;
-		this.lazilyRegisterPropertySource = lazilyRegisterPropertySource;
+	DefaultDynamicPropertyRegistry(ConfigurableEnvironment environment) {
+		DynamicValuesPropertySource dynamicValuesPropertySource =
+				DynamicValuesPropertySource.getOrCreate(environment);
+		this.valueSuppliers = dynamicValuesPropertySource.valueSuppliers;
 	}
 
 
@@ -56,24 +45,7 @@ final class DefaultDynamicPropertyRegistry implements DynamicPropertyRegistry {
 	public void add(String name, Supplier<Object> valueSupplier) {
 		Assert.hasText(name, "'name' must not be null or blank");
 		Assert.notNull(valueSupplier, "'valueSupplier' must not be null");
-		if (this.lazilyRegisterPropertySource) {
-			ensurePropertySourceIsRegistered();
-		}
 		this.valueSuppliers.put(name, valueSupplier);
-	}
-
-	private void ensurePropertySourceIsRegistered() {
-		MutablePropertySources propertySources = this.environment.getPropertySources();
-		this.propertySourcesLock.lock();
-		try {
-			PropertySource<?> ps = propertySources.get(DynamicValuesPropertySource.PROPERTY_SOURCE_NAME);
-			if (ps == null) {
-				propertySources.addFirst(new DynamicValuesPropertySource(this.valueSuppliers));
-			}
-		}
-		finally {
-			this.propertySourcesLock.unlock();
-		}
 	}
 
 }

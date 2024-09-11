@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 class DynamicPropertySourceIntegrationTests {
 
 	private static final String TEST_CONTAINER_IP = "test.container.ip";
+	private static final String MAGIC_WORD = "magic.word";
 
 	static {
 		System.setProperty(TEST_CONTAINER_IP, "system");
@@ -91,11 +92,11 @@ class DynamicPropertySourceIntegrationTests {
 		assertThat(propertySources.contains("Inlined Test Properties")).isTrue();
 		assertThat(propertySources.contains("systemProperties")).isTrue();
 		assertThat(propertySources.get("Dynamic Test Properties").getProperty(TEST_CONTAINER_IP)).isEqualTo("127.0.0.1");
-		// assertThat(propertySources.get("Dynamic Test Properties").getProperty("magic.word")).isEqualTo("enigma");
+		assertThat(propertySources.get("Dynamic Test Properties").getProperty(MAGIC_WORD)).isEqualTo("enigma");
 		assertThat(propertySources.get("Inlined Test Properties").getProperty(TEST_CONTAINER_IP)).isEqualTo("test");
 		assertThat(propertySources.get("systemProperties").getProperty(TEST_CONTAINER_IP)).isEqualTo("system");
 		assertThat(env.getProperty(TEST_CONTAINER_IP)).isEqualTo("127.0.0.1");
-		// assertThat(env.getProperty("magic.word")).isEqualTo("enigma");
+		assertThat(env.getProperty(MAGIC_WORD)).isEqualTo("enigma");
 	}
 
 	@Test
@@ -112,7 +113,7 @@ class DynamicPropertySourceIntegrationTests {
 
 		@Bean
 		DynamicPropertyRegistrar magicWordProperties() {
-			return registry -> registry.add("magic.word", () -> "engima");
+			return registry -> registry.add(MAGIC_WORD, () -> "enigma");
 		}
 
 		@Bean
