@@ -27,6 +27,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.DynamicPropertyRegistrar;
+import org.springframework.test.context.DynamicPropertyRegistry;
 
 /**
  * Internal component which eagerly initializes {@link DynamicPropertyRegistrar}
@@ -60,13 +61,14 @@ class DynamicPropertyRegistrarBeanInitializer implements BeanFactoryInitializer<
 		String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 				beanFactory, DynamicPropertyRegistrar.class);
 		if (beanNames.length > 0) {
-			DefaultDynamicPropertyRegistry dynamicPropertyRegistry = new DefaultDynamicPropertyRegistry(this.environment);
+			DynamicValuesPropertySource propertySource = DynamicValuesPropertySource.getOrCreate(this.environment);
+			DynamicPropertyRegistry registry = propertySource.dynamicPropertyRegistry;
 			for (String name : beanNames) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Eagerly initializing DynamicPropertyRegistrar bean '%s'".formatted(name));
 				}
 				DynamicPropertyRegistrar registrar = beanFactory.getBean(name, DynamicPropertyRegistrar.class);
-				registrar.accept(dynamicPropertyRegistry);
+				registrar.accept(registry);
 			}
 		}
 	}

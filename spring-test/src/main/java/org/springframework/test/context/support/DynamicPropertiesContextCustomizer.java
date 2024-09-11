@@ -79,10 +79,11 @@ class DynamicPropertiesContextCustomizer implements ContextCustomizer {
 
 		if (!this.methods.isEmpty()) {
 			ConfigurableEnvironment environment = context.getEnvironment();
-			DefaultDynamicPropertyRegistry dynamicPropertyRegistry = new DefaultDynamicPropertyRegistry(environment);
+			DynamicValuesPropertySource propertySource = DynamicValuesPropertySource.getOrCreate(environment);
+			DynamicPropertyRegistry registry = propertySource.dynamicPropertyRegistry;
 			this.methods.forEach(method -> {
 				ReflectionUtils.makeAccessible(method);
-				ReflectionUtils.invokeMethod(method, null, dynamicPropertyRegistry);
+				ReflectionUtils.invokeMethod(method, null, registry);
 			});
 		}
 	}
