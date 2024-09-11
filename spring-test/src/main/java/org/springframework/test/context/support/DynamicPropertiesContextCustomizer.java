@@ -36,8 +36,8 @@ import org.springframework.util.ReflectionUtils;
 /**
  * {@link ContextCustomizer} which supports
  * {@link org.springframework.test.context.DynamicPropertySource @DynamicPropertySource}
- * methods and registers a {@link DynamicPropertyRegistrarBeanInitializer} in the
- * container to eagerly initialize
+ * methods in test classes and registers a {@link DynamicPropertyRegistrarBeanInitializer}
+ * in the container to eagerly initialize
  * {@link org.springframework.test.context.DynamicPropertyRegistrar DynamicPropertyRegistrar}
  * beans.
  *
