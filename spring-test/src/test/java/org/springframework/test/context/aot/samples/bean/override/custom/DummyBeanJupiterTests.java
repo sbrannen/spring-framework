@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.test.context.aot.samples.bean.override.convention;
+package org.springframework.test.context.aot.samples.bean.override.custom;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.bean.override.convention.TestBean;
+import org.springframework.test.context.bean.override.DummyBean;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,27 +30,33 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.2
  */
 @SpringJUnitConfig
-public class TestBeanJupiterTests {
+public class DummyBeanJupiterTests {
 
-	@TestBean
-	String magicBean;
+	@DummyBean
+	String magicString;
 
-	static String magicBean() {
-		return "enigma-override";
-	}
+	@DummyBean
+	Integer magicNumber;
 
 	@Test
 	void test() {
-		assertThat(magicBean).isEqualTo("enigma-override");
+		assertThat(magicString).isEqualTo("overridden");
+		assertThat(magicNumber).isEqualTo(42);
 	}
 
 	@Configuration(proxyBeanMethods = false)
 	static class Config {
 
 		@Bean
-		String magicBean() {
+		String magicString() {
 			return "enigma";
 		}
+
+		@Bean
+		Integer magicNumber() {
+			return -1;
+		}
+
 	}
 
 }

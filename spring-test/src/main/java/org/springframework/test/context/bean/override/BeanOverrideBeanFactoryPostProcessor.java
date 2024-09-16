@@ -159,14 +159,21 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			copyBeanDefinitionDetails(existingBeanDefinition, beanDefinition);
 			registry.removeBeanDefinition(beanName);
 		}
+		boolean beanDefUpdated = overrideMetadata.updateOverrideBeanDefinition(beanDefinition);
 		registry.registerBeanDefinition(beanName, beanDefinition);
 
-		Object override = overrideMetadata.createOverride(beanName, existingBeanDefinition, null);
-		if (beanFactory.isSingleton(beanNameIncludingFactory)) {
-			// Now we have an instance (the override) that we can register.
-			// At this stage we don't expect a singleton instance to be present,
-			// and this call will throw if there is such an instance already.
-			beanFactory.registerSingleton(beanName, override);
+		Object override;
+		if (beanDefUpdated) {
+			override = beanFactory.getBean(beanName);
+		}
+		else {
+			override = overrideMetadata.createOverride(beanName, existingBeanDefinition, null);
+			if (beanFactory.isSingleton(beanNameIncludingFactory)) {
+				// Now we have an instance (the override) that we can register.
+				// At this stage we don't expect a singleton instance to be present,
+				// and this call will throw if there is such an instance already.
+				beanFactory.registerSingleton(beanName, override);
+			}
 		}
 
 		overrideMetadata.track(override, beanFactory);

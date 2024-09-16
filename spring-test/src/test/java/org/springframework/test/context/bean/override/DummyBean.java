@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @BeanOverride(DummyBeanOverrideProcessor.class)
-@interface DummyBean {
+public @interface DummyBean {
 
 	String beanName() default "";
 
@@ -68,17 +68,27 @@ import org.springframework.util.StringUtils;
 			}
 
 			@Override
+			protected boolean updateOverrideBeanDefinition(BeanDefinition beanDefinition) {
+				Class<?> beanType = getField().getType();
+				if (CharSequence.class.isAssignableFrom(beanType)) {
+					beanDefinition.setBeanClassName(String.class.getName());
+					beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, "overridden", "java.lang.String");
+					return true;
+				}
+				else if (Integer.class.isAssignableFrom(beanType)) {
+					beanDefinition.setBeanClassName(Integer.class.getName());
+					beanDefinition.setFactoryMethodName("valueOf");
+					beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, "42", "java.lang.String");
+					return true;
+				}
+				return false;
+			}
+
+			@Override
 			protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
 					@Nullable Object existingBeanInstance) {
 
-				Class<?> beanType = getField().getType();
-				if (CharSequence.class.isAssignableFrom(beanType)) {
-					return "overridden";
-				}
-				else if (Integer.class.isAssignableFrom(beanType)) {
-					return 42;
-				}
-				throw new IllegalStateException("Could not handle bean type " + beanType);
+				throw new UnsupportedOperationException();
 			}
 		}
 	}

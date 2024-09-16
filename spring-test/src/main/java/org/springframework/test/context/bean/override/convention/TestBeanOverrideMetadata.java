@@ -17,7 +17,6 @@
 package org.springframework.test.context.bean.override.convention;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -26,7 +25,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.bean.override.BeanOverrideStrategy;
 import org.springframework.test.context.bean.override.OverrideMetadata;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link OverrideMetadata} implementation for {@link TestBean}.
@@ -52,14 +50,14 @@ final class TestBeanOverrideMetadata extends OverrideMetadata {
 	protected Object createOverride(String beanName, @Nullable BeanDefinition existingBeanDefinition,
 			@Nullable Object existingBeanInstance) {
 
-		try {
-			ReflectionUtils.makeAccessible(this.overrideMethod);
-			return this.overrideMethod.invoke(null);
-		}
-		catch (IllegalAccessException | InvocationTargetException ex) {
-			throw new IllegalStateException("Failed to invoke bean overriding method " + this.overrideMethod.getName() +
-					"; a static method with no formal parameters is expected", ex);
-		}
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected boolean updateOverrideBeanDefinition(BeanDefinition beanDefinition) {
+		beanDefinition.setBeanClassName(this.overrideMethod.getDeclaringClass().getName());
+		beanDefinition.setFactoryMethodName(this.overrideMethod.getName());
+		return true;
 	}
 
 	@Override

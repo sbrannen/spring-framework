@@ -149,6 +149,19 @@ public abstract class OverrideMetadata {
 			@Nullable Object existingBeanInstance);
 
 	/**
+	 * Update the supplied {@link BeanDefinition} so that it is suitable for use
+	 * in AOT &mdash; for example, by registering a static factory method that is
+	 * responsible for creating the bean instance for the override.
+	 * <p>The default implementation returns {@code false}.
+	 * @return {@code true} if the supplied bean definition was updated;
+	 * {@code false} if {@link #createOverride(String, BeanDefinition, Object)}
+	 * should be used instead
+	 */
+	protected boolean updateOverrideBeanDefinition(BeanDefinition beanDefinition) {
+		return false;
+	}
+
+	/**
 	 * Optionally track objects created by this {@link OverrideMetadata}.
 	 * <p>The default is not to track, but this can be overridden in subclasses.
 	 * @param override the bean override instance to track

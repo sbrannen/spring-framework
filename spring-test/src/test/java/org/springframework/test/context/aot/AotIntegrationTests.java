@@ -149,6 +149,7 @@ class AotIntegrationTests extends AbstractAotTests {
 	void endToEndTestsForTestBeanOverrideTestClasses() {
 		List<Class<?>> testClasses = List.of(
 				org.springframework.test.context.aot.samples.bean.override.convention.TestBeanJupiterTests.class,
+				org.springframework.test.context.aot.samples.bean.override.custom.DummyBeanJupiterTests.class,
 				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.class,
 				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.TestBeanFieldInEnclosingClassTests.class,
 				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.TestBeanFieldInEnclosingClassTests.TestBeanFieldInEnclosingClassLevel2Tests.class,
