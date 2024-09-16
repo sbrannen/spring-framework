@@ -145,7 +145,6 @@ class AotIntegrationTests extends AbstractAotTests {
 		runEndToEndTests(testClasses, false);
 	}
 
-	@Disabled("Comment out to run @TestBean integration tests in AOT mode")
 	@Test
 	void endToEndTestsForTestBeanOverrideTestClasses() {
 		List<Class<?>> testClasses = List.of(
