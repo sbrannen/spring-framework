@@ -57,6 +57,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, Ordered {
@@ -155,14 +156,33 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			beanNameIncludingFactory = beanName;
 		}
 
-		if (existingBeanDefinition != null) {
-			copyBeanDefinitionDetails(existingBeanDefinition, beanDefinition);
-			registry.removeBeanDefinition(beanName);
+		if (existingBeanDefinition instanceof RootBeanDefinition rbd) {
+			rbd.setQualifiedElement(overrideMetadata.getField());
 		}
-		registry.registerBeanDefinition(beanName, beanDefinition);
+
+		// BeanOverrideFactoryBean registered during AOT processing?
+		boolean beanOverrideFactoryBeanRegistered = ((existingBeanDefinition != null) &&
+				BeanOverrideFactoryBean.class.getName().equals(existingBeanDefinition.getBeanClassName()));
+
+		// Need to register a BeanDefinition for a nonexistent bean?
+		if (!beanOverrideFactoryBeanRegistered && (existingBeanDefinition == null)) {
+			convertToBeanOverrideFactoryBeanDefinition(beanDefinition, beanName, overrideMetadata);
+
+			beanOverrideFactoryBeanRegistered = true;
+			registry.registerBeanDefinition(beanName, beanDefinition);
+		}
 
 		Object override = overrideMetadata.createOverride(beanName, existingBeanDefinition, null);
-		if (beanFactory.isSingleton(beanNameIncludingFactory)) {
+		boolean isFactoryBean = beanFactory.isFactoryBean(beanName);
+		if (!beanOverrideFactoryBeanRegistered &&
+				(beanFactory.isSingleton(beanNameIncludingFactory) || isFactoryBean)) {
+
+			// Need to remove singleton registration of FactoryBean?
+			if (isFactoryBean && existingBeanDefinition != null) {
+				registry.removeBeanDefinition(beanName);
+				registry.registerBeanDefinition(beanName, existingBeanDefinition);
+			}
+
 			// Now we have an instance (the override) that we can register.
 			// At this stage we don't expect a singleton instance to be present,
 			// and this call will throw if there is such an instance already.
@@ -170,6 +190,7 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		}
 
 		overrideMetadata.track(override, beanFactory);
+		this.overrideRegistrar.registerBeanInstance(beanName, override);
 		this.overrideRegistrar.registerNameForMetadata(overrideMetadata, beanNameIncludingFactory);
 	}
 
@@ -267,6 +288,17 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			}
 		}
 		return beans;
+	}
+
+
+	private static void convertToBeanOverrideFactoryBeanDefinition(RootBeanDefinition beanDefinition, String beanName,
+			OverrideMetadata overrideMetadata) {
+
+		beanDefinition.setBeanClass(BeanOverrideFactoryBean.class);
+		beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(BeanOverrideFactoryBean.class, overrideMetadata.getBeanType()));
+		beanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, overrideMetadata.getBeanType());
+		beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, beanName);
+		beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(1, overrideMetadata.getBeanType().resolve());
 	}
 
 

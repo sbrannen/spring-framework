@@ -51,6 +51,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 class BeanOverrideBeanFactoryPostProcessorTests {
 
@@ -210,7 +211,7 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 	}
 
 	@Test
-	void copyDefinitionPrimaryFallbackAndScope() {
+	void beanDefinitionIsRetainedForNonFactoryBean() {
 		AnnotationConfigApplicationContext context = createContext(CaseByName.class);
 		context.getBeanFactory().registerScope("customScope", new SimpleThreadScope());
 		RootBeanDefinition definition = new RootBeanDefinition(String.class, () -> "ORIGINAL");
@@ -220,8 +221,22 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		context.registerBeanDefinition("descriptionBean", definition);
 
 		assertThatNoException().isThrownBy(context::refresh);
+		assertThat(context.getBeanDefinition("descriptionBean")).isSameAs(definition);
+	}
+
+	@Test
+	void primaryFallbackAndScopeAreCopiedForFactoryBean() {
+		AnnotationConfigApplicationContext context = createContext(CaseByName.class);
+		context.getBeanFactory().registerScope("customScope", new SimpleThreadScope());
+		RootBeanDefinition definition = new RootBeanDefinition(StringFactoryBean.class);
+		definition.setScope("customScope");
+		definition.setPrimary(true);
+		definition.setFallback(true);
+		context.registerBeanDefinition("descriptionBean", definition);
+
+		assertThatNoException().isThrownBy(context::refresh);
 		assertThat(context.getBeanDefinition("descriptionBean"))
-				.isNotSameAs(definition)
+				.isSameAs(definition)
 				.matches(BeanDefinition::isPrimary, "isPrimary")
 				.matches(BeanDefinition::isFallback, "isFallback")
 				.satisfies(d -> assertThat(d.getScope()).isEqualTo("customScope"))
@@ -325,6 +340,20 @@ class BeanOverrideBeanFactoryPostProcessorTests {
 		public boolean isSingleton() {
 			return true;
 		}
+	}
+
+	static class StringFactoryBean implements FactoryBean<String> {
+
+		@Override
+		public String getObject() throws Exception {
+			return "enigma";
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return String.class;
+		}
+
 	}
 
 	static class FactoryBeanRegisteringPostProcessor implements BeanFactoryPostProcessor, Ordered {

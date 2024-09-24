@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.support.descriptor.ClassSource;
@@ -122,13 +121,14 @@ class AotIntegrationTests extends AbstractAotTests {
 					/* 1 */ DisabledInAotRuntimeMethodLevelTests.class)));
 	}
 
-	@Disabled("Comment out to run all integration tests in spring-test in AOT mode")
+	// @Disabled("Comment out to run all integration tests in spring-test in AOT mode")
 	@Test
 	void endToEndTestsForEntireSpringTestModule() {
 		// AOT BUILD-TIME: CLASSPATH SCANNING
 		List<Class<?>> testClasses = createTestClassScanner()
 				// Scan all base packages in spring-test.
-				.scan("org.springframework.mock", "org.springframework.test")
+				// .scan("org.springframework.mock", "org.springframework.test")
+				.scan("org.springframework.test.context.bean.override")
 				// Or limit execution to a particular package and its subpackages.
 				//   - For example, to test JDBC support:
 				//     .scan("org.springframework.test.context.jdbc")
@@ -142,13 +142,14 @@ class AotIntegrationTests extends AbstractAotTests {
 				.toList();
 
 		// Optionally set failOnError flag to true to halt processing at the first failure.
-		runEndToEndTests(testClasses, false);
+		runEndToEndTests(testClasses, true);
 	}
 
-	@Disabled("Comment out to run @TestBean integration tests in AOT mode")
+	// @Disabled("Comment out to run @TestBean integration tests in AOT mode")
 	@Test
 	void endToEndTestsForTestBeanOverrideTestClasses() {
 		List<Class<?>> testClasses = List.of(
+				org.springframework.test.context.bean.override.convention.TestBeanForByTypeLookupIntegrationTests.class,
 				org.springframework.test.context.aot.samples.bean.override.convention.TestBeanJupiterTests.class,
 				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.class,
 				org.springframework.test.context.bean.override.convention.TestBeanForByNameLookupIntegrationTests.TestBeanFieldInEnclosingClassTests.class,
@@ -160,14 +161,20 @@ class AotIntegrationTests extends AbstractAotTests {
 		runEndToEndTests(testClasses, true);
 	}
 
-	@Disabled("Comment out to run selected integration tests in AOT mode")
+	// @Disabled("Comment out to run selected integration tests in AOT mode")
 	@Test
 	void endToEndTestsForSelectedTestClasses() {
 		List<Class<?>> testClasses = List.of(
-				org.springframework.test.context.bean.override.easymock.EasyMockBeanIntegrationTests.class,
-				org.springframework.test.context.bean.override.mockito.MockitoBeanForByNameLookupIntegrationTests.class,
-				org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests.class,
-				org.springframework.test.context.junit4.ParameterizedDependencyInjectionTests.class
+				org.springframework.test.context.bean.override.mockito.MockitoBeanWithResetIntegrationTests.class,
+				org.springframework.test.context.bean.override.mockito.MockitoBeanForBeanFactoryIntegrationTests.class
+//				org.springframework.test.context.aot.samples.bean.override.convention.TestBeanJupiterTests.class,
+//				org.springframework.test.context.bean.override.easymock.EasyMockBeanIntegrationTests.class,
+//				org.springframework.test.context.bean.override.mockito.MockitoBeanForByNameLookupIntegrationTests.class,
+//				org.springframework.test.context.bean.override.mockito.MockitoBeanForByNameLookupIntegrationTests.MockitoBeanNestedTests.class,
+//				org.springframework.test.context.bean.override.mockito.MockitoSpyBeanForByNameLookupIntegrationTests.class,
+//				org.springframework.test.context.bean.override.mockito.MockitoSpyBeanForByNameLookupIntegrationTests.MockitoSpyBeanNestedTests.class
+//				org.springframework.test.context.junit4.SpringJUnit4ClassRunnerAppCtxTests.class,
+//				org.springframework.test.context.junit4.ParameterizedDependencyInjectionTests.class
 		);
 
 		runEndToEndTests(testClasses, true);

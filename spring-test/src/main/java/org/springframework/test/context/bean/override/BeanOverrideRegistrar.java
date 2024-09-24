@@ -36,11 +36,14 @@ import org.springframework.util.StringUtils;
  * for test execution listeners.
  *
  * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  */
 class BeanOverrideRegistrar implements BeanFactoryAware {
 
 	private final Map<OverrideMetadata, String> beanNameRegistry = new HashMap<>();
+
+	private final Map<String, Object> beanInstanceRegistry = new HashMap<>();
 
 	private final Map<String, OverrideMetadata> earlyOverrideMetadata = new HashMap<>();
 
@@ -78,6 +81,32 @@ class BeanOverrideRegistrar implements BeanFactoryAware {
 	 */
 	void registerNameForMetadata(OverrideMetadata metadata, String beanName) {
 		this.beanNameRegistry.put(metadata, beanName);
+	}
+
+	/**
+	 * Register the provided bean override instance under the supplied {@code beanName}.
+	 * @see #getBeanInstance(String, Class)
+	 */
+	void registerBeanInstance(String beanName, Object instance) {
+		this.beanInstanceRegistry.put(beanName, instance);
+	}
+
+	/**
+	 * Get the bean override instance registered under the supplied {@code beanName}.
+	 * @param beanName the name of the bean override instance
+	 * @param requiredType the required type of the bean override instance
+	 * @return the corresponding bean override instance
+	 * @throws IllegalArgumentException if no bean override instance has been
+	 * registered under the supplied name
+	 * @throws ClassCastException if the bean override instance is not of the
+	 * required type
+	 * @see #registerBeanInstance(String, Object)
+	 */
+	<T> T getBeanInstance(String beanName, Class<T> requiredType) {
+		Assert.isTrue(this.beanInstanceRegistry.containsKey(beanName),
+				() -> "Bean instance registry does not contain an entry for bean with name '%s'"
+					.formatted(beanName));
+		return requiredType.cast(this.beanInstanceRegistry.get(beanName));
 	}
 
 	/**
