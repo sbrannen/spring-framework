@@ -16,10 +16,13 @@
 
 package org.springframework.test.context.bean.override;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import org.springframework.aot.hint.annotation.Reflective;
 
 /**
  * Mark a composed annotation as eligible for Bean Override processing.
@@ -31,10 +34,13 @@ import java.lang.annotation.Target;
  * expected that it has a {@link Target} of {@link ElementType#FIELD FIELD}.
  *
  * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.ANNOTATION_TYPE)
+@Documented
+@Reflective(BeanOverrideReflectiveProcessor.class)
 public @interface BeanOverride {
 
 	/**
