@@ -155,8 +155,10 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 			registry.registerBeanDefinition(beanName, existingBeanDefinition);
 		}
 		else {
-			// There was no existing bean definition, so we register the pseudo bean definition
-			// to ensure that a bean definition exists for the given bean name.
+			// There was no existing bean definition, so we convert the pseudo bean definition
+			// to a bean definition for a BeanOverrideFactoryBean and register it to ensure that
+			// suitable a bean definition exists for the given bean name.
+			convertToBeanOverrideFactoryBean(pseudoBeanDefinition, overrideMetadata);
 			registry.registerBeanDefinition(beanName, pseudoBeanDefinition);
 		}
 
@@ -286,6 +288,13 @@ class BeanOverrideBeanFactoryPostProcessor implements BeanFactoryPostProcessor, 
 		definition.setTargetType(metadata.getBeanType());
 		definition.setQualifiedElement(metadata.getField());
 		return definition;
+	}
+
+	private static void convertToBeanOverrideFactoryBean(RootBeanDefinition beanDefinition, OverrideMetadata overrideMetadata) {
+		beanDefinition.setBeanClass(BeanOverrideFactoryBean.class);
+		beanDefinition.setTargetType(ResolvableType.forClassWithGenerics(BeanOverrideFactoryBean.class, overrideMetadata.getBeanType()));
+		beanDefinition.setAttribute(FactoryBean.OBJECT_TYPE_ATTRIBUTE, overrideMetadata.getBeanType());
+		beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(0, overrideMetadata.getBeanType().resolve());
 	}
 
 	/**

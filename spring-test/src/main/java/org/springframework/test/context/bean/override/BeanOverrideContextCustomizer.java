@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -35,6 +36,7 @@ import org.springframework.test.context.bean.override.BeanOverrideBeanFactoryPos
  *
  * @author Simon Baslé
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 6.2
  */
 class BeanOverrideContextCustomizer implements ContextCustomizer {
@@ -62,6 +64,11 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 					"that doesn't implement BeanDefinitionRegistry: " + context.getClass());
 		}
 		registerInfrastructure(registry);
+
+		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
+		BeanOverrideRegistrar beanOverrideRegistrar = beanFactory.getBean(REGISTRAR_BEAN_NAME, BeanOverrideRegistrar.class);
+		beanFactory.registerSingleton(INFRASTRUCTURE_BEAN_NAME,
+				new BeanOverrideBeanFactoryPostProcessor(this.metadata, beanOverrideRegistrar));
 	}
 
 	Set<OverrideMetadata> getMetadata() {
@@ -75,11 +82,6 @@ class BeanOverrideContextCustomizer implements ContextCustomizer {
 		RuntimeBeanReference registrarReference = new RuntimeBeanReference(REGISTRAR_BEAN_NAME);
 		addInfrastructureBeanDefinition(registry, WrapEarlyBeanPostProcessor.class, EARLY_INFRASTRUCTURE_BEAN_NAME,
 				constructorArgs -> constructorArgs.addIndexedArgumentValue(0, registrarReference));
-		addInfrastructureBeanDefinition(registry, BeanOverrideBeanFactoryPostProcessor.class, INFRASTRUCTURE_BEAN_NAME,
-				constructorArgs -> {
-					constructorArgs.addIndexedArgumentValue(0, this.metadata);
-					constructorArgs.addIndexedArgumentValue(1, registrarReference);
-				});
 	}
 
 	private void addInfrastructureBeanDefinition(BeanDefinitionRegistry registry,
