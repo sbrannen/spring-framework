@@ -52,11 +52,8 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 	}
 
 	private void findBeanOverrideHandlers(Class<?> testClass, Set<BeanOverrideHandler> handlers) {
-		if (TestContextAnnotationUtils.searchEnclosingClass(testClass)) {
-			findBeanOverrideHandlers(testClass.getEnclosingClass(), handlers);
-		}
-		BeanOverrideHandler.forTestClass(testClass).forEach(handler ->
-				Assert.state(handlers.add(handler), () ->
+		BeanOverrideHandler.forTestClass(testClass, TestContextAnnotationUtils::searchEnclosingClass)
+				.forEach(handler -> Assert.state(handlers.add(handler), () ->
 						"Duplicate BeanOverrideHandler discovered in test class %s: %s"
 							.formatted(testClass.getName(), handler)));
 	}

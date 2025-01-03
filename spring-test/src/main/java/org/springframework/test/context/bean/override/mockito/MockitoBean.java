@@ -18,6 +18,7 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -69,9 +70,10 @@ import org.springframework.test.context.bean.override.BeanOverride;
  * @see org.springframework.test.context.bean.override.mockito.MockitoSpyBean @MockitoSpyBean
  * @see org.springframework.test.context.bean.override.convention.TestBean @TestBean
  */
-@Target(ElementType.FIELD)
+@Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Repeatable(MockitoBeans.class)
 @BeanOverride(MockitoBeanOverrideProcessor.class)
 public @interface MockitoBean {
 
@@ -93,6 +95,19 @@ public @interface MockitoBean {
 	 */
 	@AliasFor("value")
 	String name() default "";
+
+	/**
+	 * The types to mock.
+	 * <p>Defaults to none.
+	 * <p>Each type specified here will result in a mock being created and
+	 * registered with the {@code ApplicationContext}.
+	 * <p>Types must be omitted when the annotation is used on a field.
+	 * <p>When {@code @MockitoBean} also defines a {@link #name} this attribute
+	 * can only contain a single value.
+	 * @return the types to mock
+	 * @since 6.2.2
+	 */
+	Class<?>[] types() default {};
 
 	/**
 	 * Extra interfaces that should also be declared by the mock.

@@ -88,7 +88,9 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 					.getBean(BeanOverrideContextCustomizer.REGISTRY_BEAN_NAME, BeanOverrideRegistry.class);
 
 			for (BeanOverrideHandler handler : handlers) {
-				beanOverrideRegistry.inject(testInstance, handler);
+				if (handler.getField() != null) {
+					beanOverrideRegistry.inject(testInstance, handler);
+				}
 			}
 		}
 	}

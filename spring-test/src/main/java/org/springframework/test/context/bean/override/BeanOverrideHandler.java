@@ -17,6 +17,7 @@
 package org.springframework.test.context.bean.override;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -70,6 +73,7 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  */
 public abstract class BeanOverrideHandler {
 
+	@Nullable
 	private final Field field;
 
 	private final Set<Annotation> fieldAnnotations;
@@ -82,7 +86,7 @@ public abstract class BeanOverrideHandler {
 	private final BeanOverrideStrategy strategy;
 
 
-	protected BeanOverrideHandler(Field field, ResolvableType beanType, @Nullable String beanName,
+	protected BeanOverrideHandler(@Nullable Field field, ResolvableType beanType, @Nullable String beanName,
 			BeanOverrideStrategy strategy) {
 
 		this.field = field;
@@ -102,27 +106,69 @@ public abstract class BeanOverrideHandler {
 	 * @see org.springframework.test.context.TestContextAnnotationUtils#searchEnclosingClass(Class)
 	 */
 	public static List<BeanOverrideHandler> forTestClass(Class<?> testClass) {
+		return forTestClass(testClass, clazz -> false);
+	}
+
+	public static List<BeanOverrideHandler> forTestClass(Class<?> testClass, Predicate<Class<?>> searchEnclosingClass) {
 		List<BeanOverrideHandler> handlers = new LinkedList<>();
-		ReflectionUtils.doWithFields(testClass, field -> processField(field, testClass, handlers));
+		findHandlers(testClass, testClass, handlers, searchEnclosingClass);
 		return handlers;
+	}
+
+	private static void findHandlers(Class<?> clazz, Class<?> testClass, List<BeanOverrideHandler> handlers,
+			Predicate<Class<?>> searchEnclosingClass) {
+
+		if (clazz == null || Object.class == clazz) {
+			return;
+		}
+
+		// 1) Search enclosing class hierarchy.
+		if (searchEnclosingClass.test(clazz)) {
+			findHandlers(clazz.getEnclosingClass(), testClass, handlers, searchEnclosingClass);
+		}
+
+		// 2) Search type hierarchy.
+		findHandlers(clazz.getSuperclass(), testClass, handlers, searchEnclosingClass);
+
+		// 3) Search interfaces.
+		for (Class<?> ifc : clazz.getInterfaces()) {
+			findHandlers(ifc, testClass, handlers, searchEnclosingClass);
+		}
+
+		// 4) Process current class.
+		processClass(clazz, testClass, handlers);
+
+		// 5) Process fields in current class.
+		ReflectionUtils.doWithLocalFields(clazz, field -> processField(field, testClass, handlers));
+	}
+
+	private static void processClass(Class<?> clazz, Class<?> testClass, List<BeanOverrideHandler> handlers) {
+		processElement(clazz, testClass, (processor, composedAnnotation) ->
+				processor.createHandlers(composedAnnotation, testClass).forEach(handlers::add));
 	}
 
 	private static void processField(Field field, Class<?> testClass, List<BeanOverrideHandler> handlers) {
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
-		MergedAnnotations.from(field, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
+		processElement(field, testClass, (processor, composedAnnotation) -> {
 			Assert.state(!Modifier.isStatic(field.getModifiers()),
 					() -> "@BeanOverride field must not be static: " + field);
+			Assert.state(overrideAnnotationFound.compareAndSet(false, true),
+					() -> "Multiple @BeanOverride annotations found on field: " + field);
+			handlers.add(processor.createHandler(composedAnnotation, testClass, field));
+		});
+	}
+
+	private static void processElement(AnnotatedElement element, Class<?> testClass,
+			BiConsumer<BeanOverrideProcessor, Annotation> consumer) {
+
+		MergedAnnotations.from(element, DIRECT).stream(BeanOverride.class).forEach(mergedAnnotation -> {
 			MergedAnnotation<?> metaSource = mergedAnnotation.getMetaSource();
 			Assert.state(metaSource != null, "@BeanOverride annotation must be meta-present");
 
 			BeanOverride beanOverride = mergedAnnotation.synthesize();
 			BeanOverrideProcessor processor = BeanUtils.instantiateClass(beanOverride.value());
 			Annotation composedAnnotation = metaSource.synthesize();
-
-			Assert.state(overrideAnnotationFound.compareAndSet(false, true),
-					() -> "Multiple @BeanOverride annotations found on field: " + field);
-			BeanOverrideHandler handler = processor.createHandler(composedAnnotation, testClass, field);
-			handlers.add(handler);
+			consumer.accept(processor, composedAnnotation);
 		});
 	}
 
@@ -130,6 +176,7 @@ public abstract class BeanOverrideHandler {
 	/**
 	 * Get the annotated {@link Field}.
 	 */
+	@Nullable
 	public final Field getField() {
 		return this.field;
 	}
@@ -226,20 +273,23 @@ public abstract class BeanOverrideHandler {
 				!Objects.equals(this.strategy, that.strategy)) {
 			return false;
 		}
+
+		// by-name lookup
 		if (this.beanName != null) {
 			return true;
 		}
 
 		// by-type lookup
-		return (Objects.equals(this.field.getName(), that.field.getName()) &&
+		return (this.field != null && that.field != null &&
+				Objects.equals(this.field.getName(), that.field.getName()) &&
 				this.fieldAnnotations.equals(that.fieldAnnotations));
 	}
 
 	@Override
 	public int hashCode() {
 		int hash = Objects.hash(getClass(), this.beanType.getType(), this.beanName, this.strategy);
-		return (this.beanName != null ? hash : hash +
-				Objects.hash(this.field.getName(), this.fieldAnnotations));
+		return (this.beanName != null ? hash :
+				hash + Objects.hash((this.field != null ? this.field.getName() : null), this.fieldAnnotations));
 	}
 
 	@Override
@@ -252,7 +302,10 @@ public abstract class BeanOverrideHandler {
 				.toString();
 	}
 
-	private static Set<Annotation> annotationSet(Field field) {
+	private static Set<Annotation> annotationSet(@Nullable Field field) {
+		if (field == null) {
+			return Collections.emptySet();
+		}
 		Annotation[] annotations = field.getAnnotations();
 		return (annotations.length != 0 ? new HashSet<>(Arrays.asList(annotations)) : Collections.emptySet());
 	}

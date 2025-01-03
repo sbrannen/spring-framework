@@ -18,8 +18,11 @@ package org.springframework.test.context.bean.override.mockito;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.test.context.bean.override.BeanOverrideHandler;
 import org.springframework.test.context.bean.override.BeanOverrideProcessor;
 
 /**
@@ -27,6 +30,7 @@ import org.springframework.test.context.bean.override.BeanOverrideProcessor;
  * {@link MockitoBean @MockitoBean} and {@link MockitoSpyBean @MockitoSpyBean}.
  *
  * @author Simon Baslé
+ * @author Sam Brannen
  * @since 6.2
  * @see MockitoBean @MockitoBean
  * @see MockitoSpyBean @MockitoSpyBean
@@ -45,6 +49,20 @@ class MockitoBeanOverrideProcessor implements BeanOverrideProcessor {
 				Invalid annotation passed to MockitoBeanOverrideProcessor: \
 				expected either @MockitoBean or @MockitoSpyBean on field %s.%s"""
 					.formatted(field.getDeclaringClass().getName(), field.getName()));
+	}
+
+	@Override
+	public List<BeanOverrideHandler> createHandlers(Annotation overrideAnnotation, Class<?> testClass) {
+		if (!(overrideAnnotation instanceof MockitoBean mockitoBean)) {
+			throw new IllegalStateException("""
+					Invalid annotation passed to MockitoBeanOverrideProcessor: \
+					expected @MockitoBean on test class """ + testClass.getName());
+		}
+		List<BeanOverrideHandler> handlers = new ArrayList<>();
+		for (Class<?> type : mockitoBean.types()) {
+			handlers.add(new MockitoBeanOverrideHandler(null, ResolvableType.forClass(type), mockitoBean));
+		}
+		return handlers;
 	}
 
 }
