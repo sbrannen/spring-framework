@@ -23,6 +23,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import org.jspecify.annotations.Nullable;
@@ -47,7 +48,21 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Expression language AST node that represents a method reference.
+ * Expression language AST node that represents a method reference (i.e., a
+ * method invocation other than a simple property reference).
+ *
+ * <h3>Null-safe Invocation</h3>
+ *
+ * <p>Null-safe invocation is supported via the {@code '?.'} operator. For example,
+ * {@code 'counter?.incrementBy(1)'} will evaluate to {@code null} if {@code counter}
+ * is {@code null} and will otherwise evaluate to the value returned from the
+ * invocation of {@code counter.incrementBy(1)}. As of Spring Framework 7.0,
+ * null-safe invocation also applies when invoking a method on an {@link Optional}
+ * target. For example, if {@code counter} is of type {@code Optional<Counter>},
+ * the expression {@code 'counter?.incrementBy(1)'} will evaluate to {@code null}
+ * if {@code counter} is {@code null} or {@link Optional#isEmpty() empty} and will
+ * otherwise evaluate the value returned from the invocation of
+ * {@code counter.get().incrementBy(1)}.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -92,7 +107,9 @@ public class MethodReference extends SpelNodeImpl {
 	protected ValueRef getValueRef(ExpressionState state) throws EvaluationException {
 		@Nullable Object[] arguments = getArguments(state);
 		if (state.getActiveContextObject().getValue() == null) {
-			throwIfNotNullSafe(getArgumentTypes(arguments));
+			if (!isNullSafe()) {
+				throw nullTargetObjectException(getArgumentTypes(arguments));
+			}
 			return ValueRef.NullValueRef.INSTANCE;
 		}
 		return new MethodValueRef(state, arguments);
@@ -109,19 +126,32 @@ public class MethodReference extends SpelNodeImpl {
 		return result;
 	}
 
-	private TypedValue getValueInternal(EvaluationContext evaluationContext,
-			@Nullable Object value, @Nullable TypeDescriptor targetType, @Nullable Object[] arguments) {
+	private TypedValue getValueInternal(EvaluationContext evaluationContext, final @Nullable Object value,
+			@Nullable TypeDescriptor targetType, @Nullable Object[] arguments) {
 
+		Object target = value;
 		List<TypeDescriptor> argumentTypes = getArgumentTypes(arguments);
-		if (value == null) {
-			throwIfNotNullSafe(argumentTypes);
-			return TypedValue.NULL;
+
+		if (isNullSafe()) {
+			if (target == null) {
+				return TypedValue.NULL;
+			}
+			if (target instanceof Optional<?> optional) {
+				if (optional.isEmpty()) {
+					return TypedValue.NULL;
+				}
+				target = optional.get();
+			}
 		}
 
-		MethodExecutor executorToUse = getCachedExecutor(evaluationContext, value, targetType, argumentTypes);
+		if (target == null) {
+			throw nullTargetObjectException(argumentTypes);
+		}
+
+		MethodExecutor executorToUse = getCachedExecutor(evaluationContext, target, targetType, argumentTypes);
 		if (executorToUse != null) {
 			try {
-				return executorToUse.execute(evaluationContext, value, arguments);
+				return executorToUse.execute(evaluationContext, target, arguments);
 			}
 			catch (AccessException ex) {
 				// Two reasons this can occur:
@@ -135,7 +165,7 @@ public class MethodReference extends SpelNodeImpl {
 				// To determine the situation, the AccessException will contain a cause.
 				// If the cause is an InvocationTargetException, a user exception was
 				// thrown inside the method. Otherwise the method could not be invoked.
-				throwSimpleExceptionIfPossible(value, ex);
+				throwSimpleExceptionIfPossible(target, ex);
 
 				// At this point we know it wasn't a user problem so worth a retry if a
 				// better candidate can be found.
@@ -144,27 +174,25 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		// either there was no accessor or it no longer existed
-		executorToUse = findAccessorForMethod(argumentTypes, value, evaluationContext);
+		executorToUse = findAccessorForMethod(argumentTypes, target, evaluationContext);
 		this.cachedExecutor = new CachedMethodExecutor(
-				executorToUse, (value instanceof Class<?> clazz ? clazz : null), targetType, argumentTypes);
+				executorToUse, (target instanceof Class<?> clazz ? clazz : null), targetType, argumentTypes);
 		try {
-			return executorToUse.execute(evaluationContext, value, arguments);
+			return executorToUse.execute(evaluationContext, target, arguments);
 		}
 		catch (AccessException ex) {
 			// Same unwrapping exception handling as above in above catch block
-			throwSimpleExceptionIfPossible(value, ex);
+			throwSimpleExceptionIfPossible(target, ex);
 			throw new SpelEvaluationException(getStartPosition(), ex,
 					SpelMessage.EXCEPTION_DURING_METHOD_INVOCATION, this.name,
-					value.getClass().getName(), ex.getMessage());
+					(value != null ? value.getClass().getName() : "null"), ex.getMessage());
 		}
 	}
 
-	private void throwIfNotNullSafe(List<TypeDescriptor> argumentTypes) {
-		if (!isNullSafe()) {
-			throw new SpelEvaluationException(getStartPosition(),
-					SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
-					FormatHelper.formatMethodForMessage(this.name, argumentTypes));
-		}
+	private SpelEvaluationException nullTargetObjectException(List<TypeDescriptor> argumentTypes) {
+		return new SpelEvaluationException(getStartPosition(),
+				SpelMessage.METHOD_CALL_ON_NULL_OBJECT_NOT_ALLOWED,
+				FormatHelper.formatMethodForMessage(this.name, argumentTypes));
 	}
 
 	private @Nullable Object[] getArguments(ExpressionState state) {

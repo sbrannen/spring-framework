@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
@@ -43,7 +44,19 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Represents a simple property or field reference.
+ * Represents a simple public property or field reference.
+ *
+ * <h3>Null-safe Navigation</h3>
+ *
+ * <p>Null-safe navigation is supported via the {@code '?.'} operator. For example,
+ * {@code 'user?.name'} will evaluate to {@code null} if {@code user} is {@code null}
+ * and will otherwise evaluate to the name of the user. As of Spring Framework 7.0,
+ * null-safe navigation also applies when accessing a property or field on an
+ * {@link Optional} target. For example, if {@code user} is of type
+ * {@code Optional<User>}, the expression {@code 'user?.name'} will evaluate to
+ * {@code null} if {@code user} is {@code null} or {@link Optional#isEmpty() empty}
+ * and will otherwise evaluate to the name of the user, effectively
+ * {@code user.get().getName()} or {@code user.get().name}.
  *
  * @author Andy Clement
  * @author Juergen Hoeller
@@ -180,8 +193,17 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 			throws EvaluationException {
 
 		Object targetObject = contextObject.getValue();
-		if (targetObject == null && isNullSafe()) {
-			return TypedValue.NULL;
+
+		if (isNullSafe()) {
+			if (targetObject == null) {
+				return TypedValue.NULL;
+			}
+			if (targetObject instanceof Optional<?> optional) {
+				if (optional.isEmpty()) {
+					return TypedValue.NULL;
+				}
+				targetObject = optional.get();
+			}
 		}
 
 		PropertyAccessor accessorToUse = this.cachedReadAccessor;
