@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.byLessThan;
 import static org.assertj.core.api.Assertions.entry;
 
 /**
@@ -972,6 +973,62 @@ class DefaultConversionServiceTests {
 				TypeDescriptor.valueOf(Optional.class))).isSameAs(Optional.empty());
 		assertThat((Object) conversionService.convert(Optional.empty(), Optional.class)).isSameAs(Optional.empty());
 	}
+
+	@Test  // gh-34544
+	void convertNullOptionalToNull() {
+		assertThat(conversionService.convert(null, TypeDescriptor.valueOf(Optional.class),
+				TypeDescriptor.valueOf(Object.class))).isNull();
+	}
+
+	@Test  // gh-34544
+	void convertEmptyOptionalToNull() {
+		assertThat(conversionService.convert(Optional.empty(), Object.class)).isNull();
+		assertThat(conversionService.convert(Optional.empty(), String.class)).isNull();
+
+		assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Optional.class),
+				TypeDescriptor.valueOf(Object.class))).isNull();
+		assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Optional.class),
+				TypeDescriptor.valueOf(String.class))).isNull();
+		assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Optional.class),
+				TypeDescriptor.valueOf(Integer[].class))).isNull();
+		assertThat(conversionService.convert(Optional.empty(), TypeDescriptor.valueOf(Optional.class),
+				TypeDescriptor.valueOf(List.class))).isNull();
+	}
+
+	@Test  // gh-34544
+	@SuppressWarnings("unchecked")
+	void convertOptionalToOptional() {
+		assertThat(conversionService.convert(Optional.of("enigma"), Optional.class)).contains("enigma");
+		assertThat((Optional<?>) conversionService.convert(Optional.of("enigma"), TypeDescriptor.valueOf(Optional.class),
+				TypeDescriptor.valueOf(Optional.class)))
+						.satisfies( optional -> assertThat(optional).get().isEqualTo("enigma"));
+	}
+
+	@Test  // gh-34544
+	@SuppressWarnings("unchecked")
+	void convertOptionalToObjectWithoutConversionOfContainedObject() {
+		assertThat(conversionService.convert(Optional.of("enigma"), String.class)).isEqualTo("enigma");
+		assertThat(conversionService.convert(Optional.of(42), Integer.class)).isEqualTo(42);
+		assertThat(conversionService.convert(Optional.of(new int[] {1, 2, 3}), int[].class)).containsExactly(1, 2, 3);
+		assertThat(conversionService.convert(Optional.of(new Integer[] {1, 2, 3}), Integer[].class)).containsExactly(1, 2, 3);
+		assertThat(conversionService.convert(Optional.of(List.of(1, 2, 3)), List.class)).containsExactly(1, 2, 3);
+	}
+
+	@Test  // gh-34544
+	@SuppressWarnings("unchecked")
+	void convertOptionalToObjectWithConversionOfContainedObject() {
+		assertThat(conversionService.convert(Optional.of(42), String.class)).isEqualTo("42");
+		assertThat(conversionService.convert(Optional.of(3.14F), Double.class)).isCloseTo(3.14, byLessThan(0.001));
+		assertThat(conversionService.convert(Optional.of(new int[] {1, 2, 3}), Integer[].class)).containsExactly(1, 2, 3);
+		assertThat(conversionService.convert(Optional.of(List.of(1, 2, 3)), Set.class)).containsExactly(1, 2, 3);
+	}
+
+	@Test  // gh-34544
+	@SuppressWarnings("unchecked")
+	void convertNestedOptionalToObject() {
+		assertThat(conversionService.convert(Optional.of(Optional.of("unwrap me twice")), String.class)).isEqualTo("unwrap me twice");
+	}
+
 
 
 	// test fields and helpers
