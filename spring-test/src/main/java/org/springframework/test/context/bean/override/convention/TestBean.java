@@ -165,6 +165,19 @@ public @interface TestBean {
 	String methodName() default "";
 
 	/**
+	 * The name of the context hierarchy level in which this {@code @TestBean}
+	 * should be applied.
+	 * <p>Defaults to an empty string which indicates that this {@code @TestBean}
+	 * should be applied to all application contexts within a context hierarchy.
+	 * <p>If a context name is configured, it must match a name configured via
+	 * {@code @ContextConfiguration(name=...)}.
+	 * @since 6.2.6
+	 * @see org.springframework.test.context.ContextHierarchy @ContextHierarchy
+	 * @see org.springframework.test.context.ContextConfiguration#name()
+	 */
+	String contextName() default "";
+
+	/**
 	 * Whether to require the existence of the bean being overridden.
 	 * <p>Defaults to {@code false} which means that a bean will be created if a
 	 * corresponding bean does not exist.

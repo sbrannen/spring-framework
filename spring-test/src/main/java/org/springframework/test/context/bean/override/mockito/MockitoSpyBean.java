@@ -137,6 +137,19 @@ public @interface MockitoSpyBean {
 	Class<?>[] types() default {};
 
 	/**
+	 * The name of the context hierarchy level in which this {@code @MockitoSpyBean}
+	 * should be applied.
+	 * <p>Defaults to an empty string which indicates that this {@code @MockitoSpyBean}
+	 * should be applied to all application contexts within a context hierarchy.
+	 * <p>If a context name is configured, it must match a name configured via
+	 * {@code @ContextConfiguration(name=...)}.
+	 * @since 6.2.6
+	 * @see org.springframework.test.context.ContextHierarchy @ContextHierarchy
+	 * @see org.springframework.test.context.ContextConfiguration#name()
+	 */
+	String contextName() default "";
+
+	/**
 	 * The reset mode to apply to the spied bean.
 	 * <p>The default is {@link MockReset#AFTER} meaning that spies are automatically
 	 * reset after each test method is invoked.

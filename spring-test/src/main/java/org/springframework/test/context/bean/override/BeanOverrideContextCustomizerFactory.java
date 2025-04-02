@@ -42,19 +42,21 @@ class BeanOverrideContextCustomizerFactory implements ContextCustomizerFactory {
 	public BeanOverrideContextCustomizer createContextCustomizer(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributes) {
 
+		String contextName = configAttributes.get(0).getName();
 		Set<BeanOverrideHandler> handlers = new LinkedHashSet<>();
-		findBeanOverrideHandlers(testClass, handlers);
+		findBeanOverrideHandlers(testClass, contextName, handlers);
 		if (handlers.isEmpty()) {
 			return null;
 		}
 		return new BeanOverrideContextCustomizer(handlers);
 	}
 
-	private void findBeanOverrideHandlers(Class<?> testClass, Set<BeanOverrideHandler> handlers) {
-		BeanOverrideHandler.findAllHandlers(testClass).forEach(handler ->
-				Assert.state(handlers.add(handler), () ->
-						"Duplicate BeanOverrideHandler discovered in test class %s: %s"
-							.formatted(testClass.getName(), handler)));
+	private void findBeanOverrideHandlers(Class<?> testClass, @Nullable String contextName, Set<BeanOverrideHandler> handlers) {
+		BeanOverrideHandler.findAllHandlers(testClass).stream()
+				.filter(handler -> handler.getContextName().isEmpty() || handler.getContextName().equals(contextName))
+				.forEach(handler -> Assert.state(handlers.add(handler),
+						() -> "Duplicate BeanOverrideHandler discovered in test class %s: %s"
+								.formatted(testClass.getName(), handler)));
 	}
 
 }

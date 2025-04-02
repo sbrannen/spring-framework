@@ -87,17 +87,26 @@ public abstract class BeanOverrideHandler {
 	@Nullable
 	private final String beanName;
 
+	private final String contextName;
+
 	private final BeanOverrideStrategy strategy;
 
 
 	protected BeanOverrideHandler(@Nullable Field field, ResolvableType beanType, @Nullable String beanName,
 			BeanOverrideStrategy strategy) {
 
+		this(field, beanType, beanName, "", strategy);
+	}
+
+	protected BeanOverrideHandler(@Nullable Field field, ResolvableType beanType, @Nullable String beanName,
+			String contextName, BeanOverrideStrategy strategy) {
+
 		this.field = field;
 		this.qualifierAnnotations = getQualifierAnnotations(field);
 		this.beanType = beanType;
 		this.beanName = beanName;
 		this.strategy = strategy;
+		this.contextName = contextName;
 	}
 
 	/**
@@ -239,6 +248,21 @@ public abstract class BeanOverrideHandler {
 	}
 
 	/**
+	 * Get the name of the context hierarchy level in which this handler should
+	 * be applied.
+	 * <p>An empty string indicates that this handler should be applied to all
+	 * application contexts within a context hierarchy.
+	 * <p>If a context name is configured for this handler, it must match a name
+	 * configured via {@code @ContextConfiguration(name=...)}.
+	 * @since 6.2.6
+	 * @see org.springframework.test.context.ContextHierarchy @ContextHierarchy
+	 * @see org.springframework.test.context.ContextConfiguration#name()
+	 */
+	public final String getContextName() {
+		return this.contextName;
+	}
+
+	/**
 	 * Get the {@link BeanOverrideStrategy} for this {@code BeanOverrideHandler},
 	 * which influences how and when the bean override instance should be created.
 	 */
@@ -311,6 +335,7 @@ public abstract class BeanOverrideHandler {
 		BeanOverrideHandler that = (BeanOverrideHandler) other;
 		if (!Objects.equals(this.beanType.getType(), that.beanType.getType()) ||
 				!Objects.equals(this.beanName, that.beanName) ||
+				!Objects.equals(this.contextName, that.contextName) ||
 				!Objects.equals(this.strategy, that.strategy)) {
 			return false;
 		}
@@ -330,7 +355,7 @@ public abstract class BeanOverrideHandler {
 
 	@Override
 	public int hashCode() {
-		int hash = Objects.hash(getClass(), this.beanType.getType(), this.beanName, this.strategy);
+		int hash = Objects.hash(getClass(), this.beanType.getType(), this.beanName, this.contextName, this.strategy);
 		return (this.beanName != null ? hash : hash +
 				Objects.hash((this.field != null ? this.field.getName() : null), this.qualifierAnnotations));
 	}
@@ -341,6 +366,7 @@ public abstract class BeanOverrideHandler {
 				.append("field", this.field)
 				.append("beanType", this.beanType)
 				.append("beanName", this.beanName)
+				.append("contextName", this.contextName)
 				.append("strategy", this.strategy)
 				.toString();
 	}

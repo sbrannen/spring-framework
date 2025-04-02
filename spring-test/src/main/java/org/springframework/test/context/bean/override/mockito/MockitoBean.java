@@ -145,6 +145,19 @@ public @interface MockitoBean {
 	Class<?>[] types() default {};
 
 	/**
+	 * The name of the context hierarchy level in which this {@code @MockitoBean}
+	 * should be applied.
+	 * <p>Defaults to an empty string which indicates that this {@code @MockitoBean}
+	 * should be applied to all application contexts within a context hierarchy.
+	 * <p>If a context name is configured, it must match a name configured via
+	 * {@code @ContextConfiguration(name=...)}.
+	 * @since 6.2.6
+	 * @see org.springframework.test.context.ContextHierarchy @ContextHierarchy
+	 * @see org.springframework.test.context.ContextConfiguration#name()
+	 */
+	String contextName() default "";
+
+	/**
 	 * Extra interfaces that should also be declared by the mock.
 	 * <p>Defaults to none.
 	 * @return any extra interfaces
