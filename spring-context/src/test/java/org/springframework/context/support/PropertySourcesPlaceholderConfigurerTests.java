@@ -19,6 +19,8 @@ package org.springframework.context.support;
 import java.util.Optional;
 import java.util.Properties;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +33,7 @@ import org.springframework.beans.testfixture.beans.TestBean;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -56,6 +59,16 @@ import static org.springframework.beans.factory.support.BeanDefinitionBuilder.ro
  * @since 3.1
  */
 class PropertySourcesPlaceholderConfigurerTests {
+
+	@BeforeAll
+	static void setSpringProperty() {
+		SpringProperties.setProperty("spring.placeholder.escapeCharacter.default", "\\");
+	}
+
+	@AfterAll
+	static void clearSpringProperty() {
+		SpringProperties.setProperty("spring.placeholder.escapeCharacter.default", null);
+	}
 
 	@Test
 	void replacementFromEnvironmentProperties() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.util;
 
+import org.springframework.core.SpringProperties;
 import org.springframework.lang.Nullable;
 
 /**
@@ -28,12 +29,19 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Dave Syer
+ * @author Sam Brannen
  * @since 1.2.5
  * @see #PLACEHOLDER_PREFIX
  * @see #PLACEHOLDER_SUFFIX
  * @see System#getProperty(String)
  */
 public abstract class SystemPropertyUtils {
+
+	/**
+	 * Property name: {@value}.
+	 * @since 6.2.7
+	 */
+	public static final String SPRING_PLACEHOLDER_ESCAPE_CHARACTER_DEFAULT = "spring.placeholder.escapeCharacter.default";
 
 	/** Prefix for system property placeholders: {@value}. */
 	public static final String PLACEHOLDER_PREFIX = "${";
@@ -44,8 +52,11 @@ public abstract class SystemPropertyUtils {
 	/** Value separator for system property placeholders: {@value}. */
 	public static final String VALUE_SEPARATOR = ":";
 
-	/** Default escape character: {@code '\'}. */
-	public static final Character ESCAPE_CHARACTER = '\\';
+	/**
+	 * Default escape character.
+	 * @see #getDefaultEscapeCharacter()
+	 */
+	public static final Character ESCAPE_CHARACTER = getDefaultEscapeCharacter();
 
 
 	private static final PropertyPlaceholderHelper strictHelper =
@@ -88,6 +99,32 @@ public abstract class SystemPropertyUtils {
 		}
 		PropertyPlaceholderHelper helper = (ignoreUnresolvablePlaceholders ? nonStrictHelper : strictHelper);
 		return helper.replacePlaceholders(text, new SystemPropertyPlaceholderResolver(text));
+	}
+
+	/**
+	 * Get the default escape character for placeholder resolution.
+	 * <p>Falls back to {@code '\'}.
+	 * @since 6.2.7
+	 */
+	@Nullable
+	public static Character getDefaultEscapeCharacter() {
+		String value = SpringProperties.getProperty(SPRING_PLACEHOLDER_ESCAPE_CHARACTER_DEFAULT);
+		if (value != null) {
+			if (value.isEmpty()) {
+				return null;
+			}
+			if (value.length() == 1) {
+				try {
+					return value.charAt(0);
+				}
+				catch (Exception ex) {
+					/* ignore */
+				}
+			}
+			System.err.printf("ERROR: Value [%s] for property [%s] must be a single character or an empty string%n",
+					value, SPRING_PLACEHOLDER_ESCAPE_CHARACTER_DEFAULT);
+		}
+		return '\\';
 	}
 
 
