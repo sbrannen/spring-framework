@@ -336,7 +336,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	@Override
-	public <T> @Nullable T execute(ConnectionCallback<T> action) throws DataAccessException {
+	public <T extends @Nullable Object> T execute(ConnectionCallback<T> action) throws DataAccessException {
 		Assert.notNull(action, "Callback object must not be null");
 
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
@@ -381,7 +381,9 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	// Methods dealing with static SQL (java.sql.Statement)
 	//-------------------------------------------------------------------------
 
-	private <T> @Nullable T execute(StatementCallback<T> action, boolean closeResources) throws DataAccessException {
+	private <T extends @Nullable Object> T execute(StatementCallback<T> action, boolean closeResources)
+			throws DataAccessException {
+
 		Assert.notNull(action, "Callback object must not be null");
 
 		Connection con = DataSourceUtils.getConnection(obtainDataSource());
@@ -415,7 +417,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T execute(StatementCallback<T> action) throws DataAccessException {
+	public <T extends @Nullable Object> T execute(StatementCallback<T> action) throws DataAccessException {
 		return execute(action, true);
 	}
 
@@ -442,7 +444,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T extends @Nullable Object> T query(String sql, ResultSetExtractor<T> rse) throws DataAccessException {
 		Assert.notNull(sql, "SQL must not be null");
 		Assert.notNull(rse, "ResultSetExtractor must not be null");
 		if (logger.isDebugEnabled()) {
@@ -509,7 +511,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException {
 		List<T> results = query(sql, rowMapper);
 		return DataAccessUtils.nullableSingleResult(results);
 	}
@@ -630,7 +632,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	// Methods dealing with prepared statements
 	//-------------------------------------------------------------------------
 
-	private <T> @Nullable T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action, boolean closeResources)
+	private <T extends @Nullable Object> T execute(
+			PreparedStatementCreator psc, PreparedStatementCallback<T> action, boolean closeResources)
 			throws DataAccessException {
 
 		Assert.notNull(psc, "PreparedStatementCreator must not be null");
@@ -678,14 +681,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action)
+	public <T extends @Nullable Object> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action)
 			throws DataAccessException {
 
 		return execute(psc, action, true);
 	}
 
 	@Override
-	public <T> @Nullable T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
+	public <T extends @Nullable Object> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
 		return execute(new SimplePreparedStatementCreator(sql), action, true);
 	}
 
@@ -700,7 +703,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 * @return an arbitrary result object, as returned by the ResultSetExtractor
 	 * @throws DataAccessException if there is any problem
 	 */
-	public <T> @Nullable T query(
+	public <T extends @Nullable Object> T query(
 			PreparedStatementCreator psc, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse)
 			throws DataAccessException {
 
@@ -726,28 +729,39 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T query(PreparedStatementCreator psc, ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T extends @Nullable Object> T query(PreparedStatementCreator psc, ResultSetExtractor<T> rse)
+			throws DataAccessException {
+
 		return query(psc, null, rse);
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T extends @Nullable Object> T query(
+			String sql, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse) throws DataAccessException {
+
 		return query(new SimplePreparedStatementCreator(sql), pss, rse);
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, @Nullable Object @Nullable [] args, int[] argTypes, ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T extends @Nullable Object> T query(
+			String sql, @Nullable Object @Nullable [] args, int[] argTypes, ResultSetExtractor<T> rse)
+			throws DataAccessException {
+
 		return query(sql, newArgTypePreparedStatementSetter(args, argTypes), rse);
 	}
 
 	@Deprecated(since = "5.3")
 	@Override
-	public <T> @Nullable T query(String sql, @Nullable Object @Nullable [] args, ResultSetExtractor<T> rse) throws DataAccessException {
+	public <T extends @Nullable Object> T query(String sql, @Nullable Object @Nullable [] args, ResultSetExtractor<T> rse)
+			throws DataAccessException {
+
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
 	@Override
-	public <T> @Nullable T query(String sql, ResultSetExtractor<T> rse, @Nullable Object @Nullable ... args) throws DataAccessException {
+	public <T extends @Nullable Object> T query(String sql, ResultSetExtractor<T> rse, @Nullable Object @Nullable ... args)
+			throws DataAccessException {
+
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
@@ -852,7 +866,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, @Nullable Object @Nullable [] args, int[] argTypes, RowMapper<T> rowMapper)
+	public <T extends @Nullable Object> T queryForObject(
+			String sql, @Nullable Object @Nullable [] args, int[] argTypes, RowMapper<T> rowMapper)
 			throws DataAccessException {
 
 		List<T> results = query(sql, args, argTypes, new RowMapperResultSetExtractor<>(rowMapper, 1));
@@ -861,13 +876,17 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	@Deprecated(since = "5.3")
 	@Override
-	public <T> @Nullable T queryForObject(String sql,@Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException {
+	public <T extends @Nullable Object> T queryForObject(
+			String sql,@Nullable Object @Nullable [] args, RowMapper<T> rowMapper) throws DataAccessException {
+
 		List<T> results = query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 1));
 		return DataAccessUtils.nullableSingleResult(results);
 	}
 
 	@Override
-	public <T> @Nullable T queryForObject(String sql, RowMapper<T> rowMapper, @Nullable Object @Nullable ... args) throws DataAccessException {
+	public <T extends @Nullable Object> T queryForObject(
+			String sql, RowMapper<T> rowMapper, @Nullable Object @Nullable ... args) throws DataAccessException {
+
 		List<T> results = query(sql, newArgPreparedStatementSetter(args), new RowMapperResultSetExtractor<>(rowMapper, 1));
 		return DataAccessUtils.nullableSingleResult(results);
 	}
@@ -1125,7 +1144,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	//-------------------------------------------------------------------------
 
 	@Override
-	public <T> @Nullable T execute(CallableStatementCreator csc, CallableStatementCallback<T> action)
+	public <T extends @Nullable Object> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action)
 			throws DataAccessException {
 
 		Assert.notNull(csc, "CallableStatementCreator must not be null");
@@ -1171,7 +1190,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	@Override
-	public <T> @Nullable T execute(String callString, CallableStatementCallback<T> action) throws DataAccessException {
+	public <T extends @Nullable Object> T execute(String callString, CallableStatementCallback<T> action) throws DataAccessException {
 		return execute(new SimpleCallableStatementCreator(callString), action);
 	}
 

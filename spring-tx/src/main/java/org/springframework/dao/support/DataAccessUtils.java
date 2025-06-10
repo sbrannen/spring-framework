@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2024 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -184,7 +184,7 @@ public abstract class DataAccessUtils {
 	 * has been found in the given Collection
 	 * @since 5.0.2
 	 */
-	public static <T> @Nullable T nullableSingleResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
+	public static <T extends @Nullable Object> T nullableSingleResult(@Nullable Collection<T> results) throws IncorrectResultSizeDataAccessException {
 		// This is identical to the requiredSingleResult implementation but differs in the
 		// semantics of the incoming Collection (which we currently can't formally express)
 		if (CollectionUtils.isEmpty(results)) {
