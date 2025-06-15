@@ -18,7 +18,6 @@ package org.springframework.core.retry;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
@@ -87,8 +86,13 @@ class DefaultRetryPolicy implements RetryPolicy {
 	}
 
 
-	private static List<String> names(Set<Class<? extends Throwable>> types) {
-		return types.stream().map(Class::getTypeName).toList();
+	private static String names(Set<Class<? extends Throwable>> types) {
+		StringJoiner result = new StringJoiner(", ", "[", "]");
+		for (Class<? extends Throwable> type : types) {
+			String name = type.getCanonicalName();
+			result.add(name != null? name : type.getName());
+		}
+		return result.toString();
 	}
 
 
@@ -114,13 +118,24 @@ class DefaultRetryPolicy implements RetryPolicy {
 					return false;
 				}
 			}
-			if (!DefaultRetryPolicy.this.excludes.isEmpty() &&
-					DefaultRetryPolicy.this.excludes.stream().anyMatch(type -> type.isInstance(throwable))) {
-				return false;
+			if (!DefaultRetryPolicy.this.excludes.isEmpty()) {
+				for (Class<? extends Throwable> excludedType : DefaultRetryPolicy.this.excludes) {
+					if (excludedType.isInstance(throwable)) {
+						return false;
+					}
+				}
 			}
-			if (!DefaultRetryPolicy.this.includes.isEmpty() &&
-					DefaultRetryPolicy.this.includes.stream().noneMatch(type -> type.isInstance(throwable))) {
-				return false;
+			if (!DefaultRetryPolicy.this.includes.isEmpty()) {
+				boolean included = false;
+				for (Class<? extends Throwable> includedType : DefaultRetryPolicy.this.includes) {
+					if (includedType.isInstance(throwable)) {
+						included = true;
+						break;
+					}
+				}
+				if (!included) {
+					return false;
+				}
 			}
 			return DefaultRetryPolicy.this.predicate == null || DefaultRetryPolicy.this.predicate.test(throwable);
 		}
