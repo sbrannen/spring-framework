@@ -40,6 +40,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.http.server.reactive.SslInfo;
 import org.springframework.test.json.JsonComparator;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.json.JsonComparison;
@@ -274,6 +275,13 @@ public interface WebTestClient {
 		 * @param sessionManager the session manager to use
 		 */
 		<T extends B> T webSessionManager(WebSessionManager sessionManager);
+
+		/**
+		 * Provide SSL session information for the mock server.
+		 * @param sslInfo the {@link SslInfo} to use
+		 * @since 7.0
+		 */
+		<T extends B> T sslInfo(SslInfo sslInfo);
 
 		/**
 		 * Shortcut for pre-packaged customizations to the mock server setup.
