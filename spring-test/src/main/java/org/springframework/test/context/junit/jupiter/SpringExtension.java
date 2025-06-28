@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
@@ -62,6 +63,7 @@ import org.springframework.test.context.support.TestConstructorUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code SpringExtension} integrates the <em>Spring TestContext Framework</em>
@@ -180,7 +182,8 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 								testClass.getName(), Arrays.toString(methodsWithErrors)));
 			}, String.class);
 
-		if (!errorMessage.isEmpty()) {
+		// Appease NullAway since ExtensionContext.Store.getOrComputeIfAbsent(...) is @Nullable
+		if (StringUtils.hasLength(errorMessage)) {
 			throw new IllegalStateException(errorMessage);
 		}
 	}
@@ -219,7 +222,8 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 					published by other tests since the application context may be shared.""";
 		}, String.class);
 
-		if (!errorMessage.isEmpty()) {
+		// Appease NullAway since ExtensionContext.Store.getOrComputeIfAbsent(...) is @Nullable
+		if (StringUtils.hasLength(errorMessage)) {
 			throw new IllegalStateException(errorMessage);
 		}
 	}
@@ -358,7 +362,11 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		Assert.notNull(context, "ExtensionContext must not be null");
 		Class<?> testClass = context.getRequiredTestClass();
 		Store store = getStore(context);
-		return store.getOrComputeIfAbsent(testClass, TestContextManager::new, TestContextManager.class);
+		TestContextManager testContextManager =
+				store.getOrComputeIfAbsent(testClass, TestContextManager::new, TestContextManager.class);
+
+		// Appease NullAway since ExtensionContext.Store.getOrComputeIfAbsent(...) is @Nullable
+		return Objects.requireNonNull(testContextManager, "TestContextManager must not be null");
 	}
 
 	private static Store getStore(ExtensionContext context) {
@@ -372,7 +380,6 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * the supplied {@link TestContextManager}.
 	 * @since 6.1
 	 */
-	@SuppressWarnings("NullAway") // org.junit.jupiter.api.extension.ExecutableInvoker is not null marked
 	private static void registerMethodInvoker(TestContextManager testContextManager, ExtensionContext context) {
 		testContextManager.getTestContext().setMethodInvoker(context.getExecutableInvoker()::invoke);
 	}

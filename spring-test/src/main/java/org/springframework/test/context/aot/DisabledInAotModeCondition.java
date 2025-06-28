@@ -37,6 +37,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 class DisabledInAotModeCondition implements ExecutionCondition {
 
 	@Override
+	@SuppressWarnings("NullAway") // ConditionEvaluationResult.disabled(): customReason should be @Nullable
 	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
 		boolean aotEnabled = AotDetector.useGeneratedArtifacts();
 		if (aotEnabled) {
