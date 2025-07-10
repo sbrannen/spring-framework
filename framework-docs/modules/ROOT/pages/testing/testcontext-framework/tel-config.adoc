@@ -4,6 +4,8 @@
 Spring provides the following `TestExecutionListener` implementations that are registered
 by default, exactly in the following order:
 
+* `ContextStateTestExecutionListener`: Marks a test's `ApplicationContext` as inactive
+  after execution of the test class has ended.
 * `ServletTestExecutionListener`: Configures Servlet API mocks for a
   `WebApplicationContext`.
 * `DirtiesContextBeforeModesTestExecutionListener`: Handles the `@DirtiesContext`

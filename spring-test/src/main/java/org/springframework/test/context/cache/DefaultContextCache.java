@@ -74,6 +74,13 @@ public class DefaultContextCache implements ContextCache {
 			new ConcurrentHashMap<>(32);
 
 	/**
+	 * Map of context keys to active test classes (i.e., test classes that are actively
+	 * using the corresponding {@link ApplicationContext}).
+	 * @since 7.0
+	 */
+	private final Map<MergedContextConfiguration, Set<Class<?>>> activeContextsMap = new ConcurrentHashMap<>(32);
+
+	/**
 	 * Map of context keys to context load failure counts.
 	 * @since 6.1
 	 */
@@ -129,6 +136,10 @@ public class DefaultContextCache implements ContextCache {
 		}
 		else {
 			this.hitCount.incrementAndGet();
+			if (context instanceof ConfigurableApplicationContext cac && !cac.isRunning()) {
+				cac.restart();
+			}
+			markContextActive(key);
 		}
 		return context;
 	}
@@ -139,6 +150,8 @@ public class DefaultContextCache implements ContextCache {
 		Assert.notNull(context, "ApplicationContext must not be null");
 
 		this.contextMap.put(key, context);
+		markContextActive(key);
+
 		MergedContextConfiguration child = key;
 		MergedContextConfiguration parent = child.getParent();
 		while (parent != null) {
@@ -147,6 +160,26 @@ public class DefaultContextCache implements ContextCache {
 			child = parent;
 			parent = child.getParent();
 		}
+	}
+
+	private void markContextActive(MergedContextConfiguration mergedConfig) {
+		getActiveTestClasses(mergedConfig).add(mergedConfig.getTestClass());
+	}
+
+	@Override
+	public void markContextInactive(MergedContextConfiguration mergedConfig) {
+		ApplicationContext context = get(mergedConfig);
+		Assert.state(context != null, "ApplicationContext must not be null for: " + mergedConfig);
+
+		Set<Class<?>> activeTestClasses = getActiveTestClasses(mergedConfig);
+		activeTestClasses.remove(mergedConfig.getTestClass());
+		if (activeTestClasses.isEmpty() && context instanceof ConfigurableApplicationContext cac) {
+			cac.stop();
+		}
+	}
+
+	private Set<Class<?>> getActiveTestClasses(MergedContextConfiguration mergedConfig) {
+		return this.activeContextsMap.computeIfAbsent(mergedConfig, mcc -> new HashSet<>());
 	}
 
 	@Override
@@ -202,6 +235,7 @@ public class DefaultContextCache implements ContextCache {
 		if (context instanceof ConfigurableApplicationContext cac) {
 			cac.close();
 		}
+		this.activeContextsMap.remove(key);
 		removedContexts.add(key);
 	}
 
@@ -258,6 +292,7 @@ public class DefaultContextCache implements ContextCache {
 		synchronized (this.contextMap) {
 			this.contextMap.clear();
 			this.hierarchyMap.clear();
+			this.activeContextsMap.clear();
 		}
 	}
 

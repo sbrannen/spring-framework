@@ -154,6 +154,21 @@ public interface ContextCache {
 	}
 
 	/**
+	 * Mark the {@link ApplicationContext} for the given
+	 * {@link MergedContextConfiguration} as inactive &mdash; for example, after
+	 * execution of a test class has ended.
+	 * <p>The default implementation of this method does nothing. Concrete
+	 * implementations are therefore highly encouraged to override this
+	 * method with appropriate behavior. Note that the standard
+	 * {@code ContextContext} implementation in Spring overrides this method
+	 * appropriately.
+	 * @param key the context key; never {@code null}
+	 * @since 7.0
+	 */
+	default void markContextInactive(MergedContextConfiguration key) {
+	}
+
+	/**
 	 * Determine the number of contexts currently stored in the cache.
 	 * <p>If the cache contains more than {@code Integer.MAX_VALUE} elements,
 	 * this method must return {@code Integer.MAX_VALUE}.

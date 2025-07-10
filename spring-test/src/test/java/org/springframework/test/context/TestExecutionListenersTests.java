@@ -32,6 +32,7 @@ import org.springframework.test.context.event.EventPublishingTestExecutionListen
 import org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.CommonCachesTestExecutionListener;
+import org.springframework.test.context.support.ContextStateTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -65,6 +66,7 @@ class TestExecutionListenersTests {
 	@Test
 	void defaultListeners() {
 		List<Class<?>> expected = List.of(//
+				ContextStateTestExecutionListener.class,//
 				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
@@ -88,6 +90,7 @@ class TestExecutionListenersTests {
 	void defaultListenersMergedWithCustomListenerPrepended() {
 		List<Class<?>> expected = List.of(//
 				QuuxTestExecutionListener.class,//
+				ContextStateTestExecutionListener.class,//
 				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
@@ -110,6 +113,7 @@ class TestExecutionListenersTests {
 	@Test
 	void defaultListenersMergedWithCustomListenerAppended() {
 		List<Class<?>> expected = List.of(//
+				ContextStateTestExecutionListener.class,//
 				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//
@@ -133,6 +137,7 @@ class TestExecutionListenersTests {
 	@Test
 	void defaultListenersMergedWithCustomListenerInserted() {
 		List<Class<?>> expected = List.of(//
+				ContextStateTestExecutionListener.class,//
 				ServletTestExecutionListener.class,//
 				DirtiesContextBeforeModesTestExecutionListener.class,//
 				ApplicationEventsTestExecutionListener.class,//

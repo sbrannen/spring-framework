@@ -152,6 +152,21 @@ public class DefaultTestContext implements TestContext {
 		this.cacheAwareContextLoaderDelegate.closeContext(this.mergedConfig, hierarchyMode);
 	}
 
+	/**
+	 * Mark the {@linkplain ApplicationContext application context} associated
+	 * with this test context as <em>inactive</em> so that it can be safely
+	 * {@linkplain org.springframework.context.ConfigurableApplicationContext#stop()
+	 * stopped}.
+	 * <p>The default implementation delegates to the {@link CacheAwareContextLoaderDelegate}
+	 * that was supplied when this {@code TestContext} was constructed.
+	 * @since 7.0
+	 * @see CacheAwareContextLoaderDelegate#markContextInactive(MergedContextConfiguration)
+	 */
+	@Override
+	public void markApplicationContextInactive() {
+		this.cacheAwareContextLoaderDelegate.markContextInactive(this.mergedConfig);
+	}
+
 	@Override
 	public final Class<?> getTestClass() {
 		return this.testClass;

@@ -90,6 +90,8 @@ package org.springframework.test.context;
  * {@code Ordered} and is registered automatically by default.
  *
  * <ul>
+ * <li>{@link org.springframework.test.context.support.ContextStateTestExecutionListener
+ * ContextStateTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener
  * ServletTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener

@@ -142,4 +142,14 @@ public interface CacheAwareContextLoaderDelegate {
 	 */
 	void closeContext(MergedContextConfiguration mergedConfig, @Nullable HierarchyMode hierarchyMode);
 
+	/**
+	 * Mark the {@linkplain ApplicationContext application context} for the
+	 * supplied {@link MergedContextConfiguration} as inactive &mdash; for example,
+	 * after execution of a test class has ended.
+	 * @param key the context key; never {@code null}
+	 * @since 7.0
+	 */
+	default void markContextInactive(MergedContextConfiguration key) {
+	}
+
 }

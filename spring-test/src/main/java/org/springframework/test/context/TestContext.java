@@ -141,6 +141,19 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	void markApplicationContextDirty(@Nullable HierarchyMode hierarchyMode);
 
 	/**
+	 * Call this method to signal that the {@linkplain ApplicationContext application
+	 * context} associated with this test context is <em>inactive</em> and can be safely
+	 * {@linkplain org.springframework.context.Lifecycle#stop() stopped}.
+	 * <p>This method is typically invoked after execution of the test class has
+	 * ended. However, this method should not be invoked unless the application
+	 * context for this test context is known to be {@linkplain #hasApplicationContext()
+	 * available}.
+	 * @since 7.0
+	 */
+	default void markApplicationContextInactive() {
+	}
+
+	/**
 	 * Update this test context to reflect the state of the currently executing test.
 	 * <p><strong>WARNING</strong>: This method should only be invoked by the
 	 * {@link TestContextManager}.
