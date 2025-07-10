@@ -204,6 +204,14 @@ public class DefaultCacheAwareContextLoaderDelegate implements CacheAwareContext
 		}
 	}
 
+	@Override
+	public void markContextInactive(MergedContextConfiguration mergedConfig) {
+		mergedConfig = replaceIfNecessary(mergedConfig);
+		synchronized (this.contextCache) {
+			this.contextCache.markContextInactive(mergedConfig);
+		}
+	}
+
 	/**
 	 * Get the {@link ContextCache} used by this context loader delegate.
 	 */

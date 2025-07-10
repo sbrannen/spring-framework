@@ -53,7 +53,8 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * Determine if the {@linkplain ApplicationContext application context} for
 	 * this test context is known to be available.
 	 * <p>If this method returns {@code true}, a subsequent invocation of
-	 * {@link #getApplicationContext()} should succeed.
+	 * {@link #getApplicationContext()} or {@link #markApplicationContextInactive()}
+	 * should succeed.
 	 * <p>The default implementation of this method always returns {@code false}.
 	 * Custom {@code TestContext} implementations are therefore highly encouraged
 	 * to override this method with a more meaningful implementation. Note that
@@ -62,6 +63,7 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * @return {@code true} if the application context has already been loaded
 	 * @since 5.2
 	 * @see #getApplicationContext()
+	 * @see #markApplicationContextInactive()
 	 */
 	default boolean hasApplicationContext() {
 		return false;
@@ -139,6 +141,19 @@ public interface TestContext extends AttributeAccessor, Serializable {
 	 * context is part of a hierarchy (may be {@code null})
 	 */
 	void markApplicationContextDirty(@Nullable HierarchyMode hierarchyMode);
+
+	/**
+	 * Call this method to signal that the {@linkplain ApplicationContext application
+	 * context} associated with this test context is <em>inactive</em> and can be
+	 * safely {@linkplain org.springframework.context.Lifecycle#stop() stopped}.
+	 * <p>This method is intended to be invoked after execution of the test class
+	 * has ended and should not be invoked unless the application context for this
+	 * test context is known to be {@linkplain #hasApplicationContext() available}.
+	 * <p>This feature is primarily intended for use within the framework.
+	 * @since 7.0
+	 */
+	default void markApplicationContextInactive() {
+	}
 
 	/**
 	 * Update this test context to reflect the state of the currently executing test.
