@@ -16,6 +16,9 @@
 
 package org.springframework.test.context.testng;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -28,6 +31,8 @@ import org.testng.ITestResult;
  * @since 4.2
  */
 public class TrackingTestNGTestListener implements ITestListener {
+
+	public final List<Throwable> throwables = new ArrayList<>();
 
 	public int testStartCount = 0;
 
@@ -54,6 +59,11 @@ public class TrackingTestNGTestListener implements ITestListener {
 	@Override
 	public void onTestFailure(ITestResult testResult) {
 		this.testFailureCount++;
+
+		Throwable throwable = testResult.getThrowable();
+		if (throwable != null) {
+			this.throwables.add(throwable);
+		}
 	}
 
 	@Override

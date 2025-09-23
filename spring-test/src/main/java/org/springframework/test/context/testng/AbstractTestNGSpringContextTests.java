@@ -73,7 +73,7 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 
 	private final TestContextManager testContextManager;
 
-	private @Nullable Throwable testException;
+	private final ThreadLocal<@Nullable Throwable> testException = new ThreadLocal<>();
 
 
 	/**
@@ -145,25 +145,25 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 			beforeCallbacksExecuted = true;
 		}
 		catch (Throwable ex) {
-			this.testException = ex;
+			this.testException.set(ex);
 		}
 
 		if (beforeCallbacksExecuted) {
 			callBack.runTestMethod(testResult);
-			this.testException = getTestResultException(testResult);
+			this.testException.set(getTestResultException(testResult));
 		}
 
 		try {
-			this.testContextManager.afterTestExecution(this, testMethod, this.testException);
+			this.testContextManager.afterTestExecution(this, testMethod, this.testException.get());
 		}
 		catch (Throwable ex) {
-			if (this.testException == null) {
-				this.testException = ex;
+			if (this.testException.get() == null) {
+				this.testException.set(ex);
 			}
 		}
 
-		if (this.testException != null) {
-			throwAsUncheckedException(this.testException);
+		if (this.testException.get() != null) {
+			throwAsUncheckedException(this.testException.get());
 		}
 	}
 
@@ -178,10 +178,10 @@ public abstract class AbstractTestNGSpringContextTests implements IHookable, App
 	@AfterMethod(alwaysRun = true)
 	protected void springTestContextAfterTestMethod(Method testMethod) throws Exception {
 		try {
-			this.testContextManager.afterTestMethod(this, testMethod, this.testException);
+			this.testContextManager.afterTestMethod(this, testMethod, this.testException.get());
 		}
 		finally {
-			this.testException = null;
+			this.testException.remove();
 		}
 	}
 
