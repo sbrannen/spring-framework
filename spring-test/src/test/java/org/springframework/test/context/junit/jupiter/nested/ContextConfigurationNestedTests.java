@@ -51,7 +51,8 @@ class ContextConfigurationNestedTests {
 	private static final String BAR = "bar";
 	private static final String BAZ = "baz";
 
-	@Autowired
+	@Autowired(required = false)
+	@Qualifier("foo")
 	String foo;
 
 
@@ -75,11 +76,8 @@ class ContextConfigurationNestedTests {
 
 		@Test
 		void test() {
-			// In contrast to nested test classes running in JUnit 4, the foo
-			// field in the outer instance should have been injected from the
-			// test ApplicationContext for the outer instance.
-			assertThat(foo).isEqualTo(FOO);
-			assertThat(this.localFoo).as("foo bean should not be present").isNull();
+			assertThat(foo).as("foo bean should not be present").isNull();
+			assertThat(this.localFoo).as("local foo bean should not be present").isNull();
 			assertThat(this.bar).isEqualTo(BAR);
 		}
 	}
@@ -122,11 +120,8 @@ class ContextConfigurationNestedTests {
 
 			@Test
 			void test() {
-				// In contrast to nested test classes running in JUnit 4, the foo
-				// field in the outer instance should have been injected from the
-				// test ApplicationContext for the outer instance.
-				assertThat(foo).isEqualTo(FOO);
-				assertThat(this.localFoo).as("foo bean should not be present").isNull();
+				assertThat(foo).as("foo bean should not be present").isNull();
+				assertThat(this.localFoo).as("local foo bean should not be present").isNull();
 				assertThat(this.bar).isEqualTo(BAR);
 			}
 
@@ -145,8 +140,8 @@ class ContextConfigurationNestedTests {
 
 				@Test
 				void test() {
-					assertThat(foo).isEqualTo(FOO);
-					assertThat(this.localFoo).as("foo bean should not be present").isNull();
+					assertThat(foo).as("foo bean should not be present").isNull();
+					assertThat(this.localFoo).as("local foo bean should not be present").isNull();
 					assertThat(this.bar).isEqualTo(BAR);
 				}
 			}
@@ -160,6 +155,7 @@ class ContextConfigurationNestedTests {
 				String localFoo;
 
 				@Autowired
+				@Qualifier("bar")
 				String bar;
 
 				@Autowired
@@ -168,8 +164,8 @@ class ContextConfigurationNestedTests {
 
 				@Test
 				void test() {
-					assertThat(foo).isEqualTo(FOO);
-					assertThat(this.localFoo).as("foo bean should not be present").isNull();
+					assertThat(foo).as("foo bean should not be present").isNull();
+					assertThat(this.localFoo).as("local foo bean should not be present").isNull();
 					assertThat(this.bar).isEqualTo(BAR);
 					assertThat(this.baz).isEqualTo(BAZ);
 				}

@@ -69,8 +69,9 @@ class ActiveProfilesNestedTests {
 
 		@Test
 		void test() {
-			assertThat(strings).containsExactlyInAnyOrder("X", "A1");
-			assertThat(this.localStrings).containsExactlyInAnyOrder("X", "A1");
+			assertThat(strings)
+					.isEqualTo(this.localStrings)
+					.containsExactlyInAnyOrder("X", "A1");
 		}
 	}
 
@@ -85,8 +86,9 @@ class ActiveProfilesNestedTests {
 
 		@Test
 		void test() {
-			assertThat(strings).containsExactlyInAnyOrder("X", "A1");
-			assertThat(this.localStrings).containsExactlyInAnyOrder("Y", "A2");
+			assertThat(strings)
+					.isEqualTo(this.localStrings)
+					.containsExactlyInAnyOrder("Y", "A2");
 		}
 	}
 
@@ -102,8 +104,9 @@ class ActiveProfilesNestedTests {
 
 		@Test
 		void test() {
-			assertThat(strings).containsExactlyInAnyOrder("X", "A1");
-			assertThat(this.localStrings).containsExactlyInAnyOrder("X", "A1", "Y", "A2");
+			assertThat(strings)
+					.isEqualTo(this.localStrings)
+					.containsExactlyInAnyOrder("X", "A1", "Y", "A2");
 		}
 
 
@@ -119,8 +122,9 @@ class ActiveProfilesNestedTests {
 
 			@Test
 			void test() {
-				assertThat(strings).containsExactlyInAnyOrder("X", "A1");
-				assertThat(this.localStrings).containsExactlyInAnyOrder("X", "Y", "Z", "A3");
+				assertThat(strings)
+						.isEqualTo(this.localStrings)
+						.containsExactlyInAnyOrder("X", "Y", "Z", "A3");
 			}
 
 
@@ -135,8 +139,9 @@ class ActiveProfilesNestedTests {
 
 				@Test
 				void test() {
-					assertThat(strings).containsExactlyInAnyOrder("X", "A1");
-					assertThat(this.localStrings).containsExactlyInAnyOrder("X", "Y", "Z", "A2");
+					assertThat(strings)
+							.isEqualTo(this.localStrings)
+							.containsExactlyInAnyOrder("X", "Y", "Z", "A2");
 				}
 			}
 
@@ -150,8 +155,9 @@ class ActiveProfilesNestedTests {
 
 				@Test
 				void test() {
-					assertThat(strings).containsExactlyInAnyOrder("X", "A1");
-					assertThat(this.localStrings).containsExactlyInAnyOrder("X", "Y", "Z", "A2", "A3");
+					assertThat(strings)
+							.isEqualTo(this.localStrings)
+							.containsExactlyInAnyOrder("X", "Y", "Z", "A2", "A3");
 				}
 			}
 		}

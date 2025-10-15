@@ -145,6 +145,11 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		}
 	}
 
+	@Override
+	public ExtensionContextScope getTestInstantiationExtensionContextScope(ExtensionContext rootContext) {
+		return ExtensionContextScope.TEST_METHOD;
+	}
+
 	/**
 	 * Delegates to {@link TestContextManager#prepareTestInstance}.
 	 * <p>This method also validates that test methods and test lifecycle methods
@@ -303,7 +308,11 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Parameter parameter = parameterContext.getParameter();
 		Executable executable = parameter.getDeclaringExecutable();
-		Class<?> testClass = extensionContext.getRequiredTestClass();
+		// Since 7.0, the value returned from extensionContext.getRequiredTestClass() may
+		// refer to the declaring class of the test method which is about to be invoked
+		// (which may be in a @Nested class within the declaring class of the Executable).
+		// Thus, we use the declaring class of the Executable as the "test class".
+		Class<?> testClass = executable.getDeclaringClass();
 		PropertyProvider junitPropertyProvider = propertyName ->
 				extensionContext.getConfigurationParameter(propertyName).orElse(null);
 		return (TestConstructorUtils.isAutowirableConstructor(executable, testClass, junitPropertyProvider) ||

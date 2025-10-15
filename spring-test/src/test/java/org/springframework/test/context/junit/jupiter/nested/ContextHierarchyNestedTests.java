@@ -86,10 +86,9 @@ class ContextHierarchyNestedTests {
 			assertThat(this.context).as("local ApplicationContext").isNotNull();
 			assertThat(this.context.getParent()).as("parent ApplicationContext").isNull();
 
-			// In contrast to nested test classes running in JUnit 4, the foo
-			// field in the outer instance should have been injected from the
-			// test ApplicationContext for the outer instance.
-			assertThat(foo).isEqualTo(FOO);
+			// The foo field in the outer instance should have been injected from
+			// the test ApplicationContext for NestedTests.
+			assertThat(foo).isEqualTo(BAR);
 			assertThat(this.bar).isEqualTo(BAR);
 		}
 	}
@@ -111,12 +110,13 @@ class ContextHierarchyNestedTests {
 			assertThat(this.context).as("local ApplicationContext").isNotNull();
 			assertThat(this.context.getParent()).as("parent ApplicationContext").isNotNull();
 
-			// Since the configuration is inherited, the foo field in the outer instance
-			// and the bar field in the inner instance should both have been injected
-			// from the test ApplicationContext for the outer instance.
-			assertThat(foo).isEqualTo(FOO);
+			// The foo field in the outer instance and the bar field in the inner
+			// instance should both have been injected from the test ApplicationContext
+			// for the inner instance.
+			assertThat(foo).as("foo")
+					.isEqualTo(this.context.getBean("foo", String.class))
+					.isEqualTo(QUX + 1);
 			assertThat(this.bar).isEqualTo(BAZ + 1);
-			assertThat(this.context.getBean("foo", String.class)).as("child foo").isEqualTo(QUX + 1);
 		}
 
 		@Nested
@@ -139,9 +139,10 @@ class ContextHierarchyNestedTests {
 				assertThat(this.context).as("local ApplicationContext").isNotNull();
 				assertThat(this.context.getParent()).as("parent ApplicationContext").isNotNull();
 
-				assertThat(foo).isEqualTo(FOO);
+				assertThat(foo).as("foo")
+						.isEqualTo(this.context.getBean("foo", String.class))
+						.isEqualTo(QUX + 2);
 				assertThat(this.bar).isEqualTo(BAZ + 2);
-				assertThat(this.context.getBean("foo", String.class)).as("child foo").isEqualTo(QUX + 2);
 			}
 
 			@Nested
@@ -165,10 +166,11 @@ class ContextHierarchyNestedTests {
 					assertThat(this.context.getParent()).as("parent ApplicationContext").isNotNull();
 					assertThat(this.context.getParent().getParent()).as("grandparent ApplicationContext").isNotNull();
 
-					assertThat(foo).isEqualTo(FOO);
-					assertThat(this.localFoo).isEqualTo("test interface");
+					assertThat(foo).as("foo")
+							.isEqualTo(this.localFoo)
+							.isEqualTo(this.context.getBean("foo", String.class))
+							.isEqualTo("test interface");
 					assertThat(this.bar).isEqualTo(BAZ + 2);
-					assertThat(this.context.getParent().getBean("foo", String.class)).as("child foo").isEqualTo(QUX + 2);
 				}
 			}
 		}

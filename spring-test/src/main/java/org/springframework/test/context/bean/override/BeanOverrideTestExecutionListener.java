@@ -93,9 +93,15 @@ public class BeanOverrideTestExecutionListener extends AbstractTestExecutionList
 	 * a corresponding bean override instance.
 	 */
 	private static void injectFields(TestContext testContext) {
-		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(testContext.getTestClass());
+		Object testInstance = testContext.getTestInstance();
+		// Since 7.0, the value returned from testContext.getTestClass() may refer
+		// to the declaring class of the test method which is about to be invoked
+		// (which may be in a @Nested class within the class for the test instance).
+		// Thus, we use the class for the test instance as the "test class".
+		Class<?> testClass = testInstance.getClass();
+
+		List<BeanOverrideHandler> handlers = BeanOverrideHandler.forTestClass(testClass);
 		if (!handlers.isEmpty()) {
-			Object testInstance = testContext.getTestInstance();
 			ApplicationContext applicationContext = testContext.getApplicationContext();
 
 			Assert.state(applicationContext.containsBean(BeanOverrideRegistry.BEAN_NAME), () -> """

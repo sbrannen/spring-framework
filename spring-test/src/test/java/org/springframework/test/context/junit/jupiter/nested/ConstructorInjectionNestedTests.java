@@ -71,7 +71,7 @@ class ConstructorInjectionNestedTests {
 
 		@Test
 		void nestedTest() {
-			assertThat(foo).isEqualTo("foo");
+			assertThat(foo).isEqualTo("bar");
 			assertThat(bar).isEqualTo("bar");
 		}
 	}
@@ -88,7 +88,7 @@ class ConstructorInjectionNestedTests {
 
 		@Test
 		void nestedTest() {
-			assertThat(foo).isEqualTo("foo");
+			assertThat(foo).isEqualTo("bar");
 			assertThat(bar).isEqualTo("bar");
 		}
 	}
@@ -105,7 +105,7 @@ class ConstructorInjectionNestedTests {
 
 		@Test
 		void nestedTest() {
-			assertThat(foo).isEqualTo("foo");
+			assertThat(foo).isEqualTo("bar");
 			assertThat(bar).isEqualTo("bar");
 		}
 	}
@@ -124,7 +124,7 @@ class ConstructorInjectionNestedTests {
 
 		@Test
 		void nestedTest() {
-			assertThat(foo).isEqualTo("foo");
+			assertThat(foo).isEqualTo("bar");
 			assertThat(bar).isEqualTo("bar");
 			assertThat(answer).isEqualTo(42);
 		}

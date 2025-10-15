@@ -65,9 +65,8 @@ class TestPropertySourceNestedTests {
 
 		@Test
 		void propertiesInEnvironment() {
-			assertThat(env1.getProperty("p1")).isEqualTo("v1");
-			assertThat(env2.getProperty("p1")).isEqualTo("v1");
 			assertThat(env1).isSameAs(env2);
+			assertThat(env2.getProperty("p1")).isEqualTo("v1");
 		}
 	}
 
@@ -82,8 +81,7 @@ class TestPropertySourceNestedTests {
 
 		@Test
 		void propertiesInEnvironment() {
-			assertThat(env1.getProperty("p1")).isEqualTo("v1");
-			assertThat(env1).isNotSameAs(env2);
+			assertThat(env1).isSameAs(env2);
 			assertThat(env2.getProperty("p1")).isNull();
 			assertThat(env2.getProperty("p2")).isEqualTo("v2");
 		}
@@ -101,8 +99,7 @@ class TestPropertySourceNestedTests {
 
 		@Test
 		void propertiesInEnvironment() {
-			assertThat(env1.getProperty("p1")).isEqualTo("v1");
-			assertThat(env1).isNotSameAs(env2);
+			assertThat(env1).isSameAs(env2);
 			assertThat(env2.getProperty("p1")).isEqualTo("v1");
 			assertThat(env2.getProperty("p2a")).isEqualTo("v2a");
 			assertThat(env2.getProperty("p2b")).isEqualTo("v2b");
@@ -121,12 +118,7 @@ class TestPropertySourceNestedTests {
 
 			@Test
 			void propertiesInEnvironment() {
-				assertThat(env1.getProperty("p1")).isEqualTo("v1");
-				assertThat(env1).isNotSameAs(env2);
-				assertThat(env2.getProperty("p1")).isEqualTo("v1");
-				assertThat(env2.getProperty("p2a")).isEqualTo("v2a");
-				assertThat(env2.getProperty("p2b")).isEqualTo("v2b");
-				assertThat(env2).isNotSameAs(env3);
+				assertThat(env1).isSameAs(env2).isSameAs(env3);
 				assertThat(env3.getProperty("p1")).isNull();
 				assertThat(env3.getProperty("p2")).isNull();
 				assertThat(env3.getProperty("p3")).isEqualTo("v3");
@@ -144,16 +136,7 @@ class TestPropertySourceNestedTests {
 
 				@Test
 				void propertiesInEnvironment() {
-					assertThat(env1.getProperty("p1")).isEqualTo("v1");
-					assertThat(env1).isNotSameAs(env2);
-					assertThat(env2.getProperty("p1")).isEqualTo("v1");
-					assertThat(env2.getProperty("p2a")).isEqualTo("v2a");
-					assertThat(env2.getProperty("p2b")).isEqualTo("v2b");
-					assertThat(env2).isNotSameAs(env3);
-					assertThat(env3.getProperty("p1")).isNull();
-					assertThat(env3.getProperty("p2")).isNull();
-					assertThat(env3.getProperty("p3")).isEqualTo("v3");
-					assertThat(env3).isNotSameAs(env4);
+					assertThat(env1).isSameAs(env2).isSameAs(env3).isSameAs(env4);
 					assertThat(env4.getProperty("p1")).isNull();
 					assertThat(env4.getProperty("p2")).isNull();
 					assertThat(env4.getProperty("p3")).isEqualTo("v34");
@@ -169,13 +152,13 @@ class TestPropertySourceNestedTests {
 
 					@Test
 					void propertiesInEnvironment() {
-						assertThat(env4).isNotSameAs(env5);
-						assertThat(env5.getProperty("foo")).isEqualTo("bar");
-						assertThat(env5.getProperty("enigma")).isEqualTo("42");
+						assertThat(env4).isSameAs(env5);
 						assertThat(env5.getProperty("p1")).isNull();
 						assertThat(env5.getProperty("p2")).isNull();
 						assertThat(env5.getProperty("p3")).isEqualTo("v34");
 						assertThat(env5.getProperty("p4")).isEqualTo("v4");
+						assertThat(env5.getProperty("foo")).isEqualTo("bar");
+						assertThat(env5.getProperty("enigma")).isEqualTo("42");
 					}
 				}
 			}
