@@ -154,8 +154,22 @@ public interface TestExecutionListener {
 	 * for details on wrapping behavior for listeners.
 	 * <p>The default implementation is <em>empty</em>. Can be overridden by
 	 * concrete classes as necessary.
+	 * <p>Since JUnit Jupiter 5.12, if the
+	 * {@link org.springframework.test.context.junit.jupiter.SpringExtension
+	 * SpringExtension} is used with a
+	 * {@linkplain org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope#TEST_METHOD
+	 * test-method scoped} {@link org.junit.jupiter.api.extension.ExtensionContext
+	 * ExtensionContext}, the {@link Class} returned from
+	 * {@link TestContext#getTestClass()} may refer to the declaring class of the
+	 * current test method, which may reside in a
+	 * {@link org.junit.jupiter.api.Nested @Nested} test class within the class
+	 * for the {@linkplain TestContext#getTestInstance() test instance}. Thus, if
+	 * you need consistent access to the <em>current</em> test class, you can
+	 * invoke {@code testContext.getTestInstance().getClass()} instead of
+	 * {@code testContext.getTestClass()}.
 	 * @param testContext the test context for the test; never {@code null}
 	 * @throws Exception allows any exception to propagate
+	 * @see org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig
 	 */
 	default void prepareTestInstance(TestContext testContext) throws Exception {
 	}

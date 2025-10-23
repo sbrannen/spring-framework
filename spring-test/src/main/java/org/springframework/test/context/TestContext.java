@@ -102,7 +102,21 @@ public interface TestContext extends AttributeAccessor, Serializable {
 
 	/**
 	 * Get the {@linkplain Class test class} for this test context.
+	 * <p>Since JUnit Jupiter 5.12, if the
+	 * {@link org.springframework.test.context.junit.jupiter.SpringExtension
+	 * SpringExtension} is used with a
+	 * {@linkplain org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope#TEST_METHOD
+	 * test-method scoped} {@link org.junit.jupiter.api.extension.ExtensionContext
+	 * ExtensionContext}, the {@code Class} returned from this method may refer to
+	 * the declaring class of the current test method, which may reside in a
+	 * {@link org.junit.jupiter.api.Nested @Nested} test class within the class
+	 * for the {@linkplain #getTestInstance() test instance}. Thus, if you need
+	 * consistent access to the <em>current</em> test class within an implementation
+	 * of {@link TestExecutionListener#prepareTestInstance(TestContext)}, you can
+	 * invoke {@code testContext.getTestInstance().getClass()} instead of
+	 * {@code testContext.getTestClass()}.
 	 * @return the test class (never {@code null})
+	 * @see org.springframework.test.context.junit.jupiter.SpringExtensionConfig @SpringExtensionConfig
 	 */
 	Class<?> getTestClass();
 
