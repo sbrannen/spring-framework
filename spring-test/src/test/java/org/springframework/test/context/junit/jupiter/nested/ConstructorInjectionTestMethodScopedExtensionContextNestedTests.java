@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope;
-import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,11 +29,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.junit.jupiter.nested.ConstructorInjectionTestMethodScopedExtensionContextNestedTests.TopLevelConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.DEFAULT_SCOPE_PROPERTY_NAME;
-import static org.junit.jupiter.api.extension.TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD;
-import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
 
 /**
@@ -48,106 +45,91 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  * @see ContextConfigurationTestClassScopedExtensionContextNestedTests
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
  */
+@SpringJUnitConfig(TopLevelConfig.class)
+@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class ConstructorInjectionTestMethodScopedExtensionContextNestedTests {
 
-	@Test
-	void runTests() {
-		EngineTestKit.engine("junit-jupiter")
-				.configurationParameter(DEFAULT_SCOPE_PROPERTY_NAME, TEST_METHOD.name())
-				.selectors(selectClass(TestCase.class))
-				.execute()
-				.testEvents()
-				.assertStatistics(stats -> stats.started(5).succeeded(5).failed(0));
+	final String foo;
+
+	ConstructorInjectionTestMethodScopedExtensionContextNestedTests(TestInfo testInfo, @Autowired String foo) {
+		this.foo = foo;
 	}
 
+	@Test
+	void topLevelTest() {
+		assertThat(foo).isEqualTo("foo");
+	}
 
-	@SpringJUnitConfig(TopLevelConfig.class)
-	@NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
-	static class TestCase {
+	@Nested
+	@SpringJUnitConfig(NestedConfig.class)
+	class AutowiredConstructorTests {
 
-		final String foo;
+		final String bar;
 
-		TestCase(TestInfo testInfo, @Autowired String foo) {
-			this.foo = foo;
+		@Autowired
+		AutowiredConstructorTests(String bar) {
+			this.bar = bar;
 		}
 
 		@Test
-		void topLevelTest() {
-			assertThat(foo).isEqualTo("foo");
+		void nestedTest() {
+			assertThat(foo).isEqualTo("bar");
+			assertThat(bar).isEqualTo("bar");
+		}
+	}
+
+	@Nested
+	@SpringJUnitConfig(NestedConfig.class)
+	class AutowiredConstructorParameterTests {
+
+		final String bar;
+
+		AutowiredConstructorParameterTests(@Autowired String bar) {
+			this.bar = bar;
 		}
 
-		@Nested
-		@SpringJUnitConfig(NestedConfig.class)
-		class AutowiredConstructorTestCase {
+		@Test
+		void nestedTest() {
+			assertThat(foo).isEqualTo("bar");
+			assertThat(bar).isEqualTo("bar");
+		}
+	}
 
-			final String bar;
+	@Nested
+	@SpringJUnitConfig(NestedConfig.class)
+	class QualifiedConstructorParameterTests {
 
-			@Autowired
-			AutowiredConstructorTestCase(String bar) {
-				this.bar = bar;
-			}
+		final String bar;
 
-			@Test
-			void nestedTest() {
-				assertThat(foo).isEqualTo("bar");
-				assertThat(bar).isEqualTo("bar");
-			}
+		QualifiedConstructorParameterTests(TestInfo testInfo, @Qualifier("bar") String s) {
+			this.bar = s;
 		}
 
-		@Nested
-		@SpringJUnitConfig(NestedConfig.class)
-		class AutowiredConstructorParameterTestCase {
+		@Test
+		void nestedTest() {
+			assertThat(foo).isEqualTo("bar");
+			assertThat(bar).isEqualTo("bar");
+		}
+	}
 
-			final String bar;
+	@Nested
+	@SpringJUnitConfig(NestedConfig.class)
+	class SpelConstructorParameterTests {
 
-			AutowiredConstructorParameterTestCase(@Autowired String bar) {
-				this.bar = bar;
-			}
+		final String bar;
+		final int answer;
 
-			@Test
-			void nestedTest() {
-				assertThat(foo).isEqualTo("bar");
-				assertThat(bar).isEqualTo("bar");
-			}
+		SpelConstructorParameterTests(@Autowired String bar, TestInfo testInfo, @Value("#{ 6 * 7 }") int answer) {
+			this.bar = bar;
+			this.answer = answer;
 		}
 
-		@Nested
-		@SpringJUnitConfig(NestedConfig.class)
-		class QualifiedConstructorParameterTestCase {
-
-			final String bar;
-
-			QualifiedConstructorParameterTestCase(TestInfo testInfo, @Qualifier("bar") String s) {
-				this.bar = s;
-			}
-
-			@Test
-			void nestedTest() {
-				assertThat(foo).isEqualTo("bar");
-				assertThat(bar).isEqualTo("bar");
-			}
+		@Test
+		void nestedTest() {
+			assertThat(foo).isEqualTo("bar");
+			assertThat(bar).isEqualTo("bar");
+			assertThat(answer).isEqualTo(42);
 		}
-
-		@Nested
-		@SpringJUnitConfig(NestedConfig.class)
-		class SpelConstructorParameterTestCase {
-
-			final String bar;
-			final int answer;
-
-			SpelConstructorParameterTestCase(@Autowired String bar, TestInfo testInfo, @Value("#{ 6 * 7 }") int answer) {
-				this.bar = bar;
-				this.answer = answer;
-			}
-
-			@Test
-			void nestedTest() {
-				assertThat(foo).isEqualTo("bar");
-				assertThat(bar).isEqualTo("bar");
-				assertThat(answer).isEqualTo(42);
-			}
-		}
-
 	}
 
 	// -------------------------------------------------------------------------

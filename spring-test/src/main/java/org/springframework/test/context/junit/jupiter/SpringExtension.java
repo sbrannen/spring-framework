@@ -59,6 +59,7 @@ import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.context.support.PropertyProvider;
 import org.springframework.test.context.support.TestConstructorUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 
@@ -120,6 +121,16 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 
 
 	/**
+	 * Returns {@link ExtensionContextScope#TEST_METHOD ExtensionContextScope.TEST_METHOD}.
+	 * @since 7.0
+	 * @see UseTestClassScopedExtensionContext @UseTestClassScopedExtensionContext
+	 */
+	@Override
+	public ExtensionContextScope getTestInstantiationExtensionContextScope(ExtensionContext rootContext) {
+		return ExtensionContextScope.TEST_METHOD;
+	}
+
+	/**
 	 * Delegates to {@link TestContextManager#beforeTestClass}.
 	 */
 	@Override
@@ -151,6 +162,8 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 */
 	@Override
 	public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws Exception {
+		context = getProperlyScopedExtensionContext(testInstance.getClass(), context);
+
 		validateAutowiredConfig(context);
 		validateRecordApplicationEventsConfig(context);
 		TestContextManager testContextManager = getTestContextManager(context);
@@ -332,7 +345,13 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	public @Nullable Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Parameter parameter = parameterContext.getParameter();
 		int index = parameterContext.getIndex();
+		Executable executable = parameterContext.getDeclaringExecutable();
 		Class<?> testClass = extensionContext.getRequiredTestClass();
+		if (executable instanceof Constructor<?> constructor) {
+			testClass = constructor.getDeclaringClass();
+			extensionContext = getProperlyScopedExtensionContext(testClass, extensionContext);
+		}
+
 		ApplicationContext applicationContext = getApplicationContext(extensionContext);
 		return ParameterResolutionDelegate.resolveDependency(parameter, index, testClass,
 				applicationContext.getAutowireCapableBeanFactory());
@@ -388,6 +407,22 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 			}
 		}
 		return false;
+	}
+
+	private static ExtensionContext getProperlyScopedExtensionContext(Class<?> testClass, ExtensionContext context) {
+		if (usesTestClassScopedExtensionContext(testClass)) {
+			while (context.getRequiredTestClass() != testClass) {
+				context = context.getParent().get();
+			}
+		}
+		return context;
+	}
+
+	private static boolean usesTestClassScopedExtensionContext(Class<?> clazz) {
+		return MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
+				.withEnclosingClasses(ClassUtils::isInnerClass)
+				.from(clazz)
+				.isPresent(UseTestClassScopedExtensionContext.class);
 	}
 
 }

@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.junit.jupiter.UseTestClassScopedExtensionContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @since 6.2
  */
 @SpringJUnitConfig
+@UseTestClassScopedExtensionContext
 public class TestBeanByNameLookupTestClassScopedExtensionContextIntegrationTests {
 
 	@TestBean(name = "field")

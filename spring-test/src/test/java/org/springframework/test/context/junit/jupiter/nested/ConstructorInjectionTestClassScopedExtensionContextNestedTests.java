@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.junit.jupiter.UseTestClassScopedExtensionContext;
 import org.springframework.test.context.junit.jupiter.nested.ConstructorInjectionTestClassScopedExtensionContextNestedTests.TopLevelConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +47,7 @@ import static org.springframework.test.context.NestedTestConfiguration.Enclosing
  * @see org.springframework.test.context.junit4.nested.NestedTestsWithSpringRulesTests
  */
 @SpringJUnitConfig(TopLevelConfig.class)
+@UseTestClassScopedExtensionContext
 @NestedTestConfiguration(OVERRIDE) // since INHERIT is now the global default
 class ConstructorInjectionTestClassScopedExtensionContextNestedTests {
 
