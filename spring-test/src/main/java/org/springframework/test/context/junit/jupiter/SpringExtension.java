@@ -91,6 +91,14 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	private static final Namespace TEST_CONTEXT_MANAGER_NAMESPACE = Namespace.create(SpringExtension.class);
 
 	/**
+	 * {@link Namespace} in which
+	 * {@link UseTestClassScopedExtensionContext @UseTestClassScopedExtensionContext}
+	 * mappings are stored, keyed by test class.
+	 */
+	private static final Namespace TEST_CLASS_SCOPED_NAMESPACE =
+			Namespace.create(SpringExtension.class.getName() + "#test-class.scoped");
+
+	/**
 	 * {@link Namespace} in which {@code @Autowired} validation error messages
 	 * are stored, keyed by test class.
 	 */
@@ -410,7 +418,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	}
 
 	private static ExtensionContext getProperlyScopedExtensionContext(Class<?> testClass, ExtensionContext context) {
-		if (usesTestClassScopedExtensionContext(testClass)) {
+		if (usesTestClassScopedExtensionContext(testClass, context)) {
 			while (context.getRequiredTestClass() != testClass) {
 				context = context.getParent().get();
 			}
@@ -418,11 +426,14 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		return context;
 	}
 
-	private static boolean usesTestClassScopedExtensionContext(Class<?> clazz) {
-		return MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
-				.withEnclosingClasses(ClassUtils::isInnerClass)
-				.from(clazz)
-				.isPresent(UseTestClassScopedExtensionContext.class);
+	private static boolean usesTestClassScopedExtensionContext(Class<?> testClass, ExtensionContext context) {
+		Store store = context.getRoot().getStore(TEST_CLASS_SCOPED_NAMESPACE);
+		return store.computeIfAbsent(testClass,
+				clazz -> MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
+							.withEnclosingClasses(ClassUtils::isInnerClass)
+							.from(clazz)
+							.isPresent(UseTestClassScopedExtensionContext.class),
+				Boolean.class);
 	}
 
 }
