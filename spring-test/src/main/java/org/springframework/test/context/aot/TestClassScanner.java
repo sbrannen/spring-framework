@@ -17,10 +17,12 @@
 package org.springframework.test.context.aot;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -84,6 +86,8 @@ class TestClassScanner {
 	// JUnit Jupiter
 	private static final String EXTEND_WITH_ANNOTATION_NAME = "org.junit.jupiter.api.extension.ExtendWith";
 	private static final String SPRING_EXTENSION_NAME = "org.springframework.test.context.junit.jupiter.SpringExtension";
+	private static final String CLASS_TEMPLATE_ANNOTATION_NAME = "org.junit.jupiter.api.ClassTemplate";
+	private static final String NESTED_ANNOTATION_NAME = "org.junit.jupiter.api.Nested";
 
 	// JUnit 4
 	private static final String RUN_WITH_ANNOTATION_NAME = "org.junit.runner.RunWith";
@@ -156,6 +160,7 @@ class TestClassScanner {
 				.map(this::getJavaClass)
 				.flatMap(Optional::stream)
 				.filter(this::isSpringTestClass)
+				.flatMap(this::expandClassTemplateIfNecessary)
 				.distinct()
 				.sorted(Comparator.comparing(Class::getName));
 	}
@@ -179,6 +184,30 @@ class TestClassScanner {
 		return isSpringTestClass;
 	}
 
+	/**
+	 * {@code @ClassTemplate} includes {@code @ParameterizedClass}.
+	 */
+	private Stream<Class<?>> expandClassTemplateIfNecessary(Class<?> testClass) {
+		Set<Class<?>> testClasses = new HashSet<>();
+		testClasses.add(testClass);
+		if (isJupiterClassTemplate(testClass)) {
+			collectNestedTestClasses(testClasses, testClass);
+		}
+		return testClasses.stream();
+	}
+
+	private void collectNestedTestClasses(Set<Class<?>> testClasses, Class<?> testClass) {
+		Class<?> superclass = testClass.getSuperclass();
+		if (superclass != null && superclass != Object.class) {
+			collectNestedTestClasses(testClasses, superclass);
+		}
+		for (Class<?> nestedClass : testClass.getDeclaredClasses()) {
+			if (isJupiterNestedClass(nestedClass) && testClasses.add(nestedClass)) {
+				collectNestedTestClasses(testClasses, nestedClass);
+			}
+		}
+	}
+
 	private static boolean isJupiterSpringTestClass(Class<?> clazz) {
 		return MergedAnnotations.search(TYPE_HIERARCHY)
 				.withEnclosingClasses(ClassUtils::isInnerClass)
@@ -188,6 +217,15 @@ class TestClassScanner {
 				.flatMap(Arrays::stream)
 				.map(Class::getName)
 				.anyMatch(SPRING_EXTENSION_NAME::equals);
+	}
+
+	private static boolean isJupiterClassTemplate(Class<?> clazz) {
+		return MergedAnnotations.from(clazz, TYPE_HIERARCHY).isPresent(CLASS_TEMPLATE_ANNOTATION_NAME);
+	}
+
+	private static boolean isJupiterNestedClass(Class<?> clazz) {
+		return (!Modifier.isAbstract(clazz.getModifiers()) && ClassUtils.isInnerClass(clazz) &&
+				MergedAnnotations.from(clazz, TYPE_HIERARCHY).isPresent(NESTED_ANNOTATION_NAME));
 	}
 
 	private static boolean isJUnit4SpringTestClass(Class<?> clazz) {
