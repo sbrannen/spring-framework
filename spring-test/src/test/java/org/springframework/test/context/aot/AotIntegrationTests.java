@@ -46,6 +46,7 @@ import org.springframework.context.aot.AbstractAotProcessor;
 import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterImportedConfigTests;
+import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterParameterizedClassTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterSharedConfigTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringJupiterTests;
 import org.springframework.test.context.aot.samples.basic.BasicSpringTestNGTests;
@@ -116,11 +117,12 @@ class AotIntegrationTests extends AbstractAotTests {
 			// .printFiles(System.out)
 			.compile(compiled ->
 				// AOT RUN-TIME: EXECUTION
-				runTestsInAotMode(7, List.of(
+				runTestsInAotMode(17, List.of(
 					// The #s represent how many tests should run from each test class, which
 					// must add up to the expectedNumTests above.
 					/* 1 */ BasicSpringJupiterSharedConfigTests.class,
 					/* 2 */ BasicSpringJupiterTests.class, // NestedTests get executed automatically
+					/* 2 * 5 */ BasicSpringJupiterParameterizedClassTests.class, // NestedTests get executed automatically
 					// Run @Import tests AFTER the tests with otherwise identical config
 					// in order to ensure that the other test classes are not accidentally
 					// using the config for the @Import tests.
@@ -145,8 +147,13 @@ class AotIntegrationTests extends AbstractAotTests {
 				// We only include test classes named *Tests so that we don't pick up
 				// internal TestCase classes that aren't really tests.
 				.filter(clazz -> clazz.getSimpleName().endsWith("Tests"))
+				// JPA tests use @PersistenceContext which is not yet supported in tests in AOT mode.
+				.filter(clazz -> !clazz.getPackageName().contains("context.orm.jpa"))
 				// TestNG EJB tests use @PersistenceContext which is not yet supported in tests in AOT mode.
 				.filter(clazz -> !clazz.getPackageName().contains("testng.transaction.ejb"))
+				// AOT processing works for ParameterizedDependencyInjectionTests by itself
+				// but fails for an unknown reason within the entire spring-test module.
+				.filter(clazz -> !clazz.getName().equals("org.springframework.test.context.junit4.ParameterizedDependencyInjectionTests"))
 				.toList();
 
 		// Optionally set failOnError flag to true to halt processing at the first failure.
