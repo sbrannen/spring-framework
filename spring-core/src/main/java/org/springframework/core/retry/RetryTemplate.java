@@ -17,6 +17,7 @@
 package org.springframework.core.retry;
 
 import java.io.Serial;
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -136,6 +137,7 @@ public class RetryTemplate implements RetryOperations {
 	@Override
 	public <R extends @Nullable Object> R execute(Retryable<R> retryable) throws RetryException {
 		String retryableName = retryable.getName();
+		long startTime = System.currentTimeMillis();
 		// Initial attempt
 		try {
 			logger.debug(() -> "Preparing to execute retryable operation '%s'".formatted(retryableName));
@@ -153,7 +155,9 @@ public class RetryTemplate implements RetryOperations {
 			exceptions.add(initialException);
 
 			Throwable lastException = initialException;
+			long timeout = this.retryPolicy.getTimeout().toMillis();
 			while (this.retryPolicy.shouldRetry(lastException)) {
+				checkIfTimeoutExceeded(timeout, startTime, retryable, exceptions);
 				try {
 					long duration = backOffExecution.nextBackOff();
 					if (duration == BackOffExecution.STOP) {
@@ -172,6 +176,7 @@ public class RetryTemplate implements RetryOperations {
 					this.retryListener.onRetryPolicyInterruption(this.retryPolicy, retryable, retryException);
 					throw retryException;
 				}
+				checkIfTimeoutExceeded(timeout, startTime, retryable, exceptions);
 				logger.debug(() -> "Preparing to retry operation '%s'".formatted(retryableName));
 				try {
 					this.retryListener.beforeRetry(this.retryPolicy, retryable);
@@ -198,6 +203,23 @@ public class RetryTemplate implements RetryOperations {
 			exceptions.forEach(retryException::addSuppressed);
 			this.retryListener.onRetryPolicyExhaustion(this.retryPolicy, retryable, retryException);
 			throw retryException;
+		}
+	}
+
+	private void checkIfTimeoutExceeded(long timeout, long startTime, Retryable<?> retryable, Deque<Throwable> exceptions)
+			throws RetryException {
+
+		if (timeout != 0) {
+			long elapsedTime = System.currentTimeMillis() - startTime;
+			if (elapsedTime >= timeout) {
+				RetryException retryException = new RetryException(
+						"Retry policy for operation '%s' exceeded timeout (%d ms); aborting execution"
+						.formatted(retryable.getName(), timeout), exceptions.removeLast());
+				exceptions.forEach(retryException::addSuppressed);
+				this.retryListener.onRetryPolicyTimeout(this.retryPolicy, retryable, retryException,
+						Duration.ofMillis(elapsedTime));
+				throw retryException;
+			}
 		}
 	}
 

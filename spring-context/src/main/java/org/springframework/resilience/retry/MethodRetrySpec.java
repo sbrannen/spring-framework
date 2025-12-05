@@ -28,11 +28,14 @@ import org.springframework.util.ExceptionTypeFilter;
  * on {@link org.springframework.resilience.annotation.Retryable}.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 7.0
  * @param includes applicable exception types to attempt a retry for
  * @param excludes non-applicable exception types to avoid a retry for
  * @param predicate a predicate for filtering exceptions from applicable methods
  * @param maxRetries the maximum number of retry attempts
+ * @param timeout the maximum amount of elapsed time allowed for the initial
+ * invocation and any subsequent retry attempts, including delays
  * @param delay the base delay after the initial invocation
  * @param jitter a jitter value for the next retry attempt
  * @param multiplier a multiplier for a delay for the next retry attempt
@@ -46,6 +49,7 @@ public record MethodRetrySpec(
 		Collection<Class<? extends Throwable>> excludes,
 		MethodRetryPredicate predicate,
 		long maxRetries,
+		Duration timeout,
 		Duration delay,
 		Duration jitter,
 		double multiplier,
@@ -60,6 +64,13 @@ public record MethodRetrySpec(
 
 		this(Collections.emptyList(), Collections.emptyList(), predicate, maxRetries, delay,
 				jitter, multiplier, maxDelay);
+	}
+
+	public MethodRetrySpec(Collection<Class<? extends Throwable>> includes,
+			Collection<Class<? extends Throwable>> excludes, MethodRetryPredicate predicate,
+			long maxRetries, Duration delay, Duration jitter, double multiplier, Duration maxDelay) {
+
+		this(includes, excludes, predicate, maxRetries, Duration.ZERO, delay, jitter, multiplier, maxDelay);
 	}
 
 

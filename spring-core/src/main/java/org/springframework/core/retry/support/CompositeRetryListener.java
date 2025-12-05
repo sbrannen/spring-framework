@@ -16,6 +16,7 @@
 
 package org.springframework.core.retry.support;
 
+import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -93,6 +94,11 @@ public class CompositeRetryListener implements RetryListener {
 	@Override
 	public void onRetryPolicyInterruption(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
 		this.listeners.forEach(listener -> listener.onRetryPolicyInterruption(retryPolicy, retryable, exception));
+	}
+
+	@Override
+	public void onRetryPolicyTimeout(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception, Duration elapsedTime) {
+		this.listeners.forEach(listener -> listener.onRetryPolicyTimeout(retryPolicy, retryable, exception, elapsedTime));
 	}
 
 }

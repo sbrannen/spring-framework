@@ -16,6 +16,8 @@
 
 package org.springframework.core.retry;
 
+import java.time.Duration;
+
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -85,6 +87,25 @@ public interface RetryListener {
 	 * @see RetryException#getRetryCount()
 	 */
 	default void onRetryPolicyInterruption(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception) {
+	}
+
+	/**
+	 * Called if the configured {@linkplain RetryPolicy#getTimeout() timeout} for
+	 * a {@link RetryPolicy} is exceeded.
+	 * @param retryPolicy the {@code RetryPolicy}
+	 * @param retryable the {@link Retryable} operation
+	 * @param exception the resulting {@link RetryException}, with the last
+	 * exception thrown by the {@code Retryable} operation as the cause and any
+	 * exceptions from previous attempts as suppressed exceptions
+	 * @param elapsedTime the total amount of elapsed time, which exceeded the
+	 * timeout
+	 * @since 7.0.2
+	 * @see RetryException#getCause()
+	 * @see RetryException#getSuppressed()
+	 * @see RetryException#getRetryCount()
+	 */
+	default void onRetryPolicyTimeout(RetryPolicy retryPolicy, Retryable<?> retryable, RetryException exception,
+			Duration elapsedTime) {
 	}
 
 }
