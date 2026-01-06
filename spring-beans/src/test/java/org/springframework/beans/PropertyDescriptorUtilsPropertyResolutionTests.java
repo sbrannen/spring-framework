@@ -34,7 +34,6 @@ import org.junit.jupiter.params.provider.FieldSource;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static org.junit.jupiter.api.Named.named;
 
@@ -61,6 +60,162 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 
 
 	@Nested
+	class NonGenericTypesTests {
+
+		@Test
+		void classWithOnlyGetter() {
+			var pdMap = resolver.resolve(ClassWithOnlyGetter.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, null);
+		}
+
+		@Test
+		void classWithOnlySetter() {
+			var pdMap = resolver.resolve(ClassWithOnlySetter.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, null, Long.class);
+		}
+
+		@Test
+		void classWithMatchingGetterAndSetter() {
+			var pdMap = resolver.resolve(ClassWithMatchingGetterAndSetter.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Long.class, Long.class);
+		}
+
+		@Test
+		void classWithOneUnrelatedSetter() {
+			var pdMap = resolver.resolve(ClassWithOneUnrelatedSetter.class);
+
+			// java.beans.Introspector never resolves unrelated write methods.
+			Class<?> writeType = null;
+			if (resolver instanceof BasicPropertiesResolver) {
+				// Spring resolves a single write method even if its type is not
+				// related to the read type.
+				writeType = String.class;
+			}
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Integer.class, writeType);
+		}
+
+		@Test
+		void classWithUnrelatedSettersInSameTypeHierarchy() {
+			var pdMap = resolver.resolve(ClassWithUnrelatedSettersInSameTypeHierarchy.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Integer.class, null);
+		}
+
+		@Test
+		void classWithOneSubtypeSetter() {
+			var pdMap = resolver.resolve(ClassWithOneSubtypeSetter.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, Long.class);
+		}
+
+		@Test
+		void classWithTwoSubtypeSetters() {
+			var pdMap = resolver.resolve(ClassWithTwoSubtypeSetters.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Serializable.class, Long.class);
+		}
+
+		@Test
+		void classWithTwoSubtypeSettersAndOneUnrelatedSetter() {
+			var pdMap = resolver.resolve(ClassWithTwoSubtypeSettersAndOneUnrelatedSetter.class);
+
+			assertReadAndWriteMethodsForClassAndId(pdMap, Serializable.class, Long.class);
+		}
+
+
+		static class ClassWithOnlyGetter {
+
+			public Number getId() {
+				return 42;
+			}
+		}
+
+		static class ClassWithOnlySetter {
+
+			public void setId(Long id) {
+			}
+		}
+
+		static class ClassWithMatchingGetterAndSetter {
+
+			public Long getId() {
+				return 42L;
+			}
+
+			public void setId(Long id) {
+			}
+		}
+
+		static class ClassWithOneUnrelatedSetter {
+
+			public Integer getId() {
+				return 42;
+			}
+
+			public void setId(String id) {
+			}
+		}
+
+		static class ClassWithUnrelatedSettersInSameTypeHierarchy {
+
+			public Integer getId() {
+				return 42;
+			}
+
+			public void setId(CharSequence id) {
+			}
+
+			public void setId(String id) {
+			}
+		}
+
+		static class ClassWithOneSubtypeSetter {
+
+			public Number getId() {
+				return 42;
+			}
+
+			public void setId(Long id) {
+			}
+		}
+
+		static class ClassWithTwoSubtypeSetters {
+
+			public Serializable getId() {
+				return 42;
+			}
+
+			public void setId(Number id) {
+			}
+
+			public void setId(Long id) {
+			}
+		}
+
+		static class ClassWithTwoSubtypeSettersAndOneUnrelatedSetter {
+
+			public Serializable getId() {
+				return 42;
+			}
+
+			public void setId(Number id) {
+			}
+
+			public void setId(Long id) {
+			}
+
+			public void setId(String id) {
+			}
+		}
+	}
+
+
+
+	@Nested
 	class UnboundedGenericsTests {
 
 		@Test
@@ -73,13 +228,16 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 
 		@Test
 		void determineBasicPropertiesWithUnresolvedGenericsInSubInterface() {
-			// FYI: java.beans.Introspector does not resolve properties for sub-interfaces.
-			assumeThat(resolver).isNotInstanceOf(StandardPropertiesResolver.class);
-
 			var pdMap = resolver.resolve(SubGenericService.class);
 
-			assertThat(pdMap).containsOnlyKeys("id");
-			assertReadAndWriteMethodsForId(pdMap.get("id"), Object.class, Object.class);
+			if (resolver instanceof StandardPropertiesResolver) {
+				// java.beans.Introspector does not resolve properties for sub-interfaces.
+				assertThat(pdMap).isEmpty();
+			}
+			else {
+				assertThat(pdMap).containsOnlyKeys("id");
+				assertReadAndWriteMethodsForId(pdMap.get("id"), Object.class, Object.class);
+			}
 		}
 
 		@Test
@@ -161,16 +319,7 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 		void resolvePropertiesWithUnresolvedGenericsInSubclassWithOverloadedSetter() {
 			var pdMap = resolver.resolve(PersonWithOverloadedSetter.class);
 
-			// TODO Determine if we want to align PropertyDescriptorUtils with java.beans.Introspector.
-			Class<?> writeType = Number.class;
-			if (resolver instanceof BasicPropertiesResolver) {
-				// PropertyDescriptorUtils currently incorrectly resolves setId(Integer)
-				// as the write method instead of setId(Number) (where Number is the
-				// unresolved generic for Long).
-				writeType = Integer.class;
-			}
-
-			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, writeType);
+			assertReadAndWriteMethodsForClassAndId(pdMap, Number.class, Number.class);
 		}
 	}
 
@@ -205,16 +354,26 @@ class PropertyDescriptorUtilsPropertyResolutionTests {
 		var writeMethod = pd.getWriteMethod();
 
 		assertSoftly(softly -> {
-			softly.assertThat(readMethod.getName()).isEqualTo("getId");
-			softly.assertThat(readMethod.getReturnType()).as("read type").isEqualTo(readType);
-			softly.assertThat(readMethod.getParameterCount()).isZero();
+			if (readType == null) {
+				softly.assertThat(readMethod).as("readmethod").isNull();
+			}
+			else {
+				softly.assertThat(readMethod.getName()).isEqualTo("getId");
+				softly.assertThat(readMethod.getReturnType()).as("read type").isEqualTo(readType);
+				softly.assertThat(readMethod.getParameterCount()).isZero();
+			}
 
-			softly.assertThat(writeMethod).as("write method").isNotNull();
-			if (writeMethod != null) {
-				softly.assertThat(writeMethod.getName()).isEqualTo("setId");
-				softly.assertThat(writeMethod.getReturnType()).isEqualTo(void.class);
-				softly.assertThat(writeMethod.getParameterCount()).isEqualTo(1);
-				softly.assertThat(writeMethod.getParameterTypes()[0]).as("write type").isEqualTo(writeType);
+			if (writeType == null) {
+				softly.assertThat(writeMethod).as("write method").isNull();
+			}
+			else {
+				softly.assertThat(writeMethod).as("write method").isNotNull();
+				if (writeMethod != null) {
+					softly.assertThat(writeMethod.getName()).isEqualTo("setId");
+					softly.assertThat(writeMethod.getReturnType()).isEqualTo(void.class);
+					softly.assertThat(writeMethod.getParameterCount()).isEqualTo(1);
+					softly.assertThat(writeMethod.getParameterTypes()[0]).as("write type").isEqualTo(writeType);
+				}
 			}
 		});
 	}
