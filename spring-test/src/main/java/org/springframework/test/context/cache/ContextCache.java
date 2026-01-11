@@ -90,8 +90,9 @@ public interface ContextCache {
 	/**
 	 * System property used to configure whether inactive application contexts
 	 * stored in the {@link ContextCache} should be paused: {@value}.
-	 * <p>Defaults to {@code always}. Set this property to {@code never} to
-	 * disable pausing of inactive application contexts &mdash; for example:
+	 * <p>Defaults to {@code on_context_switch}. Can be set to {@code always} or
+	 * {@code never} to disable pausing of inactive application contexts &mdash;
+	 * for example:
 	 * <p>{@code -Dspring.test.context.cache.pause=never}
 	 * <p>May alternatively be configured via the
 	 * {@link org.springframework.core.SpringProperties} mechanism.
@@ -366,6 +367,7 @@ public interface ContextCache {
 	 *
 	 * @since 7.0.3
 	 * @see #ALWAYS
+	 * @see #ON_CONTEXT_SWITCH
 	 * @see #NEVER
 	 * @see ContextCache#CONTEXT_CACHE_PAUSE_PROPERTY_NAME
 	 */
@@ -375,6 +377,12 @@ public interface ContextCache {
 		 * Always pause inactive application contexts.
 		 */
 		ALWAYS,
+
+		/**
+		 * Only pause inactive application contexts if the next context
+		 * retrieved from the cache is a different context.
+		 */
+		ON_CONTEXT_SWITCH,
 
 		/**
 		 * Never pause inactive application contexts, effectively disabling the

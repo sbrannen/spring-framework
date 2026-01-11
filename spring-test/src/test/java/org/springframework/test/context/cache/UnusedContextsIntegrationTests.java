@@ -26,17 +26,23 @@ import org.junit.jupiter.api.TestClassOrder;
 import org.junit.platform.testkit.engine.EngineTestKit;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.event.ContextPausedEvent;
+import org.springframework.context.event.ContextRestartedEvent;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextCustomizerFactories;
 import org.springframework.test.context.NestedTestConfiguration;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.cache.ContextCache.PauseMode;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClasses;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.INHERIT;
 import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
+import static org.springframework.test.context.cache.ContextCacheTestUtils.resetContextCache;
 
 /**
  * Integration tests for pausing and restarting "unused" contexts.
@@ -49,10 +55,63 @@ class UnusedContextsIntegrationTests {
 
 	@BeforeEach
 	@AfterEach
-	void clearApplicationEvents() {
+	void clearApplicationEventsAndResetContextCache() {
+		resetContextCache();
 		EventTracker.events.clear();
 	}
 
+	@Test
+	void topLevelTestClassesWithDifferentApplicationContexts() {
+		runTestClasses(6,
+				TestCaseConfig1A.class,
+				TestCaseConfig1B.class,
+				TestCaseConfig2.class,
+				TestCaseConfig3.class,
+				TestCaseConfig4.class,
+				TestCaseConfig5.class);
+
+		assertThat(EventTracker.events).containsExactly(
+
+			// --- TestCaseConfig1A --------------------------------------------
+			"ContextRefreshed:TestCaseConfig1A",
+			// No BeforeTestClass, since EventPublishingTestExecutionListener
+			// only publishes events for a context that has already been loaded.
+			"AfterTestClass:TestCaseConfig1A",
+
+			// --- TestCaseConfig1B --------------------------------------------
+			// Here we expect a BeforeTestClass event, since TestCaseConfig1B
+			// uses the same context as TestCaseConfig1A.
+			"BeforeTestClass:TestCaseConfig1B",
+			"AfterTestClass:TestCaseConfig1B",
+
+			// --- TestCaseConfig2 ---------------------------------------------
+			"ContextPaused:TestCaseConfig1A",
+			"ContextRefreshed:TestCaseConfig2",
+			"AfterTestClass:TestCaseConfig2",
+
+			// --- TestCaseConfig3 ---------------------------------------------
+			"ContextPaused:TestCaseConfig2",
+			"ContextRefreshed:TestCaseConfig3",
+			"AfterTestClass:TestCaseConfig3",
+			// Closed instead of Paused, since TestCaseConfig3 uses @DirtiesContext
+			"ContextClosed:TestCaseConfig3",
+
+			// --- TestCaseConfig4 ---------------------------------------------
+			"ContextRefreshed:TestCaseConfig4",
+			"AfterTestClass:TestCaseConfig4",
+
+			// --- TestCaseConfig5 ---------------------------------------------
+			"ContextPaused:TestCaseConfig4",
+			"ContextRefreshed:TestCaseConfig5",
+			"AfterTestClass:TestCaseConfig5"
+		);
+	}
+
+	/**
+	 * Since {@link PauseMode#ON_CONTEXT_SWITCH} is now the default, there are
+	 * no {@link ContextPausedEvent} or {@link ContextRestartedEvent} events
+	 * when all test classes share the same context.
+	 */
 	@Test
 	void topLevelTestClassesWithSharedApplicationContext() {
 		runTestClasses(5, TestCase1.class, TestCase2.class, TestCase3.class, TestCase4.class, TestCase5.class);
@@ -60,40 +119,32 @@ class UnusedContextsIntegrationTests {
 		assertThat(EventTracker.events).containsExactly(
 
 			// --- TestCase1 -----------------------------------------------
-			// Refreshed instead of Restarted, since this is the first time
-			// the context is loaded.
+			// Refreshed, since this is the first time the context is loaded.
 			"ContextRefreshed:TestCase1",
 			// No BeforeTestClass, since EventPublishingTestExecutionListener
 			// only publishes events for a context that has already been loaded.
 			"AfterTestClass:TestCase1",
-			"ContextPaused:TestCase1",
 
 			// --- TestCase2 -----------------------------------------------
-			"ContextRestarted:TestCase1",
 			"BeforeTestClass:TestCase2",
 			"AfterTestClass:TestCase2",
-			"ContextPaused:TestCase1",
 
 			// --- TestCase3 -----------------------------------------------
-			"ContextRestarted:TestCase1",
 			"BeforeTestClass:TestCase3",
 			"AfterTestClass:TestCase3",
-			// Closed instead of Stopped, since TestCase3 uses @DirtiesContext
+			// Closed instead of Paused, since TestCase3 uses @DirtiesContext
 			"ContextClosed:TestCase1",
 
 			// --- TestCase4 -----------------------------------------------
-			// Refreshed instead of Restarted, since TestCase3 uses @DirtiesContext
+			// Refreshed, since TestCase3 uses @DirtiesContext
 			"ContextRefreshed:TestCase4",
 			// No BeforeTestClass, since EventPublishingTestExecutionListener
 			// only publishes events for a context that has already been loaded.
 			"AfterTestClass:TestCase4",
-			"ContextPaused:TestCase4",
 
 			// --- TestCase5 -----------------------------------------------
-			"ContextRestarted:TestCase4",
 			"BeforeTestClass:TestCase5",
-			"AfterTestClass:TestCase5",
-			"ContextPaused:TestCase4"
+			"AfterTestClass:TestCase5"
 		);
 	}
 
@@ -123,7 +174,7 @@ class UnusedContextsIntegrationTests {
 						// shares the active context used by OverridingNestedTestCase1.
 						"BeforeTestClass:InheritingNestedTestCase",
 						"AfterTestClass:InheritingNestedTestCase",
-						// No Stopped event, since OverridingNestedTestCase1 is still
+						// No Paused event, since OverridingNestedTestCase1 is still
 						// using the context
 
 					"AfterTestClass:OverridingNestedTestCase1",
@@ -136,7 +187,7 @@ class UnusedContextsIntegrationTests {
 					"ContextPaused:OverridingNestedTestCase1",
 
 				"AfterTestClass:NestedTestCase",
-				// No Stopped event, since EnclosingTestCase is still using the context
+				// No Paused event, since EnclosingTestCase is still using the context
 
 			"AfterTestClass:EnclosingTestCase",
 			"ContextPaused:EnclosingTestCase"
@@ -231,6 +282,56 @@ class UnusedContextsIntegrationTests {
 	}
 
 	static class TestCase5 extends AbstractTestCase {
+	}
+
+	@Configuration
+	@Import(EventTracker.class)
+	static class Config1 {
+	}
+
+	@Configuration
+	@Import(EventTracker.class)
+	static class Config2 {
+	}
+
+	@Configuration
+	@Import(EventTracker.class)
+	static class Config3 {
+	}
+
+	@Configuration
+	@Import(EventTracker.class)
+	static class Config4 {
+	}
+
+	@Configuration
+	@Import(EventTracker.class)
+	static class Config5 {
+	}
+
+	@SpringJUnitConfig(Config1.class)
+	static class TestCaseConfig1A extends AbstractTestCase {
+	}
+
+	@SpringJUnitConfig(Config1.class)
+	static class TestCaseConfig1B extends AbstractTestCase {
+	}
+
+	@SpringJUnitConfig(Config2.class)
+	static class TestCaseConfig2 extends AbstractTestCase {
+	}
+
+	@SpringJUnitConfig(Config3.class)
+	@DirtiesContext
+	static class TestCaseConfig3 extends AbstractTestCase {
+	}
+
+	@SpringJUnitConfig(Config4.class)
+	static class TestCaseConfig4 extends AbstractTestCase {
+	}
+
+	@SpringJUnitConfig(Config5.class)
+	static class TestCaseConfig5 extends AbstractTestCase {
 	}
 
 	@SpringJUnitConfig(EventTracker.class)

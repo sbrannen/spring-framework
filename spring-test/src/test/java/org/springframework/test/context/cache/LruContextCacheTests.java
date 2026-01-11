@@ -483,7 +483,7 @@ class LruContextCacheTests {
 
 
 	private static MergedContextConfiguration config(Class<?> clazz) {
-		return new MergedContextConfiguration(null, null, new Class<?>[] { clazz }, null, null);
+		return new MergedContextConfiguration(LruContextCacheTests.class, null, new Class<?>[] { clazz }, null, null);
 	}
 
 	private static void assertCacheContents(DefaultContextCache cache, String... expectedNames) {

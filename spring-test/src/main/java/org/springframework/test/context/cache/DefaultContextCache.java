@@ -102,6 +102,8 @@ public class DefaultContextCache implements ContextCache {
 
 	private final AtomicInteger missCount = new AtomicInteger();
 
+	private volatile MergedContextConfiguration lastUsedKey;
+
 
 	/**
 	 * Create a new {@code DefaultContextCache} using the maximum cache size
@@ -160,6 +162,7 @@ public class DefaultContextCache implements ContextCache {
 	@Override
 	public @Nullable ApplicationContext get(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
+		pauseOnContextSwitch(key);
 		ApplicationContext context = this.contextMap.get(key);
 		if (context == null) {
 			this.missCount.incrementAndGet();
@@ -220,6 +223,7 @@ public class DefaultContextCache implements ContextCache {
 	}
 
 	private void putInternal(MergedContextConfiguration key, ApplicationContext context) {
+		pauseOnContextSwitch(key);
 		this.contextMap.put(key, context);
 
 		// Update context hierarchy map.
@@ -251,9 +255,8 @@ public class DefaultContextCache implements ContextCache {
 		Set<Class<?>> activeTestClasses = getActiveTestClasses(mergedConfig);
 		activeTestClasses.remove(testClass);
 		if (activeTestClasses.isEmpty()) {
-			if ((this.pauseMode == PauseMode.ALWAYS) &&
-					(context instanceof ConfigurableApplicationContext cac && cac.isRunning())) {
-				cac.pause();
+			if (this.pauseMode == PauseMode.ALWAYS) {
+				pauseIfNecessary(context);
 			}
 			this.contextUsageMap.remove(mergedConfig);
 		}
@@ -267,6 +270,21 @@ public class DefaultContextCache implements ContextCache {
 
 	private Set<Class<?>> getActiveTestClasses(MergedContextConfiguration mergedConfig) {
 		return this.contextUsageMap.computeIfAbsent(mergedConfig, key -> new HashSet<>());
+	}
+
+	private void pauseOnContextSwitch(MergedContextConfiguration currentKey) {
+		if ((this.pauseMode == PauseMode.ON_CONTEXT_SWITCH) &&
+				(this.lastUsedKey != null) && !currentKey.equals(this.lastUsedKey)) {
+			ApplicationContext lastUsedContext = this.contextMap.get(this.lastUsedKey);
+			pauseIfNecessary(lastUsedContext);
+		}
+		this.lastUsedKey = currentKey;
+	}
+
+	private static void pauseIfNecessary(@Nullable ApplicationContext context) {
+		if (context instanceof ConfigurableApplicationContext cac && cac.isRunning()) {
+			cac.pause();
+		}
 	}
 
 	@Override
@@ -383,6 +401,7 @@ public class DefaultContextCache implements ContextCache {
 	public void clear() {
 		synchronized (this.contextMap) {
 			this.contextMap.clear();
+			this.lastUsedKey = null;
 			this.hierarchyMap.clear();
 			this.contextUsageMap.clear();
 		}
