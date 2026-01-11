@@ -86,6 +86,8 @@ public class DefaultContextCache implements ContextCache {
 	 */
 	private final Map<MergedContextConfiguration, Set<Class<?>>> contextUsageMap = new ConcurrentHashMap<>(32);
 
+	private final Set<MergedContextConfiguration> unusedContexts = new HashSet<>(4);
+
 	/**
 	 * Map of context keys to context load failure counts.
 	 * @since 6.1
@@ -101,8 +103,6 @@ public class DefaultContextCache implements ContextCache {
 	private final AtomicInteger hitCount = new AtomicInteger();
 
 	private final AtomicInteger missCount = new AtomicInteger();
-
-	private volatile MergedContextConfiguration lastUsedKey;
 
 
 	/**
@@ -162,13 +162,13 @@ public class DefaultContextCache implements ContextCache {
 	@Override
 	public @Nullable ApplicationContext get(MergedContextConfiguration key) {
 		Assert.notNull(key, "Key must not be null");
-		pauseOnContextSwitch(key);
 		ApplicationContext context = this.contextMap.get(key);
 		if (context == null) {
 			this.missCount.incrementAndGet();
 		}
 		else {
 			this.hitCount.incrementAndGet();
+			pauseOnContextSwitchIfNecessary(key);
 			restartContextIfNecessary(context);
 		}
 		return context;
@@ -192,6 +192,7 @@ public class DefaultContextCache implements ContextCache {
 		Assert.notNull(context, "ApplicationContext must not be null");
 
 		evictLruContextIfNecessary();
+		pauseOnContextSwitchIfNecessary(key);
 		putInternal(key, context);
 	}
 
@@ -201,6 +202,7 @@ public class DefaultContextCache implements ContextCache {
 		Assert.notNull(loadFunction, "LoadFunction must not be null");
 
 		evictLruContextIfNecessary();
+		pauseOnContextSwitchIfNecessary(key);
 		ApplicationContext context = loadFunction.loadContext(key);
 		Assert.state(context != null, "LoadFunction must return a non-null ApplicationContext");
 		putInternal(key, context);
@@ -223,7 +225,6 @@ public class DefaultContextCache implements ContextCache {
 	}
 
 	private void putInternal(MergedContextConfiguration key, ApplicationContext context) {
-		pauseOnContextSwitch(key);
 		this.contextMap.put(key, context);
 
 		// Update context hierarchy map.
@@ -245,6 +246,9 @@ public class DefaultContextCache implements ContextCache {
 			registerContextUsage(parent, testClass);
 		}
 		getActiveTestClasses(mergedConfig).add(testClass);
+		if (pauseOnContextSwitch()) {
+			this.unusedContexts.remove(mergedConfig);
+		}
 	}
 
 	@Override
@@ -255,8 +259,9 @@ public class DefaultContextCache implements ContextCache {
 		Set<Class<?>> activeTestClasses = getActiveTestClasses(mergedConfig);
 		activeTestClasses.remove(testClass);
 		if (activeTestClasses.isEmpty()) {
-			if (this.pauseMode == PauseMode.ALWAYS) {
-				pauseIfNecessary(context);
+			switch (this.pauseMode) {
+				case ALWAYS -> pauseIfNecessary(context);
+				case ON_CONTEXT_SWITCH -> this.unusedContexts.add(mergedConfig);
 			}
 			this.contextUsageMap.remove(mergedConfig);
 		}
@@ -272,13 +277,18 @@ public class DefaultContextCache implements ContextCache {
 		return this.contextUsageMap.computeIfAbsent(mergedConfig, key -> new HashSet<>());
 	}
 
-	private void pauseOnContextSwitch(MergedContextConfiguration currentKey) {
-		if ((this.pauseMode == PauseMode.ON_CONTEXT_SWITCH) &&
-				(this.lastUsedKey != null) && !currentKey.equals(this.lastUsedKey)) {
-			ApplicationContext lastUsedContext = this.contextMap.get(this.lastUsedKey);
-			pauseIfNecessary(lastUsedContext);
+	private boolean pauseOnContextSwitch() {
+		return (this.pauseMode == PauseMode.ON_CONTEXT_SWITCH);
+	}
+
+	private void pauseOnContextSwitchIfNecessary(MergedContextConfiguration currentKey) {
+		if (pauseOnContextSwitch()) {
+			this.unusedContexts.remove(currentKey);
+			for (MergedContextConfiguration key : this.unusedContexts) {
+				pauseIfNecessary(this.contextMap.get(key));
+			}
+			this.unusedContexts.clear();
 		}
-		this.lastUsedKey = currentKey;
 	}
 
 	private static void pauseIfNecessary(@Nullable ApplicationContext context) {
@@ -338,6 +348,9 @@ public class DefaultContextCache implements ContextCache {
 		// stack as opposed to prior to the recursive call).
 		ApplicationContext context = this.contextMap.remove(key);
 		this.contextUsageMap.remove(key);
+		if (pauseOnContextSwitch()) {
+			this.unusedContexts.remove(key);
+		}
 		if (context instanceof ConfigurableApplicationContext cac) {
 			cac.close();
 		}
@@ -401,7 +414,6 @@ public class DefaultContextCache implements ContextCache {
 	public void clear() {
 		synchronized (this.contextMap) {
 			this.contextMap.clear();
-			this.lastUsedKey = null;
 			this.hierarchyMap.clear();
 			this.contextUsageMap.clear();
 		}

@@ -178,10 +178,12 @@ class UnusedContextsIntegrationTests {
 						// using the context
 
 					"AfterTestClass:OverridingNestedTestCase1",
-					"ContextPaused:OverridingNestedTestCase1",
+					// No Paused event, since OverridingNestedTestCase2 will reuse
+					// the context
 
 					// --- OverridingNestedTestCase2 ---------------------------
-					"ContextRestarted:OverridingNestedTestCase1",
+					// No Restarted event, since OverridingNestedTestCase2 will reuse
+					// the context
 					"BeforeTestClass:OverridingNestedTestCase2",
 					"AfterTestClass:OverridingNestedTestCase2",
 					"ContextPaused:OverridingNestedTestCase1",
@@ -189,8 +191,10 @@ class UnusedContextsIntegrationTests {
 				"AfterTestClass:NestedTestCase",
 				// No Paused event, since EnclosingTestCase is still using the context
 
-			"AfterTestClass:EnclosingTestCase",
-			"ContextPaused:EnclosingTestCase"
+			"AfterTestClass:EnclosingTestCase"
+			// No Paused event, since DefaultContextCache does not know if
+			// the context for EnclosingTestCase will potentially be the next
+			// context used.
 		);
 	}
 
@@ -337,6 +341,7 @@ class UnusedContextsIntegrationTests {
 	@SpringJUnitConfig(EventTracker.class)
 	@ContextCustomizerFactories(DisplayNameCustomizerFactory.class)
 	@TestPropertySource(properties = "magicKey = puzzle")
+	// @TestInstance(Lifecycle.PER_CLASS)
 	static class EnclosingTestCase {
 
 		@Test
