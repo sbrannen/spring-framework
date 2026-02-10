@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -66,17 +67,21 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	private static final int PUBLISH_ON_BUFFER_SIZE = 16;
 
 
-	private final TcpClient tcpClient;
-
 	private final ReactorNettyCodec<P> codec;
 
-	private final @Nullable ChannelGroup channelGroup;
+	private final boolean externallyManagedTcpClient;
 
-	private final @Nullable LoopResources loopResources;
+	private final @Nullable Supplier<TcpClient> tcpClientSupplier;
 
-	private final @Nullable ConnectionProvider poolResources;
+	private volatile @Nullable TcpClient tcpClient;
 
-	private final Scheduler scheduler = Schedulers.newParallel("tcp-client-scheduler");
+	private volatile @Nullable ChannelGroup channelGroup;
+
+	private volatile @Nullable LoopResources loopResources;
+
+	private volatile @Nullable ConnectionProvider poolResources;
+
+	private volatile @Nullable Scheduler scheduler = Schedulers.newParallel("tcp-client-scheduler");
 
 	private Log logger = LogFactory.getLog(ReactorNettyTcpClient.class);
 
@@ -99,15 +104,12 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		Assert.notNull(host, "host is required");
 		Assert.notNull(codec, "ReactorNettyCodec is required");
 
-		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
-		this.loopResources = LoopResources.create("tcp-client-loop");
-		this.poolResources = ConnectionProvider.create("tcp-client-pool", 10000);
 		this.codec = codec;
-
-		this.tcpClient = TcpClient.create(this.poolResources)
+		this.tcpClientSupplier = () -> TcpClient.create(this.poolResources)
 				.host(host).port(port)
 				.runOn(this.loopResources, false)
 				.doOnConnected(conn -> this.channelGroup.add(conn.channel()));
+		this.externallyManagedTcpClient = false;
 	}
 
 	/**
@@ -123,15 +125,12 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 	public ReactorNettyTcpClient(Function<TcpClient, TcpClient> clientConfigurer, ReactorNettyCodec<P> codec) {
 		Assert.notNull(codec, "ReactorNettyCodec is required");
 
-		this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
-		this.loopResources = LoopResources.create("tcp-client-loop");
-		this.poolResources = ConnectionProvider.create("tcp-client-pool", 10000);
 		this.codec = codec;
-
-		this.tcpClient = clientConfigurer.apply(TcpClient
+		this.tcpClientSupplier = () -> clientConfigurer.apply(TcpClient
 				.create(this.poolResources)
 				.runOn(this.loopResources, false)
 				.doOnConnected(conn -> this.channelGroup.add(conn.channel())));
+		this.externallyManagedTcpClient = false;
 	}
 
 	/**
@@ -147,6 +146,8 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		this.tcpClient = tcpClient;
 		this.codec = codec;
 
+		this.tcpClientSupplier = null;
+		this.externallyManagedTcpClient = true;
 		this.channelGroup = null;
 		this.loopResources = null;
 		this.poolResources = null;
@@ -179,6 +180,8 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			return handleShuttingDownConnectFailure(handler);
 		}
 
+		initSchedulerAndClientIfNecessary();
+
 		return extendTcpClient(this.tcpClient, handler)
 				.handle(new ReactorNettyHandler(handler))
 				.connect()
@@ -208,7 +211,9 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			return handleShuttingDownConnectFailure(handler);
 		}
 
-		// Report first connect to the ListenableFuture
+		initSchedulerAndClientIfNecessary();
+
+		// Report first connect to the CompletableFuture
 		CompletableFuture<@Nullable Void> connectFuture = new CompletableFuture<>();
 
 		extendTcpClient(this.tcpClient, handler)
@@ -239,6 +244,18 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 		return (time != null ? Mono.delay(Duration.ofMillis(time), this.scheduler) : Mono.empty());
 	}
 
+	private void initSchedulerAndClientIfNecessary() {
+		if (this.scheduler == null) {
+			this.scheduler = Schedulers.newParallel("tcp-client-scheduler");
+		}
+		if (!this.externallyManagedTcpClient && this.tcpClient == null) {
+			this.channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
+			this.loopResources = LoopResources.create("tcp-client-loop");
+			this.poolResources = ConnectionProvider.create("tcp-client-pool", 10000);
+			this.tcpClient = this.tcpClientSupplier.get();
+		}
+	}
+
 	@Override
 	public CompletableFuture<@Nullable Void> shutdownAsync() {
 		if (this.stopping) {
@@ -262,6 +279,14 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 			result = stopScheduler();
 		}
 
+		result = result.onErrorComplete().then(Mono.fromRunnable(
+				() -> {
+					this.stopping = false;
+					if (!this.externallyManagedTcpClient) {
+						this.tcpClient = null;
+					}
+				}));
+
 		return result.toFuture();
 	}
 
@@ -279,6 +304,7 @@ public class ReactorNettyTcpClient<P> implements TcpOperations<P> {
 					break;
 				}
 			}
+			this.scheduler = null;
 		});
 	}
 

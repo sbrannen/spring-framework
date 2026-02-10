@@ -249,6 +249,29 @@ public abstract class AbstractStompBrokerRelayIntegrationTests {
 		this.responseHandler.expectMessages(disconnect);
 	}
 
+	@Test
+	void stopAndRestart() throws Exception {
+		publishSubscribe();
+
+		this.relay.stop();
+		assertThat(this.relay.isRunning()).as("is running").isFalse();
+		assertThat(this.relay.isBrokerAvailable()).as("is broker available").isFalse();
+		this.eventPublisher.expectBrokerAvailabilityEvent(false);
+
+		this.responseHandler.queue.clear();
+
+//		TcpOperations<byte[]> tcpClient = initTcpClient(this.port);
+//		this.relay.setTcpClient(tcpClient);
+
+		this.relay.start();
+		assertThat(this.relay.isRunning()).as("is running").isTrue();
+		if (!this.relay.isBrokerAvailable()) {
+			this.eventPublisher.expectBrokerAvailabilityEvent(true);
+		}
+
+		publishSubscribe();
+	}
+
 
 	private static class TestEventPublisher implements ApplicationEventPublisher {
 
