@@ -40,6 +40,13 @@ import org.springframework.beans.BeansException;
  * A {@code BeanFactoryPostProcessor} may also be registered programmatically
  * with a {@code ConfigurableApplicationContext}.
  *
+ * <p>When registering a {@code BeanFactoryPostProcessor} via an {@code @Bean} method
+ * on a {@code @Configuration} class, use a <em>static</em> method to avoid lifecycle
+ * conflicts with annotation processing in the configuration class. See the
+ * "BeanFactoryPostProcessor-returning {@code @Bean} methods" section in
+ * {@link org.springframework.context.annotation.Bean @Bean}'s javadoc for details
+ * and an example.
+ *
  * <h3>Ordering</h3>
  * <p>{@code BeanFactoryPostProcessor} beans that are autodetected in an
  * {@code ApplicationContext} will be ordered according to
