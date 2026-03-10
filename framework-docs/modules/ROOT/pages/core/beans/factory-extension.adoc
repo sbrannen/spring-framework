@@ -67,12 +67,12 @@ interface, clearly indicating the post-processor nature of that bean. Otherwise,
 Since a `BeanPostProcessor` needs to be instantiated early in order to apply to the
 initialization of other beans in the context, this early type detection is critical.
 
-When using an `@Bean` method to register a `BeanPostProcessor`, declare the method
-as `static` and ideally with no dependencies. Doing so avoids eager initialization of
-the configuration class and other beans, which would make them ineligible for full
-post-processing (such as auto-proxying). See the "BeanPostProcessor-returning
-`@Bean` methods" section in the {spring-framework-api}/context/annotation/Bean.html[`@Bean`]
-javadoc for details.
+Furthermore, when registering a `BeanPostProcessor` via an `@Bean` factory method,
+declare the method as `static` and ideally with no dependencies. Doing so avoids eager
+initialization of the configuration class and other beans, which would make them
+ineligible for full post-processing (such as auto-proxying). See the
+"BeanPostProcessor-returning `@Bean` methods" section in the
+{spring-framework-api}/context/annotation/Bean.html[`@Bean`] javadoc for details.
 
 [[beans-factory-programmatically-registering-beanpostprocessors]]
 .Programmatically registering `BeanPostProcessor` instances
@@ -215,8 +215,8 @@ Kotlin::
 ----
 ======
 
-Alternatively, the following `beans` element uses the `InstantiationTracingBeanPostProcessor`
-with XML configuration:
+Alternatively, the `InstantiationTracingBeanPostProcessor` can be registered via the
+`bean` element with XML configuration:
 
 [source,xml,indent=0,subs="verbatim,quotes"]
 ----
@@ -352,7 +352,7 @@ implement the `BeanFactoryPostProcessor` interface. It uses these beans as bean 
 post-processors, at the appropriate time. You can deploy these post-processor beans as
 you would any other bean.
 
-When registering a `BeanFactoryPostProcessor` via an `@Bean` method on a
+When registering a `BeanFactoryPostProcessor` via an `@Bean` factory method in a
 `@Configuration` class, declare the method as `static` to avoid lifecycle conflicts
 with annotation processing (such as `@Autowired`, `@Value`, and `@PostConstruct`) in the
 configuration class. See the "BeanFactoryPostProcessor-returning `@Bean` methods"

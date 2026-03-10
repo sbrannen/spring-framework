@@ -200,22 +200,21 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.springframework.beans.factory.config.BeanPostProcessor BeanPostProcessor}
  * ({@code BPP}) types. Because {@code BPP} objects must be instantiated early in the container
  * lifecycle, a non-static {@code @Bean} method that returns a {@code BPP} will cause eager
- * initialization of its declaring {@code @Configuration} class. That can make other beans
- * ineligible for full post-processing (for example, auto-proxying). To avoid these lifecycle
- * issues, mark {@code BPP}-returning {@code @Bean} methods as {@code static}, and ideally
- * declare them with no dependencies. For example:
+ * initialization of its declaring {@code @Configuration} class, which can make other beans in the
+ * {@code @Configuration} class (as well as depencencies of those beans) ineligible for full
+ * post-processing (for example, auto-proxying). To avoid these lifecycle issues, mark
+ * {@code BPP}-returning {@code @Bean} methods as {@code static}. For example:
  *
  * <pre class="code">
- *     &#064;Bean
- *     public static MyBeanPostProcessor myBeanPostProcessor() {
- *         return new MyBeanPostProcessor();
- *     }
- * </pre>
+ * &#064;Bean
+ * public static MyBeanPostProcessor myBeanPostProcessor() {
+ *     return new MyBeanPostProcessor();
+ * }</pre>
  *
  * By marking this method as {@code static}, it can be invoked without causing instantiation of its
- * declaring {@code @Configuration} class. Prefer a method with no dependencies so that the
- * container does not need to instantiate other beans to create the post-processor, which would
- * make those beans ineligible for post-processing by all {@code BeanPostProcessor} instances.
+ * declaring {@code @Configuration} class. Furthermore, the method should ideally not declare any
+ * dependencies so that the container does not need to instantiate other beans to create the
+ * post-processor, which would make those beans ineligible for post-processing as well.
  *
  * @author Rod Johnson
  * @author Costin Leau

@@ -35,12 +35,13 @@ import org.springframework.beans.BeansException;
  * created. A plain {@code BeanFactory} allows for programmatic registration of
  * post-processors, applying them to all beans created through the bean factory.
  *
- * <p>When registering a {@code BeanPostProcessor} via an {@code @Bean} method on a
- * {@code @Configuration} class, use a <em>static</em> method with no dependencies
- * to avoid eager initialization that can make other beans ineligible for full
- * post-processing. See the "BeanPostProcessor-returning {@code @Bean} methods"
- * section in {@link org.springframework.context.annotation.Bean @Bean}'s javadoc
- * for details and an example.
+ * <p>When registering a {@code BeanPostProcessor} via an {@code @Bean} method in
+ * a {@code @Configuration} class, use a {@code static} method with ideally no
+ * dependencies in order to avoid eager initialization that can make other beans
+ * ineligible for full post-processing. See the "BeanPostProcessor-returning
+ * {@code @Bean} methods" section in
+ * {@link org.springframework.context.annotation.Bean @Bean}'s javadoc for details
+ * and an example.
  *
  * <h3>Ordering</h3>
  * <p>{@code BeanPostProcessor} beans that are autodetected in an
