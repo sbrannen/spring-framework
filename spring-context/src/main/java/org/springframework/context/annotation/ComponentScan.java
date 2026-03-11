@@ -113,10 +113,14 @@ public @interface ComponentScan {
 	 * that the scanner used to process this {@code @ComponentScan} annotation should
 	 * use its inherited bean name generator, for example, the default
 	 * {@link AnnotationBeanNameGenerator} or any custom instance supplied to the
-	 * application context at bootstrap time.
+	 * application context at bootstrap time. When the context uses a
+	 * {@link ConfigurationBeanNameGenerator} (such as
+	 * {@link FullyQualifiedConfigurationBeanNameGenerator}), it also affects the
+	 * default names for {@link Bean @Bean} methods in {@link Configuration} classes.
 	 * @see AnnotationConfigApplicationContext#setBeanNameGenerator(BeanNameGenerator)
 	 * @see AnnotationBeanNameGenerator
 	 * @see FullyQualifiedAnnotationBeanNameGenerator
+	 * @see FullyQualifiedConfigurationBeanNameGenerator
 	 */
 	Class<? extends BeanNameGenerator> nameGenerator() default BeanNameGenerator.class;
 

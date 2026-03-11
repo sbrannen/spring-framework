@@ -567,7 +567,13 @@ same non-qualified class name (i.e., classes with identical names but residing i
 different packages), you may need to configure a `BeanNameGenerator` that defaults to the
 fully qualified class name for the generated bean name. The
 `FullyQualifiedAnnotationBeanNameGenerator` located in package
-`org.springframework.context.annotation` can be used for such purposes.
+`org.springframework.context.annotation` can be used for such purposes. For naming
+conflicts among `@Bean` methods in `@Configuration` classes, use
+`FullyQualifiedConfigurationBeanNameGenerator` (as of Spring Framework 7.0), which
+generates fully-qualified default bean names (`className.methodName`) for `@Bean`
+methods without an explicit `name` attribute; set it via
+`AnnotationConfigApplicationContext.setBeanNameGenerator()` prior to registering
+configuration classes.
 
 [tabs]
 ======

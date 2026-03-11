@@ -45,10 +45,15 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>While a {@link #name} attribute is available, the default strategy for
  * determining the name of a bean is to use the name of the {@code @Bean} method.
- * This is convenient and intuitive, but if explicit naming is desired, the
- * {@code name} attribute (or its alias {@code value}) may be used. Also note
- * that {@code name} accepts an array of Strings, allowing for multiple names
- * (i.e. a primary bean name plus one or more aliases) for a single bean.
+ * This default can be overridden by configuring a different
+ * {@link org.springframework.beans.factory.support.BeanNameGenerator} &mdash; for
+ * example, {@link FullyQualifiedConfigurationBeanNameGenerator} for fully-qualified
+ * names ({@code "className.methodName"}) &mdash; via
+ * {@link AnnotationConfigApplicationContext#setBeanNameGenerator} prior to
+ * registering configuration classes. If explicit naming is desired for an
+ * individual bean, the {@code name} attribute (or its alias {@code value}) may be
+ * used. Also note that {@code name} accepts an array of Strings, allowing for
+ * multiple names (i.e. a primary bean name plus one or more aliases) for a single bean.
  *
  * <pre class="code">
  * &#064;Bean({"b1", "b2"}) // bean available as 'b1' and 'b2', but not 'myBean'
@@ -237,6 +242,9 @@ import org.springframework.core.annotation.AliasFor;
  * @see org.springframework.stereotype.Component
  * @see org.springframework.beans.factory.annotation.Autowired
  * @see org.springframework.beans.factory.annotation.Value
+ * @see FullyQualifiedAnnotationBeanNameGenerator
+ * @see FullyQualifiedConfigurationBeanNameGenerator
+ * @see AnnotationConfigApplicationContext#setBeanNameGenerator
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -255,8 +263,12 @@ public @interface Bean {
 
 	/**
 	 * The name of this bean, or if several names, a primary bean name plus aliases.
-	 * <p>If left unspecified, the name of the bean is the name of the annotated method.
-	 * If specified, the method name is ignored.
+	 * <p>If left unspecified, the name of the bean is determined by the configured
+	 * {@link org.springframework.beans.factory.support.BeanNameGenerator}; by default,
+	 * the name of the annotated method is used. If specified, the method name is
+	 * ignored. To use fully-qualified method names (e.g. {@code "className.methodName"}),
+	 * configure {@link FullyQualifiedConfigurationBeanNameGenerator} via
+	 * {@link AnnotationConfigApplicationContext#setBeanNameGenerator}.
 	 * <p>The bean name and aliases may also be configured via the {@link #value}
 	 * attribute if no other attributes are declared.
 	 * @see #value

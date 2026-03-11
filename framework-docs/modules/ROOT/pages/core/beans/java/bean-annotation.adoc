@@ -19,7 +19,8 @@ You can use the `@Bean` annotation in a `@Configuration`-annotated or in a
 To declare a bean, you can annotate a method with the `@Bean` annotation. You use this
 method to register a bean definition within an `ApplicationContext` of the type
 specified as the method's return value. By default, the bean name is the same as
-the method name. The following example shows a `@Bean` method declaration:
+the method name (unless a different xref:#beans-java-customizing-bean-naming[bean name generator] is configured).
+The following example shows a `@Bean` method declaration:
 
 [tabs]
 ======
@@ -473,8 +474,16 @@ Kotlin::
 == Customizing Bean Naming
 
 By default, configuration classes use a `@Bean` method's name as the name of the
-resulting bean. This functionality can be overridden, however, with the `name` attribute,
-as the following example shows:
+resulting bean. You can change this default strategy by configuring a custom
+{spring-framework-api}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
+when bootstrapping the context &mdash; for example,
+{spring-framework-api}/context/annotation/FullyQualifiedConfigurationBeanNameGenerator.html[`FullyQualifiedConfigurationBeanNameGenerator`]
+(available as of Spring Framework 7.0) for fully-qualified bean names
+(`className.methodName`), set via
+{spring-framework-api}/context/annotation/AnnotationConfigApplicationContext.html#setBeanNameGenerator(org.springframework.beans.factory.support.BeanNameGenerator)[`AnnotationConfigApplicationContext.setBeanNameGenerator()`]
+prior to registering configuration classes. For individual beans, the default or
+generator-derived name can be overridden with the `name` attribute, as the following
+example shows:
 
 [tabs]
 ======
