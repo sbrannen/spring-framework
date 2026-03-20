@@ -68,11 +68,11 @@ class ProxyHintsPredicatesTests {
 	}
 
 	private void assertPredicateMatches(Predicate<RuntimeHints> predicate) {
-		assertThat(predicate.test(this.runtimeHints)).isTrue();
+		assertThat(predicate).accepts(this.runtimeHints);
 	}
 
 	private void assertPredicateDoesNotMatch(Predicate<RuntimeHints> predicate) {
-		assertThat(predicate.test(this.runtimeHints)).isFalse();
+		assertThat(predicate).rejects(this.runtimeHints);
 	}
 
 }

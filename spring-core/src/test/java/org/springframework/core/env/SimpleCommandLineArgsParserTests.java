@@ -16,7 +16,6 @@
 
 package org.springframework.core.env;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -77,7 +76,7 @@ class SimpleCommandLineArgsParserTests {
 		assertThat(args.containsOption("o2")).isTrue();
 		assertThat(args.containsOption("o3")).isFalse();
 		assertThat(args.getOptionValues("o1")).containsExactly("v1");
-		assertThat(args.getOptionValues("o2")).isEqualTo(Collections.EMPTY_LIST);
+		assertThat(args.getOptionValues("o2")).isEmpty();
 		assertThat(args.getOptionValues("o3")).isNull();
 	}
 

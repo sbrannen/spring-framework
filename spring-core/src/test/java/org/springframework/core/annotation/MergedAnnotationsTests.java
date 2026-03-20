@@ -375,7 +375,7 @@ class MergedAnnotationsTests {
 	void getRootWhenNotDirect() {
 		MergedAnnotations annotations = MergedAnnotations.from(ComposedTransactionalComponentClass.class);
 		MergedAnnotation<?> annotation = annotations.get(TransactionalComponent.class);
-		assertThat(annotation.getDistance()).isGreaterThan(0);
+		assertThat(annotation.getDistance()).isPositive();
 		assertThat(annotation.getRoot().getType()).isEqualTo(ComposedTransactionalComponent.class);
 	}
 
@@ -383,7 +383,7 @@ class MergedAnnotationsTests {
 	void getRootWhenDirect() {
 		MergedAnnotations annotations = MergedAnnotations.from(ComposedTransactionalComponentClass.class);
 		MergedAnnotation<?> annotation = annotations.get(ComposedTransactionalComponent.class);
-		assertThat(annotation.getDistance()).isEqualTo(0);
+		assertThat(annotation.getDistance()).isZero();
 		assertThat(annotation.getRoot()).isSameAs(annotation);
 	}
 
@@ -610,7 +610,7 @@ class MergedAnnotationsTests {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				InheritedAnnotationInterface.class, SearchStrategy.TYPE_HIERARCHY).get(Transactional.class);
 		assertThat(annotation.isPresent()).isTrue();
-		assertThat(annotation.getAggregateIndex()).isEqualTo(0);
+		assertThat(annotation.getAggregateIndex()).isZero();
 	}
 
 	@Test
@@ -618,7 +618,7 @@ class MergedAnnotationsTests {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				SubInheritedAnnotationInterface.class, SearchStrategy.TYPE_HIERARCHY).get(Transactional.class);
 		assertThat(annotation.isPresent()).isTrue();
-		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
+		assertThat(annotation.getAggregateIndex()).isOne();
 	}
 
 	@Test
@@ -634,7 +634,7 @@ class MergedAnnotationsTests {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				NonInheritedAnnotationInterface.class, SearchStrategy.TYPE_HIERARCHY).get(Order.class);
 		assertThat(annotation.isPresent()).isTrue();
-		assertThat(annotation.getAggregateIndex()).isEqualTo(0);
+		assertThat(annotation.getAggregateIndex()).isZero();
 	}
 
 	@Test
@@ -642,7 +642,7 @@ class MergedAnnotationsTests {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				SubNonInheritedAnnotationInterface.class, SearchStrategy.TYPE_HIERARCHY).get(Order.class);
 		assertThat(annotation.isPresent()).isTrue();
-		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
+		assertThat(annotation.getAggregateIndex()).isOne();
 	}
 
 	@Test
@@ -658,7 +658,7 @@ class MergedAnnotationsTests {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleFromInterface");
 		MergedAnnotation<?> annotation = MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(Order.class);
 		assertThat(annotation.isPresent()).isTrue();
-		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
+		assertThat(annotation.getAggregateIndex()).isOne();
 	}
 
 	@Test  // gh-31803
@@ -666,7 +666,7 @@ class MergedAnnotationsTests {
 		Method method = Hello2Impl.class.getMethod("method");
 		long count = MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
 				.from(method).stream(TestAnnotation1.class).count();
-		assertThat(count).isEqualTo(1);
+		assertThat(count).isOne();
 	}
 
 	@Test
@@ -674,7 +674,7 @@ class MergedAnnotationsTests {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handle");
 		MergedAnnotation<?> annotation = MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(Transactional.class);
 		assertThat(annotation.isPresent()).isTrue();
-		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
+		assertThat(annotation.getAggregateIndex()).isOne();
 	}
 
 	@Test
@@ -682,7 +682,7 @@ class MergedAnnotationsTests {
 		Method method = ConcreteClassWithInheritedAnnotation.class.getMethod("handleParameterized", String.class);
 		MergedAnnotation<?> annotation = MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(Transactional.class);
 		assertThat(annotation.isPresent()).isTrue();
-		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
+		assertThat(annotation.getAggregateIndex()).isOne();
 	}
 
 	@Test
@@ -702,7 +702,7 @@ class MergedAnnotationsTests {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(bridgeMethod,
 				SearchStrategy.TYPE_HIERARCHY).get(Order.class);
 		assertThat(annotation.isPresent()).isTrue();
-		assertThat(annotation.getAggregateIndex()).isEqualTo(0);
+		assertThat(annotation.getAggregateIndex()).isZero();
 	}
 
 	@Test
@@ -817,9 +817,9 @@ class MergedAnnotationsTests {
 	void getFromMethodWithMethodAnnotationOnLeaf() throws Exception {
 		Method method = Leaf.class.getMethod("annotatedOnLeaf");
 		assertThat(method.getAnnotation(Order.class)).isNotNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(0);
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isZero();
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(Order.class)
-				.getDistance()).isEqualTo(0);
+				.getDistance()).isZero();
 	}
 
 	@Test
@@ -828,16 +828,16 @@ class MergedAnnotationsTests {
 		assertThat(method.getAnnotation(Order.class)).isNull();
 		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(Order.class)
-				.getDistance()).isEqualTo(0);
+				.getDistance()).isZero();
 	}
 
 	@Test
 	void getFromMethodWithMetaAnnotationOnLeaf() throws Exception {
 		Method method = Leaf.class.getMethod("metaAnnotatedOnLeaf");
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(1);
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isOne();
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(Order.class)
-				.getDistance()).isEqualTo(1);
+				.getDistance()).isOne();
 	}
 
 	@Test
@@ -853,18 +853,18 @@ class MergedAnnotationsTests {
 	void getWithAnnotationOnRoot() throws Exception {
 		Method method = Leaf.class.getMethod("annotatedOnRoot");
 		assertThat(method.getAnnotation(Order.class)).isNotNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(0);
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isZero();
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(0);
+				Order.class).getDistance()).isZero();
 	}
 
 	@Test
 	void getFromMethodWithMetaAnnotationOnRoot() throws Exception {
 		Method method = Leaf.class.getMethod("metaAnnotatedOnRoot");
 		assertThat(method.getAnnotation(Order.class)).isNull();
-		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(1);
+		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isOne();
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(1);
+				Order.class).getDistance()).isOne();
 	}
 
 	@Test
@@ -873,7 +873,7 @@ class MergedAnnotationsTests {
 		assertThat(method.getAnnotation(Order.class)).isNull();
 		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(0);
+				Order.class).getDistance()).isZero();
 	}
 
 	@Test
@@ -892,7 +892,7 @@ class MergedAnnotationsTests {
 		assertThat(method.getAnnotation(Order.class)).isNull();
 		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(0);
+				Order.class).getDistance()).isZero();
 		// For code compiled with OpenJDK, invoking getAnnotation() on a bridge
 		// method actually finds an annotation on its 'bridged' method [1]; however,
 		// the Eclipse compiler does not support this [2]. Thus, we effectively
@@ -906,9 +906,9 @@ class MergedAnnotationsTests {
 			assertThat(method.getAnnotation(Transactional.class)).isNotNull();
 		}
 		assertThat(MergedAnnotations.from(method).get(
-				Transactional.class).getDistance()).isEqualTo(0);
+				Transactional.class).getDistance()).isZero();
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Transactional.class).getDistance()).isEqualTo(0);
+				Transactional.class).getDistance()).isZero();
 	}
 
 	@Test
@@ -918,33 +918,33 @@ class MergedAnnotationsTests {
 		assertThat(method.getAnnotation(Order.class)).isNull();
 		assertThat(MergedAnnotations.from(method).get(Order.class).getDistance()).isEqualTo(-1);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(0);
+				Order.class).getDistance()).isZero();
 		assertThat(method.getAnnotation(Transactional.class)).isNotNull();
 		assertThat(MergedAnnotations.from(method).get(
-				Transactional.class).getDistance()).isEqualTo(0);
+				Transactional.class).getDistance()).isZero();
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Transactional.class).getDistance()).isEqualTo(0);
+				Transactional.class).getDistance()).isZero();
 	}
 
 	@Test
 	void getFromMethodWithInterface() throws Exception {
 		Method method = ImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(0);
+				Order.class).getDistance()).isZero();
 	}
 
 	@Test // SPR-16060
 	void getFromMethodWithGenericInterface() throws Exception {
 		Method method = ImplementsInterfaceWithGenericAnnotatedMethod.class.getMethod("foo", String.class);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(0);
+				Order.class).getDistance()).isZero();
 	}
 
 	@Test // SPR-17146
 	void getFromMethodWithGenericSuperclass() throws Exception {
 		Method method = ExtendsBaseClassWithGenericAnnotatedMethod.class.getMethod("foo", String.class);
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(0);
+				Order.class).getDistance()).isZero();
 	}
 
 	@Test
@@ -960,14 +960,14 @@ class MergedAnnotationsTests {
 	void getFromMethodWithInterfaceOnSuper() throws Exception {
 		Method method = SubOfImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(0);
+				Order.class).getDistance()).isZero();
 	}
 
 	@Test
 	void getFromMethodWhenInterfaceWhenSuperDoesNotImplementMethod() throws Exception {
 		Method method = SubOfAbstractImplementsInterfaceWithAnnotatedMethod.class.getMethod("foo");
 		assertThat(MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(
-				Order.class).getDistance()).isEqualTo(0);
+				Order.class).getDistance()).isZero();
 	}
 
 	@Test
@@ -1026,14 +1026,14 @@ class MergedAnnotationsTests {
 	void getDirectFromClassWithInheritedAnnotationInterface() {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				InheritedAnnotationInterface.class, SearchStrategy.TYPE_HIERARCHY).get(Transactional.class);
-		assertThat(annotation.getAggregateIndex()).isEqualTo(0);
+		assertThat(annotation.getAggregateIndex()).isZero();
 	}
 
 	@Test
 	void getDirectFromClassWithSubInheritedAnnotationInterface() {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				SubInheritedAnnotationInterface.class, SearchStrategy.TYPE_HIERARCHY).get(Transactional.class);
-		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
+		assertThat(annotation.getAggregateIndex()).isOne();
 	}
 
 	@Test
@@ -1047,14 +1047,14 @@ class MergedAnnotationsTests {
 	void getDirectFromClassWithNonInheritedAnnotationInterface() {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				NonInheritedAnnotationInterface.class, SearchStrategy.TYPE_HIERARCHY).get(Order.class);
-		assertThat(annotation.getAggregateIndex()).isEqualTo(0);
+		assertThat(annotation.getAggregateIndex()).isZero();
 	}
 
 	@Test
 	void getDirectFromClassWithSubNonInheritedAnnotationInterface() {
 		MergedAnnotation<?> annotation = MergedAnnotations.from(
 				SubNonInheritedAnnotationInterface.class, SearchStrategy.TYPE_HIERARCHY).get(Order.class);
-		assertThat(annotation.getAggregateIndex()).isEqualTo(1);
+		assertThat(annotation.getAggregateIndex()).isOne();
 	}
 
 	@Test
@@ -1248,7 +1248,7 @@ class MergedAnnotationsTests {
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertThat(MergedAnnotations.from(InheritedAnnotationInterface.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(
-						Transactional.class).getAggregateIndex()).isEqualTo(0);
+				Transactional.class).getAggregateIndex()).isZero();
 		// Since we're not traversing interface hierarchies the following,
 		// though perhaps counterintuitive, must be false:
 		assertThat(MergedAnnotations.from(SubInheritedAnnotationInterface.class,
@@ -1256,20 +1256,20 @@ class MergedAnnotationsTests {
 						Transactional.class).getAggregateIndex()).isEqualTo(-1);
 		assertThat(MergedAnnotations.from(InheritedAnnotationClass.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(
-						Transactional.class).getAggregateIndex()).isEqualTo(0);
+				Transactional.class).getAggregateIndex()).isZero();
 		assertThat(MergedAnnotations.from(SubInheritedAnnotationClass.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(
-						Transactional.class).getAggregateIndex()).isEqualTo(1);
+				Transactional.class).getAggregateIndex()).isOne();
 		// non-inherited class-level annotation; note: @Order is not inherited
 		assertThat(MergedAnnotations.from(NonInheritedAnnotationInterface.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(
-						Order.class).getAggregateIndex()).isEqualTo(0);
+				Order.class).getAggregateIndex()).isZero();
 		assertThat(MergedAnnotations.from(SubNonInheritedAnnotationInterface.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(
 						Order.class).getAggregateIndex()).isEqualTo(-1);
 		assertThat(MergedAnnotations.from(NonInheritedAnnotationClass.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(
-						Order.class).getAggregateIndex()).isEqualTo(0);
+				Order.class).getAggregateIndex()).isZero();
 		assertThat(MergedAnnotations.from(SubNonInheritedAnnotationClass.class,
 				SearchStrategy.INHERITED_ANNOTATIONS).get(
 						Order.class).getAggregateIndex()).isEqualTo(-1);
@@ -1321,7 +1321,7 @@ class MergedAnnotationsTests {
 		Method method = TransactionalStringGeneric.class.getMethod("something", Object.class);
 		MergedAnnotation<?> annotation =
 				MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(Order.class);
-		assertThat(annotation.getInt("value")).isEqualTo(1);
+		assertThat(annotation.getInt("value")).isOne();
 	}
 
 	@Test
@@ -1340,7 +1340,7 @@ class MergedAnnotationsTests {
 		Method method = TransactionalStringGeneric.class.getMethod("something", Object.class);
 		MergedAnnotation<Order> annotation =
 				MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY).get(Order.class);
-		assertThat(annotation.getDefaultValue("value")).contains(Ordered.LOWEST_PRECEDENCE);
+		assertThat(annotation.getDefaultValue("value")).hasValue(Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
@@ -1351,13 +1351,13 @@ class MergedAnnotationsTests {
 		MergedAnnotation<?> annotation = MergedAnnotation.from(declaredAnnotation);
 		assertThat(annotation.getType().getName()).isEqualTo(
 				"org.springframework.core.annotation.subpackage.NonPublicAnnotation");
-		assertThat(annotation.getDefaultValue("value")).contains(-1);
+		assertThat(annotation.getDefaultValue("value")).hasValue(-1);
 	}
 
 	@Test
 	void getDefaultValueFromAnnotationType() {
 		MergedAnnotation<?> annotation = MergedAnnotation.of(Order.class);
-		assertThat(annotation.getDefaultValue("value")).contains(Ordered.LOWEST_PRECEDENCE);
+		assertThat(annotation.getDefaultValue("value")).hasValue(Ordered.LOWEST_PRECEDENCE);
 	}
 
 	@Test
@@ -1469,8 +1469,9 @@ class MergedAnnotationsTests {
 		Component component = WebController.class.getAnnotation(Component.class);
 		assertThat(component).isNotNull();
 		Component synthesizedComponent = MergedAnnotation.from(component).synthesize();
-		assertThat(synthesizedComponent).isNotNull();
-		assertThat(synthesizedComponent).isEqualTo(component);
+		assertThat(synthesizedComponent)
+				.isNotNull()
+				.isEqualTo(component);
 		assertThat(synthesizedComponent.value()).isEqualTo("webController");
 	}
 
@@ -1505,8 +1506,9 @@ class MergedAnnotationsTests {
 
 		assertSynthesized(synthesizedWebMapping);
 		assertSynthesized(synthesizedAgainWebMapping);
-		assertThat(synthesizedWebMapping).isEqualTo(synthesizedAgainWebMapping);
-		assertThat(synthesizedWebMapping).isSameAs(synthesizedAgainWebMapping);
+		assertThat(synthesizedWebMapping)
+				.isEqualTo(synthesizedAgainWebMapping)
+				.isSameAs(synthesizedAgainWebMapping);
 		assertThat(synthesizedWebMapping.name()).isEqualTo("foo");
 		assertThat(synthesizedWebMapping.path()).containsExactly("/test");
 		assertThat(synthesizedWebMapping.value()).containsExactly("/test");
@@ -1583,17 +1585,18 @@ class MergedAnnotationsTests {
 
 		assertSynthesized(synthesizedWebMapping1);
 		assertSynthesized(synthesizedWebMapping2);
-		assertThat(synthesizedWebMapping1).isEqualTo(synthesizedWebMapping2);
-
-		// Synthesizing an annotation from a different MergedAnnotation results in a different synthesized annotation instance.
-		assertThat(synthesizedWebMapping1).isNotSameAs(synthesizedWebMapping2);
-		// Synthesizing an annotation from the same MergedAnnotation results in the same synthesized annotation instance.
-		assertThat(synthesizedWebMapping1).isSameAs(mergedAnnotation1.synthesize());
+		assertThat(synthesizedWebMapping1)
+				.isEqualTo(synthesizedWebMapping2)
+				// Synthesizing an annotation from a different MergedAnnotation results in a different synthesized annotation instance.
+				.isNotSameAs(synthesizedWebMapping2)
+				// Synthesizing an annotation from the same MergedAnnotation results in the same synthesized annotation instance.
+				.isSameAs(mergedAnnotation1.synthesize());
 
 		RequestMapping synthesizedAgainWebMapping = MergedAnnotation.from(synthesizedWebMapping1).synthesize();
-		assertThat(synthesizedWebMapping1).isEqualTo(synthesizedAgainWebMapping);
-		// Synthesizing an already synthesized annotation results in the original synthesized annotation instance.
-		assertThat(synthesizedWebMapping1).isSameAs(synthesizedAgainWebMapping);
+		assertThat(synthesizedWebMapping1)
+				.isEqualTo(synthesizedAgainWebMapping)
+				// Synthesizing an already synthesized annotation results in the original synthesized annotation instance.
+				.isSameAs(synthesizedAgainWebMapping);
 	}
 
 	@Test
@@ -1850,7 +1853,7 @@ class MergedAnnotationsTests {
 		Map<String, Object> map = MergedAnnotation.from(componentScan).asMap(
 				annotation -> new LinkedHashMap<>(), Adapt.ANNOTATION_TO_MAP);
 		Map<String, Object> filterMap = (Map<String, Object>) map.get("value");
-		assertThat(filterMap.get("pattern")).isEqualTo("*Foo");
+		assertThat(filterMap).containsEntry("pattern", "*Foo");
 		filterMap.put("pattern", "newFoo");
 		filterMap.put("enigma", 42);
 		MergedAnnotation<ComponentScanSingleFilter> annotation = MergedAnnotation.of(
@@ -2102,19 +2105,19 @@ class MergedAnnotationsTests {
 		RequestMapping synthesizedWebMapping2 = MergedAnnotation.from(webMappingWithPathAndValue).synthesize();
 		assertThat(synthesizedWebMapping2).isNotNull();
 		// Equality amongst standard annotations
-		assertThat(webMappingWithAliases.hashCode()).isEqualTo(webMappingWithAliases.hashCode());
-		assertThat(webMappingWithPathAndValue.hashCode()).isEqualTo(webMappingWithPathAndValue.hashCode());
+		assertThat(webMappingWithAliases).hasSameHashCodeAs(webMappingWithAliases);
+		assertThat(webMappingWithPathAndValue).hasSameHashCodeAs(webMappingWithPathAndValue);
 		// Inequality amongst standard annotations
 		assertThat(webMappingWithAliases.hashCode()).isNotEqualTo(webMappingWithPathAndValue.hashCode());
 		assertThat(webMappingWithPathAndValue.hashCode()).isNotEqualTo(webMappingWithAliases.hashCode());
 		// Equality amongst synthesized annotations
-		assertThat(synthesizedWebMapping1.hashCode()).isEqualTo(synthesizedWebMapping1.hashCode());
-		assertThat(synthesizedWebMapping2.hashCode()).isEqualTo(synthesizedWebMapping2.hashCode());
-		assertThat(synthesizedWebMapping1.hashCode()).isEqualTo(synthesizedWebMapping2.hashCode());
-		assertThat(synthesizedWebMapping2.hashCode()).isEqualTo(synthesizedWebMapping1.hashCode());
+		assertThat(synthesizedWebMapping1).hasSameHashCodeAs(synthesizedWebMapping1);
+		assertThat(synthesizedWebMapping2).hasSameHashCodeAs(synthesizedWebMapping2);
+		assertThat(synthesizedWebMapping1).hasSameHashCodeAs(synthesizedWebMapping2);
+		assertThat(synthesizedWebMapping2).hasSameHashCodeAs(synthesizedWebMapping1);
 		// Equality between standard and synthesized annotations
-		assertThat(synthesizedWebMapping1.hashCode()).isEqualTo(webMappingWithPathAndValue.hashCode());
-		assertThat(webMappingWithPathAndValue.hashCode()).isEqualTo(synthesizedWebMapping1.hashCode());
+		assertThat(synthesizedWebMapping1).hasSameHashCodeAs(webMappingWithPathAndValue);
+		assertThat(webMappingWithPathAndValue).hasSameHashCodeAs(synthesizedWebMapping1);
 		// Inequality between standard and synthesized annotations
 		assertThat(synthesizedWebMapping1.hashCode()).isNotEqualTo(webMappingWithAliases.hashCode());
 		assertThat(webMappingWithAliases.hashCode()).isNotEqualTo(synthesizedWebMapping1.hashCode());
@@ -2151,8 +2154,9 @@ class MergedAnnotationsTests {
 		Hierarchy synthesizedHierarchy = MergedAnnotation.from(hierarchy).synthesize();
 		assertSynthesized(synthesizedHierarchy);
 		TestConfiguration[] configs = synthesizedHierarchy.value();
-		assertThat(configs).isNotNull();
-		assertThat(configs).allMatch(AnnotationUtils::isSynthesizedAnnotation);
+		assertThat(configs)
+				.isNotNull()
+				.allMatch(AnnotationUtils::isSynthesizedAnnotation);
 		assertThat(configs).extracting(TestConfiguration::value).containsExactly("A", "B");
 		assertThat(configs).extracting(TestConfiguration::location).containsExactly("A", "B");
 

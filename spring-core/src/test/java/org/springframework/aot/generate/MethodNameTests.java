@@ -85,7 +85,7 @@ class MethodNameTests {
 		MethodName name1 = MethodName.of("myBean");
 		MethodName name2 = MethodName.of("my", "bean");
 		MethodName name3 = MethodName.of("myOtherBean");
-		assertThat(name1.hashCode()).isEqualTo(name2.hashCode());
+		assertThat(name1).hasSameHashCodeAs(name2);
 		assertThat(name1).isEqualTo(name1).isEqualTo(name2).isNotEqualTo(name3);
 	}
 

@@ -38,10 +38,11 @@ class CompositeSetTests {
 		Set<String> all = new HashSet<>(first);
 		all.addAll(second);
 
-		assertThat(composite).isEqualTo(all);
-		assertThat(composite).isNotEqualTo(first);
-		assertThat(composite).isNotEqualTo(second);
-		assertThat(composite).isNotEqualTo(Collections.emptySet());
+		assertThat(composite)
+				.hasSameElementsAs(all)
+				.isNotEqualTo(first)
+				.isNotEqualTo(second)
+				.isNotEqualTo(Collections.emptySet());
 	}
 
 }

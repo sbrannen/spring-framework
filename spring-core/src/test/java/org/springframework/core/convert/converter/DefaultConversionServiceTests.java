@@ -142,7 +142,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void stringToByte() {
-		assertThat(conversionService.convert("1", Byte.class)).isEqualTo((byte) 1);
+		assertThat(conversionService.convert("1", Byte.class)).isOne();
 	}
 
 	@Test
@@ -152,7 +152,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void stringToShort() {
-		assertThat(conversionService.convert("1", Short.class)).isEqualTo((short) 1);
+		assertThat(conversionService.convert("1", Short.class)).isOne();
 	}
 
 	@Test
@@ -163,7 +163,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void stringToInteger() {
-		assertThat(conversionService.convert("1", Integer.class)).isEqualTo(1);
+		assertThat(conversionService.convert("1", Integer.class)).isOne();
 	}
 
 	@Test
@@ -268,7 +268,7 @@ class DefaultConversionServiceTests {
 
 	@Test
 	void enumToInteger() {
-		assertThat(conversionService.convert(Foo.BAR, Integer.class)).isEqualTo(0);
+		assertThat(conversionService.convert(Foo.BAR, Integer.class)).isZero();
 	}
 
 	@Test
@@ -675,16 +675,18 @@ class DefaultConversionServiceTests {
 	void convertPrimitiveByteArrayToPrimitiveByteArray() {
 		byte[] byteArray = new byte[] {1, 2, 3};
 		byte[] result = conversionService.convert(byteArray, byte[].class);
-		assertThat(result).isSameAs(byteArray);
-		assertThat(result).containsExactly(1, 2, 3);
+		assertThat(result)
+				.isSameAs(byteArray)
+				.containsExactly(1, 2, 3);
 	}
 
 	@Test  // gh-14200, SPR-9566
 	void convertIntArrayToIntArray() {
 		int[] intArray = new int[] {1, 2, 3};
 		int[] result = conversionService.convert(intArray, int[].class);
-		assertThat(result).isSameAs(intArray);
-		assertThat(result).containsExactly(1, 2, 3);
+		assertThat(result)
+				.isSameAs(intArray)
+				.containsExactly(1, 2, 3);
 	}
 
 	@Test
@@ -836,9 +838,9 @@ class DefaultConversionServiceTests {
 		ISBN.reset();
 		assertThat(conversionService.convert(new ISBN("123456789"), String.class)).isEqualTo("123456789");
 
-		assertThat(ISBN.constructorCount).as("constructor invocations").isEqualTo(1);
-		assertThat(ISBN.valueOfCount).as("valueOf() invocations").isEqualTo(0);
-		assertThat(ISBN.toStringCount).as("toString() invocations").isEqualTo(1);
+		assertThat(ISBN.constructorCount).as("constructor invocations").isOne();
+		assertThat(ISBN.valueOfCount).as("valueOf() invocations").isZero();
+		assertThat(ISBN.toStringCount).as("toString() invocations").isOne();
 	}
 
 	/**
@@ -849,10 +851,10 @@ class DefaultConversionServiceTests {
 		ISBN.reset();
 		assertThat(conversionService.convert("123456789", ISBN.class)).isEqualTo(new ISBN("123456789"));
 
-		assertThat(ISBN.valueOfCount).as("valueOf() invocations").isEqualTo(1);
+		assertThat(ISBN.valueOfCount).as("valueOf() invocations").isOne();
 		// valueOf() invokes the constructor
 		assertThat(ISBN.constructorCount).as("constructor invocations").isEqualTo(2);
-		assertThat(ISBN.toStringCount).as("toString() invocations").isEqualTo(0);
+		assertThat(ISBN.toStringCount).as("toString() invocations").isZero();
 	}
 
 	@Test
@@ -860,8 +862,8 @@ class DefaultConversionServiceTests {
 		SSN.reset();
 		assertThat(conversionService.convert(new SSN("123456789"), String.class)).isEqualTo("123456789");
 
-		assertThat(SSN.constructorCount).as("constructor invocations").isEqualTo(1);
-		assertThat(SSN.toStringCount).as("toString() invocations").isEqualTo(1);
+		assertThat(SSN.constructorCount).as("constructor invocations").isOne();
+		assertThat(SSN.toStringCount).as("toString() invocations").isOne();
 	}
 
 	@Test
@@ -870,7 +872,7 @@ class DefaultConversionServiceTests {
 		assertThat(conversionService.convert("123456789", SSN.class)).isEqualTo(new SSN("123456789"));
 
 		assertThat(SSN.constructorCount).as("constructor invocations").isEqualTo(2);
-		assertThat(SSN.toStringCount).as("toString() invocations").isEqualTo(0);
+		assertThat(SSN.toStringCount).as("toString() invocations").isZero();
 	}
 
 	@Test
@@ -951,8 +953,9 @@ class DefaultConversionServiceTests {
 		conversionService.addConverter(Byte.class, Byte.class, source -> (byte) (source + 1));
 		byte[] byteArray = {1, 2, 3};
 		byte[] converted = conversionService.convert(byteArray, byte[].class);
-		assertThat(converted).isNotSameAs(byteArray);
-		assertThat(converted).containsExactly(2, 3, 4);
+		assertThat(converted)
+				.isNotSameAs(byteArray)
+				.containsExactly(2, 3, 4);
 	}
 
 
@@ -969,7 +972,7 @@ class DefaultConversionServiceTests {
 			MethodParameter parameter = new MethodParameter(method, 0);
 			TypeDescriptor descriptor = new TypeDescriptor(parameter);
 			Object actual = conversionService.convert("1,2,3", TypeDescriptor.valueOf(String.class), descriptor);
-			assertThat((Optional<List<Integer>>) actual).contains(List.of(1, 2, 3));
+			assertThat((Optional<List<Integer>>) actual).hasValue(List.of(1, 2, 3));
 		}
 
 		@Test
@@ -1010,8 +1013,7 @@ class DefaultConversionServiceTests {
 			assertThat(conversionService.convert(Optional.of(42), Optional.class)).contains(42);
 
 			assertThat(conversionService.convert(Optional.of("enigma"), Optional.class)).contains("enigma");
-			assertThat((Optional<String>) conversionService.convert(Optional.of("enigma"), rawOptionalType, rawOptionalType))
-					.contains("enigma");
+			assertThat((Optional<String>) conversionService.convert(Optional.of("enigma"), rawOptionalType, rawOptionalType)).hasValue("enigma");
 		}
 
 		@Test  // gh-34544
@@ -1022,8 +1024,7 @@ class DefaultConversionServiceTests {
 			TypeDescriptor stringOptionalType =
 					new TypeDescriptor(ResolvableType.forClassWithGenerics(Optional.class, String.class), null, null);
 
-			assertThat((Optional<String>) conversionService.convert(Optional.of(42), integerOptionalType, stringOptionalType))
-					.contains("42");
+			assertThat((Optional<String>) conversionService.convert(Optional.of(42), integerOptionalType, stringOptionalType)).hasValue("42");
 		}
 
 		@Test  // gh-34544

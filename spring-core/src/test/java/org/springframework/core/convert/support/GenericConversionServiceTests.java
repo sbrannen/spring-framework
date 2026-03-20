@@ -281,7 +281,7 @@ class GenericConversionServiceTests {
 		conversionService.addConverter(new MyStringArrayToResourceArrayConverter());
 		Resource[] converted = conversionService.convert(new String[] { "x1", "z3" }, Resource[].class);
 		List<String> descriptions = Arrays.stream(converted).map(Resource::getDescription).sorted(naturalOrder()).collect(toList());
-		assertThat(descriptions).isEqualTo(Arrays.asList("1", "3"));
+		assertThat(descriptions).containsExactlyElementsOf(Arrays.asList("1", "3"));
 	}
 
 	@Test
@@ -378,8 +378,9 @@ class GenericConversionServiceTests {
 	void convertiblePairEqualsAndHash() {
 		GenericConverter.ConvertiblePair pair = new GenericConverter.ConvertiblePair(Number.class, String.class);
 		GenericConverter.ConvertiblePair pairEqual = new GenericConverter.ConvertiblePair(Number.class, String.class);
-		assertThat(pairEqual).isEqualTo(pair);
-		assertThat(pairEqual.hashCode()).isEqualTo(pair.hashCode());
+		assertThat(pairEqual)
+				.isEqualTo(pair)
+				.hasSameHashCodeAs(pair);
 	}
 
 	@Test
@@ -416,7 +417,7 @@ class GenericConversionServiceTests {
 		conversionService.addConverter(new ColorConverter());
 		conversionService.addConverter(converter);
 		assertThat(conversionService.convert("#000000", Color.class)).isEqualTo(Color.BLACK);
-		assertThat(converter.getMatchAttempts()).isGreaterThan(0);
+		assertThat(converter.getMatchAttempts()).isPositive();
 	}
 
 	@Test
@@ -425,8 +426,8 @@ class GenericConversionServiceTests {
 		conversionService.addConverter(new ColorConverter());
 		conversionService.addConverterFactory(converter);
 		assertThat(conversionService.convert("#000000", Color.class)).isEqualTo(Color.BLACK);
-		assertThat(converter.getMatchAttempts()).isGreaterThan(0);
-		assertThat(converter.getNestedMatchAttempts()).isGreaterThan(0);
+		assertThat(converter.getMatchAttempts()).isPositive();
+		assertThat(converter.getNestedMatchAttempts()).isPositive();
 	}
 
 	@Test
@@ -465,8 +466,9 @@ class GenericConversionServiceTests {
 	void convertOptimizeArray() {
 		byte[] byteArray = new byte[] { 1, 2, 3 };
 		byte[] converted = conversionService.convert(byteArray, byte[].class);
-		assertThat(converted).isSameAs(byteArray);
-		assertThat(converted).containsExactly(1, 2, 3);
+		assertThat(converted)
+				.isSameAs(byteArray)
+				.containsExactly(1, 2, 3);
 	}
 
 	@Test

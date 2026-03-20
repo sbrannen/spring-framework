@@ -157,7 +157,7 @@ class TypeHintTests {
 	void createWithMemberCategory() {
 		TypeHint hint = TypeHint.of(TypeReference.of(String.class))
 				.withMembers(MemberCategory.DECLARED_FIELDS).build();
-		assertThat(hint.getMemberCategories()).containsOnly(MemberCategory.DECLARED_FIELDS);
+		assertThat(hint.getMemberCategories()).containsExactly(MemberCategory.DECLARED_FIELDS);
 	}
 
 	@Test

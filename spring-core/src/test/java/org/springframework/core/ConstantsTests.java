@@ -57,18 +57,21 @@ class ConstantsTests {
 		Constants c = new Constants(A.class);
 
 		Set<String> names = c.getNames("");
-		assertThat(names).hasSize(c.getSize());
-		assertThat(names).contains("DOG");
-		assertThat(names).contains("CAT");
-		assertThat(names).contains("S1");
+		assertThat(names)
+				.hasSize(c.getSize())
+				.contains("DOG")
+				.contains("CAT")
+				.contains("S1");
 
 		names = c.getNames("D");
-		assertThat(names).hasSize(1);
-		assertThat(names).contains("DOG");
+		assertThat(names)
+				.hasSize(1)
+				.contains("DOG");
 
 		names = c.getNames("d");
-		assertThat(names).hasSize(1);
-		assertThat(names).contains("DOG");
+		assertThat(names)
+				.hasSize(1)
+				.contains("DOG");
 	}
 
 	@Test
@@ -76,24 +79,28 @@ class ConstantsTests {
 		Constants c = new Constants(A.class);
 
 		Set<Object> values = c.getValues("");
-		assertThat(values).hasSize(7);
-		assertThat(values).contains(0);
-		assertThat(values).contains(66);
-		assertThat(values).contains("");
+		assertThat(values)
+				.hasSize(7)
+				.contains(0)
+				.contains(66)
+				.contains("");
 
 		values = c.getValues("D");
-		assertThat(values).hasSize(1);
-		assertThat(values).contains(0);
+		assertThat(values)
+				.hasSize(1)
+				.contains(0);
 
 		values = c.getValues("prefix");
-		assertThat(values).hasSize(2);
-		assertThat(values).contains(1);
-		assertThat(values).contains(2);
+		assertThat(values)
+				.hasSize(2)
+				.contains(1)
+				.contains(2);
 
 		values = c.getValuesForProperty("myProperty");
-		assertThat(values).hasSize(2);
-		assertThat(values).contains(1);
-		assertThat(values).contains(2);
+		assertThat(values)
+				.hasSize(2)
+				.contains(1)
+				.contains(2);
 	}
 
 	@Test
@@ -104,24 +111,28 @@ class ConstantsTests {
 			Constants c = new Constants(A.class);
 
 			Set<Object> values = c.getValues("");
-			assertThat(values).hasSize(7);
-			assertThat(values).contains(0);
-			assertThat(values).contains(66);
-			assertThat(values).contains("");
+			assertThat(values)
+					.hasSize(7)
+					.contains(0)
+					.contains(66)
+					.contains("");
 
 			values = c.getValues("D");
-			assertThat(values).hasSize(1);
-			assertThat(values).contains(0);
+			assertThat(values)
+					.hasSize(1)
+					.contains(0);
 
 			values = c.getValues("prefix");
-			assertThat(values).hasSize(2);
-			assertThat(values).contains(1);
-			assertThat(values).contains(2);
+			assertThat(values)
+					.hasSize(2)
+					.contains(1)
+					.contains(2);
 
 			values = c.getValuesForProperty("myProperty");
-			assertThat(values).hasSize(2);
-			assertThat(values).contains(1);
-			assertThat(values).contains(2);
+			assertThat(values)
+					.hasSize(2)
+					.contains(1)
+					.contains(2);
 		}
 		finally {
 			Locale.setDefault(oldLocale);
@@ -133,14 +144,16 @@ class ConstantsTests {
 		Constants c = new Constants(A.class);
 
 		Set<String> names = c.getNamesForSuffix("_PROPERTY");
-		assertThat(names).hasSize(2);
-		assertThat(names).contains("NO_PROPERTY");
-		assertThat(names).contains("YES_PROPERTY");
+		assertThat(names)
+				.hasSize(2)
+				.contains("NO_PROPERTY")
+				.contains("YES_PROPERTY");
 
 		Set<Object> values = c.getValuesForSuffix("_PROPERTY");
-		assertThat(values).hasSize(2);
-		assertThat(values).contains(3);
-		assertThat(values).contains(4);
+		assertThat(values)
+				.hasSize(2)
+				.contains(3)
+				.contains(4);
 	}
 
 	@Test
@@ -215,7 +228,7 @@ class ConstantsTests {
 	@Test
 	void withClassThatExposesNoConstants() {
 		Constants c = new Constants(NoConstants.class);
-		assertThat(c.getSize()).isEqualTo(0);
+		assertThat(c.getSize()).isZero();
 		final Set<?> values = c.getValues("");
 		assertThat(values).isNotNull();
 		assertThat(values).isEmpty();

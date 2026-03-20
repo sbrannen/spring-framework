@@ -179,7 +179,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 			ByteBuffer byteBuffer = invocation.getArgument(0);
 			byteBuffer.put("foo".getBytes(StandardCharsets.UTF_8));
 			long pos = invocation.getArgument(1);
-			assertThat(pos).isEqualTo(0);
+			assertThat(pos).isZero();
 			Object attachment = invocation.getArgument(2);
 			CompletionHandler<Integer, Object> completionHandler = invocation.getArgument(3);
 			completionHandler.completed(3, attachment);
@@ -482,7 +482,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		willAnswer(invocation -> {
 			ByteBuffer buffer = invocation.getArgument(0);
 			long pos = invocation.getArgument(1);
-			assertThat(pos).isEqualTo(0);
+			assertThat(pos).isZero();
 			Object attachment = invocation.getArgument(2);
 			CompletionHandler<Integer, Object> completionHandler = invocation.getArgument(3);
 			int written = buffer.remaining();
@@ -1111,7 +1111,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 	private static void assertReleased(DataBuffer dataBuffer) {
 		if (dataBuffer instanceof NettyDataBuffer nettyDataBuffer) {
 			ByteBuf byteBuf = nettyDataBuffer.getNativeBuffer();
-			assertThat(byteBuf.refCnt()).isEqualTo(0);
+			assertThat(byteBuf.refCnt()).isZero();
 		}
 	}
 
@@ -1189,7 +1189,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		Mono<DataBuffer> result = DataBufferUtils.join(Flux.just(buffer), 8);
 
 		StepVerifier.create(result).verifyError(DataBufferLimitException.class);
-		assertThat(buffer.getNativeBuffer().refCnt()).isEqualTo(1);
+		assertThat(buffer.getNativeBuffer().refCnt()).isOne();
 		buffer.release();
 	}
 
@@ -1235,7 +1235,7 @@ class DataBufferUtilsTests extends AbstractDataBufferAllocatingTests {
 		int result = matcher.match(foo);
 		assertThat(result).isEqualTo(-1);
 		result = matcher.match(bar);
-		assertThat(result).isEqualTo(1);
+		assertThat(result).isOne();
 
 
 		release(foo, bar);

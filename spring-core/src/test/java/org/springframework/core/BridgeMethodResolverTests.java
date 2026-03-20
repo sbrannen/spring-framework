@@ -73,7 +73,7 @@ class BridgeMethodResolverTests {
 		Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(bridgeMethod);
 		assertThat(bridgedMethod.isBridge()).isFalse();
 		assertThat(bridgedMethod.getName()).isEqualTo("add");
-		assertThat(bridgedMethod.getParameterCount()).isEqualTo(1);
+		assertThat(bridgedMethod.getParameterCount()).isOne();
 		assertThat(bridgedMethod.getParameterTypes()[0]).isEqualTo(Date.class);
 	}
 
@@ -84,7 +84,7 @@ class BridgeMethodResolverTests {
 		Method bridgedMethod = BridgeMethodResolver.getMostSpecificMethod(originalMethod, DateAdder.class);
 		assertThat(bridgedMethod.isBridge()).isFalse();
 		assertThat(bridgedMethod.getName()).isEqualTo("add");
-		assertThat(bridgedMethod.getParameterCount()).isEqualTo(1);
+		assertThat(bridgedMethod.getParameterCount()).isOne();
 		assertThat(bridgedMethod.getParameterTypes()[0]).isEqualTo(Date.class);
 	}
 
@@ -168,8 +168,9 @@ class BridgeMethodResolverTests {
 		assertThat(loadWithObjectReturn).isNotNull();
 
 		Method loadWithSettingsReturn = findMethodWithReturnType("load", Settings.class, SettingsDaoImpl.class);
-		assertThat(loadWithSettingsReturn).isNotNull();
-		assertThat(loadWithSettingsReturn).isNotSameAs(loadWithObjectReturn);
+		assertThat(loadWithSettingsReturn)
+				.isNotNull()
+				.isNotSameAs(loadWithObjectReturn);
 
 		Method method = SettingsDaoImpl.class.getMethod("load");
 		assertThat(BridgeMethodResolver.findBridgedMethod(loadWithObjectReturn)).isEqualTo(method);

@@ -73,12 +73,14 @@ class ModuleResourceTests {
 		Resource resource2 = new ModuleResource(Introspector.class.getModule(), existingPath);
 		Resource resource3 = new ModuleResource(Introspector.class.getModule(), nonExistingPath);
 
-		assertThat(resource1).isEqualTo(resource1);
-		assertThat(resource1).isEqualTo(resource2);
+		assertThat(resource1)
+				.isEqualTo(resource1)
+				.isEqualTo(resource2);
 		assertThat(resource2).isEqualTo(resource1);
-		assertThat(resource1).isNotEqualTo(resource3);
-		assertThat(resource1).hasSameHashCodeAs(resource2);
-		assertThat(resource1).doesNotHaveSameHashCodeAs(resource3);
+		assertThat(resource1)
+				.isNotEqualTo(resource3)
+				.hasSameHashCodeAs(resource2)
+				.doesNotHaveSameHashCodeAs(resource3);
 	}
 
 

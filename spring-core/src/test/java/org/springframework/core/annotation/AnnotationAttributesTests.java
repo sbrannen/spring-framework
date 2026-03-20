@@ -107,12 +107,10 @@ class AnnotationAttributesTests {
 		assertThat(attributes.getClassArray("classes")).isEqualTo(new Class<?>[] {Number.class});
 
 		AnnotationAttributes[] array = attributes.getAnnotationArray("nestedAttributes");
-		assertThat(array).isNotNull();
 		assertThat(array).hasSize(1);
 		assertThat(array[0].getString("name")).isEqualTo("Dilbert");
 
 		Filter[] filters = attributes.getAnnotationArray("filters", Filter.class);
-		assertThat(filters).isNotNull();
 		assertThat(filters).hasSize(1);
 		assertThat(filters[0].pattern()).isEqualTo("foo");
 	}
@@ -129,7 +127,6 @@ class AnnotationAttributesTests {
 		assertThat(retrievedFilter.pattern()).isEqualTo("foo");
 
 		Filter[] retrievedFilters = attributes.getAnnotationArray("filters", Filter.class);
-		assertThat(retrievedFilters).isNotNull();
 		assertThat(retrievedFilters).hasSize(2);
 		assertThat(retrievedFilters[1].pattern()).isEqualTo("foo");
 	}

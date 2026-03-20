@@ -215,7 +215,6 @@ class ComposedRepeatableAnnotationsTests {
 		assertThat(element).isNotNull();
 
 		Set<PeteRepeat> peteRepeats = getMergedRepeatableAnnotations(element, PeteRepeat.class);
-		assertThat(peteRepeats).isNotNull();
 		assertThat(peteRepeats).hasSize(3);
 
 		Iterator<PeteRepeat> iterator = peteRepeats.iterator();
@@ -228,7 +227,6 @@ class ComposedRepeatableAnnotationsTests {
 		assertThat(element).isNotNull();
 
 		Set<PeteRepeat> peteRepeats = findMergedRepeatableAnnotations(element, PeteRepeat.class);
-		assertThat(peteRepeats).isNotNull();
 		assertThat(peteRepeats).hasSize(3);
 
 		Iterator<PeteRepeat> iterator = peteRepeats.iterator();
@@ -238,7 +236,6 @@ class ComposedRepeatableAnnotationsTests {
 	}
 
 	private void assertNoninheritedRepeatableAnnotations(Set<Noninherited> annotations) {
-		assertThat(annotations).isNotNull();
 		assertThat(annotations).hasSize(3);
 
 		Iterator<Noninherited> iterator = annotations.iterator();

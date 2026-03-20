@@ -126,7 +126,7 @@ class InheritedAnnotationsAnnotationMetadataTests {
 		Map<String, Object> annotationAttributes;
 
 		annotationAttributes = standardMetadata.getAnnotationAttributes(NamedAnnotation1.class.getName());
-		assertThat(annotationAttributes.get("name")).isEqualTo("name 1");
+		assertThat(annotationAttributes).containsEntry("name", "name 1");
 
 		annotationAttributes = asmMetadata.getAnnotationAttributes(NamedAnnotation1.class.getName());
 		assertThat(annotationAttributes).isNull();

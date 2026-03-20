@@ -158,7 +158,7 @@ class PathResourceTests {
 	void getInputStream() throws IOException {
 		PathResource resource = new PathResource(TEST_FILE);
 		byte[] bytes = FileCopyUtils.copyToByteArray(resource.getInputStream());
-		assertThat(bytes).hasSizeGreaterThan(0);
+		assertThat(bytes).isNotEmpty();
 	}
 
 	@Test
@@ -265,12 +265,14 @@ class PathResourceTests {
 		PathResource resource1 = new PathResource(TEST_FILE);
 		PathResource resource2 = new PathResource(TEST_FILE);
 		PathResource resource3 = new PathResource(TEST_DIR);
-		assertThat(resource1).isEqualTo(resource1);
-		assertThat(resource1).isEqualTo(resource2);
+		assertThat(resource1)
+				.isEqualTo(resource1)
+				.isEqualTo(resource2);
 		assertThat(resource2).isEqualTo(resource1);
-		assertThat(resource1).isNotEqualTo(resource3);
-		assertThat(resource1).hasSameHashCodeAs(resource2);
-		assertThat(resource1).doesNotHaveSameHashCodeAs(resource3);
+		assertThat(resource1)
+				.isNotEqualTo(resource3)
+				.hasSameHashCodeAs(resource2)
+				.doesNotHaveSameHashCodeAs(resource3);
 	}
 
 	@Test
@@ -302,7 +304,7 @@ class PathResourceTests {
 			ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 			channel.read(buffer);
 			buffer.rewind();
-			assertThat(buffer.limit()).isGreaterThan(0);
+			assertThat(buffer.limit()).isPositive();
 		}
 	}
 

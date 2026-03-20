@@ -50,7 +50,7 @@ class AnnotationTypeMappingsTests {
 	@Test
 	void forAnnotationTypeWhenNoMetaAnnotationsReturnsMappings() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(SimpleAnnotation.class);
-		assertThat(mappings.size()).isEqualTo(1);
+		assertThat(mappings.size()).isOne();
 		assertThat(mappings.get(0).getAnnotationType()).isEqualTo(SimpleAnnotation.class);
 		assertThat(getAll(mappings)).flatExtracting(AnnotationTypeMapping::getAnnotationType)
 				.containsExactly(SimpleAnnotation.class);
@@ -83,7 +83,7 @@ class AnnotationTypeMappingsTests {
 	@Test
 	void forAnnotationTypeWhenSelfAnnotatedReturnsMapping() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(SelfAnnotated.class);
-		assertThat(mappings.size()).isEqualTo(1);
+		assertThat(mappings.size()).isOne();
 		assertThat(getAll(mappings)).flatExtracting(AnnotationTypeMapping::getAnnotationType)
 				.containsExactly(SelfAnnotated.class);
 	}
@@ -215,8 +215,8 @@ class AnnotationTypeMappingsTests {
 	@Test
 	void getDistanceReturnsDistance() {
 		AnnotationTypeMappings mappings = AnnotationTypeMappings.forAnnotationType(Mapped.class);
-		assertThat(mappings.get(0).getDistance()).isEqualTo(0);
-		assertThat(mappings.get(1).getDistance()).isEqualTo(1);
+		assertThat(mappings.get(0).getDistance()).isZero();
+		assertThat(mappings.get(1).getDistance()).isOne();
 	}
 
 	@Test
@@ -264,7 +264,7 @@ class AnnotationTypeMappingsTests {
 	void getMirrorSetWhenAliasPairReturnsMirrors() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(AliasPair.class).get(0);
 		MirrorSets mirrorSets = mapping.getMirrorSets();
-		assertThat(mirrorSets.size()).isEqualTo(1);
+		assertThat(mirrorSets.size()).isOne();
 		assertThat(mirrorSets.get(0).size()).isEqualTo(2);
 		assertThat(mirrorSets.get(0).get(0).getName()).isEqualTo("a");
 		assertThat(mirrorSets.get(0).get(1).getName()).isEqualTo("b");
@@ -274,7 +274,7 @@ class AnnotationTypeMappingsTests {
 	void getMirrorSetWhenImplicitMirrorsReturnsMirrors() {
 		AnnotationTypeMapping mapping = AnnotationTypeMappings.forAnnotationType(ImplicitMirrors.class).get(0);
 		MirrorSets mirrorSets = mapping.getMirrorSets();
-		assertThat(mirrorSets.size()).isEqualTo(1);
+		assertThat(mirrorSets.size()).isOne();
 		assertThat(mirrorSets.get(0).size()).isEqualTo(2);
 		assertThat(mirrorSets.get(0).get(0).getName()).isEqualTo("a");
 		assertThat(mirrorSets.get(0).get(1).getName()).isEqualTo("b");
@@ -289,11 +289,11 @@ class AnnotationTypeMappingsTests {
 		assertThat(getNames(mirrorSetsA.get(0))).containsExactly("a1", "a2", "a3");
 		AnnotationTypeMapping mappingB = mappings.get(1);
 		MirrorSets mirrorSetsB = mappingB.getMirrorSets();
-		assertThat(mirrorSetsB.size()).isEqualTo(1);
+		assertThat(mirrorSetsB.size()).isOne();
 		assertThat(getNames(mirrorSetsB.get(0))).containsExactly("b1", "b2");
 		AnnotationTypeMapping mappingC = mappings.get(2);
 		MirrorSets mirrorSetsC = mappingC.getMirrorSets();
-		assertThat(mirrorSetsC.size()).isEqualTo(0);
+		assertThat(mirrorSetsC.size()).isZero();
 	}
 
 	@Test

@@ -231,13 +231,13 @@ class ClassPathResourceTests {
 	void emptyFileReadable(@TempDir(cleanup = NEVER) File tempDir) throws IOException {
 		File file = new File(tempDir, "empty.txt");
 		assertThat(file.createNewFile()).isTrue();
-		assertThat(file.isFile()).isTrue();
+		assertThat(file).isFile();
 
 		try (URLClassLoader fileClassLoader = new URLClassLoader(new URL[]{tempDir.toURI().toURL()})) {
 			Resource emptyFile = new ClassPathResource("empty.txt", fileClassLoader);
 			assertThat(emptyFile.exists()).isTrue();
 			assertThat(emptyFile.isReadable()).isTrue();
-			assertThat(emptyFile.contentLength()).isEqualTo(0);
+			assertThat(emptyFile.contentLength()).isZero();
 			file.delete();
 		}
 
@@ -246,13 +246,13 @@ class ClassPathResourceTests {
 			zipOut.putNextEntry(new ZipEntry("empty2.txt"));
 			zipOut.closeEntry();
 		}
-		assertThat(jarFile.isFile()).isTrue();
+		assertThat(jarFile).isFile();
 
 		try (URLClassLoader jarClassLoader = new URLClassLoader(new URL[]{jarFile.toURI().toURL()})) {
 			Resource emptyJarEntry = new ClassPathResource("empty2.txt", jarClassLoader);
 			assertThat(emptyJarEntry.exists()).isTrue();
 			assertThat(emptyJarEntry.isReadable()).isTrue();
-			assertThat(emptyJarEntry.contentLength()).isEqualTo(0);
+			assertThat(emptyJarEntry.contentLength()).isZero();
 		}
 
 		jarFile.deleteOnExit();

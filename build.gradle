@@ -7,6 +7,8 @@ plugins {
 	id 'com.gradleup.shadow' version "9.2.2" apply false
 	id 'me.champeau.jmh' version '0.7.2' apply false
 	id 'io.spring.nullability' version '0.0.11' apply false
+	// Applied only on spring-* modules so the root project does not scan the whole repo (see configure(moduleProjects)).
+	id 'org.openrewrite.rewrite' version "${openRewritePluginVersion}" apply false
 }
 
 ext {
@@ -85,4 +87,43 @@ configure([rootProject] + javaProjects) { project ->
 
 configure(moduleProjects) { project ->
 	apply from: "${rootDir}/gradle/spring-module.gradle"
+
+	apply plugin: 'org.openrewrite.rewrite'
+
+	dependencies {
+		rewrite(platform("org.openrewrite.recipe:rewrite-recipe-bom:${rewriteRecipeBomVersion}"))
+		rewrite("org.openrewrite.recipe:rewrite-testing-frameworks")
+	}
+
+	rewrite {
+		configFile = rootProject.file("gradle/openrewrite.yml")
+		activeRecipe("org.springframework.build.rewrite.AssertjSpringFrameworkTests")
+		exportDatatables = true
+		enableExperimentalGradleBuildScriptParsing = false
+		// Paths are relative to the Git root. Drop build scripts and non-test Java sources; keep src/test/java only.
+		exclusion(
+				"**/src/main/**",
+				"**/src/testFixtures/**",
+				"**/src/test/resources/**",
+				"**/src/test/kotlin/**",
+				"**/*.gradle")
+	}
+}
+
+tasks.register('springRewriteDiscover') {
+	group = 'OpenRewrite'
+	description = 'Lists recipes on the classpath for each spring-* module.'
+	dependsOn moduleProjects.collect { "${it.path}:rewriteDiscover" }
+}
+
+tasks.register('springRewriteDryRun') {
+	group = 'OpenRewrite'
+	description = 'Dry-runs the active AssertJ recipe on spring-* modules (test Java sources only).'
+	dependsOn moduleProjects.collect { "${it.path}:rewriteDryRun" }
+}
+
+tasks.register('springRewriteRun') {
+	group = 'OpenRewrite'
+	description = 'Runs the active AssertJ recipe on spring-* modules (test Java sources only).'
+	dependsOn moduleProjects.collect { "${it.path}:rewriteRun" }
 }

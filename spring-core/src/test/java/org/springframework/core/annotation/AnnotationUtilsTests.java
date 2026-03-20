@@ -452,7 +452,7 @@ class AnnotationUtilsTests {
 		assertThat(filters).isNotNull();
 
 		List<String> patterns = stream(filters).map(Filter::pattern).collect(toList());
-		assertThat(patterns).isEqualTo(asList("*Foo", "*Bar"));
+		assertThat(patterns).containsExactlyElementsOf(asList("*Foo", "*Bar"));
 	}
 
 	@Test
@@ -545,7 +545,7 @@ class AnnotationUtilsTests {
 		Set<MyRepeatable> annotations = getRepeatableAnnotations(method, MyRepeatable.class, MyRepeatableContainer.class);
 		assertThat(annotations).isNotNull();
 		List<String> values = annotations.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(asList("A", "B", "C", "meta1"));
+		assertThat(values).containsExactlyElementsOf(asList("A", "B", "C", "meta1"));
 	}
 
 	@Test
@@ -560,10 +560,10 @@ class AnnotationUtilsTests {
 		assertThat(annotations).isNotNull();
 
 		List<String> locations = annotations.stream().map(ContextConfig::location).collect(toList());
-		assertThat(locations).isEqualTo(expectedLocations);
+		assertThat(locations).containsExactlyElementsOf(expectedLocations);
 
 		List<String> values = annotations.stream().map(ContextConfig::value).collect(toList());
-		assertThat(values).isEqualTo(expectedLocations);
+		assertThat(values).containsExactlyElementsOf(expectedLocations);
 	}
 
 	@Test
@@ -575,19 +575,19 @@ class AnnotationUtilsTests {
 		MyRepeatable[] array = MyRepeatableClass.class.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesJava);
+		assertThat(values).containsExactlyElementsOf(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class, MyRepeatableContainer.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 	}
 
 	@Test
@@ -600,19 +600,19 @@ class AnnotationUtilsTests {
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesJava);
+		assertThat(values).containsExactlyElementsOf(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 	}
 
 	@Test
@@ -625,19 +625,19 @@ class AnnotationUtilsTests {
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesJava);
+		assertThat(values).containsExactlyElementsOf(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 	}
 
 	@Test
@@ -650,19 +650,19 @@ class AnnotationUtilsTests {
 		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesJava);
+		assertThat(values).containsExactlyElementsOf(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 	}
 
 	@Test
@@ -674,20 +674,20 @@ class AnnotationUtilsTests {
 		MyRepeatable[] array = MyRepeatableClass.class.getDeclaredAnnotationsByType(MyRepeatable.class);
 		assertThat(array).isNotNull();
 		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesJava);
+		assertThat(values).containsExactlyElementsOf(expectedValuesJava);
 
 		// Spring
 		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(
 				MyRepeatableClass.class, MyRepeatable.class, MyRepeatableContainer.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 
 		// When container type is omitted and therefore inferred from @Repeatable
 		set = getDeclaredRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class);
 		assertThat(set).isNotNull();
 		values = set.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values).isEqualTo(expectedValuesSpring);
+		assertThat(values).containsExactlyElementsOf(expectedValuesSpring);
 	}
 
 	@Test
@@ -766,9 +766,9 @@ class AnnotationUtilsTests {
 
 		Map<String, Object> map = Collections.singletonMap(VALUE, "webController");
 		Component synthesizedComponent = synthesizeAnnotation(map, Component.class, WebController.class);
-		assertThat(synthesizedComponent).isNotNull();
-
-		assertThat(synthesizedComponent).isNotSameAs(component);
+		assertThat(synthesizedComponent)
+				.isNotNull()
+				.isNotSameAs(component);
 		assertThat(component.value()).as("value from component: ").isEqualTo("webController");
 		assertThat(synthesizedComponent.value()).as("value from synthesized component: ").isEqualTo("webController");
 	}
@@ -787,8 +787,7 @@ class AnnotationUtilsTests {
 		assertThat(attributes.annotationType()).isEqualTo(ComponentScanSingleFilter.class);
 
 		Map<String, Object> filterMap = (Map<String, Object>) attributes.get("value");
-		assertThat(filterMap).isNotNull();
-		assertThat(filterMap.get("pattern")).isEqualTo("*Foo");
+		assertThat(filterMap).containsEntry("pattern", "*Foo");
 
 		// Modify nested map
 		filterMap.put("pattern", "newFoo");
@@ -796,9 +795,9 @@ class AnnotationUtilsTests {
 
 		ComponentScanSingleFilter synthesizedComponentScan = synthesizeAnnotation(
 				attributes, ComponentScanSingleFilter.class, ComponentScanSingleFilterClass.class);
-		assertThat(synthesizedComponentScan).isNotNull();
-
-		assertThat(synthesizedComponentScan).isNotSameAs(componentScan);
+		assertThat(synthesizedComponentScan)
+				.isNotNull()
+				.isNotSameAs(componentScan);
 		assertThat(synthesizedComponentScan.value().pattern()).as("value from synthesized ComponentScan: ").isEqualTo("newFoo");
 	}
 
@@ -816,7 +815,7 @@ class AnnotationUtilsTests {
 		assertThat(filters).isNotNull();
 
 		List<String> patterns = stream(filters).map(m -> (String) m.get("pattern")).collect(toList());
-		assertThat(patterns).isEqualTo(asList("*Foo", "*Bar"));
+		assertThat(patterns).containsExactlyElementsOf(asList("*Foo", "*Bar"));
 
 		// Modify nested maps
 		filters[0].put("pattern", "newFoo");
@@ -826,11 +825,11 @@ class AnnotationUtilsTests {
 
 		ComponentScan synthesizedComponentScan =
 				synthesizeAnnotation(attributes, ComponentScan.class, ComponentScanClass.class);
-		assertThat(synthesizedComponentScan).isNotNull();
-
-		assertThat(synthesizedComponentScan).isNotSameAs(componentScan);
+		assertThat(synthesizedComponentScan)
+				.isNotNull()
+				.isNotSameAs(componentScan);
 		patterns = stream(synthesizedComponentScan.excludeFilters()).map(Filter::pattern).collect(toList());
-		assertThat(patterns).isEqualTo(asList("newFoo", "newBar"));
+		assertThat(patterns).containsExactlyElementsOf(asList("newFoo", "newBar"));
 	}
 
 	@Test
@@ -904,7 +903,7 @@ class AnnotationUtilsTests {
 	@Test
 	void synthesizeAnnotationFromMapWithNullAttributeValue() {
 		Map<String, Object> map = Collections.singletonMap("text", null);
-		assertThat(map.containsKey("text")).isTrue();
+		assertThat(map).containsKey("text");
 		assertMissingTextAttribute(map);
 	}
 
@@ -938,8 +937,9 @@ class AnnotationUtilsTests {
 		assertThat(synthesizedComponent).isNotNull();
 
 		// 4) Verify that the original and synthesized annotations are equivalent
-		assertThat(synthesizedComponent).isNotSameAs(component);
-		assertThat(synthesizedComponent).isEqualTo(component);
+		assertThat(synthesizedComponent)
+				.isNotSameAs(component)
+				.isEqualTo(component);
 		assertThat(component.value()).as("value from component: ").isEqualTo("webController");
 		assertThat(synthesizedComponent.value()).as("value from synthesized component: ").isEqualTo("webController");
 	}

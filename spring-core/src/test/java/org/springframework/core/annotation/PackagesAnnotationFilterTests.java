@@ -74,7 +74,7 @@ class PackagesAnnotationFilterTests {
 		PackagesAnnotationFilter filter2 = new PackagesAnnotationFilter(
 				"org.springframework", "com.example");
 		PackagesAnnotationFilter filter3 = new PackagesAnnotationFilter("com.examples");
-		assertThat(filter1.hashCode()).isEqualTo(filter2.hashCode());
+		assertThat(filter1).hasSameHashCodeAs(filter2);
 		assertThat(filter1).isEqualTo(filter1).isEqualTo(filter2).isNotEqualTo(filter3);
 	}
 

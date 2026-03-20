@@ -57,8 +57,8 @@ class MutablePropertySourcesTests {
 		sources.addAfter("b", new MockPropertySource("c"));
 
 		assertThat(sources).hasSize(5);
-		assertThat(sources.precedenceOf(PropertySource.named("a"))).isEqualTo(0);
-		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
+		assertThat(sources.precedenceOf(PropertySource.named("a"))).isZero();
+		assertThat(sources.precedenceOf(PropertySource.named("b"))).isOne();
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);
 		assertThat(sources.precedenceOf(PropertySource.named("d"))).isEqualTo(3);
 		assertThat(sources.precedenceOf(PropertySource.named("f"))).isEqualTo(4);
@@ -67,8 +67,8 @@ class MutablePropertySourcesTests {
 		sources.addAfter("f", new MockPropertySource("g"));
 
 		assertThat(sources).hasSize(7);
-		assertThat(sources.precedenceOf(PropertySource.named("a"))).isEqualTo(0);
-		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
+		assertThat(sources.precedenceOf(PropertySource.named("a"))).isZero();
+		assertThat(sources.precedenceOf(PropertySource.named("b"))).isOne();
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);
 		assertThat(sources.precedenceOf(PropertySource.named("d"))).isEqualTo(3);
 		assertThat(sources.precedenceOf(PropertySource.named("e"))).isEqualTo(4);
@@ -77,8 +77,8 @@ class MutablePropertySourcesTests {
 
 		sources.addLast(new MockPropertySource("a"));
 		assertThat(sources).hasSize(7);
-		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(0);
-		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(1);
+		assertThat(sources.precedenceOf(PropertySource.named("b"))).isZero();
+		assertThat(sources.precedenceOf(PropertySource.named("c"))).isOne();
 		assertThat(sources.precedenceOf(PropertySource.named("d"))).isEqualTo(2);
 		assertThat(sources.precedenceOf(PropertySource.named("e"))).isEqualTo(3);
 		assertThat(sources.precedenceOf(PropertySource.named("f"))).isEqualTo(4);
@@ -87,8 +87,8 @@ class MutablePropertySourcesTests {
 
 		sources.addFirst(new MockPropertySource("a"));
 		assertThat(sources).hasSize(7);
-		assertThat(sources.precedenceOf(PropertySource.named("a"))).isEqualTo(0);
-		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
+		assertThat(sources.precedenceOf(PropertySource.named("a"))).isZero();
+		assertThat(sources.precedenceOf(PropertySource.named("b"))).isOne();
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);
 		assertThat(sources.precedenceOf(PropertySource.named("d"))).isEqualTo(3);
 		assertThat(sources.precedenceOf(PropertySource.named("e"))).isEqualTo(4);
@@ -109,14 +109,14 @@ class MutablePropertySourcesTests {
 
 		sources.addFirst(new MockPropertySource("a"));
 		assertThat(sources).hasSize(7);
-		assertThat(sources.precedenceOf(PropertySource.named("a"))).isEqualTo(0);
-		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
+		assertThat(sources.precedenceOf(PropertySource.named("a"))).isZero();
+		assertThat(sources.precedenceOf(PropertySource.named("b"))).isOne();
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);
 
 		sources.replace("a", new MockPropertySource("a-replaced"));
 		assertThat(sources).hasSize(7);
-		assertThat(sources.precedenceOf(PropertySource.named("a-replaced"))).isEqualTo(0);
-		assertThat(sources.precedenceOf(PropertySource.named("b"))).isEqualTo(1);
+		assertThat(sources.precedenceOf(PropertySource.named("a-replaced"))).isZero();
+		assertThat(sources.precedenceOf(PropertySource.named("b"))).isOne();
 		assertThat(sources.precedenceOf(PropertySource.named("c"))).isEqualTo(2);
 
 		sources.replace("a-replaced", new MockPropertySource("a"));
@@ -146,18 +146,18 @@ class MutablePropertySourcesTests {
 		sources.addLast(new MockPropertySource("test"));
 
 		Iterator<PropertySource<?>> it = sources.iterator();
-		assertThat(it.hasNext()).isTrue();
+		assertThat(it).hasNext();
 		assertThat(it.next().getName()).isEqualTo("test");
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(it::remove);
-		assertThat(it.hasNext()).isFalse();
+		assertThat(it).isExhausted();
 	}
 
 	@Test
 	void iteratorIsEmptyForEmptySources() {
 		MutablePropertySources sources = new MutablePropertySources();
 		Iterator<PropertySource<?>> it = sources.iterator();
-		assertThat(it.hasNext()).isFalse();
+		assertThat(it).isExhausted();
 	}
 
 	@Test
@@ -166,7 +166,7 @@ class MutablePropertySourcesTests {
 		sources.addLast(new MockPropertySource("test"));
 
 		assertThat(sources.stream()).isNotNull();
-		assertThat(sources.stream().count()).isEqualTo(1L);
+		assertThat(sources.stream().count()).isOne();
 		assertThat(sources.stream().anyMatch(source -> "test".equals(source.getName()))).isTrue();
 		assertThat(sources.stream().anyMatch(source -> "bogus".equals(source.getName()))).isFalse();
 	}
@@ -175,7 +175,7 @@ class MutablePropertySourcesTests {
 	void streamIsEmptyForEmptySources() {
 		MutablePropertySources sources = new MutablePropertySources();
 		assertThat(sources.stream()).isNotNull();
-		assertThat(sources.stream().count()).isEqualTo(0L);
+		assertThat(sources.stream().count()).isZero();
 	}
 
 }

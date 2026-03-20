@@ -112,22 +112,22 @@ class GenericTypeResolverTests {
 		Map<TypeVariable, Type> map;
 
 		map = getTypeVariableMap(MySimpleInterfaceType.class);
-		assertThat(map.toString()).isEqualTo("{T=class java.lang.String}");
+		assertThat(map).hasToString("{T=class java.lang.String}");
 
 		map = getTypeVariableMap(MyCollectionInterfaceType.class);
-		assertThat(map.toString()).isEqualTo("{T=java.util.Collection<java.lang.String>}");
+		assertThat(map).hasToString("{T=java.util.Collection<java.lang.String>}");
 
 		map = getTypeVariableMap(MyCollectionSuperclassType.class);
-		assertThat(map.toString()).isEqualTo("{T=java.util.Collection<java.lang.String>}");
+		assertThat(map).hasToString("{T=java.util.Collection<java.lang.String>}");
 
 		map = getTypeVariableMap(MySimpleTypeWithMethods.class);
-		assertThat(map.toString()).isEqualTo("{T=class java.lang.Integer}");
+		assertThat(map).hasToString("{T=class java.lang.Integer}");
 
 		map = getTypeVariableMap(TopLevelClass.class);
-		assertThat(map.toString()).isEqualTo("{}");
+		assertThat(map).hasToString("{}");
 
 		map = getTypeVariableMap(TypedTopLevelClass.class);
-		assertThat(map.toString()).isEqualTo("{T=class java.lang.Integer}");
+		assertThat(map).hasToString("{T=class java.lang.Integer}");
 
 		map = getTypeVariableMap(TypedTopLevelClass.TypedNested.class);
 		assertThat(map).hasSize(2);
@@ -182,7 +182,6 @@ class GenericTypeResolverTests {
 	@Test  // SPR-11763
 	void resolveIncompleteTypeVariables() {
 		Class<?>[] resolved = resolveTypeArguments(IdFixingRepository.class, Repository.class);
-		assertThat(resolved).isNotNull();
 		assertThat(resolved).hasSize(2);
 		assertThat(resolved[0]).isEqualTo(Object.class);
 		assertThat(resolved[1]).isEqualTo(Long.class);
@@ -240,7 +239,7 @@ class GenericTypeResolverTests {
 	void resolveTypeWithUnresolvableElement() {
 		Type type = method(WithUnresolvableElement.class, "get").getGenericReturnType();
 		Type resolvedType = resolveType(type, WithUnresolvableElement.class);
-		assertThat(resolvedType.toString()).isEqualTo("java.util.List<E>");
+		assertThat(resolvedType).hasToString("java.util.List<E>");
 	}
 
 	@Test
@@ -252,8 +251,7 @@ class GenericTypeResolverTests {
 
 	private static Method method(Class<?> target, String methodName, Class<?>... parameterTypes) {
 		Method method = findMethod(target, methodName, parameterTypes);
-		assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull();
-		return method;
+		return assertThat(method).describedAs(target.getName() + "#" + methodName).isNotNull().actual();
 	}
 
 

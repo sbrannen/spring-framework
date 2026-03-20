@@ -420,8 +420,8 @@ class AnnotationMetadataTests {
 
 		Set<MethodMetadata> methods = metadata.getAnnotatedMethods(DirectAnnotation.class.getName());
 		MethodMetadata method = methods.iterator().next();
-		assertThat(method.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value")).isEqualTo("direct");
-		assertThat(method.getAnnotationAttributes(DirectAnnotation.class.getName()).get("myValue")).isEqualTo("direct");
+		assertThat(method.getAnnotationAttributes(DirectAnnotation.class.getName())).containsEntry("value", "direct");
+		assertThat(method.getAnnotationAttributes(DirectAnnotation.class.getName())).containsEntry("myValue", "direct");
 		List<Object> allMeta = method.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
 		assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<>(Arrays.asList("direct", "meta")));
 		allMeta = method.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
@@ -463,19 +463,19 @@ class AnnotationMetadataTests {
 			assertThat((Class<?>[]) optionalArray[0].get("classArray")).isEqualTo(new Class<?>[] {Void.class});
 			assertThat(optionalArray[0].getClassArray("classArray")).isEqualTo(new Class<?>[] {Void.class});
 
-			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value")).isEqualTo("direct");
+			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName())).containsEntry("value", "direct");
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
 			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<>(Arrays.asList("direct", "meta")));
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("additional");
 			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<>(Arrays.asList("direct", "")));
-			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("additional")).isEqualTo("");
+			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName())).containsEntry("additional", "");
 			assertThat(((String[]) metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("additionalArray"))).isEmpty();
 		}
 		{ // perform tests with classValuesAsString = true
 			AnnotationAttributes specialAttrs = (AnnotationAttributes) metadata.getAnnotationAttributes(
 				SpecialAttr.class.getName(), true);
 			assertThat(specialAttrs).hasSize(6);
-			assertThat(specialAttrs.get("clazz")).isEqualTo(String.class.getName());
+			assertThat(specialAttrs).containsEntry("clazz", String.class.getName());
 			assertThat(specialAttrs.getString("clazz")).isEqualTo(String.class.getName());
 
 			AnnotationAttributes nestedAnno = specialAttrs.getAnnotation("nestedAnno");
@@ -496,7 +496,7 @@ class AnnotationMetadataTests {
 			assertThat((String[]) optionalArray[0].get("classArray")).isEqualTo(new String[] { Void.class.getName() });
 			assertThat(optionalArray[0].getStringArray("classArray")).isEqualTo(new String[] { Void.class.getName() });
 
-			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName()).get("value")).isEqualTo("direct");
+			assertThat(metadata.getAnnotationAttributes(DirectAnnotation.class.getName())).containsEntry("value", "direct");
 			allMeta = metadata.getAllAnnotationAttributes(DirectAnnotation.class.getName()).get("value");
 			assertThat(new HashSet<>(allMeta)).isEqualTo(new HashSet<>(Arrays.asList("direct", "meta")));
 		}

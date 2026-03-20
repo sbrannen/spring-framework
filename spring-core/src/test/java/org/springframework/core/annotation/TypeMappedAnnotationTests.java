@@ -87,18 +87,18 @@ class TypeMappedAnnotationTests {
 		}
 		MergedAnnotation<ArrayTypes> annotation = TypeMappedAnnotation.of(null, null,
 				ArrayTypes.class, attributes);
-		assertThat(annotation.getValue("stringValue")).contains(new String[] {});
-		assertThat(annotation.getValue("byteValue")).contains(new byte[] {});
-		assertThat(annotation.getValue("shortValue")).contains(new short[] {});
-		assertThat(annotation.getValue("intValue")).contains(new int[] {});
-		assertThat(annotation.getValue("longValue")).contains(new long[] {});
-		assertThat(annotation.getValue("booleanValue")).contains(new boolean[] {});
-		assertThat(annotation.getValue("charValue")).contains(new char[] {});
-		assertThat(annotation.getValue("doubleValue")).contains(new double[] {});
-		assertThat(annotation.getValue("floatValue")).contains(new float[] {});
-		assertThat(annotation.getValue("classValue")).contains(new Class<?>[] {});
-		assertThat(annotation.getValue("annotationValue")).contains(new MergedAnnotation<?>[] {});
-		assertThat(annotation.getValue("enumValue")).contains(new ExampleEnum[] {});
+		assertThat(annotation.getValue("stringValue")).hasValue(new String[]{});
+		assertThat(annotation.getValue("byteValue")).hasValue(new byte[]{});
+		assertThat(annotation.getValue("shortValue")).hasValue(new short[]{});
+		assertThat(annotation.getValue("intValue")).hasValue(new int[]{});
+		assertThat(annotation.getValue("longValue")).hasValue(new long[]{});
+		assertThat(annotation.getValue("booleanValue")).hasValue(new boolean[]{});
+		assertThat(annotation.getValue("charValue")).hasValue(new char[]{});
+		assertThat(annotation.getValue("doubleValue")).hasValue(new double[]{});
+		assertThat(annotation.getValue("floatValue")).hasValue(new float[]{});
+		assertThat(annotation.getValue("classValue")).hasValue(new Class<?>[]{});
+		assertThat(annotation.getValue("annotationValue")).hasValue(new MergedAnnotation<?>[]{});
+		assertThat(annotation.getValue("enumValue")).hasValue(new ExampleEnum[]{});
 	}
 
 	@Test

@@ -1,0 +1,87 @@
+# Custom composite based on org.openrewrite.java.testing.assertj.Assertj with Spring-specific exclusions:
+# - No AssertJThrowingCallableRulesRecipes (avoids assertThatExceptionOfType -> assertThatThrownBy + InstanceOfAssertFactories)
+# - No JUnit5BestPractices under JUnit migration (avoids SimplifyTestThrows: specific throws -> throws Exception)
+# - No JUnitTryFailToAssertThatThrownBy (avoids try/catch/fail -> assertThatThrownBy)
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.springframework.build.rewrite.AssertjSpringFrameworkTests
+displayName: AssertJ cleanup for Spring Framework tests
+description: >
+  AssertJ-oriented refactors aligned with Spring conventions: keep assertThatExceptionOfType-style APIs,
+  preserve specific checked exceptions on test methods, and avoid try/fail to assertThatThrownBy migration.
+preconditions:
+  - org.openrewrite.Singleton
+recipeList:
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.assertj.core.annotations.Beta
+      newFullyQualifiedTypeName: org.assertj.core.annotation.Beta
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.assertj.core.util.CanIgnoreReturnValue
+      newFullyQualifiedTypeName: org.assertj.core.annotation.CanIgnoreReturnValue
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.assertj.core.util.CheckReturnValue
+      newFullyQualifiedTypeName: org.assertj.core.annotation.CheckReturnValue
+
+  - org.openrewrite.java.testing.hamcrest.MigrateHamcrestToAssertJ
+  - org.openrewrite.java.testing.truth.MigrateTruthToAssertJ
+  - org.openrewrite.java.testing.assertj.FestToAssertj
+
+  # Subset of org.openrewrite.java.testing.assertj.JUnitToAssertj without JUnit5BestPractices (SimplifyTestThrows)
+  # or JUnitTryFailToAssertThatThrownBy (assertThatThrownBy).
+  - org.openrewrite.java.testing.assertj.JUnitAssertArrayEqualsToAssertThat
+  - org.openrewrite.java.testing.assertj.JUnitAssertEqualsToAssertThat
+  - org.openrewrite.java.testing.assertj.JUnitAssertFalseToAssertThat
+  - org.openrewrite.java.testing.assertj.JUnitAssertNotEqualsToAssertThat
+  - org.openrewrite.java.testing.assertj.JUnitAssertNotNullToAssertThat
+  - org.openrewrite.java.testing.assertj.JUnitAssertNullToAssertThat
+  - org.openrewrite.java.testing.assertj.JUnitAssertSameToAssertThat
+  - org.openrewrite.java.testing.assertj.JUnitAssertTrueToAssertThat
+  - org.openrewrite.java.testing.assertj.JUnitFailToAssertJFail
+  - org.openrewrite.java.testing.assertj.JUnitAssertThrowsToAssertExceptionType
+  - org.openrewrite.java.testing.assertj.JUnitAssertInstanceOfToAssertThat
+  - org.openrewrite.java.dependencies.AddDependency:
+      groupId: org.assertj
+      artifactId: assertj-core
+      version: 3.x
+      onlyIfUsing: org.junit.jupiter.api.Assertions
+      acceptTransitive: true
+  - tech.picnic.errorprone.refasterrules.JUnitToAssertJRulesRecipes
+
+  - org.openrewrite.java.testing.testng.TestNgToAssertj
+  - org.openrewrite.java.testing.assertj.AdoptAssertJDurationAssertions
+  - org.openrewrite.java.testing.assertj.IsEqualToIgnoringMillisToIsCloseToRecipe
+  - org.openrewrite.java.testing.assertj.SimplifyChainedAssertJAssertions
+  - org.openrewrite.java.testing.assertj.SimplifyAssertJAssertions
+  - org.openrewrite.java.testing.assertj.SimplifyHasSizeAssertion
+  - org.openrewrite.java.testing.assertj.SimplifySequencedCollectionAssertions
+  - org.openrewrite.java.testing.assertj.SimplifyStreamMapToExtracting
+
+  - tech.picnic.errorprone.refasterrules.AssertJBigDecimalRulesRecipes
+  - org.openrewrite.java.testing.assertj.AssertJBigIntegerRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJBooleanRulesRecipes
+  - org.openrewrite.java.testing.assertj.AssertJByteRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJCharSequenceRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJComparableRulesRecipes
+  - org.openrewrite.java.testing.assertj.AssertJDoubleRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJEnumerableRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJDurationRulesRecipes
+  - org.openrewrite.java.testing.assertj.AssertJFloatRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJInstantRulesRecipes
+  - org.openrewrite.java.testing.assertj.AssertJIntegerRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJIterableRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJIteratorRulesRecipes
+  - org.openrewrite.java.testing.assertj.AssertJLongRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJMapRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJNumberRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJObjectRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJOptionalRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJPathRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJPrimitiveRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJRulesRecipes
+  - org.openrewrite.java.testing.assertj.AssertJShortRulesRecipes
+  - tech.picnic.errorprone.refasterrules.AssertJStringRulesRecipes
+
+  - org.openrewrite.java.testing.assertj.CollapseConsecutiveAssertThatStatements
+  - org.openrewrite.java.testing.assertj.ReturnActual
+  - org.openrewrite.java.testing.assertj.SimplifyRedundantAssertJChains
+  - org.openrewrite.java.testing.assertj.StaticImports

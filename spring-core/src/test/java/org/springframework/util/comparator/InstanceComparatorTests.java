@@ -41,32 +41,32 @@ class InstanceComparatorTests {
 	@Test
 	void shouldCompareClasses() {
 		Comparator<Object> comparator = new InstanceComparator<>(C1.class, C2.class);
-		assertThat(comparator.compare(c1, c1)).isEqualTo(0);
+		assertThat(comparator.compare(c1, c1)).isZero();
 		assertThat(comparator.compare(c1, c2)).isEqualTo(-1);
-		assertThat(comparator.compare(c2, c1)).isEqualTo(1);
+		assertThat(comparator.compare(c2, c1)).isOne();
 		assertThat(comparator.compare(c2, c3)).isEqualTo(-1);
 		assertThat(comparator.compare(c2, c4)).isEqualTo(-1);
-		assertThat(comparator.compare(c3, c4)).isEqualTo(0);
+		assertThat(comparator.compare(c3, c4)).isZero();
 	}
 
 	@Test
 	void shouldCompareInterfaces() {
 		Comparator<Object> comparator = new InstanceComparator<>(I1.class, I2.class);
-		assertThat(comparator.compare(c1, c1)).isEqualTo(0);
-		assertThat(comparator.compare(c1, c2)).isEqualTo(0);
-		assertThat(comparator.compare(c2, c1)).isEqualTo(0);
+		assertThat(comparator.compare(c1, c1)).isZero();
+		assertThat(comparator.compare(c1, c2)).isZero();
+		assertThat(comparator.compare(c2, c1)).isZero();
 		assertThat(comparator.compare(c1, c3)).isEqualTo(-1);
-		assertThat(comparator.compare(c3, c1)).isEqualTo(1);
-		assertThat(comparator.compare(c3, c4)).isEqualTo(0);
+		assertThat(comparator.compare(c3, c1)).isOne();
+		assertThat(comparator.compare(c3, c4)).isZero();
 	}
 
 	@Test
 	void shouldCompareMix() {
 		Comparator<Object> comparator = new InstanceComparator<>(I1.class, C3.class);
-		assertThat(comparator.compare(c1, c1)).isEqualTo(0);
+		assertThat(comparator.compare(c1, c1)).isZero();
 		assertThat(comparator.compare(c3, c4)).isEqualTo(-1);
 		assertThat(comparator.compare(c3, null)).isEqualTo(-1);
-		assertThat(comparator.compare(c4, null)).isEqualTo(0);
+		assertThat(comparator.compare(c4, null)).isZero();
 	}
 
 	private interface I1 {

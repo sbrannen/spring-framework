@@ -86,7 +86,7 @@ public abstract class AbstractAnnotationMetadataTests {
 
 		@Test
 		void classToString() {
-			assertThat(get(TestClass.class).toString()).isEqualTo(TestClass.class.getName());
+			assertThat(get(TestClass.class)).hasToString(TestClass.class.getName());
 		}
 
 		@Test

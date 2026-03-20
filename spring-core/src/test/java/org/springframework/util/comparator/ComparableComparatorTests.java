@@ -37,7 +37,7 @@ class ComparableComparatorTests {
 	void comparableComparator() {
 		@SuppressWarnings("deprecation")
 		Comparator<String> c = new ComparableComparator<>();
-		assertThat(c.compare("abc", "cde")).isLessThan(0);
+		assertThat(c.compare("abc", "cde")).isNegative();
 	}
 
 	@Test

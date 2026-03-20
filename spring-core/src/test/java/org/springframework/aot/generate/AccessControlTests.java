@@ -206,14 +206,12 @@ class AccessControlTests {
 
 	private static Method method(Class<?> type, String name, Class<?>... parameterTypes) {
 		Method method = ReflectionUtils.findMethod(type, name, parameterTypes);
-		assertThat(method).isNotNull();
-		return method;
+		return assertThat(method).isNotNull().actual();
 	}
 
 	private static Field field(Class<?> type, String name) {
 		Field field = ReflectionUtils.findField(type, name);
-		assertThat(field).isNotNull();
-		return field;
+		return assertThat(field).isNotNull().actual();
 	}
 
 	static class SelfReference<T extends SelfReference<T>> {

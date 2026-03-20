@@ -62,12 +62,13 @@ class CompositeMapTests {
 		Map<String, String> second = Map.of("quux", "corge");
 		CompositeMap<String, String> composite = new CompositeMap<>(first, second);
 
-		assertThat(composite.containsKey("foo")).isTrue();
-		assertThat(composite.containsKey("bar")).isFalse();
-		assertThat(composite.containsKey("baz")).isTrue();
-		assertThat(composite.containsKey("qux")).isFalse();
-		assertThat(composite.containsKey("quux")).isTrue();
-		assertThat(composite.containsKey("corge")).isFalse();
+		assertThat(composite)
+				.containsKey("foo")
+				.doesNotContainKey("bar")
+				.containsKey("baz")
+				.doesNotContainKey("qux")
+				.containsKey("quux")
+				.doesNotContainKey("corge");
 	}
 
 	@Test
@@ -76,12 +77,13 @@ class CompositeMapTests {
 		Map<String, String> second = Map.of("quux", "corge");
 		CompositeMap<String, String> composite = new CompositeMap<>(first, second);
 
-		assertThat(composite.containsValue("foo")).isFalse();
-		assertThat(composite.containsValue("bar")).isTrue();
-		assertThat(composite.containsValue("baz")).isFalse();
-		assertThat(composite.containsValue("qux")).isTrue();
-		assertThat(composite.containsValue("quux")).isFalse();
-		assertThat(composite.containsValue("corge")).isTrue();
+		assertThat(composite)
+				.doesNotContainValue("foo")
+				.containsValue("bar")
+				.doesNotContainValue("baz")
+				.containsValue("qux")
+				.doesNotContainValue("quux")
+				.containsValue("corge");
 	}
 
 	@Test
@@ -125,7 +127,7 @@ class CompositeMapTests {
 		CompositeMap<String, String> composite = new CompositeMap<>(first, second);
 
 		assertThat(composite.remove("foo")).isEqualTo("bar");
-		assertThat(composite.containsKey("foo")).isFalse();
+		assertThat(composite).doesNotContainKey("foo");
 		assertThat(first).containsExactly(entry("baz", "qux"));
 
 		assertThat(composite.remove("grault")).isNull();
@@ -238,10 +240,11 @@ class CompositeMapTests {
 			Map<String, String> second = Map.of("baz", "quux", "corge", "grault");
 			CompositeMap<String, String> composite = new CompositeMap<>(first, second);
 
-			assertThat(composite.containsValue("bar")).isTrue();
-			assertThat(composite.containsValue("qux")).isTrue();
-			assertThat(composite.containsValue("quux")).isFalse();
-			assertThat(composite.containsValue("grault")).isTrue();
+			assertThat(composite)
+					.containsValue("bar")
+					.containsValue("qux")
+					.doesNotContainValue("quux")
+					.containsValue("grault");
 		}
 
 		@Test
@@ -262,7 +265,7 @@ class CompositeMapTests {
 			CompositeMap<String, String> composite = new CompositeMap<>(first, second);
 
 			assertThat(composite.remove("baz")).isEqualTo("qux");
-			assertThat(composite.containsKey("baz")).isFalse();
+			assertThat(composite).doesNotContainKey("baz");
 			assertThat(first).containsExactly(entry("foo", "bar"));
 			assertThat(second).containsExactly(entry("corge", "grault"));
 		}

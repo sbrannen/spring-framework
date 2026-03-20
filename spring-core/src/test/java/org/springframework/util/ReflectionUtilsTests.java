@@ -316,8 +316,9 @@ class ReflectionUtilsTests {
 		}
 		Method[] methods = ReflectionUtils.getUniqueDeclaredMethods(Leaf.class);
 		assertThat(methods).extracting(Method::getName).filteredOn("m1"::equals).hasSize(1);
-		assertThat(methods).contains(Leaf.class.getMethod("m1"));
-		assertThat(methods).doesNotContain(Parent.class.getMethod("m1"));
+		assertThat(methods)
+				.contains(Leaf.class.getMethod("m1"))
+				.doesNotContain(Parent.class.getMethod("m1"));
 	}
 
 	@Test

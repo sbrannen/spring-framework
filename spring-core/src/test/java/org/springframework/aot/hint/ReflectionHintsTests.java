@@ -97,7 +97,7 @@ class ReflectionHintsTests {
 		assertThat(this.reflectionHints.typeHints()).singleElement().satisfies(typeHint -> {
 			assertThat(typeHint.getType().getCanonicalName()).isEqualTo(String.class.getCanonicalName());
 			assertThat(typeHint.fields()).singleElement().satisfies(fieldHint -> assertThat(fieldHint.getName()).isEqualTo("value"));
-			assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+			assertThat(typeHint.getMemberCategories()).containsExactly(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 		});
 	}
 

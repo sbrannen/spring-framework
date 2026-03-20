@@ -102,8 +102,8 @@ class StandardEnvironmentTests {
 	void propertySourceOrder() {
 		ConfigurableEnvironment env = new StandardEnvironment();
 		MutablePropertySources sources = env.getPropertySources();
-		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))).isEqualTo(0);
-		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME))).isEqualTo(1);
+		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME))).isZero();
+		assertThat(sources.precedenceOf(PropertySource.named(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME))).isOne();
 		assertThat(sources).hasSize(2);
 	}
 
@@ -309,7 +309,7 @@ class StandardEnvironmentTests {
 					environment.getPropertySources().get(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
 			Set<String> expectedKeys = new HashSet<>(System.getProperties().stringPropertyNames());
 			expectedKeys.add(STRING_PROPERTY_NAME);  // filtered out by stringPropertyNames due to non-String value
-			assertThat(Set.of(systemPropertySource.getPropertyNames())).isEqualTo(expectedKeys);
+			assertThat(Set.of(systemPropertySource.getPropertyNames())).hasSameElementsAs(expectedKeys);
 		}
 		finally {
 			System.clearProperty(ALLOWED_PROPERTY_NAME);

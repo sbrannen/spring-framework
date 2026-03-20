@@ -70,8 +70,9 @@ class PropertySourceTests {
 		ps1.getSource();
 		List<PropertySource<?>> propertySources = new ArrayList<>();
 		assertThat(propertySources.add(ps1)).isTrue();
-		assertThat(propertySources).contains(ps1);
-		assertThat(propertySources).contains(PropertySource.named("ps1"));
+		assertThat(propertySources)
+				.contains(ps1)
+				.contains(PropertySource.named("ps1"));
 
 		PropertySource<?> ps1replacement = new MapPropertySource("ps1", map2); // notice - different map
 		assertThat(propertySources.add(ps1replacement)).isTrue(); // true because linkedlist allows duplicates
@@ -84,8 +85,8 @@ class PropertySourceTests {
 		PropertySource<?> ps2 = new MapPropertySource("ps2", map2);
 		propertySources.add(ps1);
 		propertySources.add(ps2);
-		assertThat(propertySources.indexOf(PropertySource.named("ps1"))).isEqualTo(0);
-		assertThat(propertySources.indexOf(PropertySource.named("ps2"))).isEqualTo(1);
+		assertThat(propertySources.indexOf(PropertySource.named("ps1"))).isZero();
+		assertThat(propertySources.indexOf(PropertySource.named("ps2"))).isOne();
 		propertySources.clear();
 	}
 

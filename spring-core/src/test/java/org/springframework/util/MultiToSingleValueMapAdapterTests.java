@@ -48,35 +48,38 @@ class MultiToSingleValueMapAdapterTests {
 
 	@Test
 	void size() {
-		assertThat(this.adapter.size()).isEqualTo(this.delegate.size()).isEqualTo(2);
+		assertThat(this.adapter).hasSameSizeAs(this.delegate);
 	}
 
 	@Test
 	void isEmpty() {
-		assertThat(this.adapter.isEmpty()).isFalse();
+		assertThat(this.adapter).isNotEmpty();
 
 		this.adapter = new MultiToSingleValueMapAdapter<>(new LinkedMultiValueMap<>());
-		assertThat(this.adapter.isEmpty()).isTrue();
+		assertThat(this.adapter).isEmpty();
 	}
 
 	@Test
 	void containsKey() {
-		assertThat(this.adapter.containsKey("foo")).isTrue();
-		assertThat(this.adapter.containsKey("qux")).isTrue();
-		assertThat(this.adapter.containsKey("corge")).isFalse();
+		assertThat(this.adapter)
+				.containsKey("foo")
+				.containsKey("qux")
+				.doesNotContainKey("corge");
 	}
 
 	@Test
 	void containsValue() {
-		assertThat(this.adapter.containsValue("bar")).isTrue();
-		assertThat(this.adapter.containsValue("quux")).isTrue();
-		assertThat(this.adapter.containsValue("corge")).isFalse();
+		assertThat(this.adapter)
+				.containsValue("bar")
+				.containsValue("quux")
+				.doesNotContainValue("corge");
 	}
 
 	@Test
 	void get() {
-		assertThat(this.adapter.get("foo")).isEqualTo("bar");
-		assertThat(this.adapter.get("qux")).isEqualTo("quux");
+		assertThat(this.adapter)
+				.containsEntry("foo", "bar")
+				.containsEntry("qux", "quux");
 		assertThat(this.adapter.get("corge")).isNull();
 	}
 
@@ -90,8 +93,8 @@ class MultiToSingleValueMapAdapterTests {
 	@Test
 	void remove() {
 		this.adapter.remove("foo");
-		assertThat(this.adapter.containsKey("foo")).isFalse();
-		assertThat(this.delegate.containsKey("foo")).isFalse();
+		assertThat(this.adapter).doesNotContainKey("foo");
+		assertThat(this.delegate).doesNotContainKey("foo");
 	}
 
 	@Test
@@ -100,10 +103,10 @@ class MultiToSingleValueMapAdapterTests {
 		map.put("foo", "bar");
 		map.put("qux", null);
 		this.adapter.putAll(map);
-		assertThat(this.adapter.get("foo")).isEqualTo("bar");
+		assertThat(this.adapter).containsEntry("foo", "bar");
 		assertThat(this.adapter.get("qux")).isNull();
 
-		assertThat(this.delegate.get("foo")).isEqualTo(List.of("bar"));
+		assertThat(this.delegate.get("foo")).containsExactlyElementsOf(List.of("bar"));
 		assertThat(this.adapter.get("qux")).isNull();
 	}
 

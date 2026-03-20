@@ -94,7 +94,7 @@ class ResolvableTypeTests {
 		assertThat(none.resolve(String.class)).isEqualTo(String.class);
 		assertThat(none.resolveGeneric(0)).isNull();
 		assertThat(none.resolveGenerics()).isEmpty();
-		assertThat(none.toString()).isEqualTo("?");
+		assertThat(none).hasToString("?");
 		assertThat(none.hasUnresolvableGenerics()).isFalse();
 		assertThat(none.isAssignableFrom(ResolvableType.forClass(Object.class))).isFalse();
 	}
@@ -196,8 +196,9 @@ class ResolvableTypeTests {
 		assertThat(type2.resolve()).isEqualTo(List.class);
 		assertThat(type2.getSource()).isSameAs(field2);
 
-		assertThat(type2).isEqualTo(type);
-		assertThat(type2.hashCode()).isEqualTo(type.hashCode());
+		assertThat(type2)
+				.isEqualTo(type)
+				.hasSameHashCodeAs(type);
 	}
 
 	@Test
@@ -377,8 +378,7 @@ class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forClass(ListOfGenericArray.class).asCollection().getGeneric();
 		assertThat(type.isArray()).isTrue();
 		assertThat(type.getType()).isInstanceOf(TypeVariable.class);
-		assertThat(type.getComponentType().getType().toString()).isEqualTo(
-				"java.util.List<java.lang.String>");
+		assertThat(type.getComponentType().getType()).hasToString("java.util.List<java.lang.String>");
 	}
 
 	@Test
@@ -406,25 +406,25 @@ class ResolvableTypeTests {
 	@Test
 	void asFromInterface() {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class).as(List.class);
-		assertThat(type.getType().toString()).isEqualTo("java.util.List<E>");
+		assertThat(type.getType()).hasToString("java.util.List<E>");
 	}
 
 	@Test
 	void asFromInheritedInterface() {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class).as(Collection.class);
-		assertThat(type.getType().toString()).isEqualTo("java.util.Collection<E>");
+		assertThat(type.getType()).hasToString("java.util.Collection<E>");
 	}
 
 	@Test
 	void asFromSuperType() {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class).as(ArrayList.class);
-		assertThat(type.getType().toString()).isEqualTo("java.util.ArrayList<java.lang.CharSequence>");
+		assertThat(type.getType()).hasToString("java.util.ArrayList<java.lang.CharSequence>");
 	}
 
 	@Test
 	void asFromInheritedSuperType() {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class).as(List.class);
-		assertThat(type.getType().toString()).isEqualTo("java.util.List<E>");
+		assertThat(type.getType()).hasToString("java.util.List<E>");
 	}
 
 	@Test
@@ -459,8 +459,7 @@ class ResolvableTypeTests {
 		for (ResolvableType interfaceType : type.getSuperType().getInterfaces()) {
 			interfaces.add(interfaceType.toString());
 		}
-		assertThat(interfaces.toString()).isEqualTo(
-				"[java.io.Serializable, java.lang.Cloneable, " +
+		assertThat(interfaces).hasToString("[java.io.Serializable, java.lang.Cloneable, " +
 				"java.util.List<java.lang.CharSequence>, java.util.RandomAccess]");
 	}
 
@@ -517,15 +516,15 @@ class ResolvableTypeTests {
 	@Test
 	void getGenericOfGeneric() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("stringListList"));
-		assertThat(type.getGeneric().getType().toString()).isEqualTo("java.util.List<java.lang.String>");
+		assertThat(type.getGeneric().getType()).hasToString("java.util.List<java.lang.String>");
 		assertThat(type.getGeneric().getGeneric().getType()).isEqualTo(String.class);
 	}
 
 	@Test
 	void genericOfGenericWithAs() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("stringListList")).asCollection();
-		assertThat(type.toString()).isEqualTo("java.util.Collection<java.util.List<java.lang.String>>");
-		assertThat(type.getGeneric().asCollection().toString()).isEqualTo("java.util.Collection<java.lang.String>");
+		assertThat(type).hasToString("java.util.Collection<java.util.List<java.lang.String>>");
+		assertThat(type.getGeneric().asCollection()).hasToString("java.util.Collection<java.lang.String>");
 	}
 
 	@Test
@@ -562,7 +561,7 @@ class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forClass(List.class);
 		ResolvableType[] generics = type.getGenerics();
 		assertThat(generics).hasSize(1);
-		assertThat(generics[0].getType().toString()).isEqualTo("E");
+		assertThat(generics[0].getType()).hasToString("E");
 	}
 
 	@Test
@@ -617,7 +616,7 @@ class ResolvableTypeTests {
 	void resolveGenericArrayFromGeneric() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("stringArrayList"));
 		ResolvableType generic = type.asCollection().getGeneric();
-		assertThat(generic.getType().toString()).isEqualTo("E");
+		assertThat(generic.getType()).hasToString("E");
 		assertThat(generic.isArray()).isTrue();
 		assertThat(generic.resolve()).isEqualTo(String[].class);
 	}
@@ -625,7 +624,7 @@ class ResolvableTypeTests {
 	@Test
 	void resolveVariableGenericArray() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"), TypedFields.class);
-		assertThat(type.getType().toString()).isEqualTo("T[]");
+		assertThat(type.getType()).hasToString("T[]");
 		assertThat(type.isArray()).isTrue();
 		assertThat(type.resolve()).isEqualTo(String[].class);
 	}
@@ -633,7 +632,7 @@ class ResolvableTypeTests {
 	@Test
 	void resolveVariableGenericArrayUnknown() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"));
-		assertThat(type.getType().toString()).isEqualTo("T[]");
+		assertThat(type.getType()).hasToString("T[]");
 		assertThat(type.isArray()).isTrue();
 		assertThat(type.resolve()).isNull();
 	}
@@ -641,7 +640,7 @@ class ResolvableTypeTests {
 	@Test
 	void resolveVariableGenericArrayUnknownWithFallback() throws Exception {
 		ResolvableType type = ResolvableType.forField(Fields.class.getField("variableTypeGenericArray"));
-		assertThat(type.getType().toString()).isEqualTo("T[]");
+		assertThat(type.getType()).hasToString("T[]");
 		assertThat(type.isArray()).isTrue();
 		assertThat(type.toClass()).isEqualTo(Object.class);
 	}
@@ -813,7 +812,7 @@ class ResolvableTypeTests {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
 		ResolvableType type = ResolvableType.forMethodParameter(method, 0);
 		assertThat(type.resolve()).isNull();
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -821,7 +820,7 @@ class ResolvableTypeTests {
 		Method method = Methods.class.getMethod("typedParameter", Object.class);
 		ResolvableType type = ResolvableType.forMethodParameter(method, 0, TypedMethods.class);
 		assertThat(type.resolve()).isEqualTo(String.class);
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -830,7 +829,7 @@ class ResolvableTypeTests {
 		MethodParameter methodParameter = MethodParameter.forExecutable(method, 0);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve()).isNull();
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -841,7 +840,7 @@ class ResolvableTypeTests {
 		methodParameter.setContainingClass(TypedMethods.class);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter);
 		assertThat(type.resolve()).isEqualTo(String.class);
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -851,7 +850,7 @@ class ResolvableTypeTests {
 		ResolvableType implementationType = ResolvableType.forClassWithGenerics(Methods.class, Integer.class);
 		ResolvableType type = ResolvableType.forMethodParameter(methodParameter, implementationType);
 		assertThat(type.resolve()).isEqualTo(Integer.class);
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -859,7 +858,7 @@ class ResolvableTypeTests {
 		Method method = Methods.class.getMethod("typedReturn");
 		ResolvableType type = ResolvableType.forMethodReturnType(method);
 		assertThat(type.resolve()).isNull();
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -867,7 +866,7 @@ class ResolvableTypeTests {
 		Method method = Methods.class.getMethod("typedReturn");
 		ResolvableType type = ResolvableType.forMethodReturnType(method, TypedMethods.class);
 		assertThat(type.resolve()).isEqualTo(String.class);
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -875,7 +874,7 @@ class ResolvableTypeTests {
 		Type sourceType = Methods.class.getMethod("typedReturn").getGenericReturnType();
 		ResolvableType type = ResolvableType.forType(sourceType);
 		assertThat(type.resolve()).isNull();
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -884,7 +883,7 @@ class ResolvableTypeTests {
 		ResolvableType type = ResolvableType.forType(
 				sourceType, ResolvableType.forClass(TypedMethods.class).as(Methods.class).asVariableResolver());
 		assertThat(type.resolve()).isEqualTo(String.class);
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -911,7 +910,7 @@ class ResolvableTypeTests {
 		Type sourceType = Methods.class.getMethod("typedReturn").getGenericReturnType();
 		ResolvableType type = ResolvableType.forType(ParameterizedTypeReference.forType(sourceType));
 		assertThat(type.resolve()).isNull();
-		assertThat(type.getType().toString()).isEqualTo("T");
+		assertThat(type.getType()).hasToString("T");
 	}
 
 	@Test
@@ -924,7 +923,7 @@ class ResolvableTypeTests {
 
 	@Test
 	void toStrings() throws Exception {
-		assertThat(ResolvableType.NONE.toString()).isEqualTo("?");
+		assertThat(ResolvableType.NONE).hasToString("?");
 
 		assertThat(forField("classType")).hasToString("java.util.List<?>");
 		assertThat(forField("typeVariableType")).hasToString("?");
@@ -945,8 +944,8 @@ class ResolvableTypeTests {
 		assertThat(forTypedField("typeVariableType")).hasToString("java.lang.String");
 		assertThat(forTypedField("parameterizedType")).hasToString("java.util.List<java.lang.String>");
 
-		assertThat(ResolvableType.forClass(ListOfGenericArray.class).toString()).isEqualTo(ListOfGenericArray.class.getName());
-		assertThat(ResolvableType.forClass(List.class, ListOfGenericArray.class).toString()).isEqualTo("java.util.List<java.util.List<java.lang.String>[]>");
+		assertThat(ResolvableType.forClass(ListOfGenericArray.class)).hasToString(ListOfGenericArray.class.getName());
+		assertThat(ResolvableType.forClass(List.class, ListOfGenericArray.class)).hasToString("java.util.List<java.util.List<java.lang.String>[]>");
 	}
 
 	@Test
@@ -974,10 +973,10 @@ class ResolvableTypeTests {
 	@Test
 	void resolveFromClassWithGenerics() {
 		ResolvableType type = ResolvableType.forClassWithGenerics(List.class, ResolvableType.forClassWithGenerics(List.class, String.class));
-		assertThat(type.asCollection().toString()).isEqualTo("java.util.Collection<java.util.List<java.lang.String>>");
-		assertThat(type.asCollection().getGeneric().toString()).isEqualTo("java.util.List<java.lang.String>");
-		assertThat(type.asCollection().getGeneric().asCollection().toString()).isEqualTo("java.util.Collection<java.lang.String>");
-		assertThat(type.toString()).isEqualTo("java.util.List<java.util.List<java.lang.String>>");
+		assertThat(type.asCollection()).hasToString("java.util.Collection<java.util.List<java.lang.String>>");
+		assertThat(type.asCollection().getGeneric()).hasToString("java.util.List<java.lang.String>");
+		assertThat(type.asCollection().getGeneric().asCollection()).hasToString("java.util.Collection<java.lang.String>");
+		assertThat(type).hasToString("java.util.List<java.util.List<java.lang.String>>");
 		assertThat(type.asCollection().getGeneric().getGeneric().resolve()).isEqualTo(String.class);
 	}
 
@@ -1268,27 +1267,29 @@ class ResolvableTypeTests {
 		ResolvableType forFieldViaType = ResolvableType.forType(Fields.class.getDeclaredField("stringList").getGenericType(), (VariableResolver) null);
 		ResolvableType forFieldWithImplementation = ResolvableType.forField(Fields.class.getDeclaredField("stringList"), TypedFields.class);
 
-		assertThat(forClass).isEqualTo(forClass);
-		assertThat(forClass.hashCode()).isEqualTo(forClass.hashCode());
-		assertThat(forClass).isNotEqualTo(forFieldDirect);
-		assertThat(forClass).isNotEqualTo(forFieldWithImplementation);
+		assertThat(forClass)
+				.isEqualTo(forClass)
+				.hasSameHashCodeAs(forClass)
+				.isNotEqualTo(forFieldDirect)
+				.isNotEqualTo(forFieldWithImplementation);
 
-		assertThat(forFieldDirect).isEqualTo(forFieldDirect);
-		assertThat(forFieldDirect).isNotEqualTo(forFieldViaType);
-		assertThat(forFieldDirect).isNotEqualTo(forFieldWithImplementation);
+		assertThat(forFieldDirect)
+				.isEqualTo(forFieldDirect)
+				.isNotEqualTo(forFieldViaType)
+				.isNotEqualTo(forFieldWithImplementation);
 	}
 
 	@Test
 	void javaDocSample() throws Exception {
 		ResolvableType t = ResolvableType.forField(getClass().getDeclaredField("myMap"));
-		assertThat(t.toString()).isEqualTo("java.util.HashMap<java.lang.Integer, java.util.List<java.lang.String>>");
+		assertThat(t).hasToString("java.util.HashMap<java.lang.Integer, java.util.List<java.lang.String>>");
 		assertThat(t.getType().getTypeName()).isEqualTo("java.util.HashMap<java.lang.Integer, java.util.List<java.lang.String>>");
-		assertThat(t.getType().toString()).isEqualTo("java.util.HashMap<java.lang.Integer, java.util.List<java.lang.String>>");
-		assertThat(t.getSuperType().toString()).isEqualTo("java.util.AbstractMap<java.lang.Integer, java.util.List<java.lang.String>>");
-		assertThat(t.asMap().toString()).isEqualTo("java.util.Map<java.lang.Integer, java.util.List<java.lang.String>>");
+		assertThat(t.getType()).hasToString("java.util.HashMap<java.lang.Integer, java.util.List<java.lang.String>>");
+		assertThat(t.getSuperType()).hasToString("java.util.AbstractMap<java.lang.Integer, java.util.List<java.lang.String>>");
+		assertThat(t.asMap()).hasToString("java.util.Map<java.lang.Integer, java.util.List<java.lang.String>>");
 		assertThat(t.getGeneric(0).resolve()).isEqualTo(Integer.class);
 		assertThat(t.getGeneric(1).resolve()).isEqualTo(List.class);
-		assertThat(t.getGeneric(1).toString()).isEqualTo("java.util.List<java.lang.String>");
+		assertThat(t.getGeneric(1)).hasToString("java.util.List<java.lang.String>");
 		assertThat(t.resolveGeneric(1, 0)).isEqualTo(String.class);
 	}
 
@@ -1296,15 +1297,15 @@ class ResolvableTypeTests {
 	void forClassWithGenerics() {
 		ResolvableType elementType = ResolvableType.forClassWithGenerics(Map.class, Integer.class, String.class);
 		ResolvableType listType = ResolvableType.forClassWithGenerics(List.class, elementType);
-		assertThat(listType.toString()).isEqualTo("java.util.List<java.util.Map<java.lang.Integer, java.lang.String>>");
+		assertThat(listType).hasToString("java.util.List<java.util.Map<java.lang.Integer, java.lang.String>>");
 		assertThat(listType.getType().getTypeName()).isEqualTo("java.util.List<java.util.Map<java.lang.Integer, java.lang.String>>");
-		assertThat(listType.getType().toString()).isEqualTo("java.util.List<java.util.Map<java.lang.Integer, java.lang.String>>");
+		assertThat(listType.getType()).hasToString("java.util.List<java.util.Map<java.lang.Integer, java.lang.String>>");
 	}
 
 	@Test
 	void classWithGenericsAs() {
 		ResolvableType type = ResolvableType.forClassWithGenerics(MultiValueMap.class, Integer.class, String.class);
-		assertThat(type.asMap().toString()).isEqualTo("java.util.Map<java.lang.Integer, java.util.List<java.lang.String>>");
+		assertThat(type.asMap()).hasToString("java.util.Map<java.lang.Integer, java.util.List<java.lang.String>>");
 	}
 
 	@Test
@@ -1319,7 +1320,7 @@ class ResolvableTypeTests {
 	void forArrayComponent() throws Exception {
 		ResolvableType elementType = ResolvableType.forField(Fields.class.getField("stringList"));
 		ResolvableType type = ResolvableType.forArrayComponent(elementType);
-		assertThat(type.toString()).isEqualTo("java.util.List<java.lang.String>[]");
+		assertThat(type).hasToString("java.util.List<java.lang.String>[]");
 		assertThat(type.resolve()).isEqualTo(List[].class);
 	}
 
@@ -1470,7 +1471,7 @@ class ResolvableTypeTests {
 	void spr11219() throws Exception {
 		ResolvableType type = ResolvableType.forField(BaseProvider.class.getField("stuff"), BaseProvider.class);
 		assertThat(type.getNested(2).isAssignableFrom(ResolvableType.forClass(BaseImplementation.class))).isTrue();
-		assertThat(type.toString()).isEqualTo("java.util.Collection<org.springframework.core.ResolvableTypeTests$IBase<?>>");
+		assertThat(type).hasToString("java.util.Collection<org.springframework.core.ResolvableTypeTests$IBase<?>>");
 	}
 
 	@Test

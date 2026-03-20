@@ -44,11 +44,13 @@ class TransformerUtilsTests {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertThat(indent).isNotNull();
-		assertThat(indent).isEqualTo("yes");
+		assertThat(indent)
+				.isNotNull()
+				.isEqualTo("yes");
 		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
-		assertThat(indentAmount).isNotNull();
-		assertThat(indentAmount).isEqualTo(String.valueOf(TransformerUtils.DEFAULT_INDENT_AMOUNT));
+		assertThat(indentAmount)
+				.isNotNull()
+				.isEqualTo(String.valueOf(TransformerUtils.DEFAULT_INDENT_AMOUNT));
 	}
 
 	@Test
@@ -57,11 +59,13 @@ class TransformerUtilsTests {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.enableIndenting(transformer, Integer.parseInt(indentAmountProperty));
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertThat(indent).isNotNull();
-		assertThat(indent).isEqualTo("yes");
+		assertThat(indent)
+				.isNotNull()
+				.isEqualTo("yes");
 		String indentAmount = transformer.getOutputProperty("{http://xml.apache.org/xalan}indent-amount");
-		assertThat(indentAmount).isNotNull();
-		assertThat(indentAmount).isEqualTo(indentAmountProperty);
+		assertThat(indentAmount)
+				.isNotNull()
+				.isEqualTo(indentAmountProperty);
 	}
 
 	@Test
@@ -69,8 +73,9 @@ class TransformerUtilsTests {
 		Transformer transformer = new StubTransformer();
 		TransformerUtils.disableIndenting(transformer);
 		String indent = transformer.getOutputProperty(OutputKeys.INDENT);
-		assertThat(indent).isNotNull();
-		assertThat(indent).isEqualTo("no");
+		assertThat(indent)
+				.isNotNull()
+				.isEqualTo("no");
 	}
 
 	@Test

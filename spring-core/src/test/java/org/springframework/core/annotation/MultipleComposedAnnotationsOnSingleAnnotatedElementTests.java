@@ -61,7 +61,6 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 	void getMultipleNoninheritedComposedAnnotationsOnClass() {
 		Class<?> element = MultipleNoninheritedComposedCachesClass.class;
 		Set<Cacheable> cacheables = getAllMergedAnnotations(element, Cacheable.class);
-		assertThat(cacheables).isNotNull();
 		assertThat(cacheables).hasSize(2);
 
 		Iterator<Cacheable> iterator = cacheables.iterator();
@@ -126,7 +125,6 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 	void findMultipleNoninheritedComposedAnnotationsOnClass() {
 		Class<?> element = MultipleNoninheritedComposedCachesClass.class;
 		Set<Cacheable> cacheables = findAllMergedAnnotations(element, Cacheable.class);
-		assertThat(cacheables).isNotNull();
 		assertThat(cacheables).hasSize(2);
 
 		Iterator<Cacheable> iterator = cacheables.iterator();
@@ -140,7 +138,6 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 	void findMultipleNoninheritedComposedAnnotationsOnSuperclass() {
 		Class<?> element = SubMultipleNoninheritedComposedCachesClass.class;
 		Set<Cacheable> cacheables = findAllMergedAnnotations(element, Cacheable.class);
-		assertThat(cacheables).isNotNull();
 		assertThat(cacheables).hasSize(2);
 
 		Iterator<Cacheable> iterator = cacheables.iterator();
@@ -211,7 +208,6 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 		assertThat(element).isNotNull();
 
 		Set<Cacheable> cacheables = getAllMergedAnnotations(element, Cacheable.class);
-		assertThat(cacheables).isNotNull();
 		assertThat(cacheables).hasSize(2);
 
 		Iterator<Cacheable> iterator = cacheables.iterator();
@@ -227,7 +223,6 @@ class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 		assertThat(element).isNotNull();
 
 		Set<Cacheable> cacheables = findAllMergedAnnotations(element, Cacheable.class);
-		assertThat(cacheables).isNotNull();
 		assertThat(cacheables).hasSize(2);
 
 		Iterator<Cacheable> iterator = cacheables.iterator();

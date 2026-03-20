@@ -61,14 +61,14 @@ class AttributeMethodsTests {
 	@Test
 	void indexOfNameReturnsIndex() {
 		AttributeMethods methods = AttributeMethods.forAnnotationType(MultipleAttributes.class);
-		assertThat(methods.indexOf("value")).isEqualTo(1);
+		assertThat(methods.indexOf("value")).isOne();
 	}
 
 	@Test
 	void indexOfMethodReturnsIndex() throws Exception {
 		AttributeMethods methods = AttributeMethods.forAnnotationType(MultipleAttributes.class);
 		Method method = MultipleAttributes.class.getDeclaredMethod("value");
-		assertThat(methods.indexOf(method)).isEqualTo(1);
+		assertThat(methods.indexOf(method)).isOne();
 	}
 
 	@Test

@@ -142,7 +142,7 @@ class ReflectiveRuntimeHintsRegistrarTests {
 		assertThat(this.runtimeHints.reflection().getTypeHint(SampleTypeAndFieldAnnotatedBean.class))
 				.satisfies(typeHint -> {
 					assertThat(typeHint.fields().map(FieldHint::getName)).containsOnly("MESSAGE");
-					assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+					assertThat(typeHint.getMemberCategories()).containsExactly(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 					assertThat(typeHint.methods()).isEmpty();
 					assertThat(typeHint.constructors()).isEmpty();
 				});

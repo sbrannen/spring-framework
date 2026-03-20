@@ -44,9 +44,9 @@ public abstract class AbstractMethodMetadataTests {
 		MethodMetadata withMethodWithTwoArguments1 = getTagged(WithMethodWithTwoArguments.class);
 		MethodMetadata withMethodWithTwoArguments2 = getTagged(WithMethodWithTwoArguments.class);
 
-		assertThat(withMethod1).isNotEqualTo(null);
-
-		assertThat(withMethod1).isEqualTo(withMethod1);
+		assertThat(withMethod1)
+				.isNotEqualTo(null)
+				.isEqualTo(withMethod1);
 		assertThat(withMethod2).isEqualTo(withMethod2);
 		assertThat(withMethod1).isEqualTo(withMethod2);
 		assertThat(withMethod2).isEqualTo(withMethod1);

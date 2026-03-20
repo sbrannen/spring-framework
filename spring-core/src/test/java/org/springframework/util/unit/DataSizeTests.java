@@ -38,7 +38,7 @@ class DataSizeTests {
 
 	@Test
 	void ofBytesToKilobytes() {
-		assertThat(DataSize.ofBytes(1024).toKilobytes()).isEqualTo(1);
+		assertThat(DataSize.ofBytes(1024).toKilobytes()).isOne();
 	}
 
 	@Test
@@ -48,7 +48,7 @@ class DataSizeTests {
 
 	@Test
 	void ofKilobytesToMegabytes() {
-		assertThat(DataSize.ofKilobytes(1024).toMegabytes()).isEqualTo(1);
+		assertThat(DataSize.ofKilobytes(1024).toMegabytes()).isOne();
 	}
 
 	@Test
@@ -211,12 +211,12 @@ class DataSizeTests {
 
 	@Test
 	void toStringUsesBytes() {
-		assertThat(DataSize.ofKilobytes(1).toString()).isEqualTo("1024B");
+		assertThat(DataSize.ofKilobytes(1)).hasToString("1024B");
 	}
 
 	@Test
 	void toStringWithNegativeBytes() {
-		assertThat(DataSize.ofKilobytes(-1).toString()).isEqualTo("-1024B");
+		assertThat(DataSize.ofKilobytes(-1)).hasToString("-1024B");
 	}
 
 	@Test

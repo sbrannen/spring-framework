@@ -140,7 +140,7 @@ class FilePatternResourceHintsRegistrarTests {
 	}
 
 	private Consumer<ResourcePatternHints> includes(String... patterns) {
-		return hint -> assertThat(hint.getIncludes().stream().map(ResourcePatternHint::getPattern))
+		return hint -> assertThat(hint.getIncludes()).extracting(ResourcePatternHint::getPattern)
 				.containsExactlyInAnyOrder(patterns);
 	}
 

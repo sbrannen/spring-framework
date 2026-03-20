@@ -43,12 +43,13 @@ class LinkedCaseInsensitiveMapTests {
 		assertThat(map.get("key")).isEqualTo("value3");
 		assertThat(map.get("KEY")).isEqualTo("value3");
 		assertThat(map.get("Key")).isEqualTo("value3");
-		assertThat(map.containsKey("key")).isTrue();
-		assertThat(map.containsKey("KEY")).isTrue();
-		assertThat(map.containsKey("Key")).isTrue();
-		assertThat(map.keySet().contains("key")).isTrue();
-		assertThat(map.keySet().contains("KEY")).isTrue();
-		assertThat(map.keySet().contains("Key")).isTrue();
+		assertThat(map)
+				.containsKey("key")
+				.containsKey("KEY")
+				.containsKey("Key")
+				.containsKey("key")
+				.containsKey("KEY")
+				.containsKey("Key");
 	}
 
 	@Test
@@ -60,12 +61,13 @@ class LinkedCaseInsensitiveMapTests {
 		assertThat(map.get("key")).isEqualTo("value3");
 		assertThat(map.get("KEY")).isEqualTo("value3");
 		assertThat(map.get("Key")).isEqualTo("value3");
-		assertThat(map.containsKey("key")).isTrue();
-		assertThat(map.containsKey("KEY")).isTrue();
-		assertThat(map.containsKey("Key")).isTrue();
-		assertThat(map.keySet().contains("key")).isTrue();
-		assertThat(map.keySet().contains("KEY")).isTrue();
-		assertThat(map.keySet().contains("Key")).isTrue();
+		assertThat(map)
+				.containsKey("key")
+				.containsKey("KEY")
+				.containsKey("Key")
+				.containsKey("key")
+				.containsKey("KEY")
+				.containsKey("Key");
 	}
 
 	@Test

@@ -106,8 +106,9 @@ class MultiValueMapTests {
 		List<String> values = List.of("value1", "value2");
 		map.put("key", values);
 		Map<String, String> singleValueMap = map.toSingleValueMap();
-		assertThat(singleValueMap).hasSize(initialSize + 1);
-		assertThat(singleValueMap.get("key")).isEqualTo("value1");
+		assertThat(singleValueMap)
+				.hasSize(initialSize + 1)
+				.containsEntry("key", "value1");
 	}
 
 	@ParameterizedMultiValueMapTest
@@ -123,7 +124,7 @@ class MultiValueMapTests {
 	void equalsOnExistingValues(MultiValueMap<String, String> map) {
 		map.clear();
 		map.set("key1", "value1");
-		assertThat(map).isEqualTo(map);
+		assertThat(map).containsExactlyInAnyOrderEntriesOf(map);
 	}
 
 	@ParameterizedMultiValueMapTest
@@ -132,11 +133,11 @@ class MultiValueMapTests {
 		map.set("key1", "value1");
 		MultiValueMap<String, String> map1 = new LinkedMultiValueMap<>();
 		map1.set("key1", "value1");
-		assertThat(map1).isEqualTo(map);
-		assertThat(map).isEqualTo(map1);
+		assertThat(map1).containsExactlyInAnyOrderEntriesOf(map);
+		assertThat(map).containsExactlyInAnyOrderEntriesOf(map1);
 		Map<String, List<String>> map2 = Map.of("key1", List.of("value1"));
-		assertThat(map2).isEqualTo(map);
-		assertThat(map).isEqualTo(map2);
+		assertThat(map2).containsExactlyInAnyOrderEntriesOf(map);
+		assertThat(map).containsExactlyInAnyOrderEntriesOf(map2);
 	}
 
 	@Test

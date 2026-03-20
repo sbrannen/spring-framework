@@ -52,10 +52,10 @@ class UnmodifiableMultiValueMapTests {
 		assertThat(map).isNotEmpty();
 
 		given(mock.containsKey("foo")).willReturn(true);
-		assertThat(map.containsKey("foo")).isTrue();
+		assertThat(map).containsKey("foo");
 
 		given(mock.containsValue(List.of("bar"))).willReturn(true);
-		assertThat(map.containsValue(List.of("bar"))).isTrue();
+		assertThat(map).containsValue(List.of("bar"));
 
 		List<String> list = new ArrayList<>();
 		list.add("bar");
@@ -122,7 +122,7 @@ class UnmodifiableMultiValueMapTests {
 		Iterator<Map.Entry<String, List<String>>> mockIterator = mock();
 		given(mockSet.iterator()).willReturn(mockIterator);
 		given(mockIterator.hasNext()).willReturn(false);
-		assertThat(set.iterator()).isExhausted();
+		assertThat(set).isEmpty();
 	}
 
 	@Test
@@ -162,7 +162,7 @@ class UnmodifiableMultiValueMapTests {
 		Iterator<List<String>> mockIterator = mock(Iterator.class);
 		given(mockValues.iterator()).willReturn(mockIterator);
 		given(mockIterator.hasNext()).willReturn(false);
-		assertThat(values.iterator()).isExhausted();
+		assertThat(values).isEmpty();
 	}
 
 	@Test

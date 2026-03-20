@@ -438,7 +438,7 @@ class AnnotationsScannerTests {
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isInnerClass))
 				.containsExactly("0:EnclosedThree");
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, Search.always).toList())
-				.isEqualTo(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isStaticClass).toList())
+				.containsExactlyElementsOf(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isStaticClass).toList())
 				.containsExactly("0:EnclosedThree", "1:EnclosedTwo", "2:EnclosedOne");
 	}
 
@@ -448,7 +448,7 @@ class AnnotationsScannerTests {
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isStaticClass))
 				.containsExactly("0:EnclosedThree");
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, Search.always).toList())
-				.isEqualTo(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isInnerClass).toList())
+				.containsExactlyElementsOf(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isInnerClass).toList())
 				.containsExactly("0:EnclosedThree", "1:EnclosedTwo", "2:EnclosedOne");
 	}
 
@@ -456,7 +456,7 @@ class AnnotationsScannerTests {
 	void typeHierarchyStrategyWithEnclosingClassPredicatesOnMethodHierarchyUsesTypeHierarchyScan() {
 		Method source = methodFrom(WithHierarchy.class);
 		assertThat(scan(source, SearchStrategy.TYPE_HIERARCHY, Search.always).toList())
-				.isEqualTo(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isInnerClass).toList())
+				.containsExactlyElementsOf(scan(source, SearchStrategy.TYPE_HIERARCHY, ClassUtils::isInnerClass).toList())
 				.containsExactly(
 					"0:TestAnnotation1", "1:TestAnnotation5", "1:TestInheritedAnnotation5",
 					"2:TestAnnotation6", "3:TestAnnotation2", "3:TestInheritedAnnotation2",

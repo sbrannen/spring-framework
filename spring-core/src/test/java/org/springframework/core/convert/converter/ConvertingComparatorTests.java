@@ -88,9 +88,9 @@ class ConvertingComparatorTests {
 	}
 
 	private void testConversion(ConvertingComparator<String, Integer> convertingComparator) {
-		assertThat(convertingComparator.compare("0", "0")).isEqualTo(0);
+		assertThat(convertingComparator.compare("0", "0")).isZero();
 		assertThat(convertingComparator.compare("0", "1")).isEqualTo(-1);
-		assertThat(convertingComparator.compare("1", "0")).isEqualTo(1);
+		assertThat(convertingComparator.compare("1", "0")).isOne();
 		comparator.assertCalled();
 	}
 
@@ -107,7 +107,7 @@ class ConvertingComparatorTests {
 		ArrayList<Entry<String, Integer>> list = createReverseOrderMapEntryList();
 		Comparator<Map.Entry<String, Integer>> comparator = ConvertingComparator.mapEntryValues(Comparators.comparable());
 		list.sort(comparator);
-		assertThat(list.get(0).getValue()).isEqualTo(1);
+		assertThat(list.get(0).getValue()).isOne();
 	}
 
 	private ArrayList<Entry<String, Integer>> createReverseOrderMapEntryList() {

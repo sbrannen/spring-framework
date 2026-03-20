@@ -42,13 +42,13 @@ class ConverterTests {
 	@Test
 	void andThenWhenGivenConverterThenComposesInOrder() {
 		assertThat(this.moduloTwo.andThen(this.addOne).convert(13)).isEqualTo(2);
-		assertThat(this.addOne.andThen(this.moduloTwo).convert(13)).isEqualTo(0);
+		assertThat(this.addOne.andThen(this.moduloTwo).convert(13)).isZero();
 	}
 
 	@Test
 	void andThenCanConvertFromDifferentSourceType() {
 		Converter<String, Integer> length = String::length;
-		assertThat(length.andThen(this.moduloTwo).convert("example")).isEqualTo(1);
+		assertThat(length.andThen(this.moduloTwo).convert("example")).isOne();
 		assertThat(length.andThen(this.addOne).convert("example")).isEqualTo(8);
 	}
 

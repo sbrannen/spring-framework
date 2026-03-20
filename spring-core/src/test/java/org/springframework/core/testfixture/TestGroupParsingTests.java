@@ -35,27 +35,27 @@ class TestGroupParsingTests {
 
 	@Test
 	void parseNull() {
-		assertThat(TestGroup.parse(null)).isEqualTo(Collections.emptySet());
+		assertThat(TestGroup.parse(null)).hasSameElementsAs(Collections.emptySet());
 	}
 
 	@Test
 	void parseEmptyString() {
-		assertThat(TestGroup.parse("")).isEqualTo(Collections.emptySet());
+		assertThat(TestGroup.parse("")).hasSameElementsAs(Collections.emptySet());
 	}
 
 	@Test
 	void parseBlankString() {
-		assertThat(TestGroup.parse("     ")).isEqualTo(Collections.emptySet());
+		assertThat(TestGroup.parse("     ")).hasSameElementsAs(Collections.emptySet());
 	}
 
 	@Test
 	void parseWithSpaces() {
-		assertThat(TestGroup.parse(" LONG_RUNNING,  LONG_RUNNING ")).containsOnly(TestGroup.LONG_RUNNING);
+		assertThat(TestGroup.parse(" LONG_RUNNING,  LONG_RUNNING ")).containsExactly(TestGroup.LONG_RUNNING);
 	}
 
 	@Test
 	void parseInMixedCase() {
-		assertThat(TestGroup.parse("long_running,  LonG_RunnING")).containsOnly(TestGroup.LONG_RUNNING);
+		assertThat(TestGroup.parse("long_running,  LonG_RunnING")).containsExactly(TestGroup.LONG_RUNNING);
 	}
 
 	@Test
@@ -69,14 +69,14 @@ class TestGroupParsingTests {
 
 	@Test
 	void parseAll() {
-		assertThat(TestGroup.parse("all")).isEqualTo(EnumSet.allOf(TestGroup.class));
+		assertThat(TestGroup.parse("all")).hasSameElementsAs(EnumSet.allOf(TestGroup.class));
 	}
 
 	@Test
 	void parseAllExceptLongRunning() {
 		Set<TestGroup> expected = EnumSet.allOf(TestGroup.class);
 		expected.remove(TestGroup.LONG_RUNNING);
-		assertThat(TestGroup.parse("all-long_running")).isEqualTo(expected);
+		assertThat(TestGroup.parse("all-long_running")).hasSameElementsAs(expected);
 	}
 
 	@Test

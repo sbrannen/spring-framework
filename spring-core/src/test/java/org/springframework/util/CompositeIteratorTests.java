@@ -39,7 +39,7 @@ class CompositeIteratorTests {
 	@Test
 	void noIterators() {
 		CompositeIterator<String> it = new CompositeIterator<>();
-		assertThat(it.hasNext()).isFalse();
+		assertThat(it).isExhausted();
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				it::next);
 	}
@@ -49,10 +49,10 @@ class CompositeIteratorTests {
 		CompositeIterator<String> it = new CompositeIterator<>();
 		it.add(Arrays.asList("0", "1").iterator());
 		for (int i = 0; i < 2; i++) {
-			assertThat(it.hasNext()).isTrue();
+			assertThat(it).hasNext();
 			assertThat(it.next()).isEqualTo(String.valueOf(i));
 		}
-		assertThat(it.hasNext()).isFalse();
+		assertThat(it).isExhausted();
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				it::next);
 	}
@@ -64,10 +64,10 @@ class CompositeIteratorTests {
 		it.add(List.of("2").iterator());
 		it.add(Arrays.asList("3", "4").iterator());
 		for (int i = 0; i < 5; i++) {
-			assertThat(it.hasNext()).isTrue();
+			assertThat(it).hasNext();
 			assertThat(it.next()).isEqualTo(String.valueOf(i));
 		}
-		assertThat(it.hasNext()).isFalse();
+		assertThat(it).isExhausted();
 
 		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(
 				it::next);

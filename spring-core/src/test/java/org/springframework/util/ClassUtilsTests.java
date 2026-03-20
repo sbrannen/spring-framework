@@ -96,7 +96,7 @@ class ClassUtilsTests {
 		assertThat(ClassUtils.forName("org.springframework.util.ClassUtilsTests.NestedClass", classLoader)).isEqualTo(NestedClass.class);
 
 		// Precondition: package name must have length == 1.
-		assertThat(ClassHavingNestedClass.class.getPackageName().length()).isEqualTo(1);
+		assertThat(ClassHavingNestedClass.class.getPackageName()).hasSize(1);
 		assertThat(ClassUtils.forName("a.ClassHavingNestedClass$NestedClass", classLoader)).isEqualTo(ClassHavingNestedClass.NestedClass.class);
 		assertThat(ClassUtils.forName("a.ClassHavingNestedClass.NestedClass", classLoader)).isEqualTo(ClassHavingNestedClass.NestedClass.class);
 	}
@@ -358,19 +358,19 @@ class ClassUtilsTests {
 		List<Class<?>> ifcs = new ArrayList<>();
 		ifcs.add(Serializable.class);
 		ifcs.add(Runnable.class);
-		assertThat(ifcs.toString()).isEqualTo("[interface java.io.Serializable, interface java.lang.Runnable]");
+		assertThat(ifcs).hasToString("[interface java.io.Serializable, interface java.lang.Runnable]");
 		assertThat(ClassUtils.classNamesToString(ifcs)).isEqualTo("[java.io.Serializable, java.lang.Runnable]");
 
 		List<Class<?>> classes = new ArrayList<>();
 		classes.add(ArrayList.class);
 		classes.add(Integer.class);
-		assertThat(classes.toString()).isEqualTo("[class java.util.ArrayList, class java.lang.Integer]");
+		assertThat(classes).hasToString("[class java.util.ArrayList, class java.lang.Integer]");
 		assertThat(ClassUtils.classNamesToString(classes)).isEqualTo("[java.util.ArrayList, java.lang.Integer]");
 
-		assertThat(Collections.singletonList(List.class).toString()).isEqualTo("[interface java.util.List]");
+		assertThat(Collections.singletonList(List.class)).hasToString("[interface java.util.List]");
 		assertThat(ClassUtils.classNamesToString(List.class)).isEqualTo("[java.util.List]");
 
-		assertThat(Collections.EMPTY_LIST.toString()).isEqualTo("[]");
+		assertThat((List<?>) Collections.EMPTY_LIST).hasToString("[]");
 		assertThat(ClassUtils.classNamesToString(Collections.emptyList())).isEqualTo("[]");
 	}
 

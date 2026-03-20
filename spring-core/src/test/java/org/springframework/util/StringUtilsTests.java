@@ -230,18 +230,18 @@ class StringUtilsTests {
 
 	@Test
 	void countOccurrencesOf() {
-		assertThat(StringUtils.countOccurrencesOf(null, null)).as("nullx2 = 0").isEqualTo(0);
-		assertThat(StringUtils.countOccurrencesOf("s", null)).as("null string = 0").isEqualTo(0);
-		assertThat(StringUtils.countOccurrencesOf(null, "s")).as("null substring = 0").isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOf(null, null)).as("nullx2 = 0").isZero();
+		assertThat(StringUtils.countOccurrencesOf("s", null)).as("null string = 0").isZero();
+		assertThat(StringUtils.countOccurrencesOf(null, "s")).as("null substring = 0").isZero();
 		String s = "erowoiueoiur";
-		assertThat(StringUtils.countOccurrencesOf(s, "WERWER")).as("not found = 0").isEqualTo(0);
-		assertThat(StringUtils.countOccurrencesOf(s, "x")).as("not found char = 0").isEqualTo(0);
-		assertThat(StringUtils.countOccurrencesOf(s, " ")).as("not found ws = 0").isEqualTo(0);
-		assertThat(StringUtils.countOccurrencesOf(s, "")).as("not found empty string = 0").isEqualTo(0);
+		assertThat(StringUtils.countOccurrencesOf(s, "WERWER")).as("not found = 0").isZero();
+		assertThat(StringUtils.countOccurrencesOf(s, "x")).as("not found char = 0").isZero();
+		assertThat(StringUtils.countOccurrencesOf(s, " ")).as("not found ws = 0").isZero();
+		assertThat(StringUtils.countOccurrencesOf(s, "")).as("not found empty string = 0").isZero();
 		assertThat(StringUtils.countOccurrencesOf(s, "e")).as("found char=2").isEqualTo(2);
 		assertThat(StringUtils.countOccurrencesOf(s, "oi")).as("found substring=2").isEqualTo(2);
 		assertThat(StringUtils.countOccurrencesOf(s, "oiu")).as("found substring=2").isEqualTo(2);
-		assertThat(StringUtils.countOccurrencesOf(s, "oiur")).as("found substring=3").isEqualTo(1);
+		assertThat(StringUtils.countOccurrencesOf(s, "oiur")).as("found substring=3").isOne();
 		assertThat(StringUtils.countOccurrencesOf(s, "r")).as("test last").isEqualTo(2);
 	}
 
@@ -690,8 +690,8 @@ class StringUtilsTests {
 
 	@Test  // SPR-9420
 	void parseLocaleWithSameLowercaseTokenForLanguageAndCountry() {
-		assertThat(StringUtils.parseLocaleString("tr_tr").toString()).isEqualTo("tr_TR");
-		assertThat(StringUtils.parseLocaleString("bg_bg_vnt").toString()).isEqualTo("bg_BG_vnt");
+		assertThat(StringUtils.parseLocaleString("tr_tr")).hasToString("tr_TR");
+		assertThat(StringUtils.parseLocaleString("bg_bg_vnt")).hasToString("bg_BG_vnt");
 	}
 
 	@Test  // SPR-11806
@@ -704,7 +704,7 @@ class StringUtilsTests {
 
 	@Test  // SPR-14718, SPR-7598
 	void parseJava7Variant() {
-		assertThat(StringUtils.parseLocaleString("sr__#LATN").toString()).isEqualTo("sr__#LATN");
+		assertThat(StringUtils.parseLocaleString("sr__#LATN")).hasToString("sr__#LATN");
 	}
 
 	@Test  // SPR-16651
@@ -715,7 +715,7 @@ class StringUtilsTests {
 				assertThat(locale.getLanguage()).isEmpty();
 			}
 			else {
-				assertThat(locale.toString()).isEqualTo(parsedLocale.toString());
+				assertThat(locale).hasToString(parsedLocale.toString());
 			}
 		}
 	}
@@ -751,7 +751,7 @@ class StringUtilsTests {
 
 	@Test
 	void parseLocaleStringWithEmptyCountryAndVariant() {
-		assertThat(StringUtils.parseLocale("be__TARASK").toString()).isEqualTo("be__TARASK");
+		assertThat(StringUtils.parseLocale("be__TARASK")).hasToString("be__TARASK");
 	}
 
 	@Test

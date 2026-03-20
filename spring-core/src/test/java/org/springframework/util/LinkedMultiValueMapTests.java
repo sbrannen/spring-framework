@@ -104,8 +104,9 @@ class LinkedMultiValueMapTests {
 		values.add("value2");
 		map.put("key", values);
 		Map<String, String> singleValueMap = map.toSingleValueMap();
-		assertThat(singleValueMap).hasSize(1);
-		assertThat(singleValueMap.get("key")).isEqualTo("value1");
+		assertThat(singleValueMap)
+				.hasSize(1)
+				.containsEntry("key", "value1");
 	}
 
 	@Test
@@ -119,15 +120,15 @@ class LinkedMultiValueMapTests {
 	@Test
 	void equals() {
 		map.set("key1", "value1");
-		assertThat(map).isEqualTo(map);
+		assertThat(map).containsExactlyInAnyOrderEntriesOf(map);
 		MultiValueMap<String, String> o1 = new LinkedMultiValueMap<>();
 		o1.set("key1", "value1");
-		assertThat(o1).isEqualTo(map);
-		assertThat(map).isEqualTo(o1);
+		assertThat(o1).containsExactlyInAnyOrderEntriesOf(map);
+		assertThat(map).containsExactlyInAnyOrderEntriesOf(o1);
 		Map<String, List<String>> o2 = new HashMap<>();
 		o2.put("key1", Collections.singletonList("value1"));
-		assertThat(o2).isEqualTo(map);
-		assertThat(map).isEqualTo(o2);
+		assertThat(o2).containsExactlyInAnyOrderEntriesOf(map);
+		assertThat(map).containsExactlyInAnyOrderEntriesOf(o2);
 	}
 
 }

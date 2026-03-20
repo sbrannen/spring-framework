@@ -174,19 +174,19 @@ class AnnotatedElementUtilsTests {
 	@Test
 	void getMetaAnnotationTypesOnClassWithMetaDepth1() {
 		Set<String> names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class);
-		assertThat(names).isEqualTo(names(Transactional.class, Component.class, Indexed.class));
+		assertThat(names).hasSameElementsAs(names(Transactional.class, Component.class, Indexed.class));
 
 		names = getMetaAnnotationTypes(TransactionalComponentClass.class, TransactionalComponent.class.getName());
-		assertThat(names).isEqualTo(names(Transactional.class, Component.class, Indexed.class));
+		assertThat(names).hasSameElementsAs(names(Transactional.class, Component.class, Indexed.class));
 	}
 
 	@Test
 	void getMetaAnnotationTypesOnClassWithMetaDepth2() {
 		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class);
-		assertThat(names).isEqualTo(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class));
+		assertThat(names).hasSameElementsAs(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class));
 
 		names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName());
-		assertThat(names).isEqualTo(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class));
+		assertThat(names).hasSameElementsAs(names(TransactionalComponent.class, Transactional.class, Component.class, Indexed.class));
 	}
 
 	private Set<String> names(Class<?>... classes) {
@@ -296,21 +296,21 @@ class AnnotatedElementUtilsTests {
 	void getAllAnnotationAttributesOnClassWithLocalComposedAnnotationAndInheritedAnnotation() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(SubClassWithInheritedAnnotation.class, TX_NAME);
 		assertThat(attributes).as("Annotation attributes map for @Transactional on SubClassWithInheritedAnnotation").isNotNull();
-		assertThat(attributes.get("qualifier")).isEqualTo(asList("composed2", "transactionManager"));
+		assertThat(attributes).containsEntry("qualifier", asList("composed2", "transactionManager"));
 	}
 
 	@Test
 	void getAllAnnotationAttributesFavorsInheritedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(SubSubClassWithInheritedAnnotation.class, TX_NAME);
 		assertThat(attributes).as("Annotation attributes map for @Transactional on SubSubClassWithInheritedAnnotation").isNotNull();
-		assertThat(attributes.get("qualifier")).isEqualTo(List.of("transactionManager"));
+		assertThat(attributes).containsEntry("qualifier", List.of("transactionManager"));
 	}
 
 	@Test
 	void getAllAnnotationAttributesFavorsInheritedComposedAnnotationsOverMoreLocallyDeclaredComposedAnnotations() {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes( SubSubClassWithInheritedComposedAnnotation.class, TX_NAME);
 		assertThat(attributes).as("Annotation attributes map for @Transactional on SubSubClassWithInheritedComposedAnnotation").isNotNull();
-		assertThat(attributes.get("qualifier")).isEqualTo(List.of("composed1"));
+		assertThat(attributes).containsEntry("qualifier", List.of("composed1"));
 	}
 
 	/**
@@ -685,7 +685,7 @@ class AnnotatedElementUtilsTests {
 		assertThat(excludeFilters).isNotNull();
 
 		List<String> patterns = stream(excludeFilters).map(Filter::pattern).collect(toList());
-		assertThat(patterns).isEqualTo(asList("*Test", "*Tests"));
+		assertThat(patterns).containsExactlyElementsOf(asList("*Test", "*Tests"));
 	}
 
 	/**

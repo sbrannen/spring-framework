@@ -63,8 +63,9 @@ class ReactiveAdapterRegistryTests {
 
 		// Matches for ExtendedFlux itself
 		ReactiveAdapter adapter3 = getAdapter(ExtendedFlux.class);
-		assertThat(adapter3).isNotNull();
-		assertThat(adapter3).isNotSameAs(adapter1);
+		assertThat(adapter3)
+				.isNotNull()
+				.isNotSameAs(adapter1);
 
 		// Does not match for ExtendedFlux subclass since the default Flux adapter
 		// is being assignability-checked first when no specific match was found
@@ -79,8 +80,9 @@ class ReactiveAdapterRegistryTests {
 
 		// Override match for Flux
 		ReactiveAdapter adapter5 = getAdapter(Flux.class);
-		assertThat(adapter5).isNotNull();
-		assertThat(adapter5).isNotSameAs(adapter1);
+		assertThat(adapter5)
+				.isNotNull()
+				.isNotSameAs(adapter1);
 
 		// Initially registered adapter specifically matches for ExtendedFlux
 		ReactiveAdapter adapter6 = getAdapter(ExtendedFlux.class);
@@ -94,8 +96,7 @@ class ReactiveAdapterRegistryTests {
 
 	private ReactiveAdapter getAdapter(Class<?> reactiveType) {
 		ReactiveAdapter adapter = this.registry.getAdapter(reactiveType);
-		assertThat(adapter).isNotNull();
-		return adapter;
+		return assertThat(adapter).isNotNull().actual();
 	}
 
 
@@ -134,7 +135,7 @@ class ReactiveAdapterRegistryTests {
 			Publisher<Integer> source = io.reactivex.rxjava3.core.Flowable.fromIterable(sequence);
 			Object target = getAdapter(Flux.class).fromPublisher(source);
 			assertThat(target).isInstanceOf(Flux.class);
-			assertThat(((Flux<Integer>) target).collectList().block(FIVE_SECONDS)).isEqualTo(sequence);
+			assertThat(((Flux<Integer>) target).collectList().block(FIVE_SECONDS)).containsExactlyElementsOf(sequence);
 		}
 
 		@Test
@@ -152,7 +153,7 @@ class ReactiveAdapterRegistryTests {
 			Object target = getAdapter(Flow.Publisher.class).fromPublisher(source);
 			assertThat(target).isInstanceOf(Flow.Publisher.class);
 			assertThat(JdkFlowAdapter.flowPublisherToFlux((Flow.Publisher<Integer>) target)
-					.collectList().block(FIVE_SECONDS)).isEqualTo(sequence);
+					.collectList().block(FIVE_SECONDS)).containsExactlyElementsOf(sequence);
 		}
 
 		@Test
@@ -227,7 +228,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.rxjava3.core.Flowable.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Flowable.class).toPublisher(source);
 			assertThat(target).as("Expected Flux Publisher: " + target.getClass().getName()).isInstanceOf(Flux.class);
-			assertThat(((Flux<Integer>) target).collectList().block(FIVE_SECONDS)).isEqualTo(sequence);
+			assertThat(((Flux<Integer>) target).collectList().block(FIVE_SECONDS)).containsExactlyElementsOf(sequence);
 		}
 
 		@Test
@@ -236,7 +237,7 @@ class ReactiveAdapterRegistryTests {
 			Object source = io.reactivex.rxjava3.core.Observable.fromIterable(sequence);
 			Object target = getAdapter(io.reactivex.rxjava3.core.Observable.class).toPublisher(source);
 			assertThat(target).as("Expected Flux Publisher: " + target.getClass().getName()).isInstanceOf(Flux.class);
-			assertThat(((Flux<Integer>) target).collectList().block(FIVE_SECONDS)).isEqualTo(sequence);
+			assertThat(((Flux<Integer>) target).collectList().block(FIVE_SECONDS)).containsExactlyElementsOf(sequence);
 		}
 
 		@Test
@@ -306,7 +307,7 @@ class ReactiveAdapterRegistryTests {
 			Publisher<Integer> source = Flux.fromIterable(sequence);
 			Object target = getAdapter(Multi.class).fromPublisher(source);
 			assertThat(target).isInstanceOf(Multi.class);
-			assertThat(((Multi<Integer>) target).collect().asList().await().atMost(FIVE_SECONDS)).isEqualTo(sequence);
+			assertThat(((Multi<Integer>) target).collect().asList().await().atMost(FIVE_SECONDS)).containsExactlyElementsOf(sequence);
 		}
 
 		@Test

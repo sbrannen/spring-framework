@@ -71,14 +71,14 @@ class FilteredMapTests {
 
 		String value = filtered.put("baz", "qux");
 		assertThat(value).isNull();
-		assertThat(filtered.containsKey("baz")).isFalse();
-		assertThat(map.get("baz")).isEqualTo("qux");
+		assertThat(filtered).doesNotContainKey("baz");
+		assertThat(map).containsEntry("baz", "qux");
 
 		// overwrite
 		value = filtered.put("baz", "QUX");
 		assertThat(value).isNull();
-		assertThat(filtered.containsKey("baz")).isFalse();
-		assertThat(map.get("baz")).isEqualTo("QUX");
+		assertThat(filtered).doesNotContainKey("baz");
+		assertThat(map).containsEntry("baz", "QUX");
 	}
 
 	@Test
@@ -88,8 +88,8 @@ class FilteredMapTests {
 
 		String value = filtered.remove("baz");
 		assertThat(value).isNull();
-		assertThat(filtered.containsKey("baz")).isFalse();
-		assertThat(map.containsKey("baz")).isFalse();
+		assertThat(filtered).doesNotContainKey("baz");
+		assertThat(map).doesNotContainKey("baz");
 	}
 
 	@Test

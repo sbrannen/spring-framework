@@ -58,7 +58,7 @@ class SingleToMultiValueMapAdapterTests {
 	void add() {
 		this.adapter.add("corge", "grault");
 		assertThat(this.adapter.getFirst("corge")).isEqualTo("grault");
-		assertThat(this.delegate.get("corge")).isEqualTo("grault");
+		assertThat(this.delegate).containsEntry("corge", "grault");
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				this.adapter.add("foo", "garply"));
@@ -71,7 +71,7 @@ class SingleToMultiValueMapAdapterTests {
 		this.adapter.addAll(map);
 
 		assertThat(this.adapter.getFirst("corge")).isEqualTo("grault");
-		assertThat(this.delegate.get("corge")).isEqualTo("grault");
+		assertThat(this.delegate).containsEntry("corge", "grault");
 
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 				this.adapter.addAll(map));
@@ -80,46 +80,46 @@ class SingleToMultiValueMapAdapterTests {
 	@Test
 	void set() {
 		this.adapter.set("foo", "baz");
-		assertThat(this.delegate.get("foo")).isEqualTo("baz");
+		assertThat(this.delegate).containsEntry("foo", "baz");
 	}
 
 	@Test
 	void setAll() {
 		this.adapter.setAll(Map.of("foo", "baz"));
-		assertThat(this.delegate.get("foo")).isEqualTo("baz");
+		assertThat(this.delegate).containsEntry("foo", "baz");
 	}
 
 	@Test
 	void size() {
-		assertThat(this.adapter.size()).isEqualTo(this.delegate.size()).isEqualTo(2);
+		assertThat(this.adapter).hasSize(this.delegate.size());
 	}
 
 	@Test
 	void isEmpty() {
-		assertThat(this.adapter.isEmpty()).isFalse();
+		assertThat(this.adapter).isNotEmpty();
 
 		this.adapter = new SingleToMultiValueMapAdapter<>(Collections.emptyMap());
-		assertThat(this.adapter.isEmpty()).isTrue();
+		assertThat(this.adapter).isEmpty();
 	}
 
 	@Test
 	void containsKey() {
-		assertThat(this.adapter.containsKey("foo")).isTrue();
-		assertThat(this.adapter.containsKey("qux")).isTrue();
-		assertThat(this.adapter.containsKey("corge")).isFalse();
+		assertThat(this.adapter).containsKey("foo");
+		assertThat(this.adapter).containsKey("qux");
+		assertThat(this.adapter).doesNotContainKey("corge");
 	}
 
 	@Test
 	void containsValue() {
-		assertThat(this.adapter.containsValue(List.of("bar"))).isTrue();
-		assertThat(this.adapter.containsValue(List.of("quux"))).isTrue();
-		assertThat(this.adapter.containsValue(List.of("corge"))).isFalse();
+		assertThat(this.adapter).containsValue(List.of("bar"));
+		assertThat(this.adapter).containsValue(List.of("quux"));
+		assertThat(this.adapter).doesNotContainValue(List.of("corge"));
 	}
 
 	@Test
 	void get() {
-		assertThat(this.adapter.get("foo")).isEqualTo(List.of("bar"));
-		assertThat(this.adapter.get("qux")).isEqualTo(List.of("quux"));
+		assertThat(this.adapter).containsEntry("foo", List.of("bar"));
+		assertThat(this.adapter).containsEntry("qux", List.of("quux"));
 		assertThat(this.adapter.get("corge")).isNull();
 	}
 
@@ -137,9 +137,9 @@ class SingleToMultiValueMapAdapterTests {
 
 	@Test
 	void remove() {
-		assertThat(this.adapter.remove("foo")).isEqualTo(List.of("bar"));
-		assertThat(this.adapter.containsKey("foo")).isFalse();
-		assertThat(this.delegate.containsKey("foo")).isFalse();
+		assertThat(this.adapter.remove("foo")).containsExactlyElementsOf(List.of("bar"));
+		assertThat(this.adapter).doesNotContainKey("foo");
+		assertThat(this.delegate).doesNotContainKey("foo");
 	}
 
 	@Test

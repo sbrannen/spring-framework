@@ -107,7 +107,7 @@ class StreamUtilsTests {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 		StreamUtils.copyRange(in, out, 0, 8200);
-		assertThat(in.available()).isEqualTo(1);
+		assertThat(in.available()).isOne();
 		assertThat(out.toByteArray()).isEqualTo(Arrays.copyOfRange(bytes, 0, 8201));
 	}
 
@@ -116,7 +116,7 @@ class StreamUtilsTests {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 		StreamUtils.copyRange(in, out, 0, 8300);
-		assertThat(in.available()).isEqualTo(0);
+		assertThat(in.available()).isZero();
 		assertThat(out.toByteArray()).isEqualTo(Arrays.copyOfRange(bytes, 0, 8202));
 	}
 

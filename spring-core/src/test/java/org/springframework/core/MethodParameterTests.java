@@ -80,12 +80,15 @@ class MethodParameterTests {
 		assertThat(longParameter).isEqualTo(longParameter);
 		assertThat(intReturnType).isEqualTo(intReturnType);
 
-		assertThat(stringParameter).isNotEqualTo(longParameter);
-		assertThat(stringParameter).isNotEqualTo(intReturnType);
-		assertThat(longParameter).isNotEqualTo(stringParameter);
-		assertThat(longParameter).isNotEqualTo(intReturnType);
-		assertThat(intReturnType).isNotEqualTo(stringParameter);
-		assertThat(intReturnType).isNotEqualTo(longParameter);
+		assertThat(stringParameter)
+				.isNotEqualTo(longParameter)
+				.isNotEqualTo(intReturnType);
+		assertThat(longParameter)
+				.isNotEqualTo(stringParameter)
+				.isNotEqualTo(intReturnType);
+		assertThat(intReturnType)
+				.isNotEqualTo(stringParameter)
+				.isNotEqualTo(longParameter);
 
 		Method method = getClass().getMethod("method", String.class, long.class);
 		MethodParameter methodParameter = new MethodParameter(method, 0);
@@ -97,13 +100,13 @@ class MethodParameterTests {
 
 	@Test
 	void hashCodeBehavior() throws NoSuchMethodException {
-		assertThat(stringParameter.hashCode()).isEqualTo(stringParameter.hashCode());
-		assertThat(longParameter.hashCode()).isEqualTo(longParameter.hashCode());
-		assertThat(intReturnType.hashCode()).isEqualTo(intReturnType.hashCode());
+		assertThat(stringParameter).hasSameHashCodeAs(stringParameter);
+		assertThat(longParameter).hasSameHashCodeAs(longParameter);
+		assertThat(intReturnType).hasSameHashCodeAs(intReturnType);
 
 		Method method = getClass().getMethod("method", String.class, long.class);
 		MethodParameter methodParameter = new MethodParameter(method, 0);
-		assertThat(methodParameter.hashCode()).isEqualTo(stringParameter.hashCode());
+		assertThat(methodParameter).hasSameHashCodeAs(stringParameter);
 		assertThat(methodParameter.hashCode()).isNotEqualTo(longParameter.hashCode());
 	}
 
@@ -187,7 +190,7 @@ class MethodParameterTests {
 		MethodParameter m2 = MethodParameter.forExecutable(method, -1);
 		MethodParameter m3 = MethodParameter.forExecutable(method, -1).nested();
 		assertThat(m1).isEqualTo(m2).isNotEqualTo(m3);
-		assertThat(m1.hashCode()).isEqualTo(m2.hashCode());
+		assertThat(m1).hasSameHashCodeAs(m2);
 	}
 
 	@Test
@@ -201,7 +204,7 @@ class MethodParameterTests {
 				.withContainingClass(IntegerList.class);
 		MethodParameter m4 = MethodParameter.forExecutable(method, -1);
 		assertThat(m1).isEqualTo(m2).isNotEqualTo(m3).isNotEqualTo(m4);
-		assertThat(m1.hashCode()).isEqualTo(m2.hashCode());
+		assertThat(m1).hasSameHashCodeAs(m2);
 	}
 
 	@Test

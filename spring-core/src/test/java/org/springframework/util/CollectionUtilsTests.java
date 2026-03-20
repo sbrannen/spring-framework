@@ -94,10 +94,11 @@ class CollectionUtilsTests {
 		map.put("prop4", "value4");
 
 		CollectionUtils.mergePropertiesIntoMap(props, map);
-		assertThat(map.get("prop1")).isEqualTo("value1");
-		assertThat(map.get("prop2")).isEqualTo("value2");
-		assertThat(map.get("prop3")).isEqualTo(3);
-		assertThat(map.get("prop4")).isEqualTo("value4");
+		assertThat(map)
+				.containsEntry("prop1", "value1")
+				.containsEntry("prop2", "value2")
+				.containsEntry("prop3", 3)
+				.containsEntry("prop4", "value4");
 	}
 
 	@Test
@@ -203,7 +204,7 @@ class CollectionUtilsTests {
 
 	@Test
 	void findValueOfType() {
-		assertThat(CollectionUtils.findValueOfType(List.of(1), Integer.class)).isEqualTo(1);
+		assertThat(CollectionUtils.findValueOfType(List.of(1), Integer.class)).isOne();
 
 		assertThat(CollectionUtils.findValueOfType(Set.of(2), Integer.class)).isEqualTo(2);
 	}
@@ -302,7 +303,7 @@ class CollectionUtilsTests {
 		sortedSet.add(3);
 		sortedSet.add(2);
 		sortedSet.add(1);
-		assertThat(CollectionUtils.firstElement(sortedSet)).isEqualTo(1);
+		assertThat(CollectionUtils.firstElement(sortedSet)).isOne();
 	}
 
 	@Test
@@ -311,7 +312,7 @@ class CollectionUtilsTests {
 		list.add(1);
 		list.add(2);
 		list.add(3);
-		assertThat(CollectionUtils.firstElement(list)).isEqualTo(1);
+		assertThat(CollectionUtils.firstElement(list)).isOne();
 	}
 
 	@Test
@@ -388,8 +389,9 @@ class CollectionUtilsTests {
 
 		Map<String, String> compositeMap = CollectionUtils.compositeMap(first, second);
 
-		assertThat(compositeMap).containsKeys("key1", "key2", "key3", "key4");
-		assertThat(compositeMap).containsValues("value1", "value2", "value3", "value4");
+		assertThat(compositeMap)
+				.containsKeys("key1", "key2", "key3", "key4")
+				.containsValues("value1", "value2", "value3", "value4");
 	}
 
 

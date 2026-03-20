@@ -110,11 +110,10 @@ class ResourceArrayPropertyEditorTests {
 		assertThat(resources).isNotNull();
 		assertThat(resources[0]).isInstanceOfSatisfying(FileUrlResource.class,
 				resource -> assertThat(resource.getFilename()).isEqualTo("test.txt"));
-		assertThat(resources).anySatisfy(candidate ->
-				assertThat(candidate.getFilename()).isEqualTo("resource1.txt"));
-		assertThat(resources).anySatisfy(candidate ->
-				assertThat(candidate.getFilename()).isEqualTo("resource2.txt"));
-		assertThat(resources).hasSize(3);
+		assertThat(resources)
+				.anySatisfy(candidate -> assertThat(candidate.getFilename()).isEqualTo("resource1.txt"))
+				.anySatisfy(candidate -> assertThat(candidate.getFilename()).isEqualTo("resource2.txt"))
+				.hasSize(3);
 	}
 
 }

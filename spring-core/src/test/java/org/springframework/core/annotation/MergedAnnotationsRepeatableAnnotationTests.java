@@ -85,42 +85,42 @@ class MergedAnnotationsRepeatableAnnotationTests {
 	void inheritedAnnotationsWhenOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				INHERITED_ANNOTATIONS, RepeatableClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void inheritedAnnotationsWhenWhenOnSuperclassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				INHERITED_ANNOTATIONS, SubRepeatableClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void inheritedAnnotationsWhenComposedOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				INHERITED_ANNOTATIONS, ComposedRepeatableClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void inheritedAnnotationsWhenComposedMixedWithContainerOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				INHERITED_ANNOTATIONS, ComposedRepeatableMixedWithContainerClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void inheritedAnnotationsWhenComposedContainerForRepeatableOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				INHERITED_ANNOTATIONS, ComposedContainerClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void inheritedAnnotationsWhenNoninheritedComposedRepeatableOnClassReturnsAnnotations() {
 		Set<Noninherited> annotations = getAnnotations(null, Noninherited.class,
 				INHERITED_ANNOTATIONS, NoninheritedRepeatableClass.class);
-		assertThat(annotations.stream().map(Noninherited::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(Noninherited::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
@@ -165,49 +165,49 @@ class MergedAnnotationsRepeatableAnnotationTests {
 	void typeHierarchyWhenOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				TYPE_HIERARCHY, RepeatableClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void typeHierarchyWhenOnSuperclassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				TYPE_HIERARCHY, SubRepeatableClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void typeHierarchyWhenComposedOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				TYPE_HIERARCHY, ComposedRepeatableClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void typeHierarchyWhenComposedMixedWithContainerOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				TYPE_HIERARCHY, ComposedRepeatableMixedWithContainerClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void typeHierarchyWhenComposedContainerForRepeatableOnClassReturnsAnnotations() {
 		Set<PeteRepeat> annotations = getAnnotations(null, PeteRepeat.class,
 				TYPE_HIERARCHY, ComposedContainerClass.class);
-		assertThat(annotations.stream().map(PeteRepeat::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(PeteRepeat::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void typeHierarchyAnnotationsWhenNoninheritedComposedRepeatableOnClassReturnsAnnotations() {
 		Set<Noninherited> annotations = getAnnotations(null, Noninherited.class,
 				TYPE_HIERARCHY, NoninheritedRepeatableClass.class);
-		assertThat(annotations.stream().map(Noninherited::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(Noninherited::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
 	void typeHierarchyAnnotationsWhenNoninheritedComposedRepeatableOnSuperclassReturnsAnnotations() {
 		Set<Noninherited> annotations = getAnnotations(null, Noninherited.class,
 				TYPE_HIERARCHY, SubNoninheritedRepeatableClass.class);
-		assertThat(annotations.stream().map(Noninherited::value)).containsExactly("A", "B", "C");
+		assertThat(annotations).extracting(Noninherited::value).containsExactly("A", "B", "C");
 	}
 
 	@Test
@@ -245,7 +245,7 @@ class MergedAnnotationsRepeatableAnnotationTests {
 				mergedAnnotations.stream(RepeatableWithContainerWithMultipleAttributes.class)
 				.collect(MergedAnnotationCollectors.toAnnotationSet());
 		// Only finds the locally declared repeated annotation.
-		assertThat(set.stream().map(RepeatableWithContainerWithMultipleAttributes::value))
+		assertThat(set).extracting(RepeatableWithContainerWithMultipleAttributes::value)
 				.containsExactly("C");
 
 		// Standard RepeatableContainers
@@ -261,7 +261,7 @@ class MergedAnnotationsRepeatableAnnotationTests {
 		set = mergedAnnotations.stream(RepeatableWithContainerWithMultipleAttributes.class)
 				.collect(MergedAnnotationCollectors.toAnnotationSet());
 		// Finds the locally declared repeated annotation plus the 2 in the container.
-		assertThat(set.stream().map(RepeatableWithContainerWithMultipleAttributes::value))
+		assertThat(set).extracting(RepeatableWithContainerWithMultipleAttributes::value)
 				.containsExactly("A", "B", "C");
 	}
 

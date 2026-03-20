@@ -40,7 +40,7 @@ class RuntimeHintsTests {
 			assertThat(typeHint.fields()).isEmpty();
 			assertThat(typeHint.constructors()).isEmpty();
 			assertThat(typeHint.methods()).isEmpty();
-			assertThat(typeHint.getMemberCategories()).containsOnly(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
+			assertThat(typeHint.getMemberCategories()).containsExactly(MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);
 		});
 	}
 

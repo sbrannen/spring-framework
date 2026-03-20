@@ -58,20 +58,20 @@ class FastByteArrayOutputStreamTests {
 	@Test
 	void stringConversion() throws Exception {
 		this.os.write(this.helloBytes);
-		assertThat(this.os.toString()).isEqualTo("Hello World");
+		assertThat(this.os).hasToString("Hello World");
 		assertThat(this.os.toString(StandardCharsets.UTF_8)).isEqualTo("Hello World");
 
 		@SuppressWarnings("resource")
 		FastByteArrayOutputStream empty = new FastByteArrayOutputStream();
-		assertThat(empty.toString()).isEqualTo("");
-		assertThat(empty.toString(StandardCharsets.US_ASCII)).isEqualTo("");
+		assertThat(empty.toString()).isEmpty();
+		assertThat(empty.toString(StandardCharsets.US_ASCII)).isEmpty();
 
 		@SuppressWarnings("resource")
 		FastByteArrayOutputStream outputStream = new FastByteArrayOutputStream(5);
 		// Add bytes in multiple writes to ensure we get more than one buffer internally
 		outputStream.write(this.helloBytes, 0, 5);
 		outputStream.write(this.helloBytes, 5, 6);
-		assertThat(outputStream.toString()).isEqualTo("Hello World");
+		assertThat(outputStream).hasToString("Hello World");
 		assertThat(outputStream.toString(StandardCharsets.UTF_8)).isEqualTo("Hello World");
 	}
 
@@ -96,7 +96,7 @@ class FastByteArrayOutputStreamTests {
 		this.os.write(this.helloBytes);
 		assertByteArrayEqualsString(this.os);
 		this.os.reset();
-		assertThat(this.os.size()).isEqualTo(0);
+		assertThat(this.os.size()).isZero();
 		this.os.write(this.helloBytes);
 		assertByteArrayEqualsString(this.os);
 	}
@@ -171,7 +171,7 @@ class FastByteArrayOutputStreamTests {
 		int bytesRead = inputStream.read(actual);
 		assertThat(bytesRead).isEqualTo(this.helloBytes.length);
 		assertThat(actual).isEqualTo(this.helloBytes);
-		assertThat(inputStream.available()).isEqualTo(0);
+		assertThat(inputStream.available()).isZero();
 	}
 
 	@Test
@@ -184,8 +184,8 @@ class FastByteArrayOutputStreamTests {
 		for (int i = 0; i < bytesRead; i++) {
 			assertThat(actual[i]).isEqualTo(this.helloBytes[i]);
 		}
-		assertThat(actual[this.helloBytes.length]).isEqualTo((byte) 0);
-		assertThat(inputStream.available()).isEqualTo(0);
+		assertThat(actual[this.helloBytes.length]).isZero();
+		assertThat(inputStream.available()).isZero();
 	}
 
 	@Test
@@ -193,7 +193,7 @@ class FastByteArrayOutputStreamTests {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
 		assertThat(this.helloBytes[0]).isEqualTo((byte) inputStream.read());
-		assertThat(inputStream.skip(1)).isEqualTo(1);
+		assertThat(inputStream.skip(1)).isOne();
 		assertThat(this.helloBytes[2]).isEqualTo((byte) inputStream.read());
 		assertThat(inputStream.available()).isEqualTo((this.helloBytes.length - 3));
 	}
@@ -203,7 +203,7 @@ class FastByteArrayOutputStreamTests {
 		this.os.write(this.helloBytes);
 		InputStream inputStream = this.os.getInputStream();
 		assertThat(this.helloBytes.length).isEqualTo(inputStream.skip(1000));
-		assertThat(inputStream.available()).isEqualTo(0);
+		assertThat(inputStream.available()).isZero();
 	}
 
 	@Test

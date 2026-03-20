@@ -391,7 +391,7 @@ class ObjectUtilsTests {
 
 	@Test
 	void nullSafeHashWithNull() {
-		assertThat(ObjectUtils.nullSafeHash((Object[]) null)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHash((Object[]) null)).isZero();
 	}
 
 	@Test
@@ -403,7 +403,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void nullSafeHashCodeWithNullBooleanArray() {
 		boolean[] array = null;
-		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isZero();
 	}
 
 	@Test
@@ -426,7 +426,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void nullSafeHashCodeWithNullByteArray() {
 		byte[] array = null;
-		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isZero();
 	}
 
 	@Test
@@ -449,7 +449,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void nullSafeHashCodeWithNullCharArray() {
 		char[] array = null;
-		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isZero();
 	}
 
 	@Test
@@ -472,7 +472,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void nullSafeHashCodeWithNullDoubleArray() {
 		double[] array = null;
-		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isZero();
 	}
 
 	@Test
@@ -495,7 +495,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void nullSafeHashCodeWithNullFloatArray() {
 		float[] array = null;
-		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isZero();
 	}
 
 	@Test
@@ -518,7 +518,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void nullSafeHashCodeWithNullIntArray() {
 		int[] array = null;
-		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isZero();
 	}
 
 	@Test
@@ -541,7 +541,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void nullSafeHashCodeWithNullLongArray() {
 		long[] array = null;
-		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isZero();
 	}
 
 	@Test
@@ -564,7 +564,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void nullSafeHashCodeWithNullShortArray() {
 		short[] array = null;
-		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isZero();
 	}
 
 	@Test
@@ -600,7 +600,7 @@ class ObjectUtilsTests {
 	@Test
 	@Deprecated
 	void nullSafeHashCodeWithObjectArrayEqualToNull() {
-		assertThat(ObjectUtils.nullSafeHashCode((Object[]) null)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode((Object[]) null)).isZero();
 	}
 
 	@Test
@@ -615,7 +615,7 @@ class ObjectUtilsTests {
 	@Deprecated
 	void nullSafeHashCodeWithObjectEqualToNull() {
 		Object[] array = null;
-		assertThat(ObjectUtils.nullSafeHashCode(array)).isEqualTo(0);
+		assertThat(ObjectUtils.nullSafeHashCode(array)).isZero();
 	}
 
 	@Test
@@ -899,7 +899,7 @@ class ObjectUtilsTests {
 			String repeat100 = "X".repeat(100);
 			String repeat101 = "X".repeat(101);
 
-			assertThat(ObjectUtils.nullSafeConciseToString("")).isEqualTo("");
+			assertThat(ObjectUtils.nullSafeConciseToString("")).isEmpty();
 			assertThat(ObjectUtils.nullSafeConciseToString("foo")).isEqualTo("foo");
 			assertThat(ObjectUtils.nullSafeConciseToString(repeat100)).isEqualTo(repeat100);
 			assertThat(ObjectUtils.nullSafeConciseToString(repeat101)).hasSize(truncatedLength).endsWith(truncated);

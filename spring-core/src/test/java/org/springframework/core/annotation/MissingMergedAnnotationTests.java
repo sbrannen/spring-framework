@@ -273,7 +273,7 @@ class MissingMergedAnnotationTests {
 
 	@Test
 	void toStringReturnsString() {
-		assertThat(this.missing.toString()).isEqualTo("(missing)");
+		assertThat(this.missing).hasToString("(missing)");
 	}
 
 	@Test

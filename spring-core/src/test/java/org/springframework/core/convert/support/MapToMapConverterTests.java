@@ -134,8 +134,9 @@ class MapToMapConverterTests {
 		@SuppressWarnings("unchecked")
 		Map<Integer, List<Integer>> result = (Map<Integer, List<Integer>>) conversionService.convert(map, sourceType, targetType);
 		assertThat(map).isNotEqualTo(result);
-		assertThat(result.get(1)).isEqualTo(Arrays.asList(9, 12));
-		assertThat(result.get(2)).isEqualTo(Arrays.asList(37, 23));
+		assertThat(result)
+				.containsEntry(1, Arrays.asList(9, 12))
+				.containsEntry(2, Arrays.asList(37, 23));
 	}
 
 	@Test
@@ -156,8 +157,9 @@ class MapToMapConverterTests {
 		@SuppressWarnings("unchecked")
 		Map<Integer, List<Integer>> result = (Map<Integer, List<Integer>>) conversionService.convert(map, sourceType, targetType);
 		assertThat(map).isNotEqualTo(result);
-		assertThat(result.get(1)).isEqualTo(Arrays.asList(9, 12));
-		assertThat(result.get(2)).isEqualTo(Arrays.asList(37, 23));
+		assertThat(result)
+				.containsEntry(1, Arrays.asList(9, 12))
+				.containsEntry(2, Arrays.asList(37, 23));
 	}
 
 	@Test
@@ -209,7 +211,7 @@ class MapToMapConverterTests {
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		LinkedHashMap<String, String> result = (LinkedHashMap<String, String>) conversionService.convert(map, sourceType, targetType);
-		assertThat(result).isEqualTo(map);
+		assertThat(result).containsExactlyInAnyOrderEntriesOf(map);
 		assertThat(result.getClass()).isEqualTo(LinkedHashMap.class);
 	}
 
@@ -226,7 +228,7 @@ class MapToMapConverterTests {
 		assertThat(conversionService.canConvert(sourceType, targetType)).isTrue();
 		@SuppressWarnings("unchecked")
 		Map<String, Integer> result = (Map<String, Integer>) conversionService.convert(map, sourceType, targetType);
-		assertThat(result).isEqualTo(map);
+		assertThat(result).containsExactlyInAnyOrderEntriesOf(map);
 		assertThat(result.getClass()).isEqualTo(NoDefaultConstructorMap.class);
 	}
 
@@ -241,8 +243,8 @@ class MapToMapConverterTests {
 
 		MultiValueMap<String, String> converted = (MultiValueMap<String, String>) conversionService.convert(source, targetType);
 		assertThat(converted).hasSize(2);
-		assertThat(converted.get("a")).isEqualTo(Arrays.asList("1", "2", "3"));
-		assertThat(converted.get("b")).isEqualTo(Arrays.asList("4", "5", "6"));
+		assertThat(converted).containsEntry("a", Arrays.asList("1", "2", "3"));
+		assertThat(converted).containsEntry("b", Arrays.asList("4", "5", "6"));
 	}
 
 	@Test
@@ -256,8 +258,8 @@ class MapToMapConverterTests {
 
 		MultiValueMap<String, String> converted = (MultiValueMap<String, String>) conversionService.convert(source, targetType);
 		assertThat(converted).hasSize(2);
-		assertThat(converted.get("a")).isEqualTo(List.of("1"));
-		assertThat(converted.get("b")).isEqualTo(List.of("2"));
+		assertThat(converted).containsEntry("a", List.of("1"));
+		assertThat(converted).containsEntry("b", List.of("2"));
 	}
 
 	@Test

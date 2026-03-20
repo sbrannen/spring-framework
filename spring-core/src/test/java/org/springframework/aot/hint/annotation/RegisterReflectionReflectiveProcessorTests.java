@@ -110,14 +110,13 @@ class RegisterReflectionReflectiveProcessorTests {
 			assertThat(typeHint.fields()).isEmpty();
 			assertThat(typeHint.methods()).isEmpty();
 			assertThat(typeHint.constructors()).isEmpty();
-			assertThat(typeHint.getMemberCategories()).containsOnly(categories);
+			assertThat(typeHint.getMemberCategories()).containsExactly(categories);
 		};
 	}
 
 	private TypeHint getTypeHint(Class<?> target) {
 		TypeHint typeHint = hints.reflection().getTypeHint(target);
-		assertThat(typeHint).isNotNull();
-		return typeHint;
+		return assertThat(typeHint).isNotNull().actual();
 	}
 
 	private void registerReflectionHints(AnnotatedElement annotatedElement) {

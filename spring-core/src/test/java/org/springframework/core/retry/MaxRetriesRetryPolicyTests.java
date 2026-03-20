@@ -78,13 +78,13 @@ class MaxRetriesRetryPolicyTests {
 
 		// 4 retries
 		assertThat(retryPolicy.shouldRetry(new NumberFormatException())).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isEqualTo(1);
+		assertThat(backOffExecution.nextBackOff()).isOne();
 		assertThat(retryPolicy.shouldRetry(new IllegalStateException())).isFalse();
-		assertThat(backOffExecution.nextBackOff()).isEqualTo(1);
+		assertThat(backOffExecution.nextBackOff()).isOne();
 		assertThat(retryPolicy.shouldRetry(new IllegalStateException())).isFalse();
-		assertThat(backOffExecution.nextBackOff()).isEqualTo(1);
+		assertThat(backOffExecution.nextBackOff()).isOne();
 		assertThat(retryPolicy.shouldRetry(new CustomNumberFormatException())).isTrue();
-		assertThat(backOffExecution.nextBackOff()).isEqualTo(1);
+		assertThat(backOffExecution.nextBackOff()).isOne();
 
 		// After policy exhaustion
 		assertThat(retryPolicy.shouldRetry(new NumberFormatException())).isTrue();

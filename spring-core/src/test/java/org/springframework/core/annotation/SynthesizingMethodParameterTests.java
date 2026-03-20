@@ -56,12 +56,15 @@ class SynthesizingMethodParameterTests {
 		assertThat(longParameter).isEqualTo(longParameter);
 		assertThat(intReturnType).isEqualTo(intReturnType);
 
-		assertThat(stringParameter).isNotEqualTo(longParameter);
-		assertThat(stringParameter).isNotEqualTo(intReturnType);
-		assertThat(longParameter).isNotEqualTo(stringParameter);
-		assertThat(longParameter).isNotEqualTo(intReturnType);
-		assertThat(intReturnType).isNotEqualTo(stringParameter);
-		assertThat(intReturnType).isNotEqualTo(longParameter);
+		assertThat(stringParameter)
+				.isNotEqualTo(longParameter)
+				.isNotEqualTo(intReturnType);
+		assertThat(longParameter)
+				.isNotEqualTo(stringParameter)
+				.isNotEqualTo(intReturnType);
+		assertThat(intReturnType)
+				.isNotEqualTo(stringParameter)
+				.isNotEqualTo(longParameter);
 
 		Method method = getClass().getMethod("method", String.class, long.class);
 		MethodParameter methodParameter = new SynthesizingMethodParameter(method, 0);
@@ -79,13 +82,13 @@ class SynthesizingMethodParameterTests {
 
 	@Test
 	void hashCodeBehavior() throws NoSuchMethodException {
-		assertThat(stringParameter.hashCode()).isEqualTo(stringParameter.hashCode());
-		assertThat(longParameter.hashCode()).isEqualTo(longParameter.hashCode());
-		assertThat(intReturnType.hashCode()).isEqualTo(intReturnType.hashCode());
+		assertThat(stringParameter).hasSameHashCodeAs(stringParameter);
+		assertThat(longParameter).hasSameHashCodeAs(longParameter);
+		assertThat(intReturnType).hasSameHashCodeAs(intReturnType);
 
 		Method method = getClass().getMethod("method", String.class, long.class);
 		SynthesizingMethodParameter methodParameter = new SynthesizingMethodParameter(method, 0);
-		assertThat(methodParameter.hashCode()).isEqualTo(stringParameter.hashCode());
+		assertThat(methodParameter).hasSameHashCodeAs(stringParameter);
 		assertThat(methodParameter.hashCode()).isNotEqualTo(longParameter.hashCode());
 	}
 

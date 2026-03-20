@@ -42,17 +42,17 @@ class OrderComparatorTests {
 
 	@Test
 	void compareOrderedInstancesSame() {
-		assertThat(this.comparator.compare(new StubOrdered(100), new StubOrdered(100))).isEqualTo(0);
+		assertThat(this.comparator.compare(new StubOrdered(100), new StubOrdered(100))).isZero();
 	}
 
 	@Test
 	void compareOrderedInstancesAfter() {
-		assertThat(this.comparator.compare(new StubOrdered(982300), new StubOrdered(100))).isEqualTo(1);
+		assertThat(this.comparator.compare(new StubOrdered(982300), new StubOrdered(100))).isOne();
 	}
 
 	@Test
 	void compareOrderedInstancesNullFirst() {
-		assertThat(this.comparator.compare(null, new StubOrdered(100))).isEqualTo(1);
+		assertThat(this.comparator.compare(null, new StubOrdered(100))).isOne();
 	}
 
 	@Test
@@ -62,12 +62,12 @@ class OrderComparatorTests {
 
 	@Test
 	void compareOrderedInstancesDoubleNull() {
-		assertThat(this.comparator.compare(null, null)).isEqualTo(0);
+		assertThat(this.comparator.compare(null, null)).isZero();
 	}
 
 	@Test
 	void compareTwoNonOrderedInstancesEndsUpAsSame() {
-		assertThat(this.comparator.compare(new Object(), new Object())).isEqualTo(0);
+		assertThat(this.comparator.compare(new Object(), new Object())).isZero();
 	}
 
 	@Test
@@ -77,12 +77,12 @@ class OrderComparatorTests {
 
 	@Test
 	void comparePriorityOrderedInstancesSame() {
-		assertThat(this.comparator.compare(new StubPriorityOrdered(100), new StubPriorityOrdered(100))).isEqualTo(0);
+		assertThat(this.comparator.compare(new StubPriorityOrdered(100), new StubPriorityOrdered(100))).isZero();
 	}
 
 	@Test
 	void comparePriorityOrderedInstancesAfter() {
-		assertThat(this.comparator.compare(new StubPriorityOrdered(982300), new StubPriorityOrdered(100))).isEqualTo(1);
+		assertThat(this.comparator.compare(new StubPriorityOrdered(982300), new StubPriorityOrdered(100))).isOne();
 	}
 
 	@Test
@@ -102,7 +102,7 @@ class OrderComparatorTests {
 
 	private void assertThatPriorityOrderedAlwaysWins(StubPriorityOrdered priority, StubOrdered standard) {
 		assertThat(this.comparator.compare(priority, standard)).isEqualTo(-1);
-		assertThat(this.comparator.compare(standard, priority)).isEqualTo(1);
+		assertThat(this.comparator.compare(standard, priority)).isOne();
 	}
 
 	@Test
@@ -123,14 +123,14 @@ class OrderComparatorTests {
 	void compareWithSourceProviderArrayNoMatch() {
 		Comparator<Object> customComparator = this.comparator.withSourceProvider(
 				new TestSourceProvider(5L, new Object[] {new Object(), new Object()}));
-		assertThat(customComparator.compare(new Object(), 5L)).isEqualTo(0);
+		assertThat(customComparator.compare(new Object(), 5L)).isZero();
 	}
 
 	@Test
 	void compareWithSourceProviderEmpty() {
 		Comparator<Object> customComparator = this.comparator.withSourceProvider(
 				new TestSourceProvider(50L, new Object()));
-		assertThat(customComparator.compare(new Object(), 5L)).isEqualTo(0);
+		assertThat(customComparator.compare(new Object(), 5L)).isZero();
 	}
 
 

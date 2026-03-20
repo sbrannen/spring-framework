@@ -346,7 +346,7 @@ class MimeTypeTests {
 
 		assertThat(actual).hasSameSizeAs(mimeTypes);
 		for (int i = 0; i < mimeTypes.length; i++) {
-			assertThat(actual.get(i).toString()).isEqualTo(mimeTypes[i]);
+			assertThat(actual.get(i)).hasToString(mimeTypes[i]);
 		}
 	}
 
@@ -358,11 +358,11 @@ class MimeTypeTests {
 		MimeType audioBasicLevel = new MimeType("audio", "basic", singletonMap("level", "1"));
 
 		// equal
-		assertThat(audioBasic.compareTo(audioBasic)).as("Invalid comparison result").isEqualTo(0);
-		assertThat(audio.compareTo(audio)).as("Invalid comparison result").isEqualTo(0);
-		assertThat(audioBasicLevel.compareTo(audioBasicLevel)).as("Invalid comparison result").isEqualTo(0);
+		assertThat(audioBasic.compareTo(audioBasic)).as("Invalid comparison result").isZero();
+		assertThat(audio.compareTo(audio)).as("Invalid comparison result").isZero();
+		assertThat(audioBasicLevel.compareTo(audioBasicLevel)).as("Invalid comparison result").isZero();
 
-		assertThat(audioBasicLevel.compareTo(audio)).as("Invalid comparison result").isGreaterThan(0);
+		assertThat(audioBasicLevel.compareTo(audio)).as("Invalid comparison result").isPositive();
 
 		List<MimeType> expected = new ArrayList<>();
 		expected.add(audio);
@@ -388,18 +388,18 @@ class MimeTypeTests {
 	void compareToCaseSensitivity() {
 		MimeType m1 = new MimeType("audio", "basic");
 		MimeType m2 = new MimeType("Audio", "Basic");
-		assertThat(m1.compareTo(m2)).as("Invalid comparison result").isEqualTo(0);
-		assertThat(m2.compareTo(m1)).as("Invalid comparison result").isEqualTo(0);
+		assertThat(m1.compareTo(m2)).as("Invalid comparison result").isZero();
+		assertThat(m2.compareTo(m1)).as("Invalid comparison result").isZero();
 
 		m1 = new MimeType("audio", "basic", singletonMap("foo", "bar"));
 		m2 = new MimeType("audio", "basic", singletonMap("Foo", "bar"));
-		assertThat(m1.compareTo(m2)).as("Invalid comparison result").isEqualTo(0);
-		assertThat(m2.compareTo(m1)).as("Invalid comparison result").isEqualTo(0);
+		assertThat(m1.compareTo(m2)).as("Invalid comparison result").isZero();
+		assertThat(m2.compareTo(m1)).as("Invalid comparison result").isZero();
 
 		m1 = new MimeType("audio", "basic", singletonMap("foo", "bar"));
 		m2 = new MimeType("audio", "basic", singletonMap("foo", "Bar"));
-		assertThat(m1.compareTo(m2)).as("Invalid comparison result").isNotEqualTo(0);
-		assertThat(m2.compareTo(m1)).as("Invalid comparison result").isNotEqualTo(0);
+		assertThat(m1.compareTo(m2)).as("Invalid comparison result").isNotZero();
+		assertThat(m2.compareTo(m1)).as("Invalid comparison result").isNotZero();
 	}
 
 	@Test
@@ -471,9 +471,10 @@ class MimeTypeTests {
 		MimeType m1 = new MimeType("text", "plain", singletonMap("charset", "UTF-8"));
 		MimeType m2 = new MimeType("text", "plain", singletonMap("charset", "utf-8"));
 		assertThat(m2).isEqualTo(m1);
-		assertThat(m1).isEqualTo(m2);
-		assertThat(m1.compareTo(m2)).isEqualTo(0);
-		assertThat(m2.compareTo(m1)).isEqualTo(0);
+		assertThat(m1)
+				.isEqualTo(m2)
+				.isEqualByComparingTo(m2);
+		assertThat(m2).isEqualByComparingTo(m1);
 	}
 
 	@Test  // gh-26127

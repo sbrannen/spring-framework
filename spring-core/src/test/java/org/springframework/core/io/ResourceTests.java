@@ -75,8 +75,8 @@ class ResourceTests {
 		assertThat(resource.getURL().getFile()).endsWith("ResourceTests.class");
 		assertThat(resource.exists()).isTrue();
 		assertThat(resource.isReadable()).isTrue();
-		assertThat(resource.contentLength()).isGreaterThan(0);
-		assertThat(resource.lastModified()).isGreaterThan(0);
+		assertThat(resource.contentLength()).isPositive();
+		assertThat(resource.lastModified()).isPositive();
 		assertThat(resource.getContentAsByteArray()).containsExactly(Files.readAllBytes(Path.of(resource.getURI())));
 	}
 
@@ -85,11 +85,11 @@ class ResourceTests {
 	void resourceCreateRelative(Resource resource) throws Exception {
 		Resource relative1 = resource.createRelative("ClassPathResourceTests.class");
 		assertThat(relative1.getFilename()).isEqualTo("ClassPathResourceTests.class");
-		assertThat(relative1.getURL().getFile().endsWith("ClassPathResourceTests.class")).isTrue();
+		assertThat(relative1.getURL().getFile()).endsWith("ClassPathResourceTests.class");
 		assertThat(relative1.exists()).isTrue();
 		assertThat(relative1.isReadable()).isTrue();
-		assertThat(relative1.contentLength()).isGreaterThan(0);
-		assertThat(relative1.lastModified()).isGreaterThan(0);
+		assertThat(relative1.contentLength()).isPositive();
+		assertThat(relative1.lastModified()).isPositive();
 	}
 
 	@ParameterizedTest
@@ -100,8 +100,8 @@ class ResourceTests {
 		assertThat(relative2.getURL().getFile()).endsWith("PathMatchingResourcePatternResolverTests.class");
 		assertThat(relative2.exists()).isTrue();
 		assertThat(relative2.isReadable()).isTrue();
-		assertThat(relative2.contentLength()).isGreaterThan(0);
-		assertThat(relative2.lastModified()).isGreaterThan(0);
+		assertThat(relative2.contentLength()).isPositive();
+		assertThat(relative2.lastModified()).isPositive();
 	}
 
 	@ParameterizedTest
@@ -112,8 +112,8 @@ class ResourceTests {
 		assertThat(relative3.getURL().getFile()).endsWith("CollectionFactoryTests.class");
 		assertThat(relative3.exists()).isTrue();
 		assertThat(relative3.isReadable()).isTrue();
-		assertThat(relative3.contentLength()).isGreaterThan(0);
-		assertThat(relative3.lastModified()).isGreaterThan(0);
+		assertThat(relative3.contentLength()).isPositive();
+		assertThat(relative3.lastModified()).isPositive();
 	}
 
 	@ParameterizedTest
@@ -287,7 +287,7 @@ class ResourceTests {
 				ByteBuffer buffer = ByteBuffer.allocate((int) resource.contentLength());
 				channel.read(buffer);
 				buffer.rewind();
-				assertThat(buffer.limit()).isGreaterThan(0);
+				assertThat(buffer.limit()).isPositive();
 			}
 		}
 
@@ -411,7 +411,7 @@ class ResourceTests {
 			assertThat(resource.exists()).isTrue();
 			assertThat(resource.isReadable()).isTrue();
 			assertThat(resource.contentLength()).isEqualTo(6);
-			assertThat(resource.lastModified()).isGreaterThan(0);
+			assertThat(resource.lastModified()).isPositive();
 		}
 
 		@Test
@@ -421,7 +421,7 @@ class ResourceTests {
 			assertThat(resource.exists()).isTrue();
 			assertThat(resource.isReadable()).isTrue();
 			assertThat(resource.contentLength()).isEqualTo(6);
-			assertThat(resource.lastModified()).isGreaterThan(0);
+			assertThat(resource.lastModified()).isPositive();
 		}
 
 		@Test
@@ -462,7 +462,7 @@ class ResourceTests {
 			assertThat(resource.getInputStream()).hasContent("Spring");
 			RecordedRequest request = this.server.takeRequest();
 			String authorization = request.getHeaders().get("Authorization");
-			assertThat(authorization).isNotNull().startsWith("Basic ");
+			assertThat(authorization).startsWith("Basic ");
 			assertThat(new String(Base64.getDecoder().decode(authorization.substring(6)),
 					StandardCharsets.ISO_8859_1)).isEqualTo("alice:secret");
 		}
