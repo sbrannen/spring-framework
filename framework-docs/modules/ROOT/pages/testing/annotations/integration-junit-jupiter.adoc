@@ -30,13 +30,22 @@ developer wishes to switch to test-class scoped semantics — the `SpringExtensi
 configured to use a test-class scoped `ExtensionContext` by annotating a top-level test
 class with `@SpringExtensionConfig(useTestClassScopedExtensionContext = true)`.
 
-[TIP]
-====
-If your top-level test class is configured to use JUnit Jupiter's
-`@TestInstance(Lifecycle.PER_CLASS)` semantics, the `SpringExtension` will always use a
-test-class scoped `ExtensionContext`, and there is no need to declare
-`@SpringExtensionConfig(useTestClassScopedExtensionContext = true)`.
-====
+Alternatively, you can set the `spring.test.extension.context.scope` Spring property to
+`test_class` (or `TEST_CLASS`) — for example, via a JVM system property
+(`-Dspring.test.extension.context.scope=test_class`), a `spring.properties` file on the
+classpath, or a
+https://docs.junit.org/current/running-tests/configuration-parameters.html[JUnit Platform configuration parameter].
+Acceptable values are the constants defined on
+{spring-framework-api}/org/springframework/test/context/junit/jupiter/SpringExtension.ExtensionContextScope.html[`SpringExtension.ExtensionContextScope`],
+ignoring case. The `test_class` value configures how the `SpringExtension` resolves the
+`ExtensionContext` for Spring's own callbacks (while JUnit Jupiter still receives
+`TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD` from the extension for
+test instantiation). When unset,
+`test_method` semantics apply if there is no `@SpringExtensionConfig` declaration on the
+top-level test class.
+
+If `@SpringExtensionConfig` is present on the top-level test class, its
+`useTestClassScopedExtensionContext` attribute overrides the global property.
 
 [NOTE]
 ====

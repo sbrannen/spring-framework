@@ -396,11 +396,10 @@ recursively.
 ====
 As of Spring Framework 7.0, the `SpringExtension` uses a test-method scoped
 `ExtensionContext` within `@Nested` test class hierarchies by default. However, the
-`SpringExtension` can be configured to use a test-class scoped `ExtensionContext`.
-
-See the documentation for
-xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`]
-for details.
+`SpringExtension` can be configured to use a test-class scoped `ExtensionContext` — for
+example via `@SpringExtensionConfig` or the `spring.test.extension.context.scope` Spring
+property (see
+xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`]).
 ====
 
 [TIP]

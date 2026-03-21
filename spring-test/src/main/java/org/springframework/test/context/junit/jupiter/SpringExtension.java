@@ -23,6 +23,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
@@ -42,12 +44,14 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
+import org.junit.jupiter.api.extension.TestInstantiationAwareExtension;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.platform.commons.annotation.Testable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.ParameterResolutionDelegate;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.annotation.MergedAnnotations.SearchStrategy;
@@ -61,9 +65,9 @@ import org.springframework.test.context.support.PropertyProvider;
 import org.springframework.test.context.support.TestConstructorUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.ConcurrentLruCache;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.util.StringUtils;
 
 /**
  * {@code SpringExtension} integrates the <em>Spring TestContext Framework</em>
@@ -75,25 +79,24 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
  * with {@code @ExtendWith(SpringExtension.class)} such as {@code @SpringBootTest},
  * etc.
  *
- * <p>As of Spring Framework 7.0, the {@code SpringExtension} is
- * {@linkplain #getTestInstantiationExtensionContextScope(ExtensionContext)
- * configured} to use a test-method scoped {@link ExtensionContext}, which
- * enables consistent dependency injection into fields and constructors from the
- * {@link ApplicationContext} for the current test method in a
+ * <p>As of Spring Framework 7.0, the {@code SpringExtension} always
+ * {@linkplain #getTestInstantiationExtensionContextScope(ExtensionContext) reports}
+ * {@link TestInstantiationAwareExtension.ExtensionContextScope#TEST_METHOD} to JUnit
+ * Jupiter, which enables consistent dependency injection into fields and constructors
+ * from the {@link ApplicationContext} for the current test method in a
  * {@link org.junit.jupiter.api.Nested @Nested} test class hierarchy. However,
  * if a third-party {@link org.junit.platform.launcher.TestExecutionListener
  * TestExecutionListener} is not compatible with the semantics associated with
  * a test-method scoped extension context &mdash; or if a developer wishes to
- * switch to test-class scoped semantics &mdash; the {@code SpringExtension} can
- * be configured to use a test-class scoped extension context by annotating a
- * top-level test class with
+ * switch to test-class scoped semantics for Spring's own use of the
+ * {@code ExtensionContext} &mdash; the {@code SpringExtension} can be configured
+ * by annotating a top-level test class with
  * {@link SpringExtensionConfig#useTestClassScopedExtensionContext()
- * &#64;SpringExtensionConfig(useTestClassScopedExtensionContext = true)}. Note,
- * however, that the {@code SpringExtension} will always use a test-class scoped
- * {@code ExtensionContext} if your top-level test class is configured to use JUnit
- * Jupiter’s {@code @TestInstance(Lifecycle.PER_CLASS)} semantics, in which case
- * there is no need to declare
- * {@code @SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
+ * &#64;SpringExtensionConfig(useTestClassScopedExtensionContext = true)} or by
+ * setting the {@value #EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME} Spring property
+ * to {@link ExtensionContextScope#TEST_CLASS}. An explicit
+ * {@code @SpringExtensionConfig} declaration on the top-level test class
+ * overrides the global property.
  *
  * <p><strong>NOTE:</strong> This class requires JUnit Jupiter 6.0 or higher.
  *
@@ -111,6 +114,35 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
 public class SpringExtension implements BeforeAllCallback, AfterAllCallback, TestInstancePostProcessor,
 		BeforeEachCallback, AfterEachCallback, BeforeTestExecutionCallback, AfterTestExecutionCallback,
 		ParameterResolver {
+
+	/**
+	 * Spring property used to configure the default {@link ExtensionContextScope}
+	 * for the {@code SpringExtension} when {@link SpringExtensionConfig} is not
+	 * declared on the top-level test class: {@value}.
+	 * <p>Acceptable values include enum constants defined in {@link ExtensionContextScope},
+	 * ignoring case. For example, the default may be changed to
+	 * {@link ExtensionContextScope#TEST_CLASS} by supplying the following JVM system
+	 * property via the command line.
+	 * <pre style="code">-Dspring.test.extension.context.scope=test_class</pre>
+	 * <p>If the property is not set or does not resolve to a supported
+	 * {@link ExtensionContextScope} constant, {@link ExtensionContext#getConfigurationParameter(String)}
+	 * is consulted next (JUnit Platform configuration parameters, which may also consult JVM
+	 * system properties and {@code junit-platform.properties} as described in the JUnit
+	 * documentation). This mirrors the lookup order in
+	 * {@link org.springframework.test.context.support.TestConstructorUtils#isAutowirableConstructorInternal(
+	 * java.lang.reflect.Constructor, Class, org.springframework.test.context.support.PropertyProvider)
+	 * TestConstructorUtils} (without using a {@link org.springframework.test.context.support.PropertyProvider
+	 * PropertyProvider}).
+	 * <p>If neither source yields a supported value, {@link ExtensionContextScope#TEST_METHOD} semantics
+	 * apply when no {@code @SpringExtensionConfig} declaration is present.
+	 * <p>May alternatively be configured via the
+	 * {@link org.springframework.core.SpringProperties SpringProperties} mechanism (classpath
+	 * {@code spring.properties}, etc.) in addition to JVM system properties.
+	 * @since 7.0.7
+	 * @see ExtensionContextScope
+	 * @see SpringExtensionConfig
+	 */
+	public static final String EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME = "spring.test.extension.context.scope";
 
 	/**
 	 * {@link Namespace} in which {@code TestContextManagers} are stored, keyed
@@ -139,14 +171,6 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	private static final Namespace RECORD_APPLICATION_EVENTS_VALIDATION_NAMESPACE =
 			Namespace.create(SpringExtension.class.getName() + "#recordApplicationEvents.validation");
 
-	/**
-	 * LRU cache for {@link SpringExtensionConfig#useTestClassScopedExtensionContext()}
-	 * mappings, keyed by test class.
-	 * @since 7.0
-	 */
-	private static final ConcurrentLruCache<Class<?>, Boolean> useTestClassScopedExtensionContextCache =
-			new ConcurrentLruCache<>(32, SpringExtension::useTestClassScopedExtensionContext);
-
 	// Note that @Test, @TestFactory, @TestTemplate, @RepeatedTest, and @ParameterizedTest
 	// are all meta-annotated with @Testable.
 	private static final List<Class<? extends Annotation>> JUPITER_ANNOTATION_TYPES =
@@ -157,16 +181,23 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 
 
 	/**
-	 * Returns {@link ExtensionContextScope#TEST_METHOD ExtensionContextScope.TEST_METHOD}.
-	 * <p>This can be effectively overridden by annotating a test class with
-	 * {@code @SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
-	 * See the {@linkplain SpringExtension class-level Javadoc} for further details.
+	 * Always returns {@link TestInstantiationAwareExtension.ExtensionContextScope#TEST_METHOD}.
+	 * <p>Test-class scoped {@code ExtensionContext} semantics for Spring (when requested
+	 * via {@link SpringExtensionConfig} or {@value #EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME})
+	 * are applied in {@link #findProperlyScopedExtensionContext(Class, ExtensionContext)}
+	 * instead.
+	 * <p>The supplied {@code rootContext} is not inspected; it is declared only to satisfy
+	 * the {@link TestInstantiationAwareExtension} contract.
 	 * @since 7.0
 	 * @see SpringExtensionConfig#useTestClassScopedExtensionContext()
+	 * @see #EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME
+	 * @see ExtensionContextScope
 	 */
 	@Override
-	public ExtensionContextScope getTestInstantiationExtensionContextScope(ExtensionContext rootContext) {
-		return ExtensionContextScope.TEST_METHOD;
+	public TestInstantiationAwareExtension.ExtensionContextScope getTestInstantiationExtensionContextScope(
+			ExtensionContext rootContext) {
+
+		return TestInstantiationAwareExtension.ExtensionContextScope.TEST_METHOD;
 	}
 
 	/**
@@ -464,20 +495,19 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	}
 
 	/**
-	 * Find the properly {@linkplain ExtensionContextScope scoped} {@link ExtensionContext}
-	 * for the supplied test class.
+	 * Find the properly scoped {@link ExtensionContext} for the supplied test class.
 	 * <p>If the supplied {@code ExtensionContext} is already properly scoped, it
-	 * will be returned. Otherwise, if the test class is annotated with
-	 * {@code @SpringExtensionConfig(useTestClassScopedExtensionContext = true)},
-	 * this method searches the {@code ExtensionContext} hierarchy for an
-	 * {@code ExtensionContext} whose test class is the same as the supplied
-	 * test class.
+	 * will be returned. Otherwise, if test-class scoped semantics apply (see
+	 * {@linkplain SpringExtension class-level Javadoc}), this method searches the
+	 * {@code ExtensionContext} hierarchy for an {@code ExtensionContext} whose test
+	 * class is the same as the supplied test class.
 	 * @since 7.0
 	 * @see SpringExtensionConfig#useTestClassScopedExtensionContext()
+	 * @see #EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME
 	 * @see ExtensionContextScope
 	 */
 	private static ExtensionContext findProperlyScopedExtensionContext(Class<?> testClass, ExtensionContext context) {
-		if (useTestClassScopedExtensionContextCache.get(testClass)) {
+		if (shouldUseTestClassScopedExtensionContext(testClass, context)) {
 			while (context.getRequiredTestClass() != testClass) {
 				context = context.getParent().get();
 			}
@@ -486,13 +516,13 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	}
 
 	/**
-	 * Determine if the supplied test class, or one of its enclosing classes, is annotated
-	 * with {@code @SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
+	 * Determine whether test-class scoped {@code ExtensionContext} semantics apply
+	 * for the supplied test class.
 	 * @since 7.0
 	 * @see SpringExtensionConfig#useTestClassScopedExtensionContext()
-	 * @see #useTestClassScopedExtensionContextCache
+	 * @see #EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME
 	 */
-	private static boolean useTestClassScopedExtensionContext(Class<?> testClass) {
+	private static boolean shouldUseTestClassScopedExtensionContext(Class<?> testClass, ExtensionContext context) {
 		MergedAnnotation<SpringExtensionConfig> mergedAnnotation =
 				MergedAnnotations.search(SearchStrategy.TYPE_HIERARCHY)
 						.withEnclosingClasses(ClassUtils::isInnerClass)
@@ -509,7 +539,87 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 			return mergedAnnotation.getBoolean("useTestClassScopedExtensionContext");
 		}
 
-		return false;
+		return (resolveConfiguredExtensionContextScope(context) == ExtensionContextScope.TEST_CLASS);
+	}
+
+	/**
+	 * Resolve {@link ExtensionContextScope} from {@value #EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME},
+	 * first via {@link SpringProperties} and then via
+	 * {@link ExtensionContext#getConfigurationParameter(String)} if the Spring property is
+	 * unset or not a supported enum constant name (same idea as
+	 * {@link org.springframework.test.context.support.TestConstructorUtils#isAutowirableConstructorInternal(
+	 * java.lang.reflect.Constructor, Class, org.springframework.test.context.support.PropertyProvider)
+	 * TestConstructorUtils} with a {@code null} local {@code @TestConstructor} declaration).
+	 */
+	private static ExtensionContextScope resolveConfiguredExtensionContextScope(ExtensionContext extensionContext) {
+		String springValue = SpringProperties.getProperty(EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME);
+		ExtensionContextScope scope = ExtensionContextScope.from(springValue);
+
+		if (scope == null) {
+			String junitValue = extensionContext.getConfigurationParameter(EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME).orElse(null);
+			scope = ExtensionContextScope.from(junitValue);
+			if (scope == null) {
+				// Non-blank after failed ExtensionContextScope.from(...) means an unsupported value;
+				// blank or unset is treated as the default (TEST_METHOD).
+				if (StringUtils.hasText(springValue)) {
+					throw new IllegalArgumentException("Unsupported value '%s' for property '%s'"
+							.formatted(Objects.requireNonNull(springValue).strip(), EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME));
+				}
+				if (StringUtils.hasText(junitValue)) {
+					throw new IllegalArgumentException("Unsupported value '%s' for property '%s'"
+							.formatted(Objects.requireNonNull(junitValue).strip(), EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME));
+				}
+				return ExtensionContextScope.TEST_METHOD;
+			}
+		}
+		return scope;
+	}
+
+
+	/**
+	 * Spring's enumeration of <em>extension context scopes</em> for configuring how the
+	 * {@code SpringExtension} resolves an {@link ExtensionContext} within {@code @Nested}
+	 * test class hierarchies (see {@link #findProperlyScopedExtensionContext(Class, ExtensionContext)}).
+	 *
+	 * <p>Used with the {@value SpringExtension#EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME}
+	 * Spring property and JUnit Platform configuration parameters.
+	 *
+	 * @since 7.0.7
+	 * @see SpringExtension#EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME
+	 * @see SpringExtensionConfig
+	 */
+	public enum ExtensionContextScope {
+
+		/**
+		 * Use a test-method scoped {@link ExtensionContext} within {@code @Nested}
+		 * test class hierarchies.
+		 */
+		TEST_METHOD,
+
+		/**
+		 * Use a test-class scoped {@link ExtensionContext} within {@code @Nested}
+		 * test class hierarchies.
+		 */
+		TEST_CLASS;
+
+
+		/**
+		 * Get the {@code ExtensionContextScope} enum constant with the supplied name,
+		 * {@linkplain String#strip() stripped} and ignoring case.
+		 * @param name the name of the enum constant to retrieve
+		 * @return the corresponding enum constant, or {@code null} if not found
+		 */
+		public static @Nullable ExtensionContextScope from(@Nullable String name) {
+			if (!StringUtils.hasText(name)) {
+				return null;
+			}
+			try {
+				return ExtensionContextScope.valueOf(name.strip().toUpperCase(Locale.ROOT));
+			}
+			catch (IllegalArgumentException ex) {
+				return null;
+			}
+		}
 	}
 
 }
