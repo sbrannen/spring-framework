@@ -139,8 +139,8 @@ in the _Spring TestContext Framework_. See
 xref:testing/testcontext-framework/ctx-management/failure-threshold.adoc[Context Failure Threshold].
 
 | `spring.test.extension.context.scope`
-| The default _JUnit Jupiter extension context scope_ for the `SpringExtension` when
-`@SpringExtensionConfig` is not present on the top-level test class. See
+| The default _extension context scope_ used by the `SpringExtension` in `@Nested` test
+class hierarchies. See
 xref:testing/annotations/integration-junit-jupiter.adoc#integration-testing-annotations-springextensionconfig[`@SpringExtensionConfig`].
 
 | `spring.test.enclosing.configuration`

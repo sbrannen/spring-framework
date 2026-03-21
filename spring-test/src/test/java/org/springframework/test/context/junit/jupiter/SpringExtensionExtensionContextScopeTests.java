@@ -16,18 +16,24 @@
 
 package org.springframework.test.context.junit.jupiter;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.core.LauncherFactory;
-import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
+import org.junit.platform.testkit.engine.EngineTestKit;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.SpringProperties;
+import org.springframework.core.env.Environment;
+import org.springframework.test.context.NestedTestConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension.ExtensionContextScope;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
-import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.request;
+import static org.springframework.test.context.NestedTestConfiguration.EnclosingConfiguration.OVERRIDE;
+import static org.springframework.test.context.junit.jupiter.SpringExtension.EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME;
+import static org.springframework.test.context.junit.jupiter.SpringExtension.ExtensionContextScope.TEST_CLASS;
+import static org.springframework.test.context.junit.jupiter.SpringExtension.ExtensionContextScope.TEST_METHOD;
 
 /**
  * Tests for {@link SpringExtension.ExtensionContextScope} and
@@ -38,86 +44,164 @@ import static org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder.r
  */
 class SpringExtensionExtensionContextScopeTests {
 
-	private static final String JUNIT_DISABLED_CONDITION_DEACTIVATE_PROPERTY = "junit.jupiter.conditions.deactivate";
-
-	private static final String JUNIT_DISABLED_CONDITION_CLASS_NAME = "org.junit.jupiter.engine.extension.DisabledCondition";
-
 	@Test
 	void extensionContextScopeFromString() {
 		assertThat(ExtensionContextScope.from(null)).isNull();
 		assertThat(ExtensionContextScope.from("")).isNull();
 		assertThat(ExtensionContextScope.from("   ")).isNull();
-		assertThat(ExtensionContextScope.from("TEST_METHOD")).isEqualTo(ExtensionContextScope.TEST_METHOD);
-		assertThat(ExtensionContextScope.from("test_method")).isEqualTo(ExtensionContextScope.TEST_METHOD);
-		assertThat(ExtensionContextScope.from("TEST_CLASS")).isEqualTo(ExtensionContextScope.TEST_CLASS);
-		assertThat(ExtensionContextScope.from("test_class")).isEqualTo(ExtensionContextScope.TEST_CLASS);
 		assertThat(ExtensionContextScope.from("bogus")).isNull();
+
+		assertThat(ExtensionContextScope.from("TEST_METHOD")).isSameAs(TEST_METHOD);
+		assertThat(ExtensionContextScope.from("test_method")).isSameAs(TEST_METHOD);
+		assertThat(ExtensionContextScope.from("Test_Method")).isSameAs(TEST_METHOD);
+
+		assertThat(ExtensionContextScope.from("TEST_CLASS")).isSameAs(TEST_CLASS);
+		assertThat(ExtensionContextScope.from("test_class")).isSameAs(TEST_CLASS);
+		assertThat(ExtensionContextScope.from("Test_Class")).isSameAs(TEST_CLASS);
 	}
 
 	@Test
-	void executeWithInvalidExtensionContextScopePropertyFails() {
-		SpringProperties.setProperty(SpringExtension.EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, "bogus");
+	void invalidExtensionContextScopeIsRejectedWhenConfiguredViaSpringProperties() {
+		SpringProperties.setProperty(EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, "bogus");
 		try {
-			SummaryGeneratingListener listener = execute(BrokenScopeTestCase.class, false, false);
-			assertThat(listener.getSummary().getTestsFailedCount()).isGreaterThan(0);
+			EngineTestKit.engine("junit-jupiter")
+					.selectors(selectClass(InvalidScopeTestCase.class))
+					.execute()
+					.testEvents()
+					.assertStatistics(stats -> stats.started(1).failed(1));
 		}
 		finally {
-			SpringProperties.setProperty(SpringExtension.EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, null);
+			SpringProperties.setProperty(EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, null);
 		}
 	}
 
 	@Test
-	void executeWithJUnitConfigurationParameterForTestClassScope() {
-		SummaryGeneratingListener listener = execute(GlobalSpringPropertyClassScopedNestedIntegrationTests.class, true, true);
-		assertThat(listener.getSummary().getTestsSucceededCount()).isEqualTo(2);
-		assertThat(listener.getSummary().getTestsFailedCount()).isZero();
+	void invalidExtensionContextScopeIsRejectedWhenConfiguredViaJUnitConfigurationParameter() {
+		EngineTestKit.engine("junit-jupiter")
+				.selectors(selectClass(InvalidScopeTestCase.class))
+				.configurationParameter(EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, "bogus")
+				.execute()
+				.testEvents()
+				.assertStatistics(stats -> stats.started(1).failed(1));
 	}
 
 	@Test
-	void executeWithSpringPropertiesForTestClassScope() {
-		SpringProperties.setProperty(SpringExtension.EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, "test_class");
+	void testClassScopeConfiguredViaSpringProperties() {
+		SpringProperties.setProperty(EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, TEST_CLASS.name());
 		try {
-			SummaryGeneratingListener listener = execute(GlobalSpringPropertyClassScopedNestedIntegrationTests.class, false, true);
-			assertThat(listener.getSummary().getTestsSucceededCount()).isEqualTo(2);
-			assertThat(listener.getSummary().getTestsFailedCount()).isZero();
+			var results = EngineTestKit.engine("junit-jupiter")
+					.selectors(selectClass(GlobalClassScopedConfigurationTestCase.class))
+					.execute();
+			results.containerEvents()
+					.assertStatistics(stats -> stats.started(3).succeeded(3).failed(0));
+			results.testEvents()
+					.assertStatistics(stats -> stats.started(2).succeeded(2).failed(0));
 		}
 		finally {
-			SpringProperties.setProperty(SpringExtension.EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, null);
+			SpringProperties.setProperty(EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, null);
 		}
 	}
 
 	@Test
-	void springExtensionConfigFalseOverridesGlobalTestClassScope() {
-		SummaryGeneratingListener listener = execute(SpringExtensionConfigOverridesGlobalPropertyNestedIntegrationTests.class, true, true);
-		assertThat(listener.getSummary().getTestsSucceededCount()).isEqualTo(2);
-		assertThat(listener.getSummary().getTestsFailedCount()).isZero();
+	void testClassScopeConfiguredViaJUnitConfigurationParameter() {
+		var results = EngineTestKit.engine("junit-jupiter")
+				.selectors(selectClass(GlobalClassScopedConfigurationTestCase.class))
+				.configurationParameter(EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, TEST_CLASS.name())
+				.execute();
+		results.containerEvents()
+				.assertStatistics(stats -> stats.started(3).succeeded(3).failed(0));
+		results.testEvents()
+				.assertStatistics(stats -> stats.started(2).succeeded(2).failed(0));
 	}
 
-	private static SummaryGeneratingListener execute(Class<?> testClass, boolean testClassScopeViaJUnitConfig,
-			boolean deactivateDisabledCondition) {
-
-		Launcher launcher = LauncherFactory.create();
-		SummaryGeneratingListener listener = new SummaryGeneratingListener();
-		launcher.registerTestExecutionListeners(listener);
-		var builder = request().selectors(selectClass(testClass));
-		if (testClassScopeViaJUnitConfig) {
-			builder.configurationParameter(SpringExtension.EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, "test_class");
-		}
-		if (deactivateDisabledCondition) {
-			builder.configurationParameter(JUNIT_DISABLED_CONDITION_DEACTIVATE_PROPERTY, JUNIT_DISABLED_CONDITION_CLASS_NAME);
-		}
-		LauncherDiscoveryRequest request = builder.build();
-		launcher.execute(request);
-		return listener;
+	@Test
+	void springExtensionConfigOverridesGlobalTestClassScopeConfiguration() {
+		EngineTestKit.engine("junit-jupiter")
+				.selectors(selectClass(SpringExtensionConfigOverridesGlobalPropertyTestCase.class))
+				.configurationParameter(EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME, TEST_CLASS.name())
+				.execute()
+				.testEvents()
+				.assertStatistics(stats -> stats.started(2).succeeded(2).failed(0));
 	}
 
 
 	@SpringJUnitConfig
-	static class BrokenScopeTestCase {
+	static class InvalidScopeTestCase {
 
 		@Test
 		void test() {
-			// never reached — invalid extension context scope fails the engine
+			// no-op
+		}
+	}
+
+	@SpringJUnitConfig
+	@TestPropertySource(properties = "p1 = v1")
+	@NestedTestConfiguration(OVERRIDE)
+	@FailingTestCase
+	static class GlobalClassScopedConfigurationTestCase {
+
+		@Autowired
+		Environment env1;
+
+		@Test
+		void propertiesInEnvironment() {
+			assertThat(env1.getProperty("p1")).isEqualTo("v1");
+		}
+
+		@Nested
+		@SpringJUnitConfig(Config.class)
+		@TestPropertySource(properties = "p2 = v2")
+		class ConfigOverriddenByDefaultTests {
+
+			@Autowired
+			Environment env2;
+
+			@Test
+			void propertiesInEnvironment() {
+				assertThat(env1.getProperty("p1")).isEqualTo("v1");
+				assertThat(env1).isNotSameAs(env2);
+				assertThat(env2.getProperty("p1")).isNull();
+				assertThat(env2.getProperty("p2")).isEqualTo("v2");
+			}
+		}
+
+		@Configuration
+		static class Config {
+		}
+	}
+
+	@SpringJUnitConfig
+	@SpringExtensionConfig(useTestClassScopedExtensionContext = false)
+	@TestPropertySource(properties = "p1 = v1")
+	@NestedTestConfiguration(OVERRIDE)
+	static class SpringExtensionConfigOverridesGlobalPropertyTestCase {
+
+		@Autowired
+		Environment env1;
+
+		@Test
+		void propertiesInEnvironment() {
+			assertThat(env1.getProperty("p1")).isEqualTo("v1");
+		}
+
+		@Nested
+		@SpringJUnitConfig(Config.class)
+		@TestPropertySource(properties = "p2 = v2")
+		class ConfigOverriddenByDefaultTests {
+
+			@Autowired
+			Environment env2;
+
+			@Test
+			void propertiesInEnvironment() {
+				assertThat(env1).isSameAs(env2);
+				assertThat(env2.getProperty("p1")).isNull();
+				assertThat(env2.getProperty("p2")).isEqualTo("v2");
+			}
+		}
+
+		@Configuration
+		static class Config {
 		}
 	}
 

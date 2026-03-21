@@ -27,10 +27,6 @@ import java.lang.annotation.Target;
  * {@code @SpringExtensionConfig} is a type-level annotation that can be used to
  * configure the behavior of the {@link SpringExtension}.
  *
- * <p>If this annotation is declared on the top-level test class, its attributes take
- * precedence over the global {@value SpringExtension#EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME}
- * Spring property and the corresponding JUnit Platform configuration parameter.
- *
  * <p>This annotation is only applicable to {@link org.junit.jupiter.api.Nested @Nested}
  * test class hierarchies and should be applied to the top-level enclosing class
  * of a {@code @Nested} test class hierarchy. Consequently, there is no need to
@@ -64,6 +60,13 @@ public @interface SpringExtensionConfig {
 	 * {@code ExtensionContext}. Thus, there is no need to declare this annotation
 	 * attribute with a value of {@code false}.
 	 *
+	 * <p>Similarly, if your top-level test class is configured to use JUnit Jupiter’s
+	 * {@code @TestInstance(Lifecycle.PER_CLASS)} semantics, the {@code SpringExtension}
+	 * will always use a test-class scoped {@code ExtensionContext}, and there is no need
+	 * to declare {@code @SpringExtensionConfig(useTestClassScopedExtensionContext = true)}.
+	 *
+	 * <p>Furthermore, this attribute takes precedence over global configuration
+	 * of the {@code spring.test.extension.context.scope} property.
 	 *
 	 * @see SpringExtension
 	 * @see SpringExtension#EXTENSION_CONTEXT_SCOPE_PROPERTY_NAME
