@@ -24,6 +24,8 @@ import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
@@ -58,6 +60,9 @@ import org.springframework.core.annotation.RepeatableContainers;
 import org.springframework.test.context.MethodInvoker;
 import org.springframework.test.context.TestContextAnnotationUtils;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.bean.override.BeanOverride;
+import org.springframework.test.context.bean.override.BeanOverrideHandler;
+import org.springframework.test.context.bean.override.BeanOverrideUtils;
 import org.springframework.test.context.event.ApplicationEvents;
 import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.context.support.PropertyProvider;
@@ -370,6 +375,9 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * invoked with a fallback {@link PropertyProvider} that delegates its lookup
 	 * to {@link ExtensionContext#getConfigurationParameter(String)}.</li>
 	 * <li>The parameter is of type {@link ApplicationContext} or a sub-type thereof.</li>
+	 * <li>The parameter is annotated or meta-annotated with a
+	 * {@link BeanOverride @BeanOverride} composed annotation &mdash; for example,
+	 * {@code @MockitoBean} or {@code @MockitoSpyBean}.</li>
 	 * <li>The parameter is of type {@link ApplicationEvents} or a sub-type thereof.</li>
 	 * <li>{@link ParameterResolutionDelegate#isAutowirable} returns {@code true}.</li>
 	 * </ol>
@@ -396,6 +404,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 				extensionContext.getConfigurationParameter(propertyName).orElse(null);
 		return (TestConstructorUtils.isAutowirableConstructor(executable, junitPropertyProvider) ||
 				ApplicationContext.class.isAssignableFrom(parameterType) ||
+				isBeanOverride(parameter) ||
 				supportsApplicationEvents(parameterType, executable) ||
 				ParameterResolutionDelegate.isAutowirable(parameter, parameterContext.getIndex()));
 	}
@@ -414,7 +423,7 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 	 * retrieving the corresponding dependency from the test's {@link ApplicationContext}.
 	 * <p>Delegates to {@link ParameterResolutionDelegate}.
 	 * @see #supportsParameter
-	 * @see ParameterResolutionDelegate#resolveDependency
+	 * @see ParameterResolutionDelegate#resolveDependency(Parameter, int, String, Class, org.springframework.beans.factory.config.AutowireCapableBeanFactory)
 	 */
 	@Override
 	public @Nullable Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
@@ -428,6 +437,16 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 		}
 
 		ApplicationContext applicationContext = getApplicationContext(extensionContext);
+		if (isBeanOverride(parameter)) {
+			Optional<String> beanName = BeanOverrideUtils.findAllHandlers(testClass).stream()
+					.filter(handler -> parameter.equals(handler.getParameter()))
+					.map(BeanOverrideHandler::getBeanName)
+					.filter(Objects::nonNull)
+					.findFirst();
+			if (beanName.isPresent()) {
+				return applicationContext.getBean(beanName.get());
+			}
+		}
 		return ParameterResolutionDelegate.resolveDependency(parameter, index, testClass,
 				applicationContext.getAutowireCapableBeanFactory());
 	}
@@ -493,6 +512,11 @@ public class SpringExtension implements BeforeAllCallback, AfterAllCallback, Tes
 			}
 		}
 		return false;
+	}
+
+	private static boolean isBeanOverride(Parameter parameter) {
+		return (parameter.getDeclaringExecutable() instanceof Constructor &&
+				MergedAnnotations.from(parameter).isPresent(BeanOverride.class));
 	}
 
 	/**

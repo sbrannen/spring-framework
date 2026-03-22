@@ -17,7 +17,9 @@
 package org.springframework.test.context.bean.override;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -27,10 +29,13 @@ import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.SingletonBeanRegistry;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.util.Assert;
 
 /**
  * Handler for Bean Override injection points that is responsible for creating
@@ -49,7 +54,7 @@ import org.springframework.core.style.ToStringCreator;
  * <p>Concrete implementations of {@code BeanOverrideHandler} can store additional
  * metadata to use during override {@linkplain #createOverrideInstance instance
  * creation} &mdash; for example, based on further processing of the annotation,
- * the annotated field, or the annotated class.
+ * the annotated field, the annotated parameter, or the annotated class.
  *
  * <h3>Singleton Semantics</h3>
  *
@@ -62,7 +67,7 @@ import org.springframework.core.style.ToStringCreator;
  * <p>When replacing a bean created by a
  * {@link org.springframework.beans.factory.FactoryBean FactoryBean}, the
  * {@code FactoryBean} itself will be replaced with a singleton bean corresponding
- * to bean override instance created by the handler.
+ * to the bean override instance created by the handler.
  *
  * <p>When wrapping a bean created by a
  * {@link org.springframework.beans.factory.FactoryBean FactoryBean}, the object
@@ -78,6 +83,8 @@ import org.springframework.core.style.ToStringCreator;
 public abstract class BeanOverrideHandler {
 
 	private final @Nullable Field field;
+
+	private final @Nullable Parameter parameter;
 
 	private final Set<Annotation> qualifierAnnotations;
 
@@ -128,8 +135,36 @@ public abstract class BeanOverrideHandler {
 	protected BeanOverrideHandler(@Nullable Field field, ResolvableType beanType, @Nullable String beanName,
 			String contextName, BeanOverrideStrategy strategy) {
 
+		this(field, null, beanType, beanName, contextName, strategy);
+	}
+
+	/**
+	 * Construct a new {@code BeanOverrideHandler} from the supplied values.
+	 * @param parameter the constructor {@link Parameter} annotated with
+	 * {@link BeanOverride @BeanOverride}
+	 * @param beanType the {@linkplain ResolvableType type} of bean to override
+	 * @param beanName the name of the bean to override, or {@code null} to look
+	 * for a single matching bean by type
+	 * @param contextName the name of the context hierarchy level in which the
+	 * handler should be applied, or an empty string to indicate that the handler
+	 * should be applied to all application contexts within a context hierarchy
+	 * @param strategy the {@link BeanOverrideStrategy} to use
+	 * @since 7.1
+	 */
+	protected BeanOverrideHandler(Parameter parameter, ResolvableType beanType, @Nullable String beanName,
+			String contextName, BeanOverrideStrategy strategy) {
+
+		this(null, parameter, beanType, beanName, contextName, strategy);
+	}
+
+	private BeanOverrideHandler(@Nullable Field field, @Nullable Parameter parameter, ResolvableType beanType,
+			@Nullable String beanName, String contextName, BeanOverrideStrategy strategy) {
+
+		Assert.state(field == null || parameter == null, "The field and parameter cannot both be non-null");
+
 		this.field = field;
-		this.qualifierAnnotations = getQualifierAnnotations(field);
+		this.parameter = parameter;
+		this.qualifierAnnotations = getQualifierAnnotations(field != null ? field : parameter);
 		this.beanType = beanType;
 		this.beanName = beanName;
 		this.strategy = strategy;
@@ -156,10 +191,56 @@ public abstract class BeanOverrideHandler {
 
 
 	/**
-	 * Get the {@link Field} annotated with {@link BeanOverride @BeanOverride}.
+	 * Get the {@link Field} annotated with {@link BeanOverride @BeanOverride},
+	 * or {@code null} if this handler was not created for a field.
 	 */
 	public final @Nullable Field getField() {
 		return this.field;
+	}
+
+	/**
+	 * Get the constructor {@link Parameter} annotated with {@link BeanOverride @BeanOverride},
+	 * or {@code null} if this handler was not created for a parameter.
+	 * @since 7.1
+	 */
+	public final @Nullable Parameter getParameter() {
+		return this.parameter;
+	}
+
+	final @Nullable AnnotatedElement fieldOrParameter() {
+		return (this.field != null ? this.field : this.parameter);
+	}
+
+	final @Nullable String fieldOrParameterName() {
+		if (this.field != null) {
+			return this.field.getName();
+		}
+		if (this.parameter != null) {
+			return this.parameter.getName();
+		}
+		return null;
+	}
+
+	final @Nullable String fieldOrParameterDescription() {
+		if (this.field != null) {
+			return "field '%s.%s'".formatted(this.field.getDeclaringClass().getSimpleName(),
+					this.field.getName());
+		}
+		if (this.parameter != null) {
+			return "parameter '%s' in constructor for %s".formatted(this.parameter.getName(),
+					this.parameter.getDeclaringExecutable().getName());
+		}
+		return null;
+	}
+
+	final @Nullable DependencyDescriptor fieldOrParameterDependencyDescriptor() {
+		if (this.field != null) {
+			return new DependencyDescriptor(this.field, true);
+		}
+		if (this.parameter != null) {
+			return new DependencyDescriptor(MethodParameter.forParameter(this.parameter), true);
+		}
+		return null;
 	}
 
 	/**
@@ -276,24 +357,21 @@ public abstract class BeanOverrideHandler {
 		}
 
 		// by-type lookup
-		if (this.field == null) {
-			return (that.field == null);
-		}
-		return (that.field != null && this.field.getName().equals(that.field.getName()) &&
+		return (Objects.equals(fieldOrParameterName(), that.fieldOrParameterName()) &&
 				this.qualifierAnnotations.equals(that.qualifierAnnotations));
 	}
 
 	@Override
 	public int hashCode() {
 		int hash = Objects.hash(getClass(), this.beanType.getType(), this.beanName, this.contextName, this.strategy);
-		return (this.beanName != null ? hash : hash +
-				Objects.hash((this.field != null ? this.field.getName() : null), this.qualifierAnnotations));
+		return (this.beanName != null ? hash : hash + Objects.hash(fieldOrParameterName(), this.qualifierAnnotations));
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringCreator(this)
 				.append("field", this.field)
+				.append("parameter", this.parameter)
 				.append("beanType", this.beanType)
 				.append("beanName", this.beanName)
 				.append("contextName", this.contextName)
@@ -302,11 +380,11 @@ public abstract class BeanOverrideHandler {
 	}
 
 
-	private static Set<Annotation> getQualifierAnnotations(@Nullable Field field) {
-		if (field == null) {
+	private static Set<Annotation> getQualifierAnnotations(@Nullable AnnotatedElement element) {
+		if (element == null) {
 			return Collections.emptySet();
 		}
-		Annotation[] candidates = field.getDeclaredAnnotations();
+		Annotation[] candidates = element.getDeclaredAnnotations();
 		if (candidates.length == 0) {
 			return Collections.emptySet();
 		}

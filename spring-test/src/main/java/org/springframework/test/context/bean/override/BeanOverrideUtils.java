@@ -18,9 +18,12 @@ package org.springframework.test.context.bean.override;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +31,15 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
+import kotlin.jvm.JvmClassMappingKt;
+import kotlin.reflect.KClass;
+import kotlin.reflect.KFunction;
+import kotlin.reflect.full.KClasses;
+import kotlin.reflect.jvm.ReflectJvmMapping;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.KotlinDetector;
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
 import org.springframework.test.context.TestContextAnnotationUtils;
@@ -47,6 +58,8 @@ import static org.springframework.core.annotation.MergedAnnotations.SearchStrate
  */
 public abstract class BeanOverrideUtils {
 
+	private static final boolean KOTLIN_REFLECT_PRESENT = KotlinDetector.isKotlinReflectPresent();
+
 	private static final Comparator<MergedAnnotation<? extends Annotation>> reversedMetaDistance =
 			Comparator.<MergedAnnotation<? extends Annotation>> comparingInt(MergedAnnotation::getDistance).reversed();
 
@@ -55,8 +68,10 @@ public abstract class BeanOverrideUtils {
 	 * Process the given {@code testClass} and build the corresponding
 	 * {@link BeanOverrideHandler} list derived from {@link BeanOverride @BeanOverride}
 	 * fields in the test class and its type hierarchy.
-	 * <p>This method does not search the enclosing class hierarchy and does not
-	 * search for {@code @BeanOverride} declarations on classes or interfaces.
+	 * <p>This method does not search the enclosing class hierarchy, does not
+	 * search for {@code @BeanOverride} declarations on classes or interfaces, and
+	 * does not search for {@code @BeanOverride} declarations on constructor
+	 * parameters.
 	 * @param testClass the test class to process
 	 * @return a list of bean override handlers
 	 * @see #findAllHandlers(Class)
@@ -69,7 +84,8 @@ public abstract class BeanOverrideUtils {
 	 * Process the given {@code testClass} and build the corresponding
 	 * {@link BeanOverrideHandler} list derived from {@link BeanOverride @BeanOverride}
 	 * fields in the test class and in its type hierarchy as well as from
-	 * {@code @BeanOverride} declarations on classes and interfaces.
+	 * {@code @BeanOverride} declarations on classes and interfaces and
+	 * {@code @BeanOverride} declarations on constructor parameters.
 	 * <p>This method additionally searches for {@code @BeanOverride} declarations
 	 * in the enclosing class hierarchy based on
 	 * {@link TestContextAnnotationUtils#searchEnclosingClass(Class)} semantics.
@@ -83,7 +99,7 @@ public abstract class BeanOverrideUtils {
 
 	private static List<BeanOverrideHandler> findHandlers(Class<?> testClass, boolean localFieldsOnly) {
 		List<BeanOverrideHandler> handlers = new ArrayList<>();
-		findHandlers(testClass, testClass, handlers, localFieldsOnly, new HashSet<>());
+		findHandlers(testClass, testClass, handlers, localFieldsOnly, false, new HashSet<>());
 		return handlers;
 	}
 
@@ -97,11 +113,12 @@ public abstract class BeanOverrideUtils {
 	 * @param testClass the original test class
 	 * @param handlers the list of handlers found
 	 * @param localFieldsOnly whether to search only on local fields within the type hierarchy
+	 * @param fromNestedClass whether the search originated from a nested test class
 	 * @param visitedTypes the set of types already visited
 	 * @since 6.2.2
 	 */
 	private static void findHandlers(Class<?> clazz, Class<?> testClass, List<BeanOverrideHandler> handlers,
-			boolean localFieldsOnly, Set<Class<?>> visitedTypes) {
+			boolean localFieldsOnly, boolean fromNestedClass, Set<Class<?>> visitedTypes) {
 
 		// 0) Ensure that we do not process the same class or interface multiple times.
 		if (!visitedTypes.add(clazz)) {
@@ -110,26 +127,39 @@ public abstract class BeanOverrideUtils {
 
 		// 1) Search enclosing class hierarchy.
 		if (!localFieldsOnly && TestContextAnnotationUtils.searchEnclosingClass(clazz)) {
-			findHandlers(clazz.getEnclosingClass(), testClass, handlers, localFieldsOnly, visitedTypes);
+			findHandlers(clazz.getEnclosingClass(), testClass, handlers, localFieldsOnly, true, visitedTypes);
 		}
 
 		// 2) Search class hierarchy.
 		Class<?> superclass = clazz.getSuperclass();
 		if (superclass != null && superclass != Object.class) {
-			findHandlers(superclass, testClass, handlers, localFieldsOnly, visitedTypes);
+			findHandlers(superclass, testClass, handlers, localFieldsOnly, false, visitedTypes);
 		}
 
 		if (!localFieldsOnly) {
 			// 3) Search interfaces.
 			for (Class<?> ifc : clazz.getInterfaces()) {
-				findHandlers(ifc, testClass, handlers, localFieldsOnly, visitedTypes);
+				findHandlers(ifc, testClass, handlers, localFieldsOnly, false, visitedTypes);
 			}
 
 			// 4) Process current class.
 			processClass(clazz, testClass, handlers);
+
+			// 5) Process test class constructor parameters.
+			// Specifically, we only process the constructor for the current test class
+			// and enclosing test classes. In other words, we do not process constructors
+			// for superclasses.
+			if (testClass == clazz || fromNestedClass) {
+				Constructor<?> constructor = findConstructorWithParameters(clazz);
+				if (constructor != null) {
+					for (Parameter parameter : constructor.getParameters()) {
+						processParameter(parameter, testClass, handlers);
+					}
+				}
+			}
 		}
 
-		// 5) Process fields in current class.
+		// 6) Process fields in current class.
 		ReflectionUtils.doWithLocalFields(clazz, field -> processField(field, testClass, handlers));
 	}
 
@@ -138,7 +168,33 @@ public abstract class BeanOverrideUtils {
 				processor.createHandlers(composedAnnotation, testClass).forEach(handlers::add));
 	}
 
+	private static void processParameter(Parameter parameter, Class<?> testClass, List<BeanOverrideHandler> handlers) {
+		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
+		processElement(parameter, (processor, composedAnnotation) -> {
+			Assert.state(overrideAnnotationFound.compareAndSet(false, true),
+					() -> "Multiple @BeanOverride annotations found on parameter: " + parameter);
+			BeanOverrideHandler handler = processor.createHandler(composedAnnotation, testClass, parameter);
+			Assert.state(handler != null,
+					() -> "BeanOverrideProcessor [%s] returned null BeanOverrideHandler for parameter [%s]"
+							.formatted(processor.getClass().getSimpleName(), parameter));
+			handlers.add(handler);
+		});
+	}
+
 	private static void processField(Field field, Class<?> testClass, List<BeanOverrideHandler> handlers) {
+		Class<?> declaringClass = field.getDeclaringClass();
+		// For Java records, the Java compiler propagates @BeanOverride annotations from
+		// canonical constructor parameters to the corresponding component fields, resulting
+		// in duplicates. Similarly for Kotlin types, the Kotlin compiler propagates
+		// @BeanOverride annotations from primary constructor parameters to their corresponding
+		// backing fields, resulting in duplicates. Thus, if we detect either of those scenarios,
+		// we ignore the field.
+		if (declaringClass.isRecord() || (KOTLIN_REFLECT_PRESENT &&
+				KotlinDetector.isKotlinType(declaringClass) &&
+				KotlinDelegate.isFieldForBeanOverrideConstructorParameter(field))) {
+			return;
+		}
+
 		AtomicBoolean overrideAnnotationFound = new AtomicBoolean();
 		processElement(field, (processor, composedAnnotation) -> {
 			Assert.state(!Modifier.isStatic(field.getModifiers()),
@@ -162,6 +218,55 @@ public abstract class BeanOverrideUtils {
 					Annotation composedAnnotation = metaSource.synthesize();
 					consumer.accept(processor, composedAnnotation);
 				});
+	}
+
+	/**
+	 * Find a single constructor for the supplied test class that declares parameters.
+	 * <p>If the test class declares multiple constructors, this method returns
+	 * {@code null}.
+	 * @param testClass the test class to process
+	 * @return the candidate constructor, or {@code null} if no suitable candidate
+	 * was found
+	 * @since 7.1
+	 */
+	private static @Nullable Constructor<?> findConstructorWithParameters(Class<?> testClass) {
+		List<Constructor<?>> constructors = Arrays.stream(testClass.getDeclaredConstructors())
+				.filter(constructor -> !constructor.isSynthetic() && constructor.getParameterCount() > 0)
+				.toList();
+		return (constructors.size() == 1 ? constructors.get(0) : null);
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Kotlin at runtime.
+	 * @since 7.1
+	 */
+	private static class KotlinDelegate {
+
+		/**
+		 * Determine if the supplied field corresponds to a primary constructor
+		 * parameter in the field's declaring Kotlin class, where the primary
+		 * constructor parameter is annotated with {@link BeanOverride @BeanOverride}.
+		 */
+		static boolean isFieldForBeanOverrideConstructorParameter(Field field) {
+			KClass<?> kClass = JvmClassMappingKt.getKotlinClass(field.getDeclaringClass());
+			KFunction<?> primaryConstructor = KClasses.getPrimaryConstructor(kClass);
+			if (primaryConstructor == null) {
+				return false;
+			}
+			Constructor<?> javaConstructor = ReflectJvmMapping.getJavaConstructor(primaryConstructor);
+			if (javaConstructor == null) {
+				return false;
+			}
+			String fieldName = field.getName();
+			for (Parameter parameter : javaConstructor.getParameters()) {
+				if (parameter.getName().equals(fieldName) &&
+						MergedAnnotations.from(parameter).isPresent(BeanOverride.class)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 }
