@@ -26,7 +26,10 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * Tests for {@link TypeMappedAnnotation}. See also {@link MergedAnnotationsTests}
@@ -124,6 +127,22 @@ class TypeMappedAnnotationTests {
 				Collections.singletonMap("classArrayValue", new String[] { InputStream.class.getName() }));
 		assertThat(annotation.getStringArray("classArrayValue")).containsExactly(InputStream.class.getName());
 		assertThat(annotation.getClassArray("classArrayValue")).containsExactly(InputStream.class);
+	}
+
+	@Test  // gh-36524
+	void asAnnotationAttributesFromStringArrayToUnresolvableClass() {
+		// Simulates the ASM path where MergedAnnotationReadingVisitor stores class
+		// references as Strings (class names), not as Class objects. TypeMappedAnnotation
+		// must not throw when asAnnotationAttributes() is called without CLASS_TO_STRING
+		// and a class name cannot be resolved, as was the case in the old
+		// AnnotationReadingVisitorUtils.convertClassValues() which caught such exceptions
+		// and stored the Throwable as the attribute value instead of throwing.
+		MergedAnnotation<?> annotation = MergedAnnotation.of(null, null, ClassAttributes.class,
+				Map.of("classArrayValue", new String[] { "com.example.DoesNotExist" }));
+
+		// Currently throws IllegalArgumentException from ClassUtils.resolveClassName(),
+		// but should handle the unresolvable class reference gracefully.
+		assertThatNoException().isThrownBy(() -> annotation.asAnnotationAttributes(Adapt.values(false, true)));
 	}
 
 	private <A extends Annotation> TypeMappedAnnotation<A> getTypeMappedAnnotation(

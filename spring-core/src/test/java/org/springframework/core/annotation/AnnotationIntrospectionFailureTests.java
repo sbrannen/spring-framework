@@ -24,11 +24,13 @@ import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.OverridingClassLoader;
+import org.springframework.core.annotation.MergedAnnotation.Adapt;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 /**
  * Tests that trigger annotation introspection failures and ensure that they are
@@ -82,6 +84,25 @@ class AnnotationIntrospectionFailureTests {
 		assertThat(annotations.get(metaAnnotationClass).isPresent()).isFalse();
 		assertThat(annotations.isPresent(metaAnnotationClass)).isFalse();
 		assertThat(annotations.isPresent(annotationClass)).isFalse();
+	}
+
+	@Test  // gh-36524
+	void filteredTypeInAnnotationAttributeDoesNotThrowWhenCallingAsAnnotationAttributes() throws Exception {
+		// Simulates the reflection path where an annotation attribute references a class
+		// that is not on the classpath (e.g., @AutoConfigureBefore(LiquibaseAutoConfiguration.class)
+		// when LiquibaseAutoConfiguration is absent). Accessing value() on the JVM annotation
+		// proxy then throws TypeNotPresentException. MergedAnnotation.asAnnotationAttributes()
+		// must not propagate that exception but handle it gracefully, as was the case with
+		// the old AnnotationReadingVisitorUtils.convertClassValues() mechanism.
+		FilteringClassLoader classLoader = new FilteringClassLoader(getClass().getClassLoader());
+		Class<?> withAnnotation = ClassUtils.forName(WithExampleAnnotation.class.getName(), classLoader);
+		Annotation annotation = withAnnotation.getAnnotations()[0];
+		MergedAnnotation<?> mergedAnnotation = MergedAnnotation.from(null, annotation);
+
+		// Currently throws TypeNotPresentException propagated from TypeMappedAnnotation.getValue()
+		// since AnnotationUtils.invokeAnnotationMethod() re-raises it via reflection fallback,
+		// but should handle the unresolvable class attribute gracefully.
+		assertThatNoException().isThrownBy(() -> mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true)));
 	}
 
 
