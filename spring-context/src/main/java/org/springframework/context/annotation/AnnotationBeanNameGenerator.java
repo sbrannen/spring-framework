@@ -139,17 +139,7 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 		Set<AnnotationAttributes> visited = new HashSet<>();
 
 		for (MergedAnnotation<Annotation> mergedAnnotation : mergedAnnotations) {
-			AnnotationAttributes attributes = null;
-			try {
-				attributes = mergedAnnotation.asAnnotationAttributes(ADAPTATIONS);
-			}
-			catch (Throwable ex) {
-				// Ignore exception and current MergedAnnotation, assuming that values of the
-				// MergedAnnotation could not be adapted to a Map/AnnotationAttributes due to
-				// missing types referenced via annotation attributes.
-				continue;
-			}
-
+			AnnotationAttributes attributes = mergedAnnotation.asAnnotationAttributes(ADAPTATIONS);
 			if (visited.add(attributes)) {
 				String annotationType = mergedAnnotation.getType().getName();
 				Set<String> metaAnnotationTypes = this.metaAnnotationTypesCache.computeIfAbsent(annotationType,

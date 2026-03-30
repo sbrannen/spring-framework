@@ -269,8 +269,22 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		AttributeMethods attributes = this.mapping.getAttributes();
 		for (int i = 0; i < attributes.size(); i++) {
 			Method attribute = attributes.get(i);
-			Object value = (isFiltered(attribute.getName()) ? null :
-					getValue(i, getTypeForMapOptions(attribute, adaptations)));
+			if (isFiltered(attribute.getName())) {
+				continue;
+			}
+			Object value;
+			try {
+				value = getValue(i, getTypeForMapOptions(attribute, adaptations));
+			}
+			catch (Throwable ex) {
+				// If the value for the current annotation attribute cannot be resolved
+				// (for example, a class attribute referencing a type that is absent from
+				// the classpath), store the exception as the value and skip the "adapt"
+				// step. This allows us to track the exception internally and only throw it
+				// if the user actually requests the value via the AnnotationAttributes API.
+				map.put(attribute.getName(), ex);
+				continue;
+			}
 			if (value != null) {
 				map.put(attribute.getName(),
 						adaptValueForMapOptions(attribute, value, map.getClass(), factory, adaptations));

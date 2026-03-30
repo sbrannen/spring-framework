@@ -449,33 +449,53 @@ public interface MergedAnnotation<A extends Annotation> {
 	MergedAnnotation<A> withNonMergedAttributes();
 
 	/**
-	 * Create a new mutable {@link AnnotationAttributes} instance from this
-	 * merged annotation.
+	 * Create a mutable {@link AnnotationAttributes} map that contains all annotation
+	 * attributes from this merged annotation.
 	 * <p>The {@linkplain Adapt adaptations} may be used to change the way that
 	 * values are added.
+	 * <p>As of Spring Framework 7.0.7, annotation attributes of type {@code Class}
+	 * or {@code Class[]} in the returned {@code AnnotationAttributes} map may have
+	 * their values replaced by an {@linkplain Throwable exception} if an error
+	 * occurred while attempting to load the respective type via reflection.
+	 * Accessing such an attribute via {@link AnnotationAttributes#getClass(String)}
+	 * or {@link AnnotationAttributes#getClassArray(String)} will throw an
+	 * {@link IllegalArgumentException} which includes the original exception as
+	 * the cause.
 	 * @param adaptations the adaptations that should be applied to the annotation values
-	 * @return a mutable {@code AnnotationAttributes} instance containing the attributes
-	 * and values
+	 * @return a mutable {@code AnnotationAttributes} map containing the attributes
+	 * and their values
 	 */
 	AnnotationAttributes asAnnotationAttributes(Adapt... adaptations);
 
 	/**
-	 * Create an immutable {@link Map} that contains all the annotation attributes.
+	 * Create an immutable {@link Map} that contains all annotation attributes
+	 * from this merged annotation.
 	 * <p>The {@linkplain Adapt adaptations} may be used to change the way that
 	 * values are added.
+	 * <p>As of Spring Framework 7.0.7, annotation attributes of type {@code Class}
+	 * or {@code Class[]} in the returned map may have their values replaced by an
+	 * {@linkplain Throwable exception} if an error occurred while attempting to
+	 * load the respective type via reflection.
 	 * @param adaptations the adaptations that should be applied to the annotation values
-	 * @return an immutable map containing the attributes and values
+	 * @return an immutable map containing the attributes and their values
+	 * @see #asAnnotationAttributes(Adapt...)
 	 */
 	Map<String, Object> asMap(Adapt... adaptations);
 
 	/**
-	 * Create a new {@link Map} of the given type that contains all the annotation
-	 * attributes.
+	 * Create a {@link Map} using the supplied factory and populate it with all
+	 * annotation attributes from this merged annotation.
 	 * <p>The {@linkplain Adapt adaptations} may be used to change the way that
 	 * values are added.
+	 * <p>As of Spring Framework 7.0.7, annotation attributes of type {@code Class}
+	 * or {@code Class[]} in the returned map may have their values replaced by an
+	 * {@linkplain Throwable exception} if an error occurred while attempting to
+	 * load the respective type via reflection.
 	 * @param factory a map factory
 	 * @param adaptations the adaptations that should be applied to the annotation values
-	 * @return a map containing the attributes and values
+	 * @return a map containing the attributes and their values
+	 * @see #asAnnotationAttributes(Adapt...)
+	 * @see #asMap(Adapt...)
 	 */
 	<T extends Map<String, Object>> T asMap(Function<MergedAnnotation<?>, T> factory, Adapt... adaptations);
 
