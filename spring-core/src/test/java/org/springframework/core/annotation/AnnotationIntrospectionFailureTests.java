@@ -31,6 +31,7 @@ import org.springframework.util.ReflectionUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.throwable;
 
 /**
  * Tests that trigger annotation introspection failures and ensure that they are
@@ -88,12 +89,6 @@ class AnnotationIntrospectionFailureTests {
 
 	@Test  // gh-36524
 	void filteredTypeInAnnotationAttributeDoesNotThrowWhenCallingAsAnnotationAttributes() throws Exception {
-		// Simulates the reflection path where an annotation attribute references a class
-		// that is not on the classpath (e.g., @AutoConfigureBefore(LiquibaseAutoConfiguration.class)
-		// when LiquibaseAutoConfiguration is absent). Accessing value() on the JVM annotation
-		// proxy then throws TypeNotPresentException. MergedAnnotation.asAnnotationAttributes()
-		// must not propagate that exception but handle it gracefully, as was the case with
-		// the old AnnotationReadingVisitorUtils.convertClassValues() mechanism.
 		FilteringClassLoader classLoader = new FilteringClassLoader(getClass().getClassLoader());
 		Class<?> withAnnotation = ClassUtils.forName(WithExampleAnnotation.class.getName(), classLoader);
 		Annotation annotation = withAnnotation.getAnnotations()[0];
@@ -104,10 +99,18 @@ class AnnotationIntrospectionFailureTests {
 				.withCauseInstanceOf(ClassNotFoundException.class);
 
 		AnnotationAttributes attrs = mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true));
-		assertThat(attrs).doesNotContainKey("value");
+		assertThat(attrs).containsKey("value");
+		assertThat(attrs.get("value")).asInstanceOf(throwable(TypeNotPresentException.class))
+				.hasMessageContaining(FilteredType.class.getName())
+				.hasCauseInstanceOf(ClassNotFoundException.class);
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> attrs.getClass("value"))
-				.withMessageStartingWith("Attribute 'value' not found in attributes for annotation");
+				.withMessageMatching("""
+						Attribute 'value' for annotation \\[.+?\\] was not resolvable \
+						due to exception \\[.+?TypeNotPresentException.+?\\]""")
+				.havingCause()
+						.isExactlyInstanceOf(TypeNotPresentException.class)
+						.withMessageContaining(FilteredType.class.getName());
 	}
 
 

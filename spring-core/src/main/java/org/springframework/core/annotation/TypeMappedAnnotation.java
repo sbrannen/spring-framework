@@ -259,7 +259,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@Override
 	public Map<String, Object> asMap(Adapt... adaptations) {
-		return Collections.unmodifiableMap(asMap(mergedAnnotation -> new LinkedHashMap<>(), adaptations));
+		return Collections.unmodifiableMap(asMap(mergedAnnotation -> new AnnotationAttributesMap(), adaptations));
 	}
 
 	@Override
@@ -276,11 +276,14 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			try {
 				value = getValue(i, getTypeForMapOptions(attribute, adaptations));
 			}
-			catch (TypeNotPresentException ex) {
-				// Skip annotation attributes whose type references cannot be resolved,
-				// e.g. a class attribute referencing a type that is absent from the
-				// classpath. This restores the graceful handling that existed with
-				// AnnotationReadingVisitorUtils prior to Spring Framework 5.2.
+			catch (Throwable ex) {
+				// If a type reference cannot be resolved for the current annotation
+				// attribute (for example, a class attribute referencing a type that
+				// is absent from the classpath), store the exception as the value and
+				// skip the "adapt" step. This allows us to track the exception internally
+				// and only throw it if the user actually requests the value via the
+				// AnnotationAttributes API.
+				map.put(attribute.getName(), ex);
 				continue;
 			}
 			if (value != null) {
@@ -669,6 +672,26 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	@SuppressWarnings("unchecked")
 	static @Nullable Object extractFromMap(Method attribute, @Nullable Object map) {
 		return (map != null ? ((Map<String, ?>) map).get(attribute.getName()) : null);
+	}
+
+
+	@SuppressWarnings("serial")
+	static class AnnotationAttributesMap extends LinkedHashMap<String, Object> {
+
+		@Override
+		public @Nullable Object get(Object key) {
+			Object value = super.get(key);
+			if (value instanceof Error error) {
+				throw error;
+			}
+			if (value instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			if (value instanceof Throwable ex) {
+				throw new IllegalArgumentException(ex.getMessage(), ex);
+			}
+			return value;
+		}
 	}
 
 }

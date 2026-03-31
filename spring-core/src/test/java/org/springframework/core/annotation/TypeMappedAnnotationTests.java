@@ -24,12 +24,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.InstanceOfAssertFactories.throwable;
 
 /**
  * Tests for {@link TypeMappedAnnotation}. See also {@link MergedAnnotationsTests}
@@ -106,10 +109,10 @@ class TypeMappedAnnotationTests {
 
 	@Test
 	void adaptFromNestedMergedAnnotation() {
-		MergedAnnotation<Nested> nested = MergedAnnotation.of(Nested.class);
+		MergedAnnotation<NestedAnnotation> nested = MergedAnnotation.of(NestedAnnotation.class);
 		MergedAnnotation<?> annotation = TypeMappedAnnotation.of(null, null,
 				NestedContainer.class, Collections.singletonMap("value", nested));
-		assertThat(annotation.getAnnotation("value", Nested.class)).isSameAs(nested);
+		assertThat(annotation.getAnnotation("value", NestedAnnotation.class)).isSameAs(nested);
 	}
 
 	@Test
@@ -129,43 +132,98 @@ class TypeMappedAnnotationTests {
 		assertThat(annotation.getClassArray("classArrayValue")).containsExactly(InputStream.class);
 	}
 
-	@Test  // gh-36524
-	void asAnnotationAttributesFromStringToUnresolvableClass() {
-		// Simulates the ASM path where MergedAnnotationReadingVisitor stores class
-		// references as Strings (class names), not as Class objects. TypeMappedAnnotation
-		// must not throw when asAnnotationAttributes() is called without CLASS_TO_STRING
-		// and a class name cannot be resolved, as was the case in the old
-		// AnnotationReadingVisitorUtils.convertClassValues() which caught such exceptions
-		// and stored the Throwable as the attribute value instead of throwing.
-		MergedAnnotation<?> mergedAnnotation = MergedAnnotation.of(null, null, ClassAttributes.class,
-				Map.of("classValue", "com.example.DoesNotExist"));
 
-		assertThatExceptionOfType(TypeNotPresentException.class)
-				.isThrownBy(() -> mergedAnnotation.getClass("classValue"))
-				.withCauseInstanceOf(ClassNotFoundException.class);
+	@Nested
+	class AsMapTests {
 
-		AnnotationAttributes attrs = mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true));
-		assertThat(attrs).doesNotContainKey("classValue");
+		@Test  // gh-36524
+		void fromStringToUnresolvableClass() {
+			String attributeName = "classValue";
+			MergedAnnotation<?> mergedAnnotation = MergedAnnotation.of(null, null, ClassAttributes.class,
+					Map.of(attributeName, "com.example.DoesNotExist"));
+
+			assertThatExceptionOfType(TypeNotPresentException.class)
+					.isThrownBy(() -> mergedAnnotation.getClass(attributeName))
+					.withCauseInstanceOf(ClassNotFoundException.class);
+
+			Map<String, Object> map = mergedAnnotation.asMap(Adapt.values(false, true));
+			assertThat(map).containsKey(attributeName);
+			assertThatExceptionOfType(TypeNotPresentException.class)
+					.isThrownBy(() -> map.get(attributeName))
+					.withCauseInstanceOf(ClassNotFoundException.class);
+		}
+
+		@Test  // gh-36524
+		void fromStringArrayToUnresolvableClass() {
+			String attributeName = "classArrayValue";
+			MergedAnnotation<?> mergedAnnotation = MergedAnnotation.of(null, null, ClassAttributes.class,
+					Map.of(attributeName, new String[] { "com.example.DoesNotExist" }));
+
+			assertThatExceptionOfType(TypeNotPresentException.class)
+					.isThrownBy(() -> mergedAnnotation.getClassArray(attributeName))
+					.withCauseInstanceOf(ClassNotFoundException.class);
+
+			Map<String, Object> map = mergedAnnotation.asMap(Adapt.values(false, true));
+			assertThat(map).containsKey(attributeName);
+			assertThatExceptionOfType(TypeNotPresentException.class)
+					.isThrownBy(() -> map.get(attributeName))
+					.withCauseInstanceOf(ClassNotFoundException.class);
+		}
 	}
 
-	@Test  // gh-36524
-	void asAnnotationAttributesFromStringArrayToUnresolvableClass() {
-		// Simulates the ASM path where MergedAnnotationReadingVisitor stores class
-		// references as Strings (class names), not as Class objects. TypeMappedAnnotation
-		// must not throw when asAnnotationAttributes() is called without CLASS_TO_STRING
-		// and a class name cannot be resolved, as was the case in the old
-		// AnnotationReadingVisitorUtils.convertClassValues() which caught such exceptions
-		// and stored the Throwable as the attribute value instead of throwing.
-		MergedAnnotation<?> mergedAnnotation = MergedAnnotation.of(null, null, ClassAttributes.class,
-				Map.of("classArrayValue", new String[] { "com.example.DoesNotExist" }));
 
-		assertThatExceptionOfType(TypeNotPresentException.class)
-				.isThrownBy(() -> mergedAnnotation.getClassArray("classArrayValue"))
-				.withCauseInstanceOf(ClassNotFoundException.class);
+	@Nested
+	class AsAnnotationAttributesTests {
 
-		AnnotationAttributes attrs = mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true));
-		assertThat(attrs).doesNotContainKey("classArrayValue");
+		@Test  // gh-36524
+		void fromStringToUnresolvableClass() {
+			String attributeName = "classValue";
+			MergedAnnotation<?> mergedAnnotation = MergedAnnotation.of(null, null, ClassAttributes.class,
+					Map.of(attributeName, "com.example.DoesNotExist"));
+
+			assertThatExceptionOfType(TypeNotPresentException.class)
+					.isThrownBy(() -> mergedAnnotation.getClass(attributeName))
+					.withCauseInstanceOf(ClassNotFoundException.class);
+
+			AnnotationAttributes attrs = mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true));
+			assertThat(attrs).containsKey(attributeName);
+			assertThat(attrs.get(attributeName)).asInstanceOf(throwable(TypeNotPresentException.class))
+					.hasMessageContaining("com.example.DoesNotExist");
+			assertThatIllegalArgumentException()
+					.isThrownBy(() -> attrs.getClass(attributeName))
+					.withMessageMatching("""
+							Attribute 'classValue' for annotation \\[.+?\\] was not resolvable \
+							due to exception \\[.+?TypeNotPresentException.+?\\]""")
+					.havingCause()
+							.isExactlyInstanceOf(TypeNotPresentException.class)
+							.withMessageContaining("com.example.DoesNotExist");
+		}
+
+		@Test  // gh-36524
+		void fromStringArrayToUnresolvableClass() {
+			String attributeName = "classArrayValue";
+			MergedAnnotation<?> mergedAnnotation = MergedAnnotation.of(null, null, ClassAttributes.class,
+					Map.of(attributeName, new String[] { "com.example.DoesNotExist" }));
+
+			assertThatExceptionOfType(TypeNotPresentException.class)
+					.isThrownBy(() -> mergedAnnotation.getClassArray(attributeName))
+					.withCauseInstanceOf(ClassNotFoundException.class);
+
+			AnnotationAttributes attrs = mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true));
+			assertThat(attrs).containsKey(attributeName);
+			assertThat(attrs.get(attributeName)).asInstanceOf(throwable(TypeNotPresentException.class))
+					.hasMessageContaining("com.example.DoesNotExist");
+			assertThatIllegalArgumentException()
+					.isThrownBy(() -> attrs.getClassArray(attributeName))
+					.withMessageMatching("""
+							Attribute 'classArrayValue' for annotation \\[.+?\\] was not resolvable \
+							due to exception \\[.+?TypeNotPresentException.+?\\]""")
+					.havingCause()
+							.isExactlyInstanceOf(TypeNotPresentException.class)
+							.withMessageContaining("com.example.DoesNotExist");
+		}
 	}
+
 
 	private <A extends Annotation> TypeMappedAnnotation<A> getTypeMappedAnnotation(
 			Class<?> source, Class<A> annotationType) {
@@ -288,11 +346,11 @@ class TypeMappedAnnotationTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface NestedContainer {
 
-		Nested value();
+		NestedAnnotation value();
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface Nested {
+	@interface NestedAnnotation {
 
 		String value() default "";
 	}
