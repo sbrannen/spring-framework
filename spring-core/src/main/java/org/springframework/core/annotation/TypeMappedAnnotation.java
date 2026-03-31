@@ -269,8 +269,20 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		AttributeMethods attributes = this.mapping.getAttributes();
 		for (int i = 0; i < attributes.size(); i++) {
 			Method attribute = attributes.get(i);
-			Object value = (isFiltered(attribute.getName()) ? null :
-					getValue(i, getTypeForMapOptions(attribute, adaptations)));
+			if (isFiltered(attribute.getName())) {
+				continue;
+			}
+			Object value;
+			try {
+				value = getValue(i, getTypeForMapOptions(attribute, adaptations));
+			}
+			catch (TypeNotPresentException ex) {
+				// Skip annotation attributes whose type references cannot be resolved,
+				// e.g. a class attribute referencing a type that is absent from the
+				// classpath. This restores the graceful handling that existed with
+				// AnnotationReadingVisitorUtils prior to Spring Framework 5.2.
+				continue;
+			}
 			if (value != null) {
 				map.put(attribute.getName(),
 						adaptValueForMapOptions(attribute, value, map.getClass(), factory, adaptations));
@@ -436,7 +448,12 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			value = clazz.getName();
 		}
 		else if (value instanceof String str && type == Class.class) {
-			value = ClassUtils.resolveClassName(str, getClassLoader());
+			try {
+				value = ClassUtils.resolveClassName(str, getClassLoader());
+			}
+			catch (IllegalArgumentException ex) {
+				throw new TypeNotPresentException(str, ex.getCause());
+			}
 		}
 		else if (value instanceof Class<?>[] classes && type == String[].class) {
 			String[] names = new String[classes.length];
@@ -448,7 +465,12 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		else if (value instanceof String[] names && type == Class[].class) {
 			Class<?>[] classes = new Class<?>[names.length];
 			for (int i = 0; i < names.length; i++) {
-				classes[i] = ClassUtils.resolveClassName(names[i], getClassLoader());
+				try {
+					classes[i] = ClassUtils.resolveClassName(names[i], getClassLoader());
+				}
+				catch (IllegalArgumentException ex) {
+					throw new TypeNotPresentException(names[i], ex.getCause());
+				}
 			}
 			value = classes;
 		}

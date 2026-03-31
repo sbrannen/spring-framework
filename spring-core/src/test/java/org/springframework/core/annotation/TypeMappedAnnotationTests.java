@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.annotation.MergedAnnotation.Adapt;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link TypeMappedAnnotation}. See also {@link MergedAnnotationsTests}
@@ -130,6 +130,25 @@ class TypeMappedAnnotationTests {
 	}
 
 	@Test  // gh-36524
+	void asAnnotationAttributesFromStringToUnresolvableClass() {
+		// Simulates the ASM path where MergedAnnotationReadingVisitor stores class
+		// references as Strings (class names), not as Class objects. TypeMappedAnnotation
+		// must not throw when asAnnotationAttributes() is called without CLASS_TO_STRING
+		// and a class name cannot be resolved, as was the case in the old
+		// AnnotationReadingVisitorUtils.convertClassValues() which caught such exceptions
+		// and stored the Throwable as the attribute value instead of throwing.
+		MergedAnnotation<?> mergedAnnotation = MergedAnnotation.of(null, null, ClassAttributes.class,
+				Map.of("classValue", "com.example.DoesNotExist"));
+
+		assertThatExceptionOfType(TypeNotPresentException.class)
+				.isThrownBy(() -> mergedAnnotation.getClass("classValue"))
+				.withCauseInstanceOf(ClassNotFoundException.class);
+
+		AnnotationAttributes attrs = mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true));
+		assertThat(attrs).doesNotContainKey("classValue");
+	}
+
+	@Test  // gh-36524
 	void asAnnotationAttributesFromStringArrayToUnresolvableClass() {
 		// Simulates the ASM path where MergedAnnotationReadingVisitor stores class
 		// references as Strings (class names), not as Class objects. TypeMappedAnnotation
@@ -137,12 +156,15 @@ class TypeMappedAnnotationTests {
 		// and a class name cannot be resolved, as was the case in the old
 		// AnnotationReadingVisitorUtils.convertClassValues() which caught such exceptions
 		// and stored the Throwable as the attribute value instead of throwing.
-		MergedAnnotation<?> annotation = MergedAnnotation.of(null, null, ClassAttributes.class,
+		MergedAnnotation<?> mergedAnnotation = MergedAnnotation.of(null, null, ClassAttributes.class,
 				Map.of("classArrayValue", new String[] { "com.example.DoesNotExist" }));
 
-		// Currently throws IllegalArgumentException from ClassUtils.resolveClassName(),
-		// but should handle the unresolvable class reference gracefully.
-		assertThatNoException().isThrownBy(() -> annotation.asAnnotationAttributes(Adapt.values(false, true)));
+		assertThatExceptionOfType(TypeNotPresentException.class)
+				.isThrownBy(() -> mergedAnnotation.getClassArray("classArrayValue"))
+				.withCauseInstanceOf(ClassNotFoundException.class);
+
+		AnnotationAttributes attrs = mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true));
+		assertThat(attrs).doesNotContainKey("classArrayValue");
 	}
 
 	private <A extends Annotation> TypeMappedAnnotation<A> getTypeMappedAnnotation(

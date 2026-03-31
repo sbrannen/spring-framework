@@ -30,7 +30,7 @@ import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Tests that trigger annotation introspection failures and ensure that they are
@@ -99,10 +99,15 @@ class AnnotationIntrospectionFailureTests {
 		Annotation annotation = withAnnotation.getAnnotations()[0];
 		MergedAnnotation<?> mergedAnnotation = MergedAnnotation.from(null, annotation);
 
-		// Currently throws TypeNotPresentException propagated from TypeMappedAnnotation.getValue()
-		// since AnnotationUtils.invokeAnnotationMethod() re-raises it via reflection fallback,
-		// but should handle the unresolvable class attribute gracefully.
-		assertThatNoException().isThrownBy(() -> mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true)));
+		assertThatExceptionOfType(TypeNotPresentException.class)
+				.isThrownBy(() -> mergedAnnotation.getClass("value"))
+				.withCauseInstanceOf(ClassNotFoundException.class);
+
+		AnnotationAttributes attrs = mergedAnnotation.asAnnotationAttributes(Adapt.values(false, true));
+		assertThat(attrs).doesNotContainKey("value");
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> attrs.getClass("value"))
+				.withMessageStartingWith("Attribute 'value' not found in attributes for annotation");
 	}
 
 
