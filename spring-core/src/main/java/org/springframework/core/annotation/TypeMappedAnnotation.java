@@ -259,7 +259,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 
 	@Override
 	public Map<String, Object> asMap(Adapt... adaptations) {
-		return Collections.unmodifiableMap(asMap(mergedAnnotation -> new AnnotationAttributesMap(), adaptations));
+		return Collections.unmodifiableMap(asMap(AttributesMap::new, adaptations));
 	}
 
 	@Override
@@ -283,6 +283,11 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 				// skip the "adapt" step. This allows us to track the exception internally
 				// and only throw it if the user actually requests the value via the
 				// AnnotationAttributes API.
+
+//				if (AnnotationAttributes.class.isInstance(map)) {
+//					map.put(attribute.getName(), ex);
+//				}
+
 				map.put(attribute.getName(), ex);
 				continue;
 			}
@@ -451,12 +456,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 			value = clazz.getName();
 		}
 		else if (value instanceof String str && type == Class.class) {
-			try {
-				value = ClassUtils.resolveClassName(str, getClassLoader());
-			}
-			catch (IllegalArgumentException ex) {
-				throw new TypeNotPresentException(str, ex.getCause());
-			}
+			value = ClassUtils.resolveClassName(str, getClassLoader());
 		}
 		else if (value instanceof Class<?>[] classes && type == String[].class) {
 			String[] names = new String[classes.length];
@@ -468,12 +468,7 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 		else if (value instanceof String[] names && type == Class[].class) {
 			Class<?>[] classes = new Class<?>[names.length];
 			for (int i = 0; i < names.length; i++) {
-				try {
-					classes[i] = ClassUtils.resolveClassName(names[i], getClassLoader());
-				}
-				catch (IllegalArgumentException ex) {
-					throw new TypeNotPresentException(names[i], ex.getCause());
-				}
+				classes[i] = ClassUtils.resolveClassName(names[i], getClassLoader());
 			}
 			value = classes;
 		}
@@ -675,20 +670,34 @@ final class TypeMappedAnnotation<A extends Annotation> extends AbstractMergedAnn
 	}
 
 
+	/**
+	 * {@link LinkedHashMap} which mimics {@link AnnotationAttributes} by
+	 * overriding {@link #get(Object)} to throw an {@link IllegalArgumentException}
+	 * if the map holds an exception for the requested key.
+	 */
 	@SuppressWarnings("serial")
-	static class AnnotationAttributesMap extends LinkedHashMap<String, Object> {
+	static class AttributesMap extends LinkedHashMap<String, Object> {
+
+		private static final String UNKNOWN = "unknown";
+
+		private final String displayName;
+
+		AttributesMap() {
+			this.displayName = UNKNOWN;
+		}
+
+		AttributesMap(MergedAnnotation<?> mergedAnnotation) {
+			this.displayName = mergedAnnotation.getType().getName();
+		}
 
 		@Override
-		public @Nullable Object get(Object key) {
-			Object value = super.get(key);
-			if (value instanceof Error error) {
-				throw error;
-			}
-			if (value instanceof RuntimeException runtimeException) {
-				throw runtimeException;
-			}
-			if (value instanceof Throwable ex) {
-				throw new IllegalArgumentException(ex.getMessage(), ex);
+		public @Nullable Object get(Object attributeName) {
+			Object value = super.get(attributeName);
+			if (value instanceof Throwable throwable) {
+				// Mimic AnnotationAttributes.getRequiredAttribute().
+				throw new IllegalArgumentException(String.format(
+						"Attribute '%s' for annotation [%s] was not resolvable due to exception [%s]",
+						attributeName, this.displayName, value), throwable);
 			}
 			return value;
 		}
