@@ -35,6 +35,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestContextAnnotationUtils;
@@ -389,10 +390,13 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	 * proxies as necessary to compare the target instances.
 	 * @since 5.3.4
 	 * @see TransactionSynchronizationUtils#unwrapResourceIfNecessary(Object)
+	 * @see TransactionAwareDataSourceProxy#getTargetDataSource()
 	 */
 	private static boolean sameDataSource(DataSource ds1, DataSource ds2) {
-		return TransactionSynchronizationUtils.unwrapResourceIfNecessary(ds1)
-					.equals(TransactionSynchronizationUtils.unwrapResourceIfNecessary(ds2));
+		Object unwrappedDs1 = TransactionSynchronizationUtils.unwrapResourceIfNecessary(ds1);
+		Object unwrappedDs2 = TransactionSynchronizationUtils.unwrapResourceIfNecessary(ds2);
+		return (unwrappedDs1.equals(unwrappedDs2) || (unwrappedDs1 instanceof TransactionAwareDataSourceProxy tadsp &&
+				unwrappedDs2.equals(tadsp.getTargetDataSource())));
 	}
 
 	private @Nullable DataSource getDataSourceFromTransactionManager(PlatformTransactionManager transactionManager) {
