@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ import java.util.stream.Stream;
 import example.Color;
 import example.FruitMap;
 import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,6 +51,8 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.IndexAccessor;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.OptionalNullSafetyTests.Jedi;
+import org.springframework.expression.spel.OptionalNullSafetyTests.Service;
 import org.springframework.expression.spel.ast.CompoundExpression;
 import org.springframework.expression.spel.ast.InlineList;
 import org.springframework.expression.spel.ast.OpLT;
@@ -62,6 +66,7 @@ import org.springframework.expression.spel.support.ReflectiveIndexAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 import org.springframework.expression.spel.testresources.Person;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static java.util.stream.Collectors.joining;
@@ -6291,6 +6296,258 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			rh = new RecordHolder();
 			assertThat(expression.getValue(rh)).isNull();
 			assertThat(expression.getValue(rh)).isEqualTo(3L);
+		}
+	}
+
+	/**
+	 * @since 7.1
+	 */
+	@Nested
+	class OptionalNullSafeTests {  // gh-36330
+
+		private final StandardEvaluationContext context = new StandardEvaluationContext();
+
+
+		@Test
+		void accessOptionalPropertyOnEmptyOptionalViaNullSafeOperator() {
+			String exitDescriptor = CodeFlow.toDescriptor(Boolean.class);
+			context.setVariable("service", new Service());
+			expression = parser.parseExpression("#service.findJediByName('')?.present");
+
+			assertThat(expression.getValue(context, Boolean.class)).isFalse();
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context, Boolean.class)).isFalse();
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertIsCompiled(expression);
+		}
+
+		@Test
+		void accessOptionalPropertyOnNonEmptyOptionalViaNullSafeOperator() {
+			String exitDescriptor = CodeFlow.toDescriptor(Boolean.class);
+			context.setVariable("service", new Service());
+			expression = parser.parseExpression("#service.findJediByName('Yoda')?.present");
+
+			assertThat(expression.getValue(context, Boolean.class)).isTrue();
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context, Boolean.class)).isTrue();
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertIsCompiled(expression);
+		}
+
+		@Test
+		void invokeOptionalMethodOnEmptyOptionalViaNullSafeOperator() {
+			// Object instead of String, since Optional#orElse returns T.
+			String exitDescriptor = CodeFlow.toDescriptor(Object.class);
+			context.setVariable("service", new Service());
+			expression = parser.parseExpression("#service.findJediByName('')?.orElse('Luke')");
+
+			assertThat(expression.getValue(context)).isEqualTo("Luke");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isEqualTo("Luke");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertIsCompiled(expression);
+		}
+
+		@Test
+		void invokeOptionalMethodOnNonEmptyOptionalViaNullSafeOperator() {
+			// Object instead of Jedi, since Optional#orElse returns T.
+			String exitDescriptor = CodeFlow.toDescriptor(Object.class);
+			context.setVariable("service", new Service());
+			expression = parser.parseExpression("#service.findJediByName('Yoda')?.orElse('Luke')");
+
+			assertThat(expression.getValue(context)).isEqualTo(new Jedi("Yoda"));
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isEqualTo(new Jedi("Yoda"));
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertIsCompiled(expression);
+		}
+
+		@Test
+		void accessPropertyOnOptionalViaNullSafeOperator() {
+			String exitDescriptor = CodeFlow.toDescriptor(String.class);
+			expression = parser.parseExpression("#jedi?.name");
+
+			// 1) Start with empty Optional
+			context.setVariable("jedi", Optional.empty());
+			assertThat(expression.getValue(context)).isNull();
+			// Cannot compile before the "name" property type is known.
+			assertThat(getAst().getExitDescriptor()).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+
+			// 2) Switch to non-empty Optional
+			context.setVariable("jedi", Optional.of(new Jedi("Yoda")));
+			assertThat(expression.getValue(context)).isEqualTo("Yoda");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isEqualTo("Yoda");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+
+			// 3) Switch back to empty Optional
+			context.setVariable("jedi", Optional.empty());
+			assertThat(expression.getValue(context)).isNull();
+			// Exit descriptor hasn't changed.
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertIsCompiled(expression);
+		}
+
+		@Test
+		void invokeMethodOnOptionalViaNullSafeOperator() {
+			String exitDescriptor = CodeFlow.toDescriptor(String.class);
+			expression = parser.parseExpression("#jedi?.salutation('Master')");
+
+			// 1) Start with empty Optional
+			context.setVariable("jedi", Optional.empty());
+			assertThat(expression.getValue(context)).isNull();
+			// Cannot compile before the "salutation()" return type is known.
+			assertThat(getAst().getExitDescriptor()).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+
+			// 2) Switch to non-empty Optional
+			context.setVariable("jedi", Optional.of(new Jedi("Yoda")));
+			assertThat(expression.getValue(context)).isEqualTo("Master Yoda");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isEqualTo("Master Yoda");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+
+			// 3) Switch back to empty Optional
+			context.setVariable("jedi", Optional.empty());
+			assertThat(expression.getValue(context)).isNull();
+			// Exit descriptor hasn't changed.
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+		}
+
+		@Test
+		void accessIndexOnOptionalViaNullSafeOperator() {
+			// Object instead of String, since Indexer.CollectionIndexingValueRef
+			// sets the exit descriptor to Object for any Collection.
+			String exitDescriptor = CodeFlow.toDescriptor(Object.class);
+			expression = parser.parseExpression("#fruits?.[1]");
+
+			// 1) Start with empty Optional
+			context.setVariable("fruits", Optional.empty());
+			assertThat(expression.getValue(context)).isNull();
+			// Cannot compile before the indexed value type is known.
+			assertThat(getAst().getExitDescriptor()).isNull();
+			assertCannotCompile(expression);
+			assertThat(expression.getValue(context)).isNull();
+
+			// 2) Switch to non-empty Optional
+			context.setVariable("fruits", Optional.of(List.of("banana", "lemon", "mango")));
+			assertThat(expression.getValue(context)).isEqualTo("lemon");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isEqualTo("lemon");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+
+			// 3) Switch back to empty Optional
+			context.setVariable("fruits", Optional.empty());
+			assertThat(expression.getValue(context)).isNull();
+			// Exit descriptor hasn't changed.
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isNull();
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+		}
+	}
+
+	/**
+	 * @since 7.1
+	 */
+	@Nested
+	class OptionalElvisTests {  // gh-36330
+
+		private final StandardEvaluationContext context = new StandardEvaluationContext();
+
+		@BeforeEach
+		void configureContext() {
+			context.setVariable("service", new Service());
+			context.registerFunction("jedi", ClassUtils.getMethod(Jedi.class, "from", String.class));
+		}
+
+		@Test
+		void elvisOperatorOnEmptyOptional() {
+			// Object instead of Optional or String, since the Elvis operator uses
+			// "the easiest to compute common supertype" if the types for the
+			// LHS and RHS do not match.
+			String exitDescriptor = CodeFlow.toDescriptor(Object.class);
+			expression = parser.parseExpression("#service.findJediByName('') ?: 'unknown'");
+
+			assertThat(expression.getValue(context)).isEqualTo("unknown");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isEqualTo("unknown");
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+		}
+
+		@Test
+		void elvisOperatorOnNonEmptyOptionalWithNonMatchingElseType() {
+			// Object instead of Jedi or String, since the Elvis operator uses
+			// "the easiest to compute common supertype" if the types for the
+			// LHS and RHS do not match.
+			String exitDescriptor = CodeFlow.toDescriptor(Object.class);
+			expression = parser.parseExpression("#service.findJediByName('Yoda') ?: 'unknown'");
+
+			assertThat(expression.getValue(context)).isEqualTo(new Jedi("Yoda"));
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(expression.getValue(context)).isEqualTo(new Jedi("Yoda"));
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+		}
+
+		@Test
+		void elvisOperatorOnNonEmptyOptionalWithMatchingElseType() {
+			// Jedi, since the known types for the LHS and RHS eventually match.
+			String exitDescriptor = CodeFlow.toDescriptor(Jedi.class);
+			expression = parser.parseExpression("#service.findJediByName(#name) ?: #jedi('unknown')");
+
+			// 1) Start with non-empty Optional
+			context.setVariable("name", "Yoda");
+			assertThat(expression.getValue(context)).isEqualTo(new Jedi("Yoda"));
+			// Cannot compile before the types for the LHS and RHS are known.
+			assertThat(getAst().getExitDescriptor()).isNull();
+			assertCannotCompile(expression);
+			assertThat(getAst().getExitDescriptor()).isNull();
+
+			// 2) Switch to empty Optional
+			context.setVariable("name", "");
+			assertThat(expression.getValue(context)).isEqualTo(new Jedi("unknown"));
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+
+			// 3) Switch back to non-empty Optional
+			context.setVariable("name", "Luke");
+			assertThat(expression.getValue(context)).isEqualTo(new Jedi("Luke"));
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
+			assertCanCompile(expression);
+			assertIsCompiled(expression);
+			assertThat(getAst().getExitDescriptor()).isEqualTo(exitDescriptor);
 		}
 	}
 

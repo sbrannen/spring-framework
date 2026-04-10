@@ -19,6 +19,8 @@ package org.springframework.expression.spel.ast;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.asm.Label;
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.EvaluationException;
@@ -43,6 +45,15 @@ import org.springframework.util.Assert;
  */
 public class Elvis extends SpelNodeImpl {
 
+	/**
+	 * Tracks the descriptor for the value contained in an {@link Optional} that
+	 * was unwrapped in {@link #getValueInternal(ExpressionState)} using the
+	 * null-safe operator.
+	 * @since 7.1
+	 */
+	private @Nullable String unwrappedOptionalDescriptor;
+
+
 	public Elvis(int startPos, int endPos, SpelNodeImpl... args) {
 		super(startPos, endPos, args);
 	}
@@ -65,10 +76,10 @@ public class Elvis extends SpelNodeImpl {
 		Object leftHandValue = leftHandTypedValue.getValue();
 
 		if (leftHandValue instanceof Optional<?> optional) {
-			// Compilation is currently not supported for Optional with the Elvis operator.
-			this.exitTypeDescriptor = null;
 			if (optional.isPresent()) {
-				result = new TypedValue(optional.get());
+				Object value = optional.get();
+				this.unwrappedOptionalDescriptor = CodeFlow.toDescriptor(value.getClass());
+				result = new TypedValue(value);
 			}
 			else {
 				result = this.children[1].getValueInternal(state);
@@ -94,7 +105,8 @@ public class Elvis extends SpelNodeImpl {
 	public boolean isCompilable() {
 		SpelNodeImpl condition = this.children[0];
 		SpelNodeImpl ifNullValue = this.children[1];
-		String conditionDescriptor = condition.exitTypeDescriptor;
+		String conditionDescriptor = (this.unwrappedOptionalDescriptor != null ?
+				this.unwrappedOptionalDescriptor : condition.exitTypeDescriptor);
 		String ifNullValueDescriptor = ifNullValue.exitTypeDescriptor;
 
 		return (condition.isCompilable() && ifNullValue.isCompilable() &&
@@ -116,7 +128,12 @@ public class Elvis extends SpelNodeImpl {
 		this.children[0].generateCode(mv, cf);
 		String lastDesc = cf.lastDescriptor();
 		Assert.state(lastDesc != null, "No last descriptor");
-		CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
+		if ("Ljava/util/Optional".equals(lastDesc)) {
+			CodeFlow.insertOptionalUnwrapIfNecessary(mv, lastDesc);
+		}
+		else {
+			CodeFlow.insertBoxIfNecessary(mv, lastDesc.charAt(0));
+		}
 		cf.exitCompilationScope();
 
 		mv.visitInsn(DUP);
@@ -147,7 +164,8 @@ public class Elvis extends SpelNodeImpl {
 	private void computeExitTypeDescriptor() {
 		SpelNodeImpl condition = this.children[0];
 		SpelNodeImpl ifNullValue = this.children[1];
-		String conditionDescriptor = condition.exitTypeDescriptor;
+		String conditionDescriptor = (this.unwrappedOptionalDescriptor != null ?
+				this.unwrappedOptionalDescriptor : condition.exitTypeDescriptor);
 		String ifNullValueDescriptor = ifNullValue.exitTypeDescriptor;
 
 		if (this.exitTypeDescriptor == null && conditionDescriptor != null && ifNullValueDescriptor != null) {

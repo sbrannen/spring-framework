@@ -346,6 +346,7 @@ public class Indexer extends SpelNodeImpl {
 
 		Label skipIfNull = null;
 		if (isNullSafe()) {
+			CodeFlow.insertOptionalUnwrapIfNecessary(mv, descriptor);
 			mv.visitInsn(DUP);
 			skipIfNull = new Label();
 			Label continueLabel = new Label();

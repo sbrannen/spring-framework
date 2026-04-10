@@ -72,6 +72,14 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 	private @Nullable String originalPrimitiveExitTypeDescriptor;
 
+	/**
+	 * Tracks whether an {@link Optional} was unwrapped in
+	 * {@link #readProperty(TypedValue, EvaluationContext, String)} using the
+	 * null-safe operator and therefore needs to be unwrapped in a compiled expression.
+	 * @since 7.1
+	 */
+	private boolean unwrapOptional;
+
 	private volatile @Nullable PropertyAccessor cachedReadAccessor;
 
 	private volatile @Nullable PropertyAccessor cachedWriteAccessor;
@@ -196,6 +204,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 		Object target = originalTarget;
 		Optional<?> fallbackOptionalTarget = null;
 		boolean isEmptyOptional = false;
+		this.unwrapOptional = false;
 
 		if (isNullSafe()) {
 			if (target == null) {
@@ -205,6 +214,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				if (optional.isPresent()) {
 					target = optional.get();
 					fallbackOptionalTarget = optional;
+					this.unwrapOptional = true;
 				}
 				else {
 					isEmptyOptional = true;
@@ -249,6 +259,9 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 								evalContext, fallbackOptionalTarget, name);
 					}
 					this.cachedReadAccessor = accessor;
+					// If we end up using a property on the original Optional instance,
+					// we don't need to unwrap the Optional in the compiled expression.
+					this.unwrapOptional = false;
 					return accessor.read(evalContext, fallbackOptionalTarget, name);
 				}
 			}
@@ -357,6 +370,9 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 
 		Label skipIfNull = null;
 		if (isNullSafe()) {
+			if (this.unwrapOptional) {
+				CodeFlow.insertOptionalUnwrapIfNecessary(mv, cf.lastDescriptor());
+			}
 			mv.visitInsn(DUP);
 			skipIfNull = new Label();
 			Label continueLabel = new Label();
