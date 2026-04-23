@@ -160,10 +160,7 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 	public void setLocations(@Nullable List<Resource> locations) {
 		this.locationResources.clear();
 		if (locations != null) {
-			for (Resource location : locations) {
-				ResourceHandlerUtils.assertResourceLocation(location);
-				this.locationResources.add(location);
-			}
+			this.locationResources.addAll(locations);
 		}
 	}
 
@@ -382,6 +379,10 @@ public class ResourceWebHandler implements WebHandler, InitializingBean {
 				location = ResourceHandlerUtils.initLocationPath(location);
 				result.add(this.resourceLoader.getResource(location));
 			}
+		}
+
+		for (Resource location : result) {
+			ResourceHandlerUtils.assertResourceLocation(location);
 		}
 
 		if (isOptimizeLocations()) {
