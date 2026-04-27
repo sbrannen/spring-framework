@@ -249,7 +249,7 @@ public abstract class YamlProcessor {
 			}
 			else {
 				// It has to be a map key in this case
-				result.put("[" + key.toString() + "]", value);
+				result.put("[" + key + "]", value);
 			}
 		});
 		return result;

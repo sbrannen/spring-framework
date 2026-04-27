@@ -171,7 +171,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 
 	@Override
 	public String toString() {
-		return "execution(" + getSignature().toString() + ")";
+		return "execution(" + getSignature() + ")";
 	}
 
 
