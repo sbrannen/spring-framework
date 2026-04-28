@@ -20,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.function.Consumer;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -29,10 +28,9 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -48,11 +46,9 @@ import static org.springframework.core.ResolvableType.forClass;
 /**
  * @author Arjen Poutsma
  */
-class PartEventHttpMessageReaderTests {
+class PartEventHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
 	private static final int BUFFER_SIZE = 64;
-
-	private static final DataBufferFactory bufferFactory = new NettyDataBufferFactory(new PooledByteBufAllocator());
 
 	private static final MediaType TEXT_PLAIN_ASCII = new MediaType("text", "plain", StandardCharsets.US_ASCII);
 

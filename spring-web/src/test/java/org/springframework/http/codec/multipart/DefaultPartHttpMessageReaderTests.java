@@ -28,7 +28,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -44,9 +43,9 @@ import org.springframework.core.codec.DecodingException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferLimitException;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.core.io.buffer.NettyDataBufferFactory;
+import org.springframework.core.testfixture.io.buffer.AbstractLeakCheckingTests;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.testfixture.http.server.reactive.MockServerHttpRequest;
@@ -60,9 +59,12 @@ import static org.springframework.core.ResolvableType.forClass;
 import static org.springframework.core.io.buffer.DataBufferUtils.release;
 
 /**
+ * Tests for {@link DefaultPartHttpMessageReader}.
+ *
  * @author Arjen Poutsma
+ * @author Brian Clozel
  */
-class DefaultPartHttpMessageReaderTests {
+class DefaultPartHttpMessageReaderTests extends AbstractLeakCheckingTests {
 
 	private static final String LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer iaculis metus id vestibulum nullam.";
 
@@ -70,7 +72,6 @@ class DefaultPartHttpMessageReaderTests {
 
 	private static final int BUFFER_SIZE = 64;
 
-	private static final DataBufferFactory bufferFactory = new NettyDataBufferFactory(new PooledByteBufAllocator());
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
 	void canRead(DefaultPartHttpMessageReader reader) {
@@ -165,7 +166,7 @@ class DefaultPartHttpMessageReaderTests {
 				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
 		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
 
-		StepVerifier.create(result, 1)
+		StepVerifier.create(result)
 				.consumeNextWith(part -> part.content().subscribe(DataBufferUtils::release))
 				.thenCancel()
 				.verify();
@@ -221,7 +222,7 @@ class DefaultPartHttpMessageReaderTests {
 	@Test
 	void tooManyParts() throws InterruptedException {
 		MockServerHttpRequest request = createRequest(
-				new ClassPathResource("simple.multipart", getClass()), "simple-boundary");
+				new ClassPathResource("files.multipart", getClass()), "----WebKitFormBoundaryG8fJ50opQOML0oGD");
 
 		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
 		reader.setMaxParts(1);
@@ -230,8 +231,7 @@ class DefaultPartHttpMessageReaderTests {
 
 		CountDownLatch latch = new CountDownLatch(1);
 		StepVerifier.create(result)
-				.consumeNextWith(part -> testPart(part, null,
-						"This is implicitly typed plain ASCII text.\r\nIt does NOT end with a linebreak.", latch)).as("Part 1")
+				.consumeNextWith(part -> testBrowserFile(part, "file2", "a.txt", LOREM_IPSUM, latch)).as("Part 1")
 				.expectError(DecodingException.class)
 				.verify();
 
@@ -276,7 +276,7 @@ class DefaultPartHttpMessageReaderTests {
 
 	// gh-27612
 	@Test
-	void exceedHeaderLimit() throws InterruptedException {
+	void largeBufferForHeaderDoesNotExceedLimit() throws InterruptedException {
 		Flux<DataBuffer> body = DataBufferUtils
 				.readByteChannel((new ClassPathResource("files.multipart", getClass()))::readableChannel, bufferFactory, 282);
 
@@ -298,6 +298,20 @@ class DefaultPartHttpMessageReaderTests {
 				.verifyComplete();
 
 		latch.await();
+	}
+
+	@Test
+	void exceedHeaderLimit() {
+		MockServerHttpRequest request = createRequest(
+				new ClassPathResource("files.multipart", getClass()), "\"----WebKitFormBoundaryG8fJ50opQOML0oGD\"");
+
+		DefaultPartHttpMessageReader reader = new DefaultPartHttpMessageReader();
+		reader.setMaxHeadersSize(80);
+		Flux<Part> result = reader.read(forClass(Part.class), request, emptyMap());
+
+		StepVerifier.create(result)
+				.expectError(DataBufferLimitException.class)
+				.verify();
 	}
 
 	@ParameterizedDefaultPartHttpMessageReaderTest
