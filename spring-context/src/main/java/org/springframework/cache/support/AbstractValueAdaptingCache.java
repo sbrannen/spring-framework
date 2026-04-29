@@ -87,7 +87,7 @@ public abstract class AbstractValueAdaptingCache implements Cache {
 	 */
 	@Nullable
 	protected Object fromStoreValue(@Nullable Object storeValue) {
-		if (this.allowNullValues && storeValue == NullValue.INSTANCE) {
+		if (this.allowNullValues && storeValue instanceof NullValue) {
 			return null;
 		}
 		return storeValue;

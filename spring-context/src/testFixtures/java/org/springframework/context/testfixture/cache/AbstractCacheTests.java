@@ -24,7 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.cache.Cache;
+import org.springframework.cache.support.NullValue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -68,6 +70,12 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		assertThat(cache.get(key, (Class<?>) null)).isEqualTo(value);
 
 		cache.put(key, null);
+		assertThat(cache.get(key)).isNotNull();
+		assertThat(cache.get(key).get()).isNull();
+		assertThat(cache.get(key, String.class)).isNull();
+		assertThat(cache.get(key, Object.class)).isNull();
+
+		cache.put(key, BeanUtils.instantiateClass(NullValue.class));
 		assertThat(cache.get(key)).isNotNull();
 		assertThat(cache.get(key).get()).isNull();
 		assertThat(cache.get(key, String.class)).isNull();
