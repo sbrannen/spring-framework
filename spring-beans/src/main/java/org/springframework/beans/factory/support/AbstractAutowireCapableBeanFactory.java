@@ -610,9 +610,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (ex instanceof BeanCreationException bce && beanName.equals(bce.getBeanName())) {
 				throw bce;
 			}
-			else {
-				throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
-			}
+			throw new BeanCreationException(mbd.getResourceDescription(), beanName, ex.getMessage(), ex);
 		}
 
 		if (earlySingletonExposure) {
@@ -1257,8 +1255,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instance = obtainInstanceFromSupplier(supplier, beanName, mbd);
 		}
 		catch (Throwable ex) {
-			if (ex instanceof BeansException beansException) {
-				throw beansException;
+			if (ex instanceof BeanCreationException bce && beanName.equals(bce.getBeanName())) {
+				throw bce;
 			}
 			throw new BeanCreationException(beanName, "Instantiation of supplied bean failed", ex);
 		}
