@@ -77,10 +77,6 @@ public abstract class ResourceHandlerUtils {
 			}
 			else if (location instanceof ContextResource contextResource) {
 				path = contextResource.getPathWithinContext();
-				if ("/".equals(path)) {
-					logger.warn("Resource location '" + location + "' is considered unsafe " +
-							"and should not be used as it provides access to the root servlet context.");
-				}
 			}
 			else if (location instanceof UrlResource) {
 				path = location.getURL().toExternalForm();
