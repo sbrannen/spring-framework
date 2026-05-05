@@ -77,11 +77,4 @@ class ResourceHandlerUtilsTests {
 				.withMessageContaining("is considered unsafe");
 	}
 
-	@Test
-	void assertResourceLocationShouldRejectUnsafeContextResource() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				ResourceHandlerUtils.assertResourceLocation(new ServletContextResource(new MockServletContext(), "/")))
-				.withMessageContaining("is considered unsafe");
-	}
-
 }

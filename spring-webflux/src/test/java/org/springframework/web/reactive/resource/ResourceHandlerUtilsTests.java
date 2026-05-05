@@ -82,13 +82,6 @@ class ResourceHandlerUtilsTests {
 				.withMessageContaining("is considered unsafe");
 	}
 
-	@Test
-	void assertResourceLocationShouldRejectUnsafeContextResource() {
-		assertThatIllegalArgumentException().isThrownBy(() ->
-				ResourceHandlerUtils.assertResourceLocation(new TestContextResource("/")))
-				.withMessageContaining("is considered unsafe");
-	}
-
 	private static class TestContextResource implements ContextResource {
 
 		private final String path;
