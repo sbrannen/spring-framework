@@ -534,7 +534,7 @@ class EvaluationTests extends AbstractExpressionTests {
 		void matchesWithPatternAccessThreshold() {
 			String pattern = "^(?=[a-z0-9-]{1,47})([a-z0-9]+[-]{0,1}){1,47}[a-z0-9]{1}$";
 			String expression = "'abcde-fghijklmn-o42pasdfasdfasdf.qrstuvwxyz10x.xx.yyy.zasdfasfd' matches '" + pattern + "'";
-			evaluateAndCheckError(expression, SpelMessage.FLAWED_PATTERN);
+			evaluateAndCheckError(expression, SpelMessage.FLAWED_PATTERN, 74);
 		}
 
 		@Test
@@ -546,7 +546,7 @@ class EvaluationTests extends AbstractExpressionTests {
 
 			pattern += "?";
 			assertThat(pattern).hasSize(1001);
-			evaluateAndCheckError("'X' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED);
+			evaluateAndCheckError("'X' matches '" + pattern + "'", Boolean.class, SpelMessage.MAX_REGEX_LENGTH_EXCEEDED, 12);
 		}
 
 		@Test
