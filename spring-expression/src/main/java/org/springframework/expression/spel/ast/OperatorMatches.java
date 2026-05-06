@@ -117,7 +117,7 @@ public class OperatorMatches extends Operator {
 
 	private void checkRegexLength(String regex) {
 		if (regex.length() > MAX_REGEX_LENGTH) {
-			throw new SpelEvaluationException(getStartPosition(),
+			throw new SpelEvaluationException(getRightOperand().getStartPosition(),
 					SpelMessage.MAX_REGEX_LENGTH_EXCEEDED, MAX_REGEX_LENGTH);
 		}
 	}
