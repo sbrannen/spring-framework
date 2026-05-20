@@ -106,6 +106,8 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	// The expression being parsed
 	private String expressionString = "";
 
+	private int nestingDepth = 0;
+
 	// The token stream constructed from that expression string
 	private List<Token> tokenStream = Collections.emptyList();
 
@@ -168,6 +170,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	//      | (ELVIS^ expression))?;
 	@SuppressWarnings("NullAway") // Not null assertion performed in SpelNodeImpl constructor
 	private @Nullable SpelNodeImpl eatExpression() {
+		incrementNestingDepth();
 		SpelNodeImpl expr = eatLogicalOrExpression();
 		Token t = peekToken();
 		if (t != null) {
@@ -201,6 +204,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				return new Ternary(t.startPos, t.endPos, expr, ifTrueExprValue, ifFalseExprValue);
 			}
 		}
+		decrementNestingDepth();
 		return expr;
 	}
 
@@ -1051,6 +1055,28 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 		if (operandExpression == null) {
 			throw internalException(token.startPos, SpelMessage.RIGHT_OPERAND_PROBLEM);
 		}
+	}
+
+	/**
+	 * Increment the nesting depth.
+	 * @since 7.1
+	 * @see SpelParserConfiguration#getMaximumNestingDepth()
+	 */
+	private void incrementNestingDepth() {
+		int maxNestingDepth = this.configuration.getMaximumNestingDepth();
+		if (this.nestingDepth++ > maxNestingDepth) {
+			throw new InternalParseException(new SpelParseException(0,
+					SpelMessage.MAX_EXPRESSION_NESTING_DEPTH_EXCEEDED, maxNestingDepth));
+		}
+	}
+
+	/**
+	 * Decrement the nesting depth.
+	 * @since 7.1
+	 * @see SpelParserConfiguration#getMaximumNestingDepth()
+	 */
+	private void decrementNestingDepth() {
+		this.nestingDepth--;
 	}
 
 	private InternalParseException internalException(int startPos, SpelMessage message, Object... inserts) {

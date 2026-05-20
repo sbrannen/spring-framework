@@ -24,9 +24,11 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionException;
+import org.springframework.expression.spel.SpelCompilerMode;
 import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.SpelNode;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.ast.OpAnd;
 import org.springframework.expression.spel.ast.OpOr;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
@@ -34,6 +36,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.springframework.expression.spel.SpelMessage.MISSING_CONSTRUCTOR_ARGS;
 import static org.springframework.expression.spel.SpelMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING;
 import static org.springframework.expression.spel.SpelMessage.NON_TERMINATING_QUOTED_STRING;
@@ -80,6 +83,36 @@ class SpelParserTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(throwingCallable)
 				.withMessage("'expressionString' must not be null or blank");
+	}
+
+	@Test
+	void maxNestingDepth() {
+		int maxNestingDepth = 10;
+		SpelParserConfiguration configuration =
+				new SpelParserConfiguration(SpelCompilerMode.OFF, null, false, false, 0, 1000, maxNestingDepth);
+		SpelExpressionParser parser = new SpelExpressionParser(configuration);
+
+		// 9 < max
+		assertThatNoException()
+				.isThrownBy(() -> parser.parseExpression(generatedNestedExpression(9)));
+
+		// 10 <= max
+		assertThatNoException()
+				.isThrownBy(() -> parser.parseExpression(generatedNestedExpression(10)));
+
+		// 11 > max
+		assertParseExceptionThrownBy(() -> parser.parseExpression(generatedNestedExpression(11)))
+				.withMessageEndingWith("SpEL expression nesting depth exceeds the threshold of 10")
+				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.MAX_EXPRESSION_NESTING_DEPTH_EXCEEDED));
+
+		// 100 > max
+		assertParseExceptionThrownBy(() -> parser.parseExpression(generatedNestedExpression(100)))
+				.withMessageEndingWith("SpEL expression nesting depth exceeds the threshold of 10")
+				.satisfies(ex -> assertThat(ex.getMessageCode()).isEqualTo(SpelMessage.MAX_EXPRESSION_NESTING_DEPTH_EXCEEDED));
+	}
+
+	private static String generatedNestedExpression(int depth) {
+		return "{".repeat(depth) + "1" + "}".repeat(depth);
 	}
 
 	@Test

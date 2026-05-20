@@ -21,6 +21,7 @@ import java.util.Locale;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.SpringProperties;
+import org.springframework.util.Assert;
 
 /**
  * Configuration object for the SpEL expression parser.
@@ -39,6 +40,12 @@ public class SpelParserConfiguration {
 	 * @since 5.2.24
 	 */
 	public static final int DEFAULT_MAX_EXPRESSION_LENGTH = 10_000;
+
+	/**
+	 * Default maximum nesting depth permitted within a SpEL expression: {@value}.
+	 * @since 7.1
+	 */
+	public static final int DEFAULT_MAX_EXPRESSION_NESTING_DEPTH = 1_000;
 
 	/** System property to configure the default compiler mode for SpEL expression parsers: {@value}. */
 	public static final String SPRING_EXPRESSION_COMPILER_MODE_PROPERTY_NAME = "spring.expression.compiler.mode";
@@ -64,6 +71,9 @@ public class SpelParserConfiguration {
 	private final int maximumAutoGrowSize;
 
 	private final int maximumExpressionLength;
+
+	private final int maximumNestingDepth;
+
 
 
 	/**
@@ -127,16 +137,45 @@ public class SpelParserConfiguration {
 	 * @param maximumExpressionLength the maximum length of a SpEL expression;
 	 * must be a positive number
 	 * @since 5.2.25
+	 * @see #DEFAULT_MAX_EXPRESSION_NESTING_DEPTH
 	 */
 	public SpelParserConfiguration(@Nullable SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
 			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength) {
 
-		this.compilerMode = (compilerMode != null ? compilerMode : defaultCompilerMode);
+		this((compilerMode != null ? compilerMode : defaultCompilerMode), compilerClassLoader, autoGrowNullReferences,
+				autoGrowCollections, maximumAutoGrowSize, maximumExpressionLength, DEFAULT_MAX_EXPRESSION_NESTING_DEPTH);
+	}
+
+	/**
+	 * Create a new {@code SpelParserConfiguration} instance.
+	 * @param compilerMode the compiler mode that parsers using this configuration
+	 * should use; must not be {@code null}
+	 * @param compilerClassLoader the {@code ClassLoader} to use as the basis for
+	 * expression compilation; or {@code null} to use the default {@code ClassLoader}
+	 * @param autoGrowNullReferences if null references should automatically grow
+	 * @param autoGrowCollections if collections should automatically grow
+	 * @param maximumAutoGrowSize the maximum size to which a collection can auto grow
+	 * @param maximumExpressionLength the maximum length of a SpEL expression;
+	 * must be a positive number
+	 * @param maximumNestingDepth the maximum nesting depth permitted within a SpEL
+	 * expression; must be a positive number
+	 * @since 7.1
+	 */
+	public SpelParserConfiguration(SpelCompilerMode compilerMode, @Nullable ClassLoader compilerClassLoader,
+			boolean autoGrowNullReferences, boolean autoGrowCollections, int maximumAutoGrowSize, int maximumExpressionLength,
+			int maximumNestingDepth) {
+
+		Assert.notNull(compilerMode, "'compilerMode' must not be null");
+		Assert.isTrue(maximumExpressionLength > 0, "'maximumExpressionLength' must be a positive number");
+		Assert.isTrue(maximumNestingDepth > 0, "'maximumNestingDepth' must be a positive number");
+
+		this.compilerMode = compilerMode;
 		this.compilerClassLoader = compilerClassLoader;
 		this.autoGrowNullReferences = autoGrowNullReferences;
 		this.autoGrowCollections = autoGrowCollections;
 		this.maximumAutoGrowSize = maximumAutoGrowSize;
 		this.maximumExpressionLength = maximumExpressionLength;
+		this.maximumNestingDepth = maximumNestingDepth;
 	}
 
 
@@ -181,6 +220,14 @@ public class SpelParserConfiguration {
 	 */
 	public int getMaximumExpressionLength() {
 		return this.maximumExpressionLength;
+	}
+
+	/**
+	 * Return the maximum nesting depth permitted within a SpEL expression.
+	 * @since 7.1
+	 */
+	public int getMaximumNestingDepth() {
+		return this.maximumNestingDepth;
 	}
 
 }
