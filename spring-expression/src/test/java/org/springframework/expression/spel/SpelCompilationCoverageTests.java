@@ -47,6 +47,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.asm.MethodVisitor;
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.IndexAccessor;
@@ -64,6 +65,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.MapAccessor;
 import org.springframework.expression.spel.support.ReflectiveIndexAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.testdata.PersonInOtherPackage;
 import org.springframework.expression.spel.testresources.Person;
 import org.springframework.util.ClassUtils;
@@ -2343,10 +2345,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertCanCompile(expression);
 			assertThat(expression.getValue(new Greeter())).isEqualTo("helloworld spring");
 
-			// Three strings, optimal bytecode would only use one StringBuilder
+			// String + int + String — now compilable without a custom TypeConverter
 			expression = parse("'hello' + 3 + ' spring'");
-			assertThat(expression.getValue(new Greeter())).isEqualTo("hello3 spring");
-			assertCannotCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello3 spring");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello3 spring");
 
 			expression = parse("object + 'a'");
 			assertThat(expression.getValue(new Greeter())).isEqualTo("objecta");
@@ -2372,6 +2375,64 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			assertThat(expression.getValue(new Greeter())).isEqualTo("objectobject");
 			assertCanCompile(expression);
 			assertThat(expression.getValue(new Greeter())).isEqualTo("objectobject");
+		}
+
+		@Test
+		void opPlusStringWithNonStringOperand() {
+			// String + int
+			expression = parse("'hello' + 42");
+			assertThat(expression.getValue()).isEqualTo("hello42");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello42");
+
+			// String + long
+			expression = parse("'hello' + 42L");
+			assertThat(expression.getValue()).isEqualTo("hello42");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello42");
+
+			// String + float
+			expression = parse("'hello' + 3.14f");
+			assertThat(expression.getValue()).isEqualTo("hello3.14");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello3.14");
+
+			// String + double
+			expression = parse("'hello' + 3.14d");
+			assertThat(expression.getValue()).isEqualTo("hello3.14");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hello3.14");
+
+			// String + boolean
+			expression = parse("'hello' + true");
+			assertThat(expression.getValue()).isEqualTo("hellotrue");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("hellotrue");
+
+			// int + String
+			expression = parse("42 + ' world'");
+			assertThat(expression.getValue()).isEqualTo("42 world");
+			assertCanCompile(expression);
+			assertThat(expression.getValue()).isEqualTo("42 world");
+
+			// String + Method returning int: String#length
+			StandardEvaluationContext ctx = new StandardEvaluationContext();
+			ctx.setVariable("first", "Jane");
+			ctx.setVariable("last", "Smith");
+			expression = parse("(#first + ' ' + #last).toUpperCase() + ' (' + (#first + ' ' + #last).length() + ')'");
+			assertThat(expression.getValue(ctx)).isEqualTo("JANE SMITH (10)");
+			assertCanCompile(expression);
+			assertThat(expression.getValue(ctx)).isEqualTo("JANE SMITH (10)");
+
+			// Custom TypeConverter producing a result different from toString() must prevent compilation,
+			// to ensure interpreted and compiled modes always produce the same result.
+			GenericConversionService conversionService = new GenericConversionService();
+			conversionService.addConverter(Integer.class, String.class, i -> "int-" + i);
+			StandardEvaluationContext contextWithConverter = new StandardEvaluationContext();
+			contextWithConverter.setTypeConverter(new StandardTypeConverter(conversionService));
+			expression = parse("'prefix-' + 42");
+			assertThat(expression.getValue(contextWithConverter)).isEqualTo("prefix-int-42");
+			assertCannotCompile(expression);
 		}
 
 		@Test

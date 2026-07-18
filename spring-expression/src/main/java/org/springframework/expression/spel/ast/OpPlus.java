@@ -41,8 +41,9 @@ import org.springframework.util.NumberUtils;
  * <li>concatenate strings
  * </ul>
  *
- * <p>It can be used as a unary operator for numbers.
- * The standard promotions are performed when the operand types vary (double+int=double).
+ * <p>It can also be used as a unary operator for numbers.
+ *
+ * <p>The standard promotions are performed when the operand types vary (double + int = double).
  * For other options it defers to the registered overloader.
  *
  * @author Andy Clement
@@ -59,6 +60,19 @@ public class OpPlus extends Operator {
 	 * @since 5.2.24
 	 */
 	private static final int MAX_CONCATENATED_STRING_LENGTH = 100_000;
+
+	/**
+	 * Tracks whether a registered {@link TypeConverter} produced a result for a
+	 * {@code String + non-String} (or {@code non-String + String}) concatenation that
+	 * differs from the natural {@link String#valueOf(Object)} representation.
+	 * <p>When {@code true}, the expression cannot be compiled, because the compiled
+	 * bytecode uses {@code StringBuilder.append(T)} which is equivalent to
+	 * {@code String.valueOf(T)} and therefore not equivalent to the conversion
+	 * performed by the {@code TypeConverter} in interpreted mode.
+	 * <p>This flag is a one-way latch: once set to {@code true} it is never reset.
+	 * @since 7.1
+	 */
+	private volatile boolean typeConversionDiffersFromToString;
 
 
 	public OpPlus(int startPos, int endPos, SpelNodeImpl... operands) {
@@ -140,15 +154,29 @@ public class OpPlus extends Operator {
 
 		if (leftOperand instanceof String leftString) {
 			checkStringLength(leftString);
-			String rightString = (rightOperand == null ? "null" : convertTypedValueToString(operandTwoValue, state));
-			checkStringLength(rightString);
+			String rightString;
+			if (rightOperand == null) {
+				rightString = "null";
+			}
+			else {
+				rightString = toStringForConcatenation(operandTwoValue, state, rightOperand);
+				checkStringLength(rightString);
+			}
+			this.exitTypeDescriptor = "Ljava/lang/String";
 			return concatenate(state, leftString, rightString);
 		}
 
 		if (rightOperand instanceof String rightString) {
 			checkStringLength(rightString);
-			String leftString = (leftOperand == null ? "null" : convertTypedValueToString(operandOneValue, state));
-			checkStringLength(leftString);
+			String leftString;
+			if (leftOperand == null) {
+				leftString = "null";
+			}
+			else {
+				leftString = toStringForConcatenation(operandOneValue, state, leftOperand);
+				checkStringLength(leftString);
+			}
+			this.exitTypeDescriptor = "Ljava/lang/String";
 			return concatenate(state, leftString, rightString);
 		}
 
@@ -189,20 +217,30 @@ public class OpPlus extends Operator {
 	}
 
 	/**
-	 * Convert operand value to string using registered converter or using
-	 * {@code toString} method.
-	 * @param value typed value to be converted
-	 * @param state expression state
-	 * @return {@code TypedValue} instance converted to {@code String}
+	 * Convert the supplied non-{@code null} operand value to a {@code String} for use
+	 * in a {@code String + non-String} (or {@code non-String + String}) concatenation.
+	 * <p>If the registered {@link TypeConverter} can convert the operand, the converted
+	 * result is used and compared against {@link String#valueOf(Object)} to detect
+	 * semantic divergence. If they differ, {@link #typeConversionDiffersFromToString}
+	 * is set to {@code true} to prevent compilation of this expression node.
+	 * <p>If the {@code TypeConverter} cannot convert the operand,
+	 * {@link String#valueOf(Object)} is used directly, avoiding a redundant second
+	 * conversion and comparison.
 	 */
-	private static String convertTypedValueToString(TypedValue value, ExpressionState state) {
+	private String toStringForConcatenation(TypedValue value, ExpressionState state, Object operand) {
 		TypeConverter typeConverter = state.getEvaluationContext().getTypeConverter();
-		TypeDescriptor typeDescriptor = TypeDescriptor.valueOf(String.class);
-		if (typeConverter.canConvert(value.getTypeDescriptor(), typeDescriptor)) {
-			return String.valueOf(typeConverter.convertValue(value.getValue(),
-					value.getTypeDescriptor(), typeDescriptor));
+		TypeDescriptor stringDescriptor = TypeDescriptor.valueOf(String.class);
+		if (typeConverter.canConvert(value.getTypeDescriptor(), stringDescriptor)) {
+			String converterResult = String.valueOf(
+					typeConverter.convertValue(operand, value.getTypeDescriptor(), stringDescriptor));
+			if (!this.typeConversionDiffersFromToString && !converterResult.equals(String.valueOf(operand))) {
+				this.typeConversionDiffersFromToString = true;
+			}
+			return converterResult;
 		}
-		return String.valueOf(value.getValue());
+		// No converter registered for this type: String.valueOf() is the only path,
+		// so no comparison is needed and compilation is always safe.
+		return String.valueOf(operand);
 	}
 
 	@Override
@@ -215,7 +253,7 @@ public class OpPlus extends Operator {
 				return false;
 			}
 		}
-		return (this.exitTypeDescriptor != null);
+		return (this.exitTypeDescriptor != null && !this.typeConversionDiffersFromToString);
 	}
 
 	/**
@@ -229,12 +267,47 @@ public class OpPlus extends Operator {
 		}
 		else if (operand != null) {
 			cf.enterCompilationScope();
-			operand.generateCode(mv,cf);
-			if (!"Ljava/lang/String".equals(cf.lastDescriptor())) {
-				mv.visitTypeInsn(CHECKCAST, "java/lang/String");
-			}
+			operand.generateCode(mv, cf);
+			String lastDesc = cf.lastDescriptor();
 			cf.exitCompilationScope();
-			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+			appendToStringBuilder(mv, lastDesc);
+		}
+	}
+
+	/**
+	 * Emit the appropriate {@code StringBuilder.append(T)} call for the value
+	 * whose type is described by the supplied descriptor.
+	 * <p>Primitive types use the dedicated {@code append} overloads directly.
+	 * Reference types use {@code append(Object)}, which delegates to
+	 * {@link String#valueOf(Object)} and therefore handles {@code null} safely
+	 * (producing {@code "null"}).
+	 */
+	private static void appendToStringBuilder(MethodVisitor mv, @Nullable String descriptor) {
+		if ("Ljava/lang/String".equals(descriptor)) {
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append",
+					"(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+		}
+		else if (CodeFlow.isPrimitive(descriptor)) {
+			// byte (B) and short (S) are widened to int on the JVM operand stack
+			String appendTypeDesc = switch (descriptor.charAt(0)) {
+				case 'B', 'S', 'I' -> "I";
+				case 'J' -> "J";
+				case 'F' -> "F";
+				case 'D' -> "D";
+				case 'Z' -> "Z";
+				case 'C' -> "C";
+				default -> throw new IllegalStateException(
+						"Unexpected primitive descriptor '" + descriptor + "'");
+			};
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append",
+					"(" + appendTypeDesc + ")Ljava/lang/StringBuilder;", false);
+		}
+		else {
+			// For null and Object reference types, StringBuilder.append(Object) calls
+			// String.valueOf(Object), which handles null safely (producing "null") and
+			// calls obj.toString() otherwise.
+			mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append",
+					"(Ljava/lang/Object;)Ljava/lang/StringBuilder;", false);
 		}
 	}
 
