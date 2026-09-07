@@ -96,6 +96,7 @@ public class BeanPropertyBindingResult extends AbstractPropertyBindingResult imp
 			this.beanWrapper.setExtractOldValueForEditor(true);
 			this.beanWrapper.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
 			this.beanWrapper.setAutoGrowCollectionLimit(this.autoGrowCollectionLimit);
+			this.beanWrapper.setMaximumNestedPathDepth(getMaximumNestedPathDepth());
 		}
 		return this.beanWrapper;
 	}

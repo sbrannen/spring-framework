@@ -40,6 +40,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.MethodInvocationException;
 import org.springframework.beans.MutablePropertyValues;
@@ -2060,6 +2061,48 @@ class DataBinderTests {
 		assertThatIllegalStateException().isThrownBy(() ->
 				binder.setAutoGrowCollectionLimit(257))
 			.withMessageContaining("DataBinder is already initialized - call setAutoGrowCollectionLimit before other configuration methods");
+	}
+
+	@Test  // gh-37252
+	void defaultMaximumNestedPathDepthIsAppliedToPropertyAccessor() {
+		DataBinder binder = new DataBinder(new TestBean(), "testBean");
+
+		assertThat(binder.getMaximumNestedPathDepth())
+				.isEqualTo(ConfigurablePropertyAccessor.DEFAULT_MAX_NESTED_PATH_DEPTH);
+		assertThat(binder.getInternalBindingResult().getPropertyAccessor().getMaximumNestedPathDepth())
+				.isEqualTo(ConfigurablePropertyAccessor.DEFAULT_MAX_NESTED_PATH_DEPTH);
+	}
+
+	@Test  // gh-37252
+	void setMaximumNestedPathDepth() {
+		TestBean rod = new TestBean("rod", 31);
+		TestBean kerry = new TestBean("kerry", 35);
+		rod.setSpouse(kerry);
+		kerry.setSpouse(rod);
+
+		DataBinder binder = new DataBinder(rod);
+		binder.setMaximumNestedPathDepth(2);
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("spouse.spouse.name", "Jane");
+		binder.bind(pvs);
+		assertThat(rod.getName()).isEqualTo("Jane");
+
+		MutablePropertyValues tooDeep = new MutablePropertyValues();
+		tooDeep.add("spouse.spouse.spouse.name", "Joe");
+		assertThatExceptionOfType(InvalidPropertyException.class)
+				.isThrownBy(() -> binder.bind(tooDeep))
+				.withMessageEndingWith("Nesting depth of property path exceeds the maximum of 2");
+	}
+
+	@Test  // gh-37252
+	void setMaximumNestedPathDepthAfterInitialization() {
+		DataBinder binder = new DataBinder(new TestBean());
+		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
+
+		assertThatIllegalStateException().isThrownBy(() ->
+				binder.setMaximumNestedPathDepth(2))
+			.withMessageContaining("DataBinder is already initialized - call setMaximumNestedPathDepth before other configuration methods");
 	}
 
 	@Test  // SPR-15009

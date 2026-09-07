@@ -150,6 +150,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		setExtractOldValueForEditor(parent.isExtractOldValueForEditor());
 		setAutoGrowNestedPaths(parent.isAutoGrowNestedPaths());
 		setAutoGrowCollectionLimit(parent.getAutoGrowCollectionLimit());
+		setMaximumNestedPathDepth(parent.getMaximumNestedPathDepth());
 		setConversionService(parent.getConversionService());
 	}
 
@@ -802,6 +803,18 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @return a property accessor for the target bean
 	 */
 	protected AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath) {
+		return getPropertyAccessorForPropertyPath(propertyPath, 0);
+	}
+
+	/**
+	 * Recursively navigate to return a property accessor for the nested property path,
+	 * tracking the current nesting depth in order to enforce the configured limit.
+	 * @param propertyPath property path, which may be nested
+	 * @param depth the number of nested properties traversed so far
+	 * @return a property accessor for the target bean
+	 * @see #getMaximumNestedPathDepth()
+	 */
+	private AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath, int depth) {
 		if (PropertyAccessorUtils.hasUnbalancedBrackets(propertyPath)) {
 			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyPath,
 					"Property path '" + propertyPath + "' contains unbalanced brackets");
@@ -809,10 +822,15 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
 		// Handle nested properties recursively.
 		if (pos > -1) {
+			int maximumNestedPathDepth = getMaximumNestedPathDepth();
+			if (depth >= maximumNestedPathDepth) {
+				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyPath,
+						"Nesting depth of property path exceeds the maximum of " + maximumNestedPathDepth);
+			}
 			String nestedProperty = propertyPath.substring(0, pos);
 			String nestedPath = propertyPath.substring(pos + 1);
 			AbstractNestablePropertyAccessor nestedPa = getNestedPropertyAccessor(nestedProperty);
-			return nestedPa.getPropertyAccessorForPropertyPath(nestedPath);
+			return nestedPa.getPropertyAccessorForPropertyPath(nestedPath, depth + 1);
 		}
 		else {
 			return this;

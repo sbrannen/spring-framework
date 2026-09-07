@@ -167,6 +167,8 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	private int autoGrowCollectionLimit = DEFAULT_AUTO_GROW_COLLECTION_LIMIT;
 
+	private int maximumNestedPathDepth = ConfigurablePropertyAccessor.DEFAULT_MAX_NESTED_PATH_DEPTH;
+
 	private String @Nullable [] allowedFields;
 
 	private String @Nullable [] disallowedFields;
@@ -293,6 +295,38 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
+	 * Specify the maximum nesting depth permitted for a nested property path.
+	 * <p>The nesting depth of a property path corresponds to the number of
+	 * intermediate properties that must be traversed in order to reach the final
+	 * property. For example, {@code "address.country.name"} has a nesting depth
+	 * of 2, since the {@code address} and {@code country} properties must be
+	 * traversed in order to reach the {@code name} property.
+	 * <p>Default is {@link ConfigurablePropertyAccessor#DEFAULT_MAX_NESTED_PATH_DEPTH}.
+	 * <p>Used for setter injection as well as field injection via
+	 * {@link #bind(PropertyValues)}; not applicable to constructor binding via
+	 * {@link #construct}, whose nesting depth is instead bounded by the declared
+	 * constructor parameters of the target type.
+	 * @param maximumNestedPathDepth the maximum nesting depth; must not be
+	 * negative
+	 * @since 7.1
+	 * @see ConfigurablePropertyAccessor#setMaximumNestedPathDepth(int)
+	 */
+	public void setMaximumNestedPathDepth(int maximumNestedPathDepth) {
+		Assert.state(this.bindingResult == null,
+				"DataBinder is already initialized - call setMaximumNestedPathDepth before other configuration methods");
+		Assert.isTrue(maximumNestedPathDepth >= 0, "'maximumNestedPathDepth' must not be negative");
+		this.maximumNestedPathDepth = maximumNestedPathDepth;
+	}
+
+	/**
+	 * Return the maximum nesting depth permitted for a nested property path.
+	 * @since 7.1
+	 */
+	public int getMaximumNestedPathDepth() {
+		return this.maximumNestedPathDepth;
+	}
+
+	/**
 	 * Initialize standard JavaBean property access for this DataBinder.
 	 * <p>This is the default; an explicit call just leads to eager initialization.
 	 * @see #initDirectFieldAccess()
@@ -312,6 +346,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected AbstractPropertyBindingResult createBeanPropertyBindingResult() {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(getTarget(),
 				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+		result.setMaximumNestedPathDepth(getMaximumNestedPathDepth());
 
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);
@@ -345,6 +380,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
 		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
 				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+		result.setMaximumNestedPathDepth(getMaximumNestedPathDepth());
 
 		if (this.conversionService != null) {
 			result.initConversion(this.conversionService);

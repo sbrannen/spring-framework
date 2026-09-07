@@ -46,6 +46,8 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 
 	private transient @Nullable ConversionService conversionService;
 
+	private int maximumNestedPathDepth = ConfigurablePropertyAccessor.DEFAULT_MAX_NESTED_PATH_DEPTH;
+
 
 	/**
 	 * Create a new AbstractPropertyBindingResult instance.
@@ -56,6 +58,27 @@ public abstract class AbstractPropertyBindingResult extends AbstractBindingResul
 		super(objectName);
 	}
 
+
+	/**
+	 * Specify the maximum nesting depth permitted for a nested property path.
+	 * <p>Default is {@link ConfigurablePropertyAccessor#DEFAULT_MAX_NESTED_PATH_DEPTH}.
+	 * @param maximumNestedPathDepth the maximum nesting depth; must not be
+	 * negative
+	 * @since 7.1
+	 * @see ConfigurablePropertyAccessor#setMaximumNestedPathDepth(int)
+	 */
+	public void setMaximumNestedPathDepth(int maximumNestedPathDepth) {
+		Assert.isTrue(maximumNestedPathDepth >= 0, "'maximumNestedPathDepth' must not be negative");
+		this.maximumNestedPathDepth = maximumNestedPathDepth;
+	}
+
+	/**
+	 * Return the maximum nesting depth permitted for a nested property path.
+	 * @since 7.1
+	 */
+	public int getMaximumNestedPathDepth() {
+		return this.maximumNestedPathDepth;
+	}
 
 	public void initConversion(ConversionService conversionService) {
 		Assert.notNull(conversionService, "ConversionService must not be null");

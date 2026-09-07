@@ -100,6 +100,7 @@ public class DirectFieldBindingResult extends AbstractPropertyBindingResult {
 			this.directFieldAccessor.setExtractOldValueForEditor(true);
 			this.directFieldAccessor.setAutoGrowNestedPaths(this.autoGrowNestedPaths);
 			this.directFieldAccessor.setAutoGrowCollectionLimit(this.autoGrowCollectionLimit);
+			this.directFieldAccessor.setMaximumNestedPathDepth(getMaximumNestedPathDepth());
 		}
 		return this.directFieldAccessor;
 	}
