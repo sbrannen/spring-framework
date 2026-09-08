@@ -85,6 +85,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	/** Map with cached nested Accessors: nested path -> Accessor instance. */
 	private @Nullable Map<String, AbstractNestablePropertyAccessor> nestedPropertyAccessors;
 
+	/** The number of nested properties traversed to reach the wrapped object. */
+	private int nestedPathDepth;
+
 
 	/**
 	 * Create a new empty accessor. Wrapped instance needs to be set afterwards.
@@ -177,6 +180,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
 		this.rootObject = (!this.nestedPath.isEmpty() ? rootObject : this.wrappedObject);
 		this.nestedPropertyAccessors = null;
+		this.nestedPathDepth = 0;
 		this.typeConverterDelegate = new TypeConverterDelegate(this, this.wrappedObject);
 	}
 
@@ -799,22 +803,15 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	/**
 	 * Recursively navigate to return a property accessor for the nested property path.
+	 * <p>The default implementation rejects a property path which contains unbalanced
+	 * brackets as well as one which exceeds the
+	 * {@linkplain #getMaximumNestedPathDepth() maximum nesting depth}. An override
+	 * which does not delegate to {@code super} is therefore responsible for
+	 * performing equivalent validation itself.
 	 * @param propertyPath property path, which may be nested
 	 * @return a property accessor for the target bean
 	 */
 	protected AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath) {
-		return getPropertyAccessorForPropertyPath(propertyPath, 0);
-	}
-
-	/**
-	 * Recursively navigate to return a property accessor for the nested property path,
-	 * tracking the current nesting depth in order to enforce the configured limit.
-	 * @param propertyPath property path, which may be nested
-	 * @param depth the number of nested properties traversed so far
-	 * @return a property accessor for the target bean
-	 * @see #getMaximumNestedPathDepth()
-	 */
-	private AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath, int depth) {
 		if (PropertyAccessorUtils.hasUnbalancedBrackets(propertyPath)) {
 			throw new NotReadablePropertyException(getRootClass(), this.nestedPath + propertyPath,
 					"Property path '" + propertyPath + "' contains unbalanced brackets");
@@ -823,14 +820,14 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		// Handle nested properties recursively.
 		if (pos > -1) {
 			int maximumNestedPathDepth = getMaximumNestedPathDepth();
-			if (depth >= maximumNestedPathDepth) {
+			if (this.nestedPathDepth >= maximumNestedPathDepth) {
 				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyPath,
 						"Nesting depth of property path exceeds the maximum of " + maximumNestedPathDepth);
 			}
 			String nestedProperty = propertyPath.substring(0, pos);
 			String nestedPath = propertyPath.substring(pos + 1);
 			AbstractNestablePropertyAccessor nestedPa = getNestedPropertyAccessor(nestedProperty);
-			return nestedPa.getPropertyAccessorForPropertyPath(nestedPath, depth + 1);
+			return nestedPa.getPropertyAccessorForPropertyPath(nestedPath);
 		}
 		else {
 			return this;
@@ -871,6 +868,10 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				logger.trace("Creating new nested " + getClass().getSimpleName() + " for property '" + canonicalName + "'");
 			}
 			nestedPa = newNestedPropertyAccessor(value, this.nestedPath + canonicalName + NESTED_PROPERTY_SEPARATOR);
+			// Track the nesting depth here rather than in a constructor, so that the
+			// depth is assigned even if a subclass creates the nested property accessor
+			// without copying the configuration of this accessor.
+			nestedPa.nestedPathDepth = this.nestedPathDepth + 1;
 			// Inherit all type-specific PropertyEditors.
 			copyDefaultEditorsTo(nestedPa);
 			copyCustomEditorsTo(nestedPa, canonicalName);
