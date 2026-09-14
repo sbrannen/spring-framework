@@ -44,6 +44,7 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.datasource.JdbcTransactionObjectSupport;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.orm.jpa.EntityManagerHolder;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidIsolationLevelException;
@@ -96,6 +97,13 @@ import org.springframework.util.Assert;
  * your JDBC driver supports savepoints). <i>Note that Hibernate itself does not
  * support nested transactions! Hence, do not expect Hibernate access code to
  * semantically participate in a nested transaction.</i>
+ *
+ * <p>Since a Hibernate {@code Session} is also a JPA {@code EntityManager} for a
+ * Hibernate-backed persistence unit, this transaction manager transparently
+ * participates in an {@link EntityManagerHolder} that has already been bound for
+ * the same underlying {@code SessionFactory}/{@code EntityManagerFactory} instance,
+ * for example by {@link org.springframework.orm.jpa.JpaTransactionManager} or by an
+ * open-EntityManager-in-view filter/interceptor.
  *
  * @author Juergen Hoeller
  * @since 7.0
@@ -391,13 +399,25 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
 
 		SessionFactory sessionFactory = obtainSessionFactory();
-		SessionHolder sessionHolder =
-				(SessionHolder) TransactionSynchronizationManager.getResource(sessionFactory);
-		if (sessionHolder != null) {
+		Object resource = TransactionSynchronizationManager.getResource(sessionFactory);
+		if (resource instanceof SessionHolder sessionHolder) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found thread-bound Session [" + sessionHolder.getSession() + "] for Hibernate transaction");
 			}
 			txObject.setSessionHolder(sessionHolder);
+		}
+		else if (resource instanceof EntityManagerHolder emHolder) {
+			// Since a Hibernate Session is a JPA EntityManager (and vice versa for a
+			// Hibernate-backed persistence provider), the SessionFactory and EntityManagerFactory
+			// for a given persistence unit are actually the same instance and therefore share the
+			// same TransactionSynchronizationManager resource key. This lets us participate in an
+			// EntityManagerHolder bound by JpaTransactionManager or by an open-EntityManager-in-view
+			// filter/interceptor, e.g. in order to obtain a Hibernate StatelessSession alongside it.
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found thread-bound EntityManager [" + emHolder.getEntityManager() +
+						"] for Hibernate transaction");
+			}
+			txObject.setParticipatingEntityManagerHolder(emHolder);
 		}
 		else if (this.hibernateManagedSession) {
 			try {
@@ -442,9 +462,17 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		SessionImplementor session = null;
+		EntityManagerHolder participatingEntityManagerHolder = txObject.getParticipatingEntityManagerHolder();
 
 		try {
-			if (!txObject.hasSessionHolder() || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
+			if (participatingEntityManagerHolder != null) {
+				// Replace the EntityManagerHolder bound by JpaTransactionManager or by an
+				// open-EntityManager-in-view filter/interceptor with an equivalent SessionHolder
+				// for the remainder of this transaction, keeping the same underlying Session.
+				TransactionSynchronizationManager.unbindResourceIfPossible(obtainSessionFactory());
+				txObject.setExistingSession(participatingEntityManagerHolder.getEntityManager().unwrap(Session.class));
+			}
+			else if (!txObject.hasSessionHolder() || txObject.getSessionHolder().isSynchronizedWithTransaction()) {
 				Interceptor entityInterceptor = getEntityInterceptor();
 				Session newSession = (entityInterceptor != null ?
 						obtainSessionFactory().withOptions().interceptor(entityInterceptor).openSession() :
@@ -559,6 +587,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 					txObject.setSessionHolder(null);
 				}
 			}
+			if (participatingEntityManagerHolder != null) {
+				// Restore the original EntityManagerHolder that we replaced above,
+				// since we never actually took ownership of the underlying EntityManager/Session.
+				TransactionSynchronizationManager.bindResource(obtainSessionFactory(), participatingEntityManagerHolder);
+			}
 			throw new CannotCreateTransactionException("Could not open Hibernate Session for transaction", ex);
 		}
 	}
@@ -671,6 +704,13 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		if (txObject.isNewSessionHolder()) {
 			TransactionSynchronizationManager.unbindResource(obtainSessionFactory());
 		}
+		EntityManagerHolder participatingEntityManagerHolder = txObject.getParticipatingEntityManagerHolder();
+		if (participatingEntityManagerHolder != null) {
+			// Restore the EntityManagerHolder originally bound by JpaTransactionManager or by an
+			// open-EntityManager-in-view filter/interceptor, which we replaced in doBegin(),
+			// so that it can still be found and unbound/closed by whoever bound it in the first place.
+			TransactionSynchronizationManager.bindResource(obtainSessionFactory(), participatingEntityManagerHolder);
+		}
 
 		// Remove the JDBC connection holder from the thread, if exposed.
 		if (getDataSource() != null) {
@@ -744,6 +784,8 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		private boolean needsConnectionReset;
 
+		private @Nullable EntityManagerHolder participatingEntityManagerHolder;
+
 		public void setSession(Session session) {
 			this.sessionHolder = new SessionHolder(session);
 			this.newSessionHolder = true;
@@ -785,6 +827,14 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 		public boolean needsConnectionReset() {
 			return this.needsConnectionReset;
+		}
+
+		public void setParticipatingEntityManagerHolder(EntityManagerHolder participatingEntityManagerHolder) {
+			this.participatingEntityManagerHolder = participatingEntityManagerHolder;
+		}
+
+		public @Nullable EntityManagerHolder getParticipatingEntityManagerHolder() {
+			return this.participatingEntityManagerHolder;
 		}
 
 		public boolean hasSpringManagedTransaction() {
