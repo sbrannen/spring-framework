@@ -153,67 +153,11 @@ class JdbcClientIntegrationTests {
 	}
 
 	@Test
-	void batchUpdateWithIndexedParameters() {
+	void batchUpdateWithIndexedParameterList() {
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
 				.batch()
-					.params("Jane", "Smith").add()
-					.params("John", "Doe")
-				.update();
-
-		assertThat(rowsAffected).containsExactly(1, 1);
-		assertNumUsers(3);
-		assertUser(1, "Jane", "Smith");
-		assertUser(2, "John", "Doe");
-	}
-
-	@Test
-	void batchUpdateWithJdbcIndexParameters() {
-		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
-				.batch()
-				.param(2, "Smith").param(1, "Jane").add()
-				.param(2, "Doe").param(1, "John")
-				.update();
-
-		assertThat(rowsAffected).containsExactly(1, 1);
-		assertNumUsers(3);
-		assertUser(1, "Jane", "Smith");
-		assertUser(2, "John", "Doe");
-	}
-
-	@Test
-	void batchUpdateWithJdbcIndexParametersAndSqlType() {
-		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
-				.batch()
-				.param(2, "Smith", Types.VARCHAR).param(1, "Jane", Types.VARCHAR).add()
-				.param(2, "Doe", Types.VARCHAR).param(1, "John", Types.VARCHAR)
-				.update();
-
-		assertThat(rowsAffected).containsExactly(1, 1);
-		assertNumUsers(3);
-		assertUser(1, "Jane", "Smith");
-		assertUser(2, "John", "Doe");
-	}
-
-	@Test
-	void batchUpdateWithNamedParameters() {
-		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
-				.batch()
-					.param("firstName", "Jane").param("lastName", "Smith").add()
-					.param("firstName", "John").param("lastName", "Doe")
-				.update();
-
-		assertThat(rowsAffected).containsExactly(1, 1);
-		assertNumUsers(3);
-		assertUser(1, "Jane", "Smith");
-		assertUser(2, "John", "Doe");
-	}
-
-	@Test
-	void batchUpdateWithNamedParametersAndSqlType() {
-		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
-				.batch()
-				.param("firstName", "Jane", Types.VARCHAR).param("lastName", "Smith", Types.VARCHAR).add()
-				.param("firstName", "John", Types.VARCHAR).param("lastName", "Doe", Types.VARCHAR)
+					.entry(List.of("Jane", "Smith"))
+					.entry(List.of("John", "Doe"))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -226,8 +170,8 @@ class JdbcClientIntegrationTests {
 	void batchUpdateWithIndividualIndexedParameters() {
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
 				.batch()
-					.param("Jane").param("Smith").add()
-					.param("John").param("Doe")
+					.entry(entry -> entry.param("Jane").param("Smith"))
+					.entry(entry -> entry.param("John").param("Doe"))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -237,11 +181,53 @@ class JdbcClientIntegrationTests {
 	}
 
 	@Test
-	void batchUpdateWithIndexedParameterList() {
+	void batchUpdateWithJdbcIndexParameters() {
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
 				.batch()
-					.params(List.of("Jane", "Smith")).add()
-					.params(List.of("John", "Doe"))
+					.entry(entry -> entry.param(2, "Smith").param(1, "Jane"))
+					.entry(entry -> entry.param(2, "Doe").param(1, "John"))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+	}
+
+	@Test
+	void batchUpdateWithJdbcIndexParametersAndSqlType() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
+				.batch()
+					.entry(entry -> entry.param(2, "Smith", Types.VARCHAR).param(1, "Jane", Types.VARCHAR))
+					.entry(entry -> entry.param(2, "Doe", Types.VARCHAR).param(1, "John", Types.VARCHAR))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+	}
+
+	@Test
+	void batchUpdateWithNamedParameters() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+					.entry(entry -> entry.param("firstName", "Jane").param("lastName", "Smith"))
+					.entry(entry -> entry.param("firstName", "John").param("lastName", "Doe"))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+	}
+
+	@Test
+	void batchUpdateWithNamedParametersAndSqlType() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+					.entry(entry -> entry.param("firstName", "Jane", Types.VARCHAR).param("lastName", "Smith", Types.VARCHAR))
+					.entry(entry -> entry.param("firstName", "John", Types.VARCHAR).param("lastName", "Doe", Types.VARCHAR))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -254,8 +240,8 @@ class JdbcClientIntegrationTests {
 	void batchUpdateWithNamedParameterMap() {
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 				.batch()
-					.params(Map.of("firstName", "Jane", "lastName", "Smith")).add()
-					.params(Map.of("firstName", "John", "lastName", "Doe"))
+					.entry(Map.of("firstName", "Jane", "lastName", "Smith"))
+					.entry(Map.of("firstName", "John", "lastName", "Doe"))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -265,11 +251,11 @@ class JdbcClientIntegrationTests {
 	}
 
 	@Test
-	void batchUpdateWithParameterObjects() {
+	void batchUpdateWithParameterObject() {
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 				.batch()
-					.paramSource(new NewUser("Jane", "Smith")).add()
-					.paramSource(new NewUser("John", "Doe"))
+					.entry(entry -> entry.paramSource(new NewUser("Jane", "Smith")))
+					.entry(entry -> entry.paramSource(new NewUser("John", "Doe")))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -279,11 +265,11 @@ class JdbcClientIntegrationTests {
 	}
 
 	@Test
-	void batchUpdateWithParameterSources() {
+	void batchUpdateWithParameterSource() {
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 				.batch()
-					.paramSource(new MapSqlParameterSource("firstName", "Jane").addValue("lastName", "Smith")).add()
-					.paramSource(new MapSqlParameterSource("firstName", "John").addValue("lastName", "Doe"))
+					.entry(entry -> entry.paramSource(new MapSqlParameterSource("firstName", "Jane").addValue("lastName", "Smith")))
+					.entry(entry -> entry.paramSource(new MapSqlParameterSource("firstName", "John").addValue("lastName", "Doe")))
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -293,17 +279,65 @@ class JdbcClientIntegrationTests {
 	}
 
 	@Test
-	void batchUpdateWithTrailingAdd() {
+	void batchUpdateWithListOfParameterObjects() {
+		List<NewUser> users = List.of(new NewUser("Jane", "Smith"), new NewUser("John", "Doe"));
+
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 				.batch()
-					.param("firstName", "Jane").param("lastName", "Smith").add()
-					.param("firstName", "John").param("lastName", "Doe").add()
+					.entries(users)
 				.update();
 
 		assertThat(rowsAffected).containsExactly(1, 1);
 		assertNumUsers(3);
 		assertUser(1, "Jane", "Smith");
 		assertUser(2, "John", "Doe");
+	}
+
+	@Test
+	void batchUpdateWithVarargsParameterMaps() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+					.entries(
+						Map.of("firstName", "Jane", "lastName", "Smith"),
+						Map.of("firstName", "John", "lastName", "Doe"))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+	}
+
+	@Test
+	void batchUpdateWithVarargsParameterSources() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+					.entries(
+						new MapSqlParameterSource("firstName", "Jane").addValue("lastName", "Smith"),
+						new MapSqlParameterSource("firstName", "John").addValue("lastName", "Doe"))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+	}
+
+	@Test
+	void batchUpdateWithCombinedEntries() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+					.entries(List.of(new NewUser("Jane", "Smith"), new NewUser("John", "Doe")))
+					.entry(entry -> entry.param("firstName", "Jack").param("lastName", "Jones"))
+					.entry(Map.of("firstName", "Jill", "lastName", "Brown"))
+				.update();
+
+		assertThat(rowsAffected).containsExactly(1, 1, 1, 1);
+		assertNumUsers(5);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+		assertUser(3, "Jack", "Jones");
+		assertUser(4, "Jill", "Brown");
 	}
 
 	@Test
@@ -315,12 +349,29 @@ class JdbcClientIntegrationTests {
 	}
 
 	@Test
+	void emptyEntriesBatchUpdate() {
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS).batch().entries(List.of()).update();
+
+		assertThat(rowsAffected).isEmpty();
+		assertNumUsers(1);
+	}
+
+	@Test
+	void batchUpdateRejectsEntryWithoutParameters() {
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS).batch().entry(entry -> {}));
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS).batch().entry(List.of()));
+		assertThatIllegalStateException().isThrownBy(() ->
+				this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS).batch().entry(Map.of()));
+	}
+
+	@Test
 	void batchUpdateRejectsMixedParametersWithinEntry() {
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
 						.batch()
-							.param("Jane").param("lastName", "Smith")
-						.update());
+							.entry(entry -> entry.param("Jane").param("lastName", "Smith")));
 	}
 
 	@Test
@@ -328,9 +379,8 @@ class JdbcClientIntegrationTests {
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 						.batch()
-							.param("firstName", "Jane").param("lastName", "Smith").add()
-							.params("John", "Doe")
-						.update());
+							.entry(Map.of("firstName", "Jane", "lastName", "Smith"))
+							.entry(List.of("John", "Doe")));
 	}
 
 	@Test
@@ -338,9 +388,8 @@ class JdbcClientIntegrationTests {
 		assertThatIllegalStateException().isThrownBy(() ->
 				this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 						.batch()
-							.param("firstName", "Jane")
-							.paramSource(new MapSqlParameterSource("lastName", "Smith"))
-						.update());
+							.entry(entry -> entry.param("firstName", "Jane")
+									.paramSource(new MapSqlParameterSource("lastName", "Smith"))));
 	}
 
 	@Test
@@ -348,8 +397,8 @@ class JdbcClientIntegrationTests {
 		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 				.batch()
-				.param("firstName", "Jane").param("lastName", "Smith").add()
-				.param("firstName", "John").param("lastName", "Doe")
+					.entry(Map.of("firstName", "Jane", "lastName", "Smith"))
+					.entry(Map.of("firstName", "John", "lastName", "Doe"))
 				.update(generatedKeyHolder);
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -364,8 +413,8 @@ class JdbcClientIntegrationTests {
 		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
 				.batch()
-				.params("Jane", "Smith").add()
-				.params("John", "Doe")
+					.entry(List.of("Jane", "Smith"))
+					.entry(List.of("John", "Doe"))
 				.update(generatedKeyHolder);
 
 		assertThat(rowsAffected).containsExactly(1, 1);
@@ -380,9 +429,24 @@ class JdbcClientIntegrationTests {
 		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
 				.batch()
-				.param("firstName", "Jane").param("lastName", "Smith").add()
-				.param("firstName", "John").param("lastName", "Doe")
+					.entry(entry -> entry.param("firstName", "Jane").param("lastName", "Smith"))
+					.entry(entry -> entry.param("firstName", "John").param("lastName", "Doe"))
 				.update(generatedKeyHolder, "id");
+
+		assertThat(rowsAffected).containsExactly(1, 1);
+		assertNumUsers(3);
+		assertUser(1, "Jane", "Smith");
+		assertUser(2, "John", "Doe");
+		assertThat(generatedKeyHolder.getKeyList()).containsExactly(Map.of("ID", 1), Map.of("ID", 2));
+	}
+
+	@Test
+	void batchUpdateWithParameterObjectsAndGeneratedKeys() {
+		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_NAMED_PARAMS)
+				.batch()
+					.entries(new NewUser("Jane", "Smith"), new NewUser("John", "Doe"))
+				.update(generatedKeyHolder);
 
 		assertThat(rowsAffected).containsExactly(1, 1);
 		assertNumUsers(3);
@@ -396,8 +460,8 @@ class JdbcClientIntegrationTests {
 		KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 		int[] rowsAffected = this.jdbcClient.sql(INSERT_WITH_JDBC_PARAMS)
 				.batch()
-				.params("Jane", "Smith").add()
-				.params("John", "Doe")
+					.entry(entry -> entry.param("Jane").param("Smith"))
+					.entry(entry -> entry.param("John").param("Doe"))
 				.update(generatedKeyHolder, "id");
 
 		assertThat(rowsAffected).containsExactly(1, 1);
