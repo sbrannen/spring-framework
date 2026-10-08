@@ -108,7 +108,8 @@ public class JdkClientHttpConnector implements ClientHttpConnector {
 	 */
 	public void setReadTimeout(Duration readTimeout) {
 		Assert.notNull(readTimeout, "readTimeout is required");
-		this.readTimeout = (Duration.ZERO.equals(readTimeout) ? null : readTimeout);
+		Assert.isTrue(!readTimeout.isNegative(), "Timeout must be a non-negative value");
+		this.readTimeout = (readTimeout.isZero() ? null : readTimeout);
 	}
 
 	/**

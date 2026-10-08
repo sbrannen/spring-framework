@@ -130,13 +130,15 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
 	 * @param connectionRequestTimeout the timeout value to request a connection
-	 * as a {@code Duration}.
+	 * as a {@code Duration}; must be 0 or at least one millisecond
 	 * @since 6.1
 	 * @see RequestConfig#getConnectionRequestTimeout()
 	 */
 	public void setConnectionRequestTimeout(Duration connectionRequestTimeout) {
 		Assert.notNull(connectionRequestTimeout, "ConnectionRequestTimeout must not be null");
 		Assert.isTrue(!connectionRequestTimeout.isNegative(), "Timeout must be a non-negative value");
+		Assert.isTrue(connectionRequestTimeout.isZero() || connectionRequestTimeout.toMillis() > 0,
+				"Timeout must be zero or at least one millisecond");
 		this.connectionRequestTimeout = connectionRequestTimeout.toMillis();
 	}
 
@@ -159,13 +161,16 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * A timeout value of 0 specifies an infinite timeout.
 	 * <p>Additional properties can be configured by specifying a
 	 * {@link RequestConfig} instance on a custom {@link HttpClient}.
-	 * @param readTimeout the timeout as a {@code Duration}.
+	 * @param readTimeout the timeout as a {@code Duration}; must be 0 or at
+	 * least one millisecond
 	 * @since 6.2
 	 * @see RequestConfig#getResponseTimeout()
 	 */
 	public void setReadTimeout(Duration readTimeout) {
 		Assert.notNull(readTimeout, "ReadTimeout must not be null");
 		Assert.isTrue(!readTimeout.isNegative(), "Timeout must be a non-negative value");
+		Assert.isTrue(readTimeout.isZero() || readTimeout.toMillis() > 0,
+				"Timeout must be zero or at least one millisecond");
 		this.readTimeout = readTimeout.toMillis();
 	}
 
