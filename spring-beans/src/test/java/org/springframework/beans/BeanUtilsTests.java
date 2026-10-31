@@ -907,7 +907,7 @@ class BeanUtilsTests {
 	}
 
 
-	private static class ReadOnlyAndWriteOnlyBean {
+	static class ReadOnlyAndWriteOnlyBean {
 
 		public String getReadOnly() {
 			return "readOnly";
@@ -918,7 +918,7 @@ class BeanUtilsTests {
 	}
 
 
-	private static class BeanWithNullableTypes {
+	static class BeanWithNullableTypes {
 
 		private Integer counter;
 
