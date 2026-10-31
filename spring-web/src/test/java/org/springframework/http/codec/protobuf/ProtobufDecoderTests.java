@@ -107,11 +107,10 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 	@Test
 	@Override
-	@SuppressWarnings("deprecation")
 	protected void decode() {
 		Flux<DataBuffer> input = Flux.just(this.testMsg1, this.testMsg2)
 				.flatMap(msg -> Mono.defer(() -> {
-					DataBuffer buffer = this.bufferFactory.allocateBuffer();
+					DataBuffer buffer = this.bufferFactory.allocateBuffer(256);
 					try {
 						msg.writeDelimitedTo(buffer.asOutputStream());
 						return Mono.just(buffer);
@@ -133,7 +132,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 	void decodeSplitChunks() {
 		Flux<DataBuffer> input = Flux.just(this.testMsg1, this.testMsg2)
 				.flatMap(msg -> Mono.defer(() -> {
-					DataBuffer buffer = this.bufferFactory.allocateBuffer();
+					DataBuffer buffer = this.bufferFactory.allocateBuffer(256);
 					try {
 						msg.writeDelimitedTo(buffer.asOutputStream());
 						return Mono.just(buffer);
@@ -166,7 +165,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 		this.testMsg2.writeDelimitedTo(secondMessage);
 		byte[] secondMessageBytes = secondMessage.toByteArray();
 
-		DataBuffer buffer = this.bufferFactory.allocateBuffer();
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(256);
 		this.testMsg1.writeDelimitedTo(buffer.asOutputStream());
 		buffer.write(secondMessageBytes, 0, secondMessageBytes.length / 2);
 
@@ -187,7 +186,7 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 
 		Flux<DataBuffer> input = Flux.just(bigMessage, bigMessage)
 				.flatMap(msg -> Mono.defer(() -> {
-					DataBuffer buffer = this.bufferFactory.allocateBuffer();
+					DataBuffer buffer = this.bufferFactory.allocateBuffer(256);
 					try {
 						msg.writeDelimitedTo(buffer.asOutputStream());
 						return Mono.just(buffer);
@@ -215,9 +214,8 @@ class ProtobufDecoderTests extends AbstractDecoderTests<ProtobufDecoder> {
 	}
 
 	@Test
-	@SuppressWarnings("deprecation")
 	void decodeMergedChunks() throws IOException {
-		DataBuffer buffer = this.bufferFactory.allocateBuffer();
+		DataBuffer buffer = this.bufferFactory.allocateBuffer(256);
 		this.testMsg1.writeDelimitedTo(buffer.asOutputStream());
 		this.testMsg1.writeDelimitedTo(buffer.asOutputStream());
 
